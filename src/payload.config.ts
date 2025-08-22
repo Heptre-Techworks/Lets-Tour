@@ -16,6 +16,11 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { PackageCategories } from './collections/PackageCategories'
+import { Destinations } from './collections/Destinations'
+import { Packages } from './collections/Packages'
+import { SearchFilters } from './collections/SearchFilters'
+import { Testimonials } from './collections/Testimonials'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -62,9 +67,9 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
+  collections: [Pages, Posts, Media, Categories, Users,PackageCategories, Destinations, Packages,Testimonials ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer],
+  globals: [Header, Footer, SearchFilters],
   plugins: [
     ...plugins,
     // storage-adapter-placeholder

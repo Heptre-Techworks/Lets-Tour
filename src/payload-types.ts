@@ -72,6 +72,10 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
+    'package-categories': PackageCategory;
+    destinations: Destination;
+    packages: Package;
+    testimonials: Testimonial;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -88,6 +92,10 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'package-categories': PackageCategoriesSelect<false> | PackageCategoriesSelect<true>;
+    destinations: DestinationsSelect<false> | DestinationsSelect<true>;
+    packages: PackagesSelect<false> | PackagesSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -103,10 +111,12 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    'search-filters': SearchFilter;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'search-filters': SearchFiltersSelect<false> | SearchFiltersSelect<true>;
   };
   locale: null;
   user: User & {
@@ -191,7 +201,21 @@ export interface Page {
       | null;
     media?: (string | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | ArchiveBlock
+    | FormBlock
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        destinations?: (string | Destination)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featuredDestinationsBlock';
+      }
+  )[];
   meta?: {
     title?: string | null;
     /**
@@ -736,6 +760,173 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinations".
+ */
+export interface Destination {
+  id: string;
+  name: string;
+  slug?: string | null;
+  country: string;
+  continent?: ('asia' | 'europe' | 'north-america' | 'south-america' | 'africa' | 'oceania') | null;
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  shortDescription?: string | null;
+  featured?: boolean | null;
+  heroImage: string | Media;
+  gallery?:
+    | {
+        image: string | Media;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Starting price for packages to this destination
+   */
+  startingPrice?: number | null;
+  /**
+   * Number of packages available
+   */
+  packageCount?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "package-categories".
+ */
+export interface PackageCategory {
+  id: string;
+  name: string;
+  slug?: string | null;
+  description?: string | null;
+  icon?: (string | null) | Media;
+  /**
+   * Hex color code for category styling
+   */
+  color?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages".
+ */
+export interface Package {
+  id: string;
+  title: string;
+  slug?: string | null;
+  destination: string | Destination;
+  description?: string | null;
+  detailedDescription: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  price: number;
+  /**
+   * Original price before discount
+   */
+  originalPrice?: number | null;
+  currency?: string | null;
+  priceUnit?: ('per-person' | 'per-group' | 'per-family') | null;
+  duration: {
+    days: number;
+    nights: number;
+  };
+  /**
+   * e.g., Madrid 2N, Seville 2N, Granada 1N
+   */
+  itinerary?: string | null;
+  category?: (string | PackageCategory)[] | null;
+  tags?:
+    | (
+        | 'popular'
+        | 'in-season'
+        | 'family-friendly'
+        | 'outdoor'
+        | 'relaxing'
+        | 'glamping'
+        | 'girls-day-out'
+        | 'vibe-match'
+      )[]
+    | null;
+  discount?: {
+    hasDiscount?: boolean | null;
+    percentage?: number | null;
+    /**
+     * e.g., "10% Off", "Special Offer"
+     */
+    label?: string | null;
+  };
+  heroImage: string | Media;
+  gallery?:
+    | {
+        image: string | Media;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  rating?: number | null;
+  reviewCount?: number | null;
+  featured?: boolean | null;
+  status?: ('active' | 'inactive' | 'coming-soon') | null;
+  inclusions?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  exclusions?:
+    | {
+        item: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: string;
+  customerName: string;
+  customerLocation?: string | null;
+  customerPhoto?: (string | null) | Media;
+  tour?: (string | null) | Package;
+  rating: number;
+  review: string;
+  featured?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -928,6 +1119,22 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'package-categories';
+        value: string | PackageCategory;
+      } | null)
+    | ({
+        relationTo: 'destinations';
+        value: string | Destination;
+      } | null)
+    | ({
+        relationTo: 'packages';
+        value: string | Package;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: string | Testimonial;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: string | Redirect;
       } | null)
@@ -1025,6 +1232,15 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        featuredDestinationsBlock?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   meta?:
     | T
@@ -1290,6 +1506,116 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "package-categories_select".
+ */
+export interface PackageCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  icon?: T;
+  color?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinations_select".
+ */
+export interface DestinationsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  country?: T;
+  continent?: T;
+  description?: T;
+  shortDescription?: T;
+  featured?: T;
+  heroImage?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  startingPrice?: T;
+  packageCount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages_select".
+ */
+export interface PackagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  destination?: T;
+  description?: T;
+  detailedDescription?: T;
+  price?: T;
+  originalPrice?: T;
+  currency?: T;
+  priceUnit?: T;
+  duration?:
+    | T
+    | {
+        days?: T;
+        nights?: T;
+      };
+  itinerary?: T;
+  category?: T;
+  tags?: T;
+  discount?:
+    | T
+    | {
+        hasDiscount?: T;
+        percentage?: T;
+        label?: T;
+      };
+  heroImage?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  rating?: T;
+  reviewCount?: T;
+  featured?: T;
+  status?: T;
+  inclusions?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  exclusions?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  customerName?: T;
+  customerLocation?: T;
+  customerPhoto?: T;
+  tour?: T;
+  rating?: T;
+  review?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1606,6 +1932,31 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-filters".
+ */
+export interface SearchFilter {
+  id: string;
+  /**
+   * Featured destinations in search dropdown
+   */
+  destinations?: (string | Destination)[] | null;
+  /**
+   * Categories shown in search filter
+   */
+  categories?: (string | PackageCategory)[] | null;
+  priceRanges?:
+    | {
+        label: string;
+        min?: number | null;
+        max?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -1644,6 +1995,25 @@ export interface FooterSelect<T extends boolean = true> {
               url?: T;
               label?: T;
             };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-filters_select".
+ */
+export interface SearchFiltersSelect<T extends boolean = true> {
+  destinations?: T;
+  categories?: T;
+  priceRanges?:
+    | T
+    | {
+        label?: T;
+        min?: T;
+        max?: T;
         id?: T;
       };
   updatedAt?: T;
