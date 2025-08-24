@@ -1,3 +1,4 @@
+// app/packages/[slug]/page.tsx
 import React from 'react'
 import { getPayloadHMR } from '@payloadcms/next/utilities'
 import configPromise from '@payload-config'
@@ -41,6 +42,11 @@ export default async function PackagePage({
   const pkg = packages.docs[0] as Package
   const destination = typeof pkg.destination === 'string' ? null : pkg.destination as Destination
 
+  // Fetch global settings
+  const settings = await payload.findGlobal({
+    slug: 'packageLayout',
+  })
+
   // Fetch related packages from same destination
   const relatedPackages = await payload.find({
     collection: 'packages',
@@ -61,10 +67,18 @@ export default async function PackagePage({
     limit: 4,
   })
 
+  // Dynamic gallery grid classes
+  const galleryGridClasses = {
+    2: 'grid-cols-1 md:grid-cols-2',
+    3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+    4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
+  }
+  const galleryGrid = galleryGridClasses[settings.galleryColumns as keyof typeof galleryGridClasses] || galleryGridClasses[3]
+
   return (
     <div>
-      {/* Hero Section */}
-      <section className="relative h-96">
+      {/* Hero Section - Dynamic Height */}
+      <section className={`relative ${settings.heroHeight}`}>
         <img 
           src={typeof pkg.heroImage === 'string' ? '' : pkg.heroImage.url || ''}
           alt={pkg.title}
@@ -73,10 +87,12 @@ export default async function PackagePage({
         <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
           <div className="text-center text-white">
             <h1 className="text-5xl font-bold mb-4">{pkg.title}</h1>
-            <p className="text-xl">
-              {destination ? `${destination.name}, ${destination.country}` : ''}
-            </p>
-            {pkg.duration && (
+            {settings.showDestination && destination && (
+              <p className="text-xl">
+                {destination.name}, {destination.country}
+              </p>
+            )}
+            {settings.showDuration && pkg.duration && (
               <p className="text-lg mt-2">
                 {pkg.duration.days} Days, {pkg.duration.nights} Nights
               </p>
@@ -88,10 +104,10 @@ export default async function PackagePage({
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2">
-            {/* Package Details */}
+            {/* Package Details - Dynamic Title */}
             <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
-              <h2 className="text-3xl font-bold mb-6">Package Details</h2>
-              {pkg.itinerary && (
+              <h2 className="text-3xl font-bold mb-6">{settings.packageDetailsTitle}</h2>
+              {settings.showItinerary && pkg.itinerary && (
                 <div className="bg-blue-50 p-4 rounded-lg mb-6">
                   <h3 className="font-semibold text-blue-800 mb-2">Itinerary</h3>
                   <p className="text-blue-700">{pkg.itinerary}</p>
@@ -102,11 +118,13 @@ export default async function PackagePage({
               </div>
             </div>
 
-            {/* Inclusions & Exclusions */}
+            {/* Inclusions & Exclusions - Dynamic Titles */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               {pkg.inclusions && pkg.inclusions.length > 0 && (
                 <div className="bg-green-50 p-6 rounded-lg">
-                  <h3 className="text-xl font-semibold mb-4 text-green-800">Inclusions</h3>
+                  <h3 className="text-xl font-semibold mb-4 text-green-800">
+                    {settings.inclusionsTitle}
+                  </h3>
                   <ul className="space-y-2">
                     {pkg.inclusions.map((item, index) => (
                       <li key={index} className="flex items-center text-green-700">
@@ -120,7 +138,9 @@ export default async function PackagePage({
 
               {pkg.exclusions && pkg.exclusions.length > 0 && (
                 <div className="bg-red-50 p-6 rounded-lg">
-                  <h3 className="text-xl font-semibold mb-4 text-red-800">Exclusions</h3>
+                  <h3 className="text-xl font-semibold mb-4 text-red-800">
+                    {settings.exclusionsTitle}
+                  </h3>
                   <ul className="space-y-2">
                     {pkg.exclusions.map((item, index) => (
                       <li key={index} className="flex items-center text-red-700">
@@ -133,11 +153,11 @@ export default async function PackagePage({
               )}
             </div>
 
-            {/* Gallery */}
+            {/* Gallery - Dynamic Title and Columns */}
             {pkg.gallery && pkg.gallery.length > 0 && (
               <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
-                <h3 className="text-2xl font-bold mb-6">Gallery</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <h3 className="text-2xl font-bold mb-6">{settings.galleryTitle}</h3>
+                <div className={`grid ${galleryGrid} gap-4`}>
                   {pkg.gallery.map((item, index) => (
                     <div key={index} className="aspect-square">
                       <img 
@@ -151,10 +171,12 @@ export default async function PackagePage({
               </div>
             )}
 
-            {/* Related Packages */}
+            {/* Related Packages - Dynamic Title */}
             {relatedPackages.docs.length > 0 && (
               <div className="bg-white p-8 rounded-lg shadow-lg">
-                <h3 className="text-2xl font-bold mb-6">More Packages in {destination?.name}</h3>
+                <h3 className="text-2xl font-bold mb-6">
+                  {settings.relatedPackagesTitle} in {destination?.name}
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {relatedPackages.docs.map((relatedPkg: Package) => (
                     <div key={relatedPkg.id} className="border border-gray-200 p-4 rounded-lg">
@@ -178,7 +200,7 @@ export default async function PackagePage({
             )}
           </div>
 
-          {/* Sidebar */}
+          {/* Existing Sidebar - Dynamic Button Text */}
           <div className="lg:col-span-1">
             <div className="bg-white p-8 rounded-lg shadow-lg sticky top-8">
               <div className="text-center mb-6">
@@ -236,12 +258,13 @@ export default async function PackagePage({
                 )}
               </div>
 
+              {/* Dynamic Button Text */}
               <button className="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors mb-4">
-                Book Now
+                {settings.bookButtonText}
               </button>
               
               <button className="w-full border border-blue-600 text-blue-600 py-3 rounded-lg hover:bg-blue-50 transition-colors">
-                Add to Wishlist ♡
+                {settings.wishlistButtonText}
               </button>
 
               <div className="mt-6 pt-6 border-t">
