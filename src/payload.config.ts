@@ -21,6 +21,7 @@ import { Destinations } from './collections/Destinations'
 import { Packages } from './collections/Packages'
 import { SearchFilters } from './collections/SearchFilters'
 import { Testimonials } from './collections/Testimonials'
+import { PackageLayout } from './PackageLayout/config'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -69,7 +70,7 @@ export default buildConfig({
   }),
   collections: [Pages, Posts, Media, Categories, Users,PackageCategories, Destinations, Packages,Testimonials ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, SearchFilters],
+  globals: [Header, Footer, SearchFilters, PackageLayout],
   plugins: [
     ...plugins,
     // storage-adapter-placeholder

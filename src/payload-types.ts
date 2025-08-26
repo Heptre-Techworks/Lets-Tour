@@ -112,11 +112,13 @@ export interface Config {
     header: Header;
     footer: Footer;
     'search-filters': SearchFilter;
+    packageLayout: PackageLayout;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'search-filters': SearchFiltersSelect<false> | SearchFiltersSelect<true>;
+    packageLayout: PackageLayoutSelect<false> | PackageLayoutSelect<true>;
   };
   locale: null;
   user: User & {
@@ -214,6 +216,126 @@ export interface Page {
         id?: string | null;
         blockName?: string | null;
         blockType: 'featuredDestinationsBlock';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        /**
+         * Add destination cards and choose their visual size to match the collage layout.
+         */
+        cards?:
+          | {
+              title: string;
+              /**
+               * Starting price in INR
+               */
+              price?: number | null;
+              image: string | Media;
+              /**
+               * Optional link to destination page (e.g., /destinations/spain)
+               */
+              link?: string | null;
+              size?: ('large' | 'medium' | 'small') | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'popularNowBlock';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        /**
+         * Select destinations to feature in this carousel
+         */
+        destinations?: (string | Destination)[] | null;
+        cardStyle?: ('rounded' | 'sharp') | null;
+        showLabels?: boolean | null;
+        showPricing?: boolean | null;
+        cardsPerView?: ('3' | '4' | '5') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'uniformCardCarousel';
+      }
+    | {
+        /**
+         * Background image for the block
+         */
+        image: string | Media;
+        overlay?: boolean | null;
+        /**
+         * Height of the image block
+         */
+        height?: ('small' | 'medium' | 'large' | 'xl') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'staticImageBlock';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        /**
+         * Select destinations - they will automatically get varied card sizes
+         */
+        destinations?: (string | Destination)[] | null;
+        showDiscountBadge?: boolean | null;
+        showLocationDetails?: boolean | null;
+        /**
+         * How to distribute different card sizes
+         */
+        cardSizePattern?: ('varied' | 'pattern' | 'random') | null;
+        backgroundColor?: ('gray' | 'white' | 'cream') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'nonUniformCardCarousel';
+      }
+    | {
+        slides?:
+          | {
+              /**
+               * The main background image for the slide.
+               */
+              image: string | Media;
+              title?: string | null;
+              subtitle?: string | null;
+              location?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Upload a PNG image of clouds with a transparent background. This will be layered at the bottom.
+         */
+        cloudImage: string | Media;
+        enableAirplaneAnimation?: boolean | null;
+        /**
+         * Autoplay interval in milliseconds (e.g., 8000 = 8 seconds).
+         */
+        autoplayDuration?: number | null;
+        destinationOptions?:
+          | {
+              label: string;
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        categoryOptions?:
+          | {
+              label: string;
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        buttonLabel?: string | null;
+        placeholders?: {
+          destination?: string | null;
+          date?: string | null;
+          people?: string | null;
+          category?: string | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'heroMainBlock';
       }
   )[];
   meta?: {
@@ -1241,6 +1363,100 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        popularNowBlock?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              cards?:
+                | T
+                | {
+                    title?: T;
+                    price?: T;
+                    image?: T;
+                    link?: T;
+                    size?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        uniformCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              cardStyle?: T;
+              showLabels?: T;
+              showPricing?: T;
+              cardsPerView?: T;
+              id?: T;
+              blockName?: T;
+            };
+        staticImageBlock?:
+          | T
+          | {
+              image?: T;
+              overlay?: T;
+              height?: T;
+              id?: T;
+              blockName?: T;
+            };
+        nonUniformCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              showDiscountBadge?: T;
+              showLocationDetails?: T;
+              cardSizePattern?: T;
+              backgroundColor?: T;
+              id?: T;
+              blockName?: T;
+            };
+        heroMainBlock?:
+          | T
+          | {
+              slides?:
+                | T
+                | {
+                    image?: T;
+                    title?: T;
+                    subtitle?: T;
+                    location?: T;
+                    id?: T;
+                  };
+              cloudImage?: T;
+              enableAirplaneAnimation?: T;
+              autoplayDuration?: T;
+              destinationOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              categoryOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              buttonLabel?: T;
+              placeholders?:
+                | T
+                | {
+                    destination?: T;
+                    date?: T;
+                    people?: T;
+                    category?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
       };
   meta?:
     | T
@@ -1957,6 +2173,27 @@ export interface SearchFilter {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packageLayout".
+ */
+export interface PackageLayout {
+  id: string;
+  heroHeight?: ('h-80' | 'h-96' | 'h-[500px]') | null;
+  showDestination?: boolean | null;
+  showDuration?: boolean | null;
+  packageDetailsTitle?: string | null;
+  showItinerary?: boolean | null;
+  inclusionsTitle?: string | null;
+  exclusionsTitle?: string | null;
+  galleryTitle?: string | null;
+  galleryColumns?: ('2' | '3' | '4') | null;
+  relatedPackagesTitle?: string | null;
+  bookButtonText?: string | null;
+  wishlistButtonText?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -2016,6 +2253,27 @@ export interface SearchFiltersSelect<T extends boolean = true> {
         max?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packageLayout_select".
+ */
+export interface PackageLayoutSelect<T extends boolean = true> {
+  heroHeight?: T;
+  showDestination?: T;
+  showDuration?: T;
+  packageDetailsTitle?: T;
+  showItinerary?: T;
+  inclusionsTitle?: T;
+  exclusionsTitle?: T;
+  galleryTitle?: T;
+  galleryColumns?: T;
+  relatedPackagesTitle?: T;
+  bookButtonText?: T;
+  wishlistButtonText?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
