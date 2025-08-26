@@ -1,12 +1,12 @@
 // app/packages/[slug]/page.tsx
 import React from 'react'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
+import { getPayload } from 'payload' // Updated import
 import configPromise from '@payload-config'
 import { notFound } from 'next/navigation'
 import { Package, Destination } from '../../../../payload-types'
 
 export async function generateStaticParams() {
-  const payload = await getPayloadHMR({ config: configPromise })
+  const payload = await getPayload({ config: configPromise }) // Updated getPayload
   
   const packages = await payload.find({
     collection: 'packages',
@@ -21,15 +21,18 @@ export async function generateStaticParams() {
 export default async function PackagePage({ 
   params 
 }: { 
-  params: { slug: string } 
+  params: Promise<{ slug: string }> // Updated type
 }) {
-  const payload = await getPayloadHMR({ config: configPromise })
+  // Await params before using
+  const { slug } = await params
+  
+  const payload = await getPayload({ config: configPromise }) // Updated getPayload
   
   const packages = await payload.find({
     collection: 'packages',
     where: {
       slug: {
-        equals: params.slug,
+        equals: slug, // Use awaited slug
       },
     },
     limit: 1,
@@ -67,40 +70,23 @@ export default async function PackagePage({
     limit: 4,
   })
 
+  // Fix the type conversion issue
+  const galleryColumns = Number(settings.galleryColumns) as 2 | 3 | 4
+  const safeGalleryColumns: 2 | 3 | 4 = [2, 3, 4].includes(galleryColumns) 
+    ? galleryColumns 
+    : 3 // fallback
+
   // Dynamic gallery grid classes
   const galleryGridClasses = {
     2: 'grid-cols-1 md:grid-cols-2',
     3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
     4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
   }
-  const galleryGrid = galleryGridClasses[settings.galleryColumns as keyof typeof galleryGridClasses] || galleryGridClasses[3]
+  const galleryGrid = galleryGridClasses[safeGalleryColumns]
 
   return (
     <div>
-      {/* Hero Section - Dynamic Height */}
-      <section className={`relative ${settings.heroHeight}`}>
-        <img 
-          src={typeof pkg.heroImage === 'string' ? '' : pkg.heroImage.url || ''}
-          alt={pkg.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-          <div className="text-center text-white">
-            <h1 className="text-5xl font-bold mb-4">{pkg.title}</h1>
-            {settings.showDestination && destination && (
-              <p className="text-xl">
-                {destination.name}, {destination.country}
-              </p>
-            )}
-            {settings.showDuration && pkg.duration && (
-              <p className="text-lg mt-2">
-                {pkg.duration.days} Days, {pkg.duration.nights} Nights
-              </p>
-            )}
-          </div>
-        </div>
-      </section>
-
+      
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2">
@@ -161,7 +147,7 @@ export default async function PackagePage({
                   {pkg.gallery.map((item, index) => (
                     <div key={index} className="aspect-square">
                       <img 
-                        src={typeof item.image === 'string' ? '' : item.image.url || ''}
+                        src={typeof item.image === 'string' ? '' : item.image?.url || ''}
                         alt={item.caption || pkg.title}
                         className="w-full h-full object-cover rounded-lg"
                       />

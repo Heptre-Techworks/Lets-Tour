@@ -11,7 +11,8 @@ type Destination = {
   country: string
   continent: string
   labels?: string[] // ['In Season', 'Popular']
-  heroImage: {
+  // The heroImage is now optional to prevent runtime errors if data is missing
+  heroImage?: {
     url: string
     alt?: string
   }
@@ -48,11 +49,12 @@ export const UniformCardCarousel: React.FC<Props> = ({
 
   const cardWidth = 300
   const gap = 20
-  const maxIndex = Math.max(0, destinations.length - cardsPerView)
+  // Ensure maxIndex is never negative
+  const maxIndex = destinations ? Math.max(0, destinations.length - cardsPerView) : 0
 
   // Auto scroll functionality
   useEffect(() => {
-    if (!autoScroll || isHovered || destinations.length === 0) return
+    if (!autoScroll || isHovered || !destinations || destinations.length === 0) return
 
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => {
@@ -68,7 +70,7 @@ export const UniformCardCarousel: React.FC<Props> = ({
     }, autoScrollInterval)
 
     return () => clearInterval(interval)
-  }, [autoScroll, autoScrollInterval, isHovered, maxIndex, cardWidth, gap, destinations.length])
+  }, [autoScroll, autoScrollInterval, isHovered, maxIndex, cardWidth, gap, destinations?.length])
 
   const scrollLeft = () => {
     const newIndex = Math.max(currentIndex - 1, 0)
@@ -104,7 +106,7 @@ export const UniformCardCarousel: React.FC<Props> = ({
 
   const roundedClass = cardStyle === 'rounded' ? 'rounded-xl' : 'rounded-none'
 
-  if (destinations.length === 0) {
+  if (!destinations || destinations.length === 0) {
     return (
       <section className="py-12 bg-orange-100">
         <div className="container mx-auto px-4 text-center">
@@ -149,81 +151,95 @@ export const UniformCardCarousel: React.FC<Props> = ({
           <div className="mx-16 overflow-hidden">
             <div
               ref={scrollContainerRef}
-              className="flex gap-5 transition-transform duration-300 ease-in-out"
+              className="flex gap-5"
               style={{ 
                 scrollBehavior: 'smooth',
                 width: `${destinations.length * (cardWidth + gap)}px`
               }}
             >
-              {destinations.map((destination, index) => (
-                <Link
-                  key={destination.id}
-                  href={`/destinations/${destination.slug}`}
-                  className="group flex-shrink-0"
-                  style={{ width: `${cardWidth}px` }}
-                >
-                  <div className={`relative ${roundedClass} overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white transform hover:-translate-y-1`}>
-                    {/* Image */}
-                    <div className="relative h-52">
-                      <img
-                        src={destination.heroImage.url}
-                        alt={destination.heroImage.alt || destination.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                      
-                      {/* Labels */}
-                      {showLabels && destination.labels && destination.labels.length > 0 && (
-                        <div className="absolute top-3 left-3 flex gap-2">
-                          {destination.labels.map((label, labelIndex) => (
-                            <span
-                              key={labelIndex}
-                              className={`px-3 py-1 text-xs font-semibold text-white rounded-full shadow-md ${
-                                label.toLowerCase().includes('popular') 
-                                  ? 'bg-red-500' 
-                                  : 'bg-orange-400'
-                              }`}
-                            >
-                              {label}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+              {destinations.map((destination) => {
+                // **FIX:** Safely access image properties using optional chaining (?.)
+                const imageUrl = destination.heroImage?.url;
+                const imageAlt = destination.heroImage?.alt || destination.name;
 
-                      {/* Heart Icon */}
-                      <div className="absolute top-3 right-3">
-                        <button 
-                          className="w-9 h-9 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-opacity-40 transition-all duration-200"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            // Add to favorites logic here
-                          }}
-                        >
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                        </button>
-                      </div>
-
-                      {/* Destination Name & Price Overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
-                        <h3 className="text-xl font-serif text-white mb-1 italic font-medium">
-                          {destination.name}
-                        </h3>
-                        {showPricing && destination.startingPrice && (
-                          <div className="text-white">
-                            <p className="text-sm opacity-90">Packages starting at</p>
-                            <p className="text-lg font-bold">
-                              ₹{destination.startingPrice.toLocaleString()}
-                              <span className="text-sm font-normal opacity-90">/person</span>
-                            </p>
+                return (
+                  <Link
+                    // The key prop is correctly placed on the top-level element in the map
+                    key={destination.id}
+                    href={`/destinations/${destination.slug}`}
+                    className="group flex-shrink-0"
+                    style={{ width: `${cardWidth}px` }}
+                  >
+                    <div className={`relative ${roundedClass} overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white transform hover:-translate-y-1`}>
+                      {/* Image Container */}
+                      <div className="relative h-52">
+                        {/* **FIX:** Conditionally render image or a placeholder to prevent crashes */}
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={imageAlt}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-gray-500 text-sm">Image not available</span>
                           </div>
                         )}
+                        
+                        {/* Labels */}
+                        {showLabels && destination.labels && destination.labels.length > 0 && (
+                          <div className="absolute top-3 left-3 flex gap-2">
+                            {destination.labels.map((label, labelIndex) => (
+                              <span
+                                key={labelIndex}
+                                className={`px-3 py-1 text-xs font-semibold text-white rounded-full shadow-md ${
+                                  label.toLowerCase().includes('popular') 
+                                    ? 'bg-red-500' 
+                                    : 'bg-orange-400'
+                                }`}
+                              >
+                                {label}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Heart Icon */}
+                        <div className="absolute top-3 right-3">
+                          <button 
+                            className="w-9 h-9 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-opacity-40 transition-all duration-200"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              // Add to favorites logic here
+                            }}
+                          >
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        {/* Destination Name & Price Overlay */}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
+                          <h3 className="text-xl font-serif text-white mb-1 italic font-medium">
+                            {destination.name}
+                          </h3>
+                          {showPricing && destination.startingPrice && (
+                            <div className="text-white">
+                              <p className="text-sm opacity-90">Packages starting at</p>
+                              <p className="text-lg font-bold">
+                                ₹{destination.startingPrice.toLocaleString()}
+                                <span className="text-sm font-normal opacity-90">/person</span>
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -246,7 +262,7 @@ export const UniformCardCarousel: React.FC<Props> = ({
           <div className="flex items-center space-x-2">
             {Array.from({ length: maxIndex + 1 }).map((_, index) => (
               <button
-                key={index}
+                key={`dot-${index}`} // Using a prefix for the key
                 onClick={() => goToIndex(index)}
                 className={`h-2 rounded-full transition-all duration-200 ${
                   currentIndex === index
@@ -265,15 +281,6 @@ export const UniformCardCarousel: React.FC<Props> = ({
             </span>
           </div>
         </div>
-
-        {/* Auto-scroll indicator */}
-        {autoScroll && (
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-500">
-              {isHovered ? 'Auto-scroll paused' : 'Auto-scrolling...'}
-            </p>
-          </div>
-        )}
       </div>
     </section>
   )

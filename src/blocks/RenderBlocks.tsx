@@ -13,6 +13,8 @@ import UniformCardCarousel from '@/blocks/UniformCardCarousel/Component'
 import StaticImageBlock from '@/blocks/StaticImageBlock/Component'
 import NonUniformCardCarousel from '@/blocks/NonUniformCardCarousel/Component'
 
+import HeroMainBlock from '@/blocks/HeroMainBlock/Component'
+
 const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
@@ -23,7 +25,9 @@ const blockComponents = {
   popularNowBlock: PopularNowBlock,
   uniformCardCarousel: UniformCardCarousel,
   staticImageBlock: StaticImageBlock,
-  nonUniformCardCarousel: NonUniformCardCarousel
+  nonUniformCardCarousel: NonUniformCardCarousel,
+
+  heroMainBlock: HeroMainBlock,
 }
 
 export const RenderBlocks: React.FC<{

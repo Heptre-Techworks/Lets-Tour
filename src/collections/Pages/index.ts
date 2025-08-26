@@ -26,6 +26,8 @@ import { UniformCardCarousel } from '../../blocks/UniformCardCarousel/config'
 import { StaticImageBlock } from '../../blocks/StaticImageBlock/config'
 import { NonUniformCardCarousel } from '../../blocks/NonUniformCardCarousel/config'
 
+import { HeroMainBlock } from '../../blocks/HeroMainBlock/config'
+
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
@@ -80,7 +82,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, FeaturedDestinationsBlock, PopularNowBlock,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, FeaturedDestinationsBlock, PopularNowBlock,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel,HeroMainBlock],
               required: true,
               admin: {
                 initCollapsed: true,

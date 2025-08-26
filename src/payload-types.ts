@@ -290,6 +290,53 @@ export interface Page {
         blockName?: string | null;
         blockType: 'nonUniformCardCarousel';
       }
+    | {
+        slides?:
+          | {
+              /**
+               * The main background image for the slide.
+               */
+              image: string | Media;
+              title?: string | null;
+              subtitle?: string | null;
+              location?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Upload a PNG image of clouds with a transparent background. This will be layered at the bottom.
+         */
+        cloudImage: string | Media;
+        enableAirplaneAnimation?: boolean | null;
+        /**
+         * Autoplay interval in milliseconds (e.g., 8000 = 8 seconds).
+         */
+        autoplayDuration?: number | null;
+        destinationOptions?:
+          | {
+              label: string;
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        categoryOptions?:
+          | {
+              label: string;
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        buttonLabel?: string | null;
+        placeholders?: {
+          destination?: string | null;
+          date?: string | null;
+          people?: string | null;
+          category?: string | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'heroMainBlock';
+      }
   )[];
   meta?: {
     title?: string | null;
@@ -1366,6 +1413,47 @@ export interface PagesSelect<T extends boolean = true> {
               showLocationDetails?: T;
               cardSizePattern?: T;
               backgroundColor?: T;
+              id?: T;
+              blockName?: T;
+            };
+        heroMainBlock?:
+          | T
+          | {
+              slides?:
+                | T
+                | {
+                    image?: T;
+                    title?: T;
+                    subtitle?: T;
+                    location?: T;
+                    id?: T;
+                  };
+              cloudImage?: T;
+              enableAirplaneAnimation?: T;
+              autoplayDuration?: T;
+              destinationOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              categoryOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              buttonLabel?: T;
+              placeholders?:
+                | T
+                | {
+                    destination?: T;
+                    date?: T;
+                    people?: T;
+                    category?: T;
+                  };
               id?: T;
               blockName?: T;
             };
