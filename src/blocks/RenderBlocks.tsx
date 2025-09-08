@@ -9,11 +9,13 @@ import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { FeaturedDestinationsBlock } from '@/blocks/FeaturedDestinationsBlock/Component'
 import { PopularNowBlock } from '@/blocks/PopularNowBlock/Component'
-import UniformCardCarousel from '@/blocks/UniformCardCarousel/Component'
+import {EnlargingCardCarousel} from './EnlargingCardCarousel/Component'
+import {UniformCardCarousel} from '@/blocks/UniformCardCarousel/Component'
 import StaticImageBlock from '@/blocks/StaticImageBlock/Component'
 import NonUniformCardCarousel from '@/blocks/NonUniformCardCarousel/Component'
-
+import UpDownCardCarousel from './UpDownCardCarousel/Component'
 import HeroMainBlock from '@/blocks/HeroMainBlock/Component'
+import DestinationHeroCarousel from './DestinationHeroCarousel/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -26,8 +28,10 @@ const blockComponents = {
   uniformCardCarousel: UniformCardCarousel,
   staticImageBlock: StaticImageBlock,
   nonUniformCardCarousel: NonUniformCardCarousel,
-
+  upDownCardCarousel:UpDownCardCarousel,
   heroMainBlock: HeroMainBlock,
+  enlargingCardCarousel:EnlargingCardCarousel,
+  destinationHeroCarousel: DestinationHeroCarousel,
 }
 
 export const RenderBlocks: React.FC<{

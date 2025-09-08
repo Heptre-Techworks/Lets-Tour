@@ -11,53 +11,36 @@ export const UniformCardCarousel: Block = {
     {
       name: 'title',
       type: 'text',
-      defaultValue: 'Featured Destinations',
+      defaultValue: 'In Season',
+      admin: {
+        description: 'Main title for the carousel section',
+      },
     },
     {
       name: 'subtitle',
       type: 'text',
       defaultValue: "Today's enemy is tomorrow's friend.",
+      admin: {
+        description: 'Subtitle text below the main title',
+      },
     },
     {
       name: 'destinations',
       type: 'relationship',
-      relationTo: 'destinations',
+      relationTo: 'destinations', // This matches your collection slug
       hasMany: true,
-      maxRows: 12,
+      maxRows: 10,
       admin: {
-        description: 'Select destinations to feature in this carousel',
+        description: 'Select destinations to display in the carousel',
       },
     },
     {
-      name: 'cardStyle',
-      type: 'select',
-      defaultValue: 'rounded',
-      options: [
-        { label: 'Rounded Corners', value: 'rounded' },
-        { label: 'Sharp Corners', value: 'sharp' },
-      ],
-    },
-    {
-      name: 'showLabels',
+      name: 'showNavigation',
       type: 'checkbox',
+      label: 'Show Navigation Arrows',
       defaultValue: true,
-      label: 'Show labels (In Season, Popular)',
-    },
-    {
-      name: 'showPricing',
-      type: 'checkbox',
-      defaultValue: true,
-      label: 'Show starting prices',
-    },
-    {
-      name: 'cardsPerView',
-      type: 'select',
-      defaultValue: '4',
-      options: [
-        { label: '3 Cards', value: '3' },
-        { label: '4 Cards', value: '4' },
-        { label: '5 Cards', value: '5' },
-      ],
     },
   ],
 }
+
+export default UniformCardCarousel

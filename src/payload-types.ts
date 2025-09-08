@@ -244,16 +244,19 @@ export interface Page {
         blockType: 'popularNowBlock';
       }
     | {
+        /**
+         * Main title for the carousel section
+         */
         title?: string | null;
+        /**
+         * Subtitle text below the main title
+         */
         subtitle?: string | null;
         /**
-         * Select destinations to feature in this carousel
+         * Select destinations to display in the carousel
          */
         destinations?: (string | Destination)[] | null;
-        cardStyle?: ('rounded' | 'sharp') | null;
-        showLabels?: boolean | null;
-        showPricing?: boolean | null;
-        cardsPerView?: ('3' | '4' | '5') | null;
+        showNavigation?: boolean | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'uniformCardCarousel';
@@ -336,6 +339,92 @@ export interface Page {
         id?: string | null;
         blockName?: string | null;
         blockType: 'heroMainBlock';
+      }
+    | {
+        /**
+         * Main heading for the carousel section
+         */
+        title: string;
+        /**
+         * Subtitle text below the main title
+         */
+        subtitle?: string | null;
+        /**
+         * Select destinations to display in the masonry layout
+         */
+        destinations?: (string | Destination)[] | null;
+        /**
+         * Choose the layout style for the cards
+         */
+        layout?: ('masonry' | 'grid') | null;
+        showStartingPrice?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'upDownCardCarousel';
+      }
+    | {
+        /**
+         * Main heading for the carousel section
+         */
+        title: string;
+        /**
+         * Subtitle text below the main title
+         */
+        subtitle?: string | null;
+        /**
+         * Select destinations to display in the enlarging carousel
+         */
+        destinations?: (string | Destination)[] | null;
+        showNavigation?: boolean | null;
+        autoPlay?: boolean | null;
+        enlargeOnHover?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'enlargingCardCarousel';
+      }
+    | {
+        /**
+         * Main title for the hero section
+         */
+        title: string;
+        stops?:
+          | {
+              /**
+               * Name of the attraction (e.g., Park Güell)
+               */
+              name: string;
+              /**
+               * City where the attraction is located
+               */
+              city: string;
+              /**
+               * Hero image for the attraction
+               */
+              image: string | Media;
+              /**
+               * Short description of the attraction
+               */
+              excerpt: string;
+              /**
+               * URL slug for the attraction page (optional)
+               */
+              slug?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        displaySettings?: {
+          /**
+           * Scale up the centered card
+           */
+          showActiveScale?: boolean | null;
+          /**
+           * Number of cards visible at once
+           */
+          visibleWindow?: number | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'destinationHeroCarousel';
       }
   )[];
   meta?: {
@@ -1387,10 +1476,7 @@ export interface PagesSelect<T extends boolean = true> {
               title?: T;
               subtitle?: T;
               destinations?: T;
-              cardStyle?: T;
-              showLabels?: T;
-              showPricing?: T;
-              cardsPerView?: T;
+              showNavigation?: T;
               id?: T;
               blockName?: T;
             };
@@ -1453,6 +1539,52 @@ export interface PagesSelect<T extends boolean = true> {
                     date?: T;
                     people?: T;
                     category?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        upDownCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              layout?: T;
+              showStartingPrice?: T;
+              id?: T;
+              blockName?: T;
+            };
+        enlargingCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              showNavigation?: T;
+              autoPlay?: T;
+              enlargeOnHover?: T;
+              id?: T;
+              blockName?: T;
+            };
+        destinationHeroCarousel?:
+          | T
+          | {
+              title?: T;
+              stops?:
+                | T
+                | {
+                    name?: T;
+                    city?: T;
+                    image?: T;
+                    excerpt?: T;
+                    slug?: T;
+                    id?: T;
+                  };
+              displaySettings?:
+                | T
+                | {
+                    showActiveScale?: T;
+                    visibleWindow?: T;
                   };
               id?: T;
               blockName?: T;

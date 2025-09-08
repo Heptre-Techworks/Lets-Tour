@@ -1,285 +1,223 @@
 // components/blocks/UniformCardCarousel.tsx
 'use client'
 
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
+import { ChevronLeftIcon, ChevronRightIcon, HeartIcon } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 
-type Destination = {
-  id: string
-  slug: string
+interface Media {
+  url: string
+  alt?: string
+}
+
+interface Destination {
   name: string
+  slug: string
   country: string
-  continent: string
-  labels?: string[] // ['In Season', 'Popular']
-  // The heroImage is now optional to prevent runtime errors if data is missing
-  heroImage?: {
-    url: string
-    alt?: string
-  }
-  packageCount?: number
+  shortDescription?: string
+  featured?: boolean
+  heroImage?: Media | string
   startingPrice?: number
 }
 
-type Props = {
+interface UniformCardCarouselProps {
   title?: string
   subtitle?: string
   destinations?: Destination[]
-  cardStyle?: 'rounded' | 'sharp'
-  showLabels?: boolean
-  showPricing?: boolean
-  cardsPerView?: 3 | 4 | 5
-  autoScroll?: boolean
-  autoScrollInterval?: number
+  showNavigation?: boolean
 }
 
-export const UniformCardCarousel: React.FC<Props> = ({
-  title = 'Uniform Card Carousel',
+export const UniformCardCarousel: React.FC<UniformCardCarouselProps> = ({
+  title = 'In Season',
   subtitle = "Today's enemy is tomorrow's friend.",
   destinations = [],
-  cardStyle = 'rounded',
-  showLabels = true,
-  showPricing = true,
-  cardsPerView = 4,
-  autoScroll = false,
-  autoScrollInterval = 3000,
+  showNavigation = true,
 }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isHovered, setIsHovered] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
-  const cardWidth = 300
-  const gap = 20
-  // Ensure maxIndex is never negative
-  const maxIndex = destinations ? Math.max(0, destinations.length - cardsPerView) : 0
-
-  // Auto scroll functionality
+  // Fix hydration issue by ensuring client-side rendering
   useEffect(() => {
-    if (!autoScroll || isHovered || !destinations || destinations.length === 0) return
+    setIsClient(true)
+  }, [])
 
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => {
-        const newIndex = prevIndex >= maxIndex ? 0 : prevIndex + 1
-        if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollTo({
-            left: newIndex * (cardWidth + gap),
-            behavior: 'smooth',
-          })
-        }
-        return newIndex
-      })
-    }, autoScrollInterval)
+  const getImageUrl = (image: Media | string | undefined): string | null => {
+    if (!image) return null
+    return typeof image === 'string' ? image : image.url
+  }
 
-    return () => clearInterval(interval)
-  }, [autoScroll, autoScrollInterval, isHovered, maxIndex, cardWidth, gap, destinations?.length])
+  const formatPrice = (price: number | undefined): string => {
+    if (!price) return '₹ 117,927'
+    return `₹ ${price.toLocaleString('en-IN')}`
+  }
 
   const scrollLeft = () => {
-    const newIndex = Math.max(currentIndex - 1, 0)
-    setCurrentIndex(newIndex)
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        left: newIndex * (cardWidth + gap),
-        behavior: 'smooth',
-      })
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1)
     }
   }
 
   const scrollRight = () => {
-    const newIndex = Math.min(currentIndex + 1, maxIndex)
-    setCurrentIndex(newIndex)
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        left: newIndex * (cardWidth + gap),
-        behavior: 'smooth',
-      })
+    if (currentIndex < destinations.length - 4) {
+      setCurrentIndex(currentIndex + 1)
     }
   }
 
-  const goToIndex = (index: number) => {
-    setCurrentIndex(index)
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        left: index * (cardWidth + gap),
-        behavior: 'smooth',
-      })
-    }
-  }
+  const validDestinations = destinations.filter(dest => 
+    dest && getImageUrl(dest.heroImage) !== null
+  )
 
-  const roundedClass = cardStyle === 'rounded' ? 'rounded-xl' : 'rounded-none'
-
-  if (!destinations || destinations.length === 0) {
+  if (validDestinations.length === 0) {
     return (
-      <section className="py-12 bg-orange-100">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-500">No destinations available</p>
-        </div>
-      </section>
+      <div className="w-full py-8 px-4 text-center text-gray-500">
+        No destinations available
+      </div>
     )
   }
 
   return (
-    <section className="py-12 bg-orange-100">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-2">
+    <section className="w-full py-8 px-4">
+      <header className="mb-8 px-16">
+        <div className="flex items-center gap-4 mb-4">
+          <h2 className="[font-family:'Amiri',Helvetica] font-bold italic text-black text-[64px] tracking-[-0.70px] leading-[56.3px] whitespace-nowrap">
             {title}
           </h2>
-          {subtitle && (
-            <p className="text-gray-600 italic">"{subtitle}"</p>
-          )}
+          <div className="flex-1 h-px bg-black/20">
+            <img
+              className="w-full h-px object-cover"
+              alt="Line"
+              src="/line-6-1.svg"
+            />
+          </div>
         </div>
-
-        {/* Carousel */}
-        <div 
-          className="relative"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          {/* Left Arrow */}
-          <button
-            onClick={scrollLeft}
-            disabled={currentIndex === 0}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
-            aria-label="Previous destinations"
-          >
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          {/* Cards Container */}
-          <div className="mx-16 overflow-hidden">
-            <div
-              ref={scrollContainerRef}
-              className="flex gap-5"
-              style={{ 
-                scrollBehavior: 'smooth',
-                width: `${destinations.length * (cardWidth + gap)}px`
-              }}
+        <p className="[font-family:'NATS-Regular',Helvetica] font-normal text-black text-[26px] tracking-[-0.29px] leading-[22.9px]">
+          {subtitle}
+        </p>
+      </header>
+      <div className="relative px-16">
+        <div className="flex items-center justify-between">
+          {showNavigation && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={scrollLeft}
+              disabled={currentIndex === 0}
+              className="w-[50px] h-[50px] bg-[#ecececbf] rounded-[25px] shadow-[0px_4px_4px_#00000040] opacity-50 hover:opacity-75 transition-opacity z-10"
             >
-              {destinations.map((destination) => {
-                // **FIX:** Safely access image properties using optional chaining (?.)
-                const imageUrl = destination.heroImage?.url;
-                const imageAlt = destination.heroImage?.alt || destination.name;
-
-                return (
-                  <Link
-                    // The key prop is correctly placed on the top-level element in the map
-                    key={destination.id}
-                    href={`/destinations/${destination.slug}`}
-                    className="group flex-shrink-0"
-                    style={{ width: `${cardWidth}px` }}
-                  >
-                    <div className={`relative ${roundedClass} overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white transform hover:-translate-y-1`}>
-                      {/* Image Container */}
-                      <div className="relative h-52">
-                        {/* **FIX:** Conditionally render image or a placeholder to prevent crashes */}
-                        {imageUrl ? (
+              <ChevronLeftIcon className="w-6 h-6" />
+            </Button>
+          )}
+          <div className="flex gap-6 overflow-hidden flex-1 mx-8">
+            {validDestinations.map((destination, index) => {
+              const heroImageUrl = getImageUrl(destination.heroImage)
+              
+              return (
+                <Card
+                  key={`${destination.slug}-${index}`}
+                  className="relative w-[286px] h-[386px] flex-shrink-0 overflow-hidden rounded-xl border-0 bg-transparent"
+                >
+                  <CardContent className="p-0 relative h-full">
+                    <div className="relative w-full h-full">
+                      {heroImageUrl && (
+                        <>
                           <img
-                            src={imageUrl}
-                            alt={imageAlt}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            loading="lazy"
+                            className="absolute w-full h-[375px] top-0 left-0 rounded-xl object-cover"
+                            alt="Background"
+                            src={heroImageUrl}
                           />
-                        ) : (
-                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-500 text-sm">Image not available</span>
-                          </div>
-                        )}
-                        
-                        {/* Labels */}
-                        {showLabels && destination.labels && destination.labels.length > 0 && (
-                          <div className="absolute top-3 left-3 flex gap-2">
-                            {destination.labels.map((label, labelIndex) => (
-                              <span
-                                key={labelIndex}
-                                className={`px-3 py-1 text-xs font-semibold text-white rounded-full shadow-md ${
-                                  label.toLowerCase().includes('popular') 
-                                    ? 'bg-red-500' 
-                                    : 'bg-orange-400'
-                                }`}
-                              >
-                                {label}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                          <img
+                            className="absolute w-full h-[383px] top-0 left-0 rounded-xl object-cover"
+                            alt={destination.name}
+                            src={heroImageUrl}
+                          />
+                        </>
+                      )}
+                      <div className="absolute w-full h-[375px] top-0 left-0 rounded-xl bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_40%,rgba(120,119,120,0)_100%)]" />
+                    </div>
+                    
+                    {/* Fixed Badge with hydration suppression */}
+                    <div suppressHydrationWarning>
+                      {isClient && destination.featured && (
+                        <Badge className="absolute top-5 left-5 bg-orange-400 hover:bg-orange-500 text-white border-0 rounded-lg px-3 py-1">
+                          <span className="font-normal text-lg tracking-tight">
+                            Featured
+                          </span>
+                        </Badge>
+                      )}
+                      {isClient && !destination.featured && (
+                        <Badge className="absolute top-5 left-5 bg-[#fbae3d] hover:bg-[#fbae3d] text-white border-0 rounded-lg px-3 py-1">
+                          <span className="[font-family:'NATS-Regular',Helvetica] font-normal text-lg tracking-[-0.20px] leading-[15.8px]">
+                            10% Off
+                          </span>
+                        </Badge>
+                      )}
+                    </div>
 
-                        {/* Heart Icon */}
-                        <div className="absolute top-3 right-3">
-                          <button 
-                            className="w-9 h-9 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-opacity-40 transition-all duration-200"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              // Add to favorites logic here
-                            }}
-                          >
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                          </button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-5 right-5 w-6 h-6 p-0 hover:bg-transparent"
+                    >
+                      <HeartIcon className="w-6 h-6 text-white" />
+                    </Button>
+                    <div className="absolute bottom-12 left-5 right-5">
+                      <h3 className="[font-family:'Amiri',Helvetica] font-normal italic text-white text-[40px] tracking-[-0.44px] leading-[35.2px] mb-3">
+                        {destination.name}
+                      </h3>
+                      <p className="[font-family:'NATS-Regular',Helvetica] font-normal text-white text-base tracking-[-0.18px] leading-[14.1px] mb-6">
+                        {destination.shortDescription || `${destination.country} - Experience the beauty and culture`}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <img
+                            className="w-[235px] h-px object-cover mb-4"
+                            alt="Vector"
+                            src="/vector-1.svg"
+                          />
+                          <div className="[font-family:'NATS-Regular',Helvetica] font-normal text-white text-[32px] tracking-[-0.35px] leading-[28.2px]">
+                            <span className="tracking-[-0.11px]">
+                              {formatPrice(destination.startingPrice)}
+                            </span>
+                            <span className="text-2xl tracking-[-0.06px] leading-[21.1px]">
+                              &nbsp;
+                            </span>
+                            <span className="text-base tracking-[-0.03px] leading-[14.1px]">
+                              (per person)
+                            </span>
+                          </div>
                         </div>
-
-                        {/* Destination Name & Price Overlay */}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4">
-                          <h3 className="text-xl font-serif text-white mb-1 italic font-medium">
-                            {destination.name}
-                          </h3>
-                          {showPricing && destination.startingPrice && (
-                            <div className="text-white">
-                              <p className="text-sm opacity-90">Packages starting at</p>
-                              <p className="text-lg font-bold">
-                                ₹{destination.startingPrice.toLocaleString()}
-                                <span className="text-sm font-normal opacity-90">/person</span>
-                              </p>
+                        <Link href={`/destinations/${destination.slug}`}>
+                          <Button className="w-[50px] h-[50px] bg-[#1e1e1e] hover:bg-[#1e1e1e]/80 rounded-[25px] p-0">
+                            <div className="w-10 h-10 bg-white rounded-[20px] flex items-center justify-center">
+                              <img
+                                className="w-[21px] h-[15px]"
+                                alt="Arrow"
+                                src="/arrow-1.svg"
+                              />
                             </div>
-                          )}
-                        </div>
+                          </Button>
+                        </Link>
                       </div>
                     </div>
-                  </Link>
-                );
-              })}
-            </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
-
-          {/* Right Arrow */}
-          <button
-            onClick={scrollRight}
-            disabled={currentIndex >= maxIndex}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
-            aria-label="Next destinations"
-          >
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Dots Indicator & Pagination */}
-        <div className="mt-8 flex items-center justify-between">
-          {/* Dots Indicator */}
-          <div className="flex items-center space-x-2">
-            {Array.from({ length: maxIndex + 1 }).map((_, index) => (
-              <button
-                key={`dot-${index}`} // Using a prefix for the key
-                onClick={() => goToIndex(index)}
-                className={`h-2 rounded-full transition-all duration-200 ${
-                  currentIndex === index
-                    ? 'w-8 bg-gray-800'
-                    : 'w-2 bg-gray-400 hover:bg-gray-600'
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
-
-          {/* Pagination Counter */}
-          <div className="text-right">
-            <span className="text-gray-700 font-semibold text-lg">
-              {Math.min(currentIndex + cardsPerView, destinations.length)} / {destinations.length}
-            </span>
-          </div>
+          {showNavigation && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={scrollRight}
+              disabled={currentIndex >= validDestinations.length - 4}
+              className="w-[50px] h-[50px] bg-[#ecececbf] rounded-[25px] shadow-[0px_4px_4px_#00000040] opacity-50 hover:opacity-75 transition-opacity z-10"
+            >
+              <ChevronRightIcon className="w-6 h-6" />
+            </Button>
+          )}
         </div>
       </div>
     </section>

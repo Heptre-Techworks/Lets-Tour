@@ -222,8 +222,8 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
                       {/* Image */}
                       <div className="relative" style={{ height: `${height}px` }}>
                         <img
-                          src={destination.heroImage.url}
-                          alt={destination.heroImage.alt || destination.name}
+                          src={destination.heroImage?.url}
+                          alt={destination.heroImage?.alt || destination.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           loading="lazy"
                         />

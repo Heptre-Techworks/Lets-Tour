@@ -8,6 +8,7 @@ import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { FeaturedDestinationsBlock } from '../../blocks/FeaturedDestinationsBlock/config'
+import { UpDownCardCarousel } from '../../blocks/UpDownCardCarousel/config'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -27,6 +28,8 @@ import { StaticImageBlock } from '../../blocks/StaticImageBlock/config'
 import { NonUniformCardCarousel } from '../../blocks/NonUniformCardCarousel/config'
 
 import { HeroMainBlock } from '../../blocks/HeroMainBlock/config'
+import {EnlargingCardCarousel} from '@/blocks/EnlargingCardCarousel/config'
+import {DestinationHeroCarousel} from '@/blocks/DestinationHeroCarousel/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -82,7 +85,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, FeaturedDestinationsBlock, PopularNowBlock,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel,HeroMainBlock],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, FeaturedDestinationsBlock, PopularNowBlock,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel,HeroMainBlock, UpDownCardCarousel,EnlargingCardCarousel,DestinationHeroCarousel],
               required: true,
               admin: {
                 initCollapsed: true,
