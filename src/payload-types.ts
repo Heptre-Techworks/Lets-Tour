@@ -75,7 +75,22 @@ export interface Config {
     'package-categories': PackageCategory;
     destinations: Destination;
     packages: Package;
-    testimonials: Testimonial;
+    'accommodation-types': AccommodationType;
+    activities: Activity;
+    amenities: Amenity;
+    bookings: Booking;
+    'bulk-booking-requests': BulkBookingRequest;
+    cities: City;
+    'custom-trip-requests': CustomTripRequest;
+    exclusions: Exclusion;
+    favorites: Favorite;
+    inclusions: Inclusion;
+    'marketing-banners': MarketingBanner;
+    places: Place;
+    promotions: Promotion;
+    regions: Region;
+    reviews: Review;
+    'social-posts': SocialPost;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -95,7 +110,22 @@ export interface Config {
     'package-categories': PackageCategoriesSelect<false> | PackageCategoriesSelect<true>;
     destinations: DestinationsSelect<false> | DestinationsSelect<true>;
     packages: PackagesSelect<false> | PackagesSelect<true>;
-    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    'accommodation-types': AccommodationTypesSelect<false> | AccommodationTypesSelect<true>;
+    activities: ActivitiesSelect<false> | ActivitiesSelect<true>;
+    amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
+    bookings: BookingsSelect<false> | BookingsSelect<true>;
+    'bulk-booking-requests': BulkBookingRequestsSelect<false> | BulkBookingRequestsSelect<true>;
+    cities: CitiesSelect<false> | CitiesSelect<true>;
+    'custom-trip-requests': CustomTripRequestsSelect<false> | CustomTripRequestsSelect<true>;
+    exclusions: ExclusionsSelect<false> | ExclusionsSelect<true>;
+    favorites: FavoritesSelect<false> | FavoritesSelect<true>;
+    inclusions: InclusionsSelect<false> | InclusionsSelect<true>;
+    'marketing-banners': MarketingBannersSelect<false> | MarketingBannersSelect<true>;
+    places: PlacesSelect<false> | PlacesSelect<true>;
+    promotions: PromotionsSelect<false> | PromotionsSelect<true>;
+    regions: RegionsSelect<false> | RegionsSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    'social-posts': SocialPostsSelect<false> | SocialPostsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -113,12 +143,14 @@ export interface Config {
     footer: Footer;
     'search-filters': SearchFilter;
     packageLayout: PackageLayout;
+    destinationLayout: DestinationLayout;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'search-filters': SearchFiltersSelect<false> | SearchFiltersSelect<true>;
     packageLayout: PackageLayoutSelect<false> | PackageLayoutSelect<true>;
+    destinationLayout: DestinationLayoutSelect<false> | DestinationLayoutSelect<true>;
   };
   locale: null;
   user: User & {
@@ -161,47 +193,69 @@ export interface Page {
   id: string;
   title: string;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: string;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    links?:
-      | {
-          link: {
-            type?: ('reference' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?:
-              | ({
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null)
-              | ({
-                  relationTo: 'posts';
-                  value: string | Post;
-                } | null);
-            url?: string | null;
+    type: 'mainHero' | 'destinationHero' | 'packageHero';
+    mainHeroFields?: {
+      slides: {
+        /**
+         * The main background image for the slide.
+         */
+        backgroundImage: string | Media;
+        headline: string;
+        subtitle?: string | null;
+        location?: string | null;
+        id?: string | null;
+      }[];
+      /**
+       * Upload a PNG image of clouds with a transparent background. This will be layered at the bottom.
+       */
+      cloudImage: string | Media;
+      enableAirplaneAnimation?: boolean | null;
+      /**
+       * Autoplay interval in milliseconds (e.g., 8000 = 8 seconds).
+       */
+      autoplayDuration?: number | null;
+      /**
+       * Slide transition duration in milliseconds.
+       */
+      transitionDuration?: number | null;
+      destinationOptions?:
+        | {
             label: string;
-            /**
-             * Choose how the link should be rendered.
-             */
-            appearance?: ('default' | 'outline') | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    media?: (string | null) | Media;
+            value: string;
+            id?: string | null;
+          }[]
+        | null;
+      categoryOptions?:
+        | {
+            label: string;
+            value: string;
+            id?: string | null;
+          }[]
+        | null;
+      buttonLabel?: string | null;
+      placeholders?: {
+        destination?: string | null;
+        date?: string | null;
+        people?: string | null;
+        category?: string | null;
+      };
+    };
+    destinationHeroFields?: {
+      destination: string | Destination;
+      presentation?: {
+        overlay?: number | null;
+        showArrows?: boolean | null;
+        /**
+         * Defaults to destination.name if left empty
+         */
+        titleOverride?: string | null;
+      };
+    };
+    packageHeroFields?: {
+      packageName: string;
+      packageImage: string | Media;
+      description?: string | null;
+    };
   };
   layout: (
     | CallToActionBlock
@@ -221,24 +275,13 @@ export interface Page {
         title?: string | null;
         subtitle?: string | null;
         /**
-         * Add destination cards and choose their visual size to match the collage layout.
+         * Select destinations; the order chosen here is preserved on the page.
          */
-        cards?:
-          | {
-              title: string;
-              /**
-               * Starting price in INR
-               */
-              price?: number | null;
-              image: string | Media;
-              /**
-               * Optional link to destination page (e.g., /destinations/spain)
-               */
-              link?: string | null;
-              size?: ('large' | 'medium' | 'small') | null;
-              id?: string | null;
-            }[]
-          | null;
+        destinations: (string | Destination)[];
+        /**
+         * Maximum number of destinations to render.
+         */
+        limit?: number | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'popularNowBlock';
@@ -426,6 +469,7 @@ export interface Page {
         blockName?: string | null;
         blockType: 'destinationHeroCarousel';
       }
+    | InstagramCarouselBlock
   )[];
   meta?: {
     title?: string | null;
@@ -436,53 +480,6 @@ export interface Page {
     description?: string | null;
   };
   publishedAt?: string | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  title: string;
-  heroImage?: (string | null) | Media;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  relatedPosts?: (string | Post)[] | null;
-  categories?: (string | Category)[] | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-    description?: string | null;
-  };
-  publishedAt?: string | null;
-  authors?: (string | User)[] | null;
-  populatedAuthors?:
-    | {
-        id?: string | null;
-        name?: string | null;
-      }[]
-    | null;
   slug?: string | null;
   slugLock?: boolean | null;
   updatedAt: string;
@@ -583,49 +580,38 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
+ * via the `definition` "destinations".
  */
-export interface Category {
+export interface Destination {
   id: string;
-  title: string;
+  name: string;
+  summary?: string | null;
+  heroImage?: (string | null) | Media;
+  startingFromPricePerPerson?: number | null;
+  /**
+   * Destination label chips like Popular/In Season
+   */
+  labels?: (string | PackageCategory)[] | null;
   slug?: string | null;
   slugLock?: boolean | null;
-  parent?: (string | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (string | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "package-categories".
  */
-export interface User {
+export interface PackageCategory {
   id: string;
-  name?: string | null;
+  name: string;
+  type: 'experience' | 'trip_type' | 'vibe' | 'destination_label';
+  /**
+   * Optional parent category
+   */
+  parent?: (string | null) | PackageCategory;
+  description?: string | null;
   updatedAt: string;
   createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -674,6 +660,105 @@ export interface CallToActionBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  heroImage?: (string | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  relatedPosts?: (string | Post)[] | null;
+  categories?: (string | Category)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+    description?: string | null;
+  };
+  publishedAt?: string | null;
+  authors?: (string | User)[] | null;
+  populatedAuthors?:
+    | {
+        id?: string | null;
+        name?: string | null;
+      }[]
+    | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  name: string;
+  type: 'experience' | 'trip_type' | 'vibe' | 'destination_label';
+  description?: string | null;
+  /**
+   * Optional parent category for hierarchy
+   */
+  parent?: (string | null) | Category;
+  breadcrumbs?:
+    | {
+        doc?: (string | null) | Category;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  name: string;
+  role: 'customer' | 'agent' | 'admin';
+  phone?: string | null;
+  marketingOptIn?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -971,15 +1056,37 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "destinations".
+ * via the `definition` "InstagramCarouselBlock".
  */
-export interface Destination {
-  id: string;
-  name: string;
-  slug?: string | null;
-  country: string;
-  continent?: ('asia' | 'europe' | 'north-america' | 'south-america' | 'africa' | 'oceania') | null;
-  description: {
+export interface InstagramCarouselBlock {
+  /**
+   * E.g., "Latest on Instagram"
+   */
+  heading?: string | null;
+  /**
+   * Optional header with a follow button
+   */
+  profile?: {
+    handle?: string | null;
+    profileUrl?: string | null;
+    followLabel?: string | null;
+  };
+  layout?: {
+    columnsDesktop?: number | null;
+    columnsTablet?: number | null;
+    columnsMobile?: number | null;
+    gutter?: string | null;
+    showCaptions?: boolean | null;
+  };
+  posts: {
+    url: string;
+    /**
+     * Force captions for this post only
+     */
+    captioned?: boolean | null;
+    id?: string | null;
+  }[];
+  caption?: {
     root: {
       type: string;
       children: {
@@ -993,44 +1100,10 @@ export interface Destination {
       version: number;
     };
     [k: string]: unknown;
-  };
-  shortDescription?: string | null;
-  featured?: boolean | null;
-  heroImage: string | Media;
-  gallery?:
-    | {
-        image: string | Media;
-        caption?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Starting price for packages to this destination
-   */
-  startingPrice?: number | null;
-  /**
-   * Number of packages available
-   */
-  packageCount?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "package-categories".
- */
-export interface PackageCategory {
-  id: string;
-  name: string;
-  slug?: string | null;
-  description?: string | null;
-  icon?: (string | null) | Media;
-  /**
-   * Hex color code for category styling
-   */
-  color?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'instagramCarousel';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1038,11 +1111,10 @@ export interface PackageCategory {
  */
 export interface Package {
   id: string;
-  title: string;
-  slug?: string | null;
-  destination: string | Destination;
-  description?: string | null;
-  detailedDescription: {
+  name: string;
+  tagline?: string | null;
+  summary?: string | null;
+  description?: {
     root: {
       type: string;
       children: {
@@ -1056,83 +1128,344 @@ export interface Package {
       version: number;
     };
     [k: string]: unknown;
-  };
-  price: number;
-  /**
-   * Original price before discount
-   */
-  originalPrice?: number | null;
-  currency?: string | null;
-  priceUnit?: ('per-person' | 'per-group' | 'per-family') | null;
-  duration: {
-    days: number;
-    nights: number;
-  };
-  /**
-   * e.g., Madrid 2N, Seville 2N, Granada 1N
-   */
-  itinerary?: string | null;
-  category?: (string | PackageCategory)[] | null;
-  tags?:
-    | (
-        | 'popular'
-        | 'in-season'
-        | 'family-friendly'
-        | 'outdoor'
-        | 'relaxing'
-        | 'glamping'
-        | 'girls-day-out'
-        | 'vibe-match'
-      )[]
-    | null;
-  discount?: {
-    hasDiscount?: boolean | null;
-    percentage?: number | null;
-    /**
-     * e.g., "10% Off", "Special Offer"
-     */
-    label?: string | null;
-  };
-  heroImage: string | Media;
-  gallery?:
-    | {
-        image: string | Media;
-        caption?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  } | null;
   rating?: number | null;
-  reviewCount?: number | null;
-  featured?: boolean | null;
-  status?: ('active' | 'inactive' | 'coming-soon') | null;
-  inclusions?:
+  stars?: number | null;
+  isFeatured?: boolean | null;
+  isFamilyFriendly?: boolean | null;
+  bookingsCount30d?: number | null;
+  minPricePerPerson?: number | null;
+  currency?: ('INR' | 'USD' | 'EUR' | 'GBP') | null;
+  durationDays: number;
+  coverImage?: (string | null) | Media;
+  route?:
     | {
-        item: string;
+        city: string | City;
+        notes?: string | null;
         id?: string | null;
       }[]
     | null;
-  exclusions?:
+  itinerary?:
     | {
-        item: string;
+        dayNumber: number;
+        title: string;
+        description?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        mealsIncluded?: {
+          breakfast?: boolean | null;
+          lunch?: boolean | null;
+          dinner?: boolean | null;
+        };
+        image?: (string | null) | Media;
+        places?: (string | Place)[] | null;
+        notes?: string | null;
         id?: string | null;
       }[]
     | null;
+  highlights?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  goodToKnow?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  prices?:
+    | {
+        roomOccupancy: 'single' | 'double' | 'triple';
+        pricePerPerson: number;
+        currency: 'INR' | 'USD' | 'EUR' | 'GBP';
+        validFrom?: string | null;
+        validTo?: string | null;
+        notes?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  categories?: (string | PackageCategory)[] | null;
+  activities?: (string | Activity)[] | null;
+  amenities?: (string | Amenity)[] | null;
+  accommodationTypes?: (string | AccommodationType)[] | null;
+  inclusions?: (string | Inclusion)[] | null;
+  exclusions?: (string | Exclusion)[] | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "testimonials".
+ * via the `definition` "cities".
  */
-export interface Testimonial {
+export interface City {
   id: string;
-  customerName: string;
-  customerLocation?: string | null;
-  customerPhoto?: (string | null) | Media;
-  tour?: (string | null) | Package;
+  name: string;
+  destination: string | Destination;
+  regions?: (string | null) | Region;
+  latitude?: number | null;
+  longitude?: number | null;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions".
+ */
+export interface Region {
+  id: string;
+  name: string;
+  destination: string | Destination;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "places".
+ */
+export interface Place {
+  id: string;
+  name: string;
+  city: string | City;
+  type: 'attraction' | 'museum' | 'monument' | 'park' | 'other';
+  description?: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  image?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activities".
+ */
+export interface Activity {
+  id: string;
+  name: string;
+  type: 'adventure' | 'leisure' | 'cultural' | 'other';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities".
+ */
+export interface Amenity {
+  id: string;
+  name: string;
+  type: 'logistic' | 'accessibility' | 'accommodation' | 'other';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "accommodation-types".
+ */
+export interface AccommodationType {
+  id: string;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inclusions".
+ */
+export interface Inclusion {
+  id: string;
+  code: string;
+  name: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exclusions".
+ */
+export interface Exclusion {
+  id: string;
+  code: string;
+  name: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bookings".
+ */
+export interface Booking {
+  id: string;
+  user: string | User;
+  package: string | Package;
+  startDate?: string | null;
+  endDate?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-booking-requests".
+ */
+export interface BulkBookingRequest {
+  id: string;
+  contactName: string;
+  email: string;
+  phone?: string | null;
+  organization?: string | null;
+  destination?: (string | null) | Destination;
+  desiredStartDate?: string | null;
+  desiredEndDate?: string | null;
+  numPeople: number;
+  message?: string | null;
+  status?: ('new' | 'contacted' | 'closed') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-trip-requests".
+ */
+export interface CustomTripRequest {
+  id: string;
+  user?: (string | null) | User;
+  destination?: (string | null) | Destination;
+  budgetMin?: number | null;
+  budgetMax?: number | null;
+  numPeople: number;
+  startDate?: string | null;
+  endDate?: string | null;
+  preferences?: string | null;
+  source?: ('curate' | 'plan_my_trip') | null;
+  status?: ('new' | 'in_progress' | 'quoted' | 'closed') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "favorites".
+ */
+export interface Favorite {
+  id: string;
+  user: string | User;
+  target:
+    | {
+        relationTo: 'packages';
+        value: string | Package;
+      }
+    | {
+        relationTo: 'destinations';
+        value: string | Destination;
+      }
+    | {
+        relationTo: 'places';
+        value: string | Place;
+      };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "marketing-banners".
+ */
+export interface MarketingBanner {
+  id: string;
+  title: string;
+  subtitle?: string | null;
+  percentageOff?: number | null;
+  image?: (string | null) | Media;
+  ctaText?: string | null;
+  ctaTarget?: ('package' | 'destination' | 'category' | 'url') | null;
+  ctaRef?:
+    | ({
+        relationTo: 'packages';
+        value: string | Package;
+      } | null)
+    | ({
+        relationTo: 'destinations';
+        value: string | Destination;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null);
+  ctaUrl?: string | null;
+  sortOrder?: number | null;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "promotions".
+ */
+export interface Promotion {
+  id: string;
+  name: string;
+  description?: string | null;
+  discountType: 'percent' | 'amount';
+  discountValue: number;
+  maxDiscountAmount?: number | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  isActive?: boolean | null;
+  bannerImage?: (string | null) | Media;
+  packages?: (string | Package)[] | null;
+  categories?: (string | Category)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: string;
+  user: string | User;
+  package?: (string | null) | Package;
+  destination?: (string | null) | Destination;
   rating: number;
-  review: string;
-  featured?: boolean | null;
+  title?: string | null;
+  body?: string | null;
+  photos?:
+    | {
+        image?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  published?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "social-posts".
+ */
+export interface SocialPost {
+  id: string;
+  platform: 'instagram';
+  handle?: string | null;
+  externalId?: string | null;
+  caption?: string | null;
+  image?: (string | null) | Media;
+  postedAt?: string | null;
+  isPinned?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1342,8 +1675,68 @@ export interface PayloadLockedDocument {
         value: string | Package;
       } | null)
     | ({
-        relationTo: 'testimonials';
-        value: string | Testimonial;
+        relationTo: 'accommodation-types';
+        value: string | AccommodationType;
+      } | null)
+    | ({
+        relationTo: 'activities';
+        value: string | Activity;
+      } | null)
+    | ({
+        relationTo: 'amenities';
+        value: string | Amenity;
+      } | null)
+    | ({
+        relationTo: 'bookings';
+        value: string | Booking;
+      } | null)
+    | ({
+        relationTo: 'bulk-booking-requests';
+        value: string | BulkBookingRequest;
+      } | null)
+    | ({
+        relationTo: 'cities';
+        value: string | City;
+      } | null)
+    | ({
+        relationTo: 'custom-trip-requests';
+        value: string | CustomTripRequest;
+      } | null)
+    | ({
+        relationTo: 'exclusions';
+        value: string | Exclusion;
+      } | null)
+    | ({
+        relationTo: 'favorites';
+        value: string | Favorite;
+      } | null)
+    | ({
+        relationTo: 'inclusions';
+        value: string | Inclusion;
+      } | null)
+    | ({
+        relationTo: 'marketing-banners';
+        value: string | MarketingBanner;
+      } | null)
+    | ({
+        relationTo: 'places';
+        value: string | Place;
+      } | null)
+    | ({
+        relationTo: 'promotions';
+        value: string | Promotion;
+      } | null)
+    | ({
+        relationTo: 'regions';
+        value: string | Region;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: string | Review;
+      } | null)
+    | ({
+        relationTo: 'social-posts';
+        value: string | SocialPost;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1417,23 +1810,65 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
-        richText?: T;
-        links?:
+        mainHeroFields?:
           | T
           | {
-              link?:
+              slides?:
                 | T
                 | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    url?: T;
-                    label?: T;
-                    appearance?: T;
+                    backgroundImage?: T;
+                    headline?: T;
+                    subtitle?: T;
+                    location?: T;
+                    id?: T;
                   };
-              id?: T;
+              cloudImage?: T;
+              enableAirplaneAnimation?: T;
+              autoplayDuration?: T;
+              transitionDuration?: T;
+              destinationOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              categoryOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              buttonLabel?: T;
+              placeholders?:
+                | T
+                | {
+                    destination?: T;
+                    date?: T;
+                    people?: T;
+                    category?: T;
+                  };
             };
-        media?: T;
+        destinationHeroFields?:
+          | T
+          | {
+              destination?: T;
+              presentation?:
+                | T
+                | {
+                    overlay?: T;
+                    showArrows?: T;
+                    titleOverride?: T;
+                  };
+            };
+        packageHeroFields?:
+          | T
+          | {
+              packageName?: T;
+              packageImage?: T;
+              description?: T;
+            };
       };
   layout?:
     | T
@@ -1457,16 +1892,8 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               title?: T;
               subtitle?: T;
-              cards?:
-                | T
-                | {
-                    title?: T;
-                    price?: T;
-                    image?: T;
-                    link?: T;
-                    size?: T;
-                    id?: T;
-                  };
+              destinations?: T;
+              limit?: T;
               id?: T;
               blockName?: T;
             };
@@ -1589,6 +2016,7 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        instagramCarousel?: T | InstagramCarouselBlockSelect<T>;
       };
   meta?:
     | T
@@ -1685,6 +2113,39 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InstagramCarouselBlock_select".
+ */
+export interface InstagramCarouselBlockSelect<T extends boolean = true> {
+  heading?: T;
+  profile?:
+    | T
+    | {
+        handle?: T;
+        profileUrl?: T;
+        followLabel?: T;
+      };
+  layout?:
+    | T
+    | {
+        columnsDesktop?: T;
+        columnsTablet?: T;
+        columnsMobile?: T;
+        gutter?: T;
+        showCaptions?: T;
+      };
+  posts?:
+    | T
+    | {
+        url?: T;
+        captioned?: T;
+        id?: T;
+      };
+  caption?: T;
   id?: T;
   blockName?: T;
 }
@@ -1817,9 +2278,9 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  slugLock?: T;
+  name?: T;
+  type?: T;
+  description?: T;
   parent?: T;
   breadcrumbs?:
     | T
@@ -1838,6 +2299,9 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  role?: T;
+  phone?: T;
+  marketingOptIn?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1861,10 +2325,9 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface PackageCategoriesSelect<T extends boolean = true> {
   name?: T;
-  slug?: T;
+  type?: T;
+  parent?: T;
   description?: T;
-  icon?: T;
-  color?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1874,22 +2337,12 @@ export interface PackageCategoriesSelect<T extends boolean = true> {
  */
 export interface DestinationsSelect<T extends boolean = true> {
   name?: T;
-  slug?: T;
-  country?: T;
-  continent?: T;
-  description?: T;
-  shortDescription?: T;
-  featured?: T;
+  summary?: T;
   heroImage?: T;
-  gallery?:
-    | T
-    | {
-        image?: T;
-        caption?: T;
-        id?: T;
-      };
-  startingPrice?: T;
-  packageCount?: T;
+  startingFromPricePerPerson?: T;
+  labels?: T;
+  slug?: T;
+  slugLock?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1898,70 +2351,295 @@ export interface DestinationsSelect<T extends boolean = true> {
  * via the `definition` "packages_select".
  */
 export interface PackagesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  destination?: T;
+  name?: T;
+  tagline?: T;
+  summary?: T;
   description?: T;
-  detailedDescription?: T;
-  price?: T;
-  originalPrice?: T;
-  currency?: T;
-  priceUnit?: T;
-  duration?:
-    | T
-    | {
-        days?: T;
-        nights?: T;
-      };
-  itinerary?: T;
-  category?: T;
-  tags?: T;
-  discount?:
-    | T
-    | {
-        hasDiscount?: T;
-        percentage?: T;
-        label?: T;
-      };
-  heroImage?: T;
-  gallery?:
-    | T
-    | {
-        image?: T;
-        caption?: T;
-        id?: T;
-      };
   rating?: T;
-  reviewCount?: T;
-  featured?: T;
-  status?: T;
-  inclusions?:
+  stars?: T;
+  isFeatured?: T;
+  isFamilyFriendly?: T;
+  bookingsCount30d?: T;
+  minPricePerPerson?: T;
+  currency?: T;
+  durationDays?: T;
+  coverImage?: T;
+  route?:
     | T
     | {
-        item?: T;
+        city?: T;
+        notes?: T;
         id?: T;
       };
-  exclusions?:
+  itinerary?:
     | T
     | {
-        item?: T;
+        dayNumber?: T;
+        title?: T;
+        description?: T;
+        mealsIncluded?:
+          | T
+          | {
+              breakfast?: T;
+              lunch?: T;
+              dinner?: T;
+            };
+        image?: T;
+        places?: T;
+        notes?: T;
         id?: T;
       };
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  goodToKnow?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  prices?:
+    | T
+    | {
+        roomOccupancy?: T;
+        pricePerPerson?: T;
+        currency?: T;
+        validFrom?: T;
+        validTo?: T;
+        notes?: T;
+        id?: T;
+      };
+  categories?: T;
+  activities?: T;
+  amenities?: T;
+  accommodationTypes?: T;
+  inclusions?: T;
+  exclusions?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "testimonials_select".
+ * via the `definition` "accommodation-types_select".
  */
-export interface TestimonialsSelect<T extends boolean = true> {
-  customerName?: T;
-  customerLocation?: T;
-  customerPhoto?: T;
-  tour?: T;
+export interface AccommodationTypesSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activities_select".
+ */
+export interface ActivitiesSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities_select".
+ */
+export interface AmenitiesSelect<T extends boolean = true> {
+  name?: T;
+  type?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bookings_select".
+ */
+export interface BookingsSelect<T extends boolean = true> {
+  user?: T;
+  package?: T;
+  startDate?: T;
+  endDate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-booking-requests_select".
+ */
+export interface BulkBookingRequestsSelect<T extends boolean = true> {
+  contactName?: T;
+  email?: T;
+  phone?: T;
+  organization?: T;
+  destination?: T;
+  desiredStartDate?: T;
+  desiredEndDate?: T;
+  numPeople?: T;
+  message?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cities_select".
+ */
+export interface CitiesSelect<T extends boolean = true> {
+  name?: T;
+  destination?: T;
+  regions?: T;
+  latitude?: T;
+  longitude?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-trip-requests_select".
+ */
+export interface CustomTripRequestsSelect<T extends boolean = true> {
+  user?: T;
+  destination?: T;
+  budgetMin?: T;
+  budgetMax?: T;
+  numPeople?: T;
+  startDate?: T;
+  endDate?: T;
+  preferences?: T;
+  source?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exclusions_select".
+ */
+export interface ExclusionsSelect<T extends boolean = true> {
+  code?: T;
+  name?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "favorites_select".
+ */
+export interface FavoritesSelect<T extends boolean = true> {
+  user?: T;
+  target?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inclusions_select".
+ */
+export interface InclusionsSelect<T extends boolean = true> {
+  code?: T;
+  name?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "marketing-banners_select".
+ */
+export interface MarketingBannersSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  percentageOff?: T;
+  image?: T;
+  ctaText?: T;
+  ctaTarget?: T;
+  ctaRef?: T;
+  ctaUrl?: T;
+  sortOrder?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "places_select".
+ */
+export interface PlacesSelect<T extends boolean = true> {
+  name?: T;
+  city?: T;
+  type?: T;
+  description?: T;
+  address?: T;
+  latitude?: T;
+  longitude?: T;
+  image?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "promotions_select".
+ */
+export interface PromotionsSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  discountType?: T;
+  discountValue?: T;
+  maxDiscountAmount?: T;
+  startsAt?: T;
+  endsAt?: T;
+  isActive?: T;
+  bannerImage?: T;
+  packages?: T;
+  categories?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions_select".
+ */
+export interface RegionsSelect<T extends boolean = true> {
+  name?: T;
+  destination?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  user?: T;
+  package?: T;
+  destination?: T;
   rating?: T;
-  review?: T;
-  featured?: T;
+  title?: T;
+  body?: T;
+  photos?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  published?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "social-posts_select".
+ */
+export interface SocialPostsSelect<T extends boolean = true> {
+  platform?: T;
+  handle?: T;
+  externalId?: T;
+  caption?: T;
+  image?: T;
+  postedAt?: T;
+  isPinned?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2226,26 +2904,19 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Header {
   id: string;
+  logo: string | Media;
   navItems?:
     | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: string | Post;
-              } | null);
-          url?: string | null;
-          label: string;
-        };
+        label: string;
+        href: string;
         id?: string | null;
       }[]
     | null;
+  curateButton?: {
+    show?: boolean | null;
+    text?: string | null;
+    href?: string | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2255,6 +2926,7 @@ export interface Header {
  */
 export interface Footer {
   id: string;
+  logo?: (string | null) | Media;
   navItems?:
     | {
         link: {
@@ -2275,6 +2947,7 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  showThemeSelector?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2309,18 +2982,509 @@ export interface SearchFilter {
  */
 export interface PackageLayout {
   id: string;
-  heroHeight?: ('h-80' | 'h-96' | 'h-[500px]') | null;
-  showDestination?: boolean | null;
-  showDuration?: boolean | null;
-  packageDetailsTitle?: string | null;
-  showItinerary?: boolean | null;
-  inclusionsTitle?: string | null;
-  exclusionsTitle?: string | null;
-  galleryTitle?: string | null;
-  galleryColumns?: ('2' | '3' | '4') | null;
-  relatedPackagesTitle?: string | null;
-  bookButtonText?: string | null;
-  wishlistButtonText?: string | null;
+  layout: (
+    | ArchiveBlock
+    | ContentBlock
+    | CallToActionBlock
+    | FormBlock
+    | MediaBlock
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        destinations?: (string | Destination)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featuredDestinationsBlock';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        /**
+         * Select destinations; the order chosen here is preserved on the page.
+         */
+        destinations: (string | Destination)[];
+        /**
+         * Maximum number of destinations to render.
+         */
+        limit?: number | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'popularNowBlock';
+      }
+    | {
+        /**
+         * Main title for the carousel section
+         */
+        title?: string | null;
+        /**
+         * Subtitle text below the main title
+         */
+        subtitle?: string | null;
+        /**
+         * Select destinations to display in the carousel
+         */
+        destinations?: (string | Destination)[] | null;
+        showNavigation?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'uniformCardCarousel';
+      }
+    | {
+        /**
+         * Background image for the block
+         */
+        image: string | Media;
+        overlay?: boolean | null;
+        /**
+         * Height of the image block
+         */
+        height?: ('small' | 'medium' | 'large' | 'xl') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'staticImageBlock';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        /**
+         * Select destinations - they will automatically get varied card sizes
+         */
+        destinations?: (string | Destination)[] | null;
+        showDiscountBadge?: boolean | null;
+        showLocationDetails?: boolean | null;
+        /**
+         * How to distribute different card sizes
+         */
+        cardSizePattern?: ('varied' | 'pattern' | 'random') | null;
+        backgroundColor?: ('gray' | 'white' | 'cream') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'nonUniformCardCarousel';
+      }
+    | {
+        /**
+         * Main heading for the carousel section
+         */
+        title: string;
+        /**
+         * Subtitle text below the main title
+         */
+        subtitle?: string | null;
+        /**
+         * Select destinations to display in the masonry layout
+         */
+        destinations?: (string | Destination)[] | null;
+        /**
+         * Choose the layout style for the cards
+         */
+        layout?: ('masonry' | 'grid') | null;
+        showStartingPrice?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'upDownCardCarousel';
+      }
+    | {
+        slides?:
+          | {
+              /**
+               * The main background image for the slide.
+               */
+              image: string | Media;
+              title?: string | null;
+              subtitle?: string | null;
+              location?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Upload a PNG image of clouds with a transparent background. This will be layered at the bottom.
+         */
+        cloudImage: string | Media;
+        enableAirplaneAnimation?: boolean | null;
+        /**
+         * Autoplay interval in milliseconds (e.g., 8000 = 8 seconds).
+         */
+        autoplayDuration?: number | null;
+        destinationOptions?:
+          | {
+              label: string;
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        categoryOptions?:
+          | {
+              label: string;
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        buttonLabel?: string | null;
+        placeholders?: {
+          destination?: string | null;
+          date?: string | null;
+          people?: string | null;
+          category?: string | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'heroMainBlock';
+      }
+    | {
+        /**
+         * Main heading for the carousel section
+         */
+        title: string;
+        /**
+         * Subtitle text below the main title
+         */
+        subtitle?: string | null;
+        /**
+         * Select destinations to display in the enlarging carousel
+         */
+        destinations?: (string | Destination)[] | null;
+        showNavigation?: boolean | null;
+        autoPlay?: boolean | null;
+        enlargeOnHover?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'enlargingCardCarousel';
+      }
+    | {
+        /**
+         * Main title for the hero section
+         */
+        title: string;
+        stops?:
+          | {
+              /**
+               * Name of the attraction (e.g., Park Güell)
+               */
+              name: string;
+              /**
+               * City where the attraction is located
+               */
+              city: string;
+              /**
+               * Hero image for the attraction
+               */
+              image: string | Media;
+              /**
+               * Short description of the attraction
+               */
+              excerpt: string;
+              /**
+               * URL slug for the attraction page (optional)
+               */
+              slug?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        displaySettings?: {
+          /**
+           * Scale up the centered card
+           */
+          showActiveScale?: boolean | null;
+          /**
+           * Number of cards visible at once
+           */
+          visibleWindow?: number | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'destinationHeroCarousel';
+      }
+  )[];
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinationLayout".
+ */
+export interface DestinationLayout {
+  id: string;
+  hero: {
+    type: 'mainHero' | 'destinationHero' | 'packageHero';
+    mainHeroFields?: {
+      slides: {
+        /**
+         * The main background image for the slide.
+         */
+        backgroundImage: string | Media;
+        headline: string;
+        subtitle?: string | null;
+        location?: string | null;
+        id?: string | null;
+      }[];
+      /**
+       * Upload a PNG image of clouds with a transparent background. This will be layered at the bottom.
+       */
+      cloudImage: string | Media;
+      enableAirplaneAnimation?: boolean | null;
+      /**
+       * Autoplay interval in milliseconds (e.g., 8000 = 8 seconds).
+       */
+      autoplayDuration?: number | null;
+      /**
+       * Slide transition duration in milliseconds.
+       */
+      transitionDuration?: number | null;
+      destinationOptions?:
+        | {
+            label: string;
+            value: string;
+            id?: string | null;
+          }[]
+        | null;
+      categoryOptions?:
+        | {
+            label: string;
+            value: string;
+            id?: string | null;
+          }[]
+        | null;
+      buttonLabel?: string | null;
+      placeholders?: {
+        destination?: string | null;
+        date?: string | null;
+        people?: string | null;
+        category?: string | null;
+      };
+    };
+    destinationHeroFields?: {
+      destination: string | Destination;
+      presentation?: {
+        overlay?: number | null;
+        showArrows?: boolean | null;
+        /**
+         * Defaults to destination.name if left empty
+         */
+        titleOverride?: string | null;
+      };
+    };
+    packageHeroFields?: {
+      packageName: string;
+      packageImage: string | Media;
+      description?: string | null;
+    };
+  };
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | ArchiveBlock
+    | FormBlock
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        destinations?: (string | Destination)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'featuredDestinationsBlock';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        /**
+         * Select destinations; the order chosen here is preserved on the page.
+         */
+        destinations: (string | Destination)[];
+        /**
+         * Maximum number of destinations to render.
+         */
+        limit?: number | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'popularNowBlock';
+      }
+    | {
+        /**
+         * Main title for the carousel section
+         */
+        title?: string | null;
+        /**
+         * Subtitle text below the main title
+         */
+        subtitle?: string | null;
+        /**
+         * Select destinations to display in the carousel
+         */
+        destinations?: (string | Destination)[] | null;
+        showNavigation?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'uniformCardCarousel';
+      }
+    | {
+        /**
+         * Background image for the block
+         */
+        image: string | Media;
+        overlay?: boolean | null;
+        /**
+         * Height of the image block
+         */
+        height?: ('small' | 'medium' | 'large' | 'xl') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'staticImageBlock';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        /**
+         * Select destinations - they will automatically get varied card sizes
+         */
+        destinations?: (string | Destination)[] | null;
+        showDiscountBadge?: boolean | null;
+        showLocationDetails?: boolean | null;
+        /**
+         * How to distribute different card sizes
+         */
+        cardSizePattern?: ('varied' | 'pattern' | 'random') | null;
+        backgroundColor?: ('gray' | 'white' | 'cream') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'nonUniformCardCarousel';
+      }
+    | {
+        slides?:
+          | {
+              /**
+               * The main background image for the slide.
+               */
+              image: string | Media;
+              title?: string | null;
+              subtitle?: string | null;
+              location?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Upload a PNG image of clouds with a transparent background. This will be layered at the bottom.
+         */
+        cloudImage: string | Media;
+        enableAirplaneAnimation?: boolean | null;
+        /**
+         * Autoplay interval in milliseconds (e.g., 8000 = 8 seconds).
+         */
+        autoplayDuration?: number | null;
+        destinationOptions?:
+          | {
+              label: string;
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        categoryOptions?:
+          | {
+              label: string;
+              value: string;
+              id?: string | null;
+            }[]
+          | null;
+        buttonLabel?: string | null;
+        placeholders?: {
+          destination?: string | null;
+          date?: string | null;
+          people?: string | null;
+          category?: string | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'heroMainBlock';
+      }
+    | {
+        /**
+         * Main heading for the carousel section
+         */
+        title: string;
+        /**
+         * Subtitle text below the main title
+         */
+        subtitle?: string | null;
+        /**
+         * Select destinations to display in the masonry layout
+         */
+        destinations?: (string | Destination)[] | null;
+        /**
+         * Choose the layout style for the cards
+         */
+        layout?: ('masonry' | 'grid') | null;
+        showStartingPrice?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'upDownCardCarousel';
+      }
+    | {
+        /**
+         * Main heading for the carousel section
+         */
+        title: string;
+        /**
+         * Subtitle text below the main title
+         */
+        subtitle?: string | null;
+        /**
+         * Select destinations to display in the enlarging carousel
+         */
+        destinations?: (string | Destination)[] | null;
+        showNavigation?: boolean | null;
+        autoPlay?: boolean | null;
+        enlargeOnHover?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'enlargingCardCarousel';
+      }
+    | {
+        /**
+         * Main title for the hero section
+         */
+        title: string;
+        stops?:
+          | {
+              /**
+               * Name of the attraction (e.g., Park Güell)
+               */
+              name: string;
+              /**
+               * City where the attraction is located
+               */
+              city: string;
+              /**
+               * Hero image for the attraction
+               */
+              image: string | Media;
+              /**
+               * Short description of the attraction
+               */
+              excerpt: string;
+              /**
+               * URL slug for the attraction page (optional)
+               */
+              slug?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        displaySettings?: {
+          /**
+           * Scale up the centered card
+           */
+          showActiveScale?: boolean | null;
+          /**
+           * Number of cards visible at once
+           */
+          visibleWindow?: number | null;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'destinationHeroCarousel';
+      }
+    | InstagramCarouselBlock
+  )[];
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2329,19 +3493,20 @@ export interface PackageLayout {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
+  logo?: T;
   navItems?:
     | T
     | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
+        label?: T;
+        href?: T;
         id?: T;
+      };
+  curateButton?:
+    | T
+    | {
+        show?: T;
+        text?: T;
+        href?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -2352,6 +3517,7 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
+  logo?: T;
   navItems?:
     | T
     | {
@@ -2366,6 +3532,7 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  showThemeSelector?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -2394,18 +3561,376 @@ export interface SearchFiltersSelect<T extends boolean = true> {
  * via the `definition` "packageLayout_select".
  */
 export interface PackageLayoutSelect<T extends boolean = true> {
-  heroHeight?: T;
-  showDestination?: T;
-  showDuration?: T;
-  packageDetailsTitle?: T;
-  showItinerary?: T;
-  inclusionsTitle?: T;
-  exclusionsTitle?: T;
-  galleryTitle?: T;
-  galleryColumns?: T;
-  relatedPackagesTitle?: T;
-  bookButtonText?: T;
-  wishlistButtonText?: T;
+  layout?:
+    | T
+    | {
+        archive?: T | ArchiveBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        cta?: T | CallToActionBlockSelect<T>;
+        formBlock?: T | FormBlockSelect<T>;
+        mediaBlock?: T | MediaBlockSelect<T>;
+        featuredDestinationsBlock?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              id?: T;
+              blockName?: T;
+            };
+        popularNowBlock?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        uniformCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              showNavigation?: T;
+              id?: T;
+              blockName?: T;
+            };
+        staticImageBlock?:
+          | T
+          | {
+              image?: T;
+              overlay?: T;
+              height?: T;
+              id?: T;
+              blockName?: T;
+            };
+        nonUniformCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              showDiscountBadge?: T;
+              showLocationDetails?: T;
+              cardSizePattern?: T;
+              backgroundColor?: T;
+              id?: T;
+              blockName?: T;
+            };
+        upDownCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              layout?: T;
+              showStartingPrice?: T;
+              id?: T;
+              blockName?: T;
+            };
+        heroMainBlock?:
+          | T
+          | {
+              slides?:
+                | T
+                | {
+                    image?: T;
+                    title?: T;
+                    subtitle?: T;
+                    location?: T;
+                    id?: T;
+                  };
+              cloudImage?: T;
+              enableAirplaneAnimation?: T;
+              autoplayDuration?: T;
+              destinationOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              categoryOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              buttonLabel?: T;
+              placeholders?:
+                | T
+                | {
+                    destination?: T;
+                    date?: T;
+                    people?: T;
+                    category?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        enlargingCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              showNavigation?: T;
+              autoPlay?: T;
+              enlargeOnHover?: T;
+              id?: T;
+              blockName?: T;
+            };
+        destinationHeroCarousel?:
+          | T
+          | {
+              title?: T;
+              stops?:
+                | T
+                | {
+                    name?: T;
+                    city?: T;
+                    image?: T;
+                    excerpt?: T;
+                    slug?: T;
+                    id?: T;
+                  };
+              displaySettings?:
+                | T
+                | {
+                    showActiveScale?: T;
+                    visibleWindow?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinationLayout_select".
+ */
+export interface DestinationLayoutSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        type?: T;
+        mainHeroFields?:
+          | T
+          | {
+              slides?:
+                | T
+                | {
+                    backgroundImage?: T;
+                    headline?: T;
+                    subtitle?: T;
+                    location?: T;
+                    id?: T;
+                  };
+              cloudImage?: T;
+              enableAirplaneAnimation?: T;
+              autoplayDuration?: T;
+              transitionDuration?: T;
+              destinationOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              categoryOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              buttonLabel?: T;
+              placeholders?:
+                | T
+                | {
+                    destination?: T;
+                    date?: T;
+                    people?: T;
+                    category?: T;
+                  };
+            };
+        destinationHeroFields?:
+          | T
+          | {
+              destination?: T;
+              presentation?:
+                | T
+                | {
+                    overlay?: T;
+                    showArrows?: T;
+                    titleOverride?: T;
+                  };
+            };
+        packageHeroFields?:
+          | T
+          | {
+              packageName?: T;
+              packageImage?: T;
+              description?: T;
+            };
+      };
+  layout?:
+    | T
+    | {
+        cta?: T | CallToActionBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        mediaBlock?: T | MediaBlockSelect<T>;
+        archive?: T | ArchiveBlockSelect<T>;
+        formBlock?: T | FormBlockSelect<T>;
+        featuredDestinationsBlock?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              id?: T;
+              blockName?: T;
+            };
+        popularNowBlock?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              limit?: T;
+              id?: T;
+              blockName?: T;
+            };
+        uniformCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              showNavigation?: T;
+              id?: T;
+              blockName?: T;
+            };
+        staticImageBlock?:
+          | T
+          | {
+              image?: T;
+              overlay?: T;
+              height?: T;
+              id?: T;
+              blockName?: T;
+            };
+        nonUniformCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              showDiscountBadge?: T;
+              showLocationDetails?: T;
+              cardSizePattern?: T;
+              backgroundColor?: T;
+              id?: T;
+              blockName?: T;
+            };
+        heroMainBlock?:
+          | T
+          | {
+              slides?:
+                | T
+                | {
+                    image?: T;
+                    title?: T;
+                    subtitle?: T;
+                    location?: T;
+                    id?: T;
+                  };
+              cloudImage?: T;
+              enableAirplaneAnimation?: T;
+              autoplayDuration?: T;
+              destinationOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              categoryOptions?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              buttonLabel?: T;
+              placeholders?:
+                | T
+                | {
+                    destination?: T;
+                    date?: T;
+                    people?: T;
+                    category?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        upDownCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              layout?: T;
+              showStartingPrice?: T;
+              id?: T;
+              blockName?: T;
+            };
+        enlargingCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              showNavigation?: T;
+              autoPlay?: T;
+              enlargeOnHover?: T;
+              id?: T;
+              blockName?: T;
+            };
+        destinationHeroCarousel?:
+          | T
+          | {
+              title?: T;
+              stops?:
+                | T
+                | {
+                    name?: T;
+                    city?: T;
+                    image?: T;
+                    excerpt?: T;
+                    slug?: T;
+                    id?: T;
+                  };
+              displaySettings?:
+                | T
+                | {
+                    showActiveScale?: T;
+                    visibleWindow?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        instagramCarousel?: T | InstagramCarouselBlockSelect<T>;
+      };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

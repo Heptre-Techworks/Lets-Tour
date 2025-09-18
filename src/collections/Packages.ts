@@ -1,220 +1,122 @@
-import { CollectionConfig } from "payload"
+// src/collections/Packages.ts
+import type { CollectionConfig } from 'payload'
 
 export const Packages: CollectionConfig = {
   slug: 'packages',
-  labels: {
-    singular: 'Package',
-    plural: 'Packages'
-  },
-  admin: {
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'destination', 'price', 'duration', 'featured']
-  },
+  admin: { useAsTitle: 'name' },
   fields: [
-    {
-      name: 'title',
-      type: 'text',
-      required: true
-    },
-    {
-      name: 'slug',
-      type: 'text',
-      admin: { position: 'sidebar' },
-      hooks: {
-        beforeValidate: [
-          ({ value, operation, data }) => {
-            if (operation === 'create' || !value) {
-              return data?.title?.toLowerCase().replace(/ /g, '-')
-            }
-            return value
-          }
-        ]
-      }
-    },
-    {
-      name: 'destination',
-      type: 'relationship',
-      relationTo: 'destinations',
-      required: true
-    },
-    {
-      name: 'description',
-      type: 'textarea',
-      maxLength: 200
-    },
-    {
-      name: 'detailedDescription',
-      type: 'richText',
-      required: true
-    },
-    {
-      name: 'price',
-      type: 'number',
-      required: true,
-      min: 0
-    },
-    {
-      name: 'originalPrice',
-      type: 'number',
-      admin: {
-        description: 'Original price before discount'
-      }
-    },
+    { name: 'name', type: 'text', required: true }, // no slug; use id
+    { name: 'tagline', type: 'text' },
+    { name: 'summary', type: 'textarea' },
+    { name: 'description', type: 'richText' },
+    { name: 'rating', type: 'number', min: 0, max: 5 },
+    { name: 'stars', type: 'number', min: 0, max: 5 },
+    { name: 'isFeatured', type: 'checkbox', defaultValue: false },
+    { name: 'isFamilyFriendly', type: 'checkbox', defaultValue: false },
+    { name: 'bookingsCount30d', type: 'number', min: 0, admin: { position: 'sidebar' } },
+
+    { name: 'minPricePerPerson', type: 'number', min: 0 },
     {
       name: 'currency',
-      type: 'text',
-      defaultValue: 'INR'
-    },
-    {
-      name: 'priceUnit',
       type: 'select',
       options: [
-        { label: 'Per Person', value: 'per-person' },
-        { label: 'Per Group', value: 'per-group' },
-        { label: 'Per Family', value: 'per-family' }
+        { label: 'INR', value: 'INR' },
+        { label: 'USD', value: 'USD' },
+        { label: 'EUR', value: 'EUR' },
+        { label: 'GBP', value: 'GBP' },
       ],
-      defaultValue: 'per-person'
+      defaultValue: 'INR',
     },
+    { name: 'durationDays', type: 'number', min: 1, required: true },
+    { name: 'coverImage', type: 'upload', relationTo: 'media' },
+
     {
-      name: 'duration',
-      type: 'group',
+      name: 'route',
+      type: 'array',
+      labels: { singular: 'Stop', plural: 'Route' },
       fields: [
-        {
-          name: 'days',
-          type: 'number',
-          required: true
-        },
-        {
-          name: 'nights',
-          type: 'number',
-          required: true
-        }
-      ]
+        { name: 'city', type: 'relationship', relationTo: 'cities', required: true },
+        { name: 'notes', type: 'text' },
+      ],
     },
+
     {
       name: 'itinerary',
-      type: 'text',
-      admin: {
-        description: 'e.g., Madrid 2N, Seville 2N, Granada 1N'
-      }
-    },
-    {
-      name: 'category',
-      type: 'relationship',
-      relationTo: 'package-categories',
-      hasMany: true
-    },
-    {
-      name: 'tags',
-      type: 'select',
-      hasMany: true,
-      options: [
-        { label: 'Popular', value: 'popular' },
-        { label: 'In Season', value: 'in-season' },
-        { label: 'Family Friendly', value: 'family-friendly' },
-        { label: 'Outdoor', value: 'outdoor' },
-        { label: 'Relaxing', value: 'relaxing' },
-        { label: 'Glamping', value: 'glamping' },
-        { label: 'Girls Day Out', value: 'girls-day-out' },
-        { label: 'Vibe Match', value: 'vibe-match' }
-      ]
-    },
-    {
-      name: 'discount',
-      type: 'group',
-      fields: [
-        {
-          name: 'hasDiscount',
-          type: 'checkbox',
-          defaultValue: false
-        },
-        {
-          name: 'percentage',
-          type: 'number',
-          min: 0,
-          max: 100
-        },
-        {
-          name: 'label',
-          type: 'text',
-          admin: {
-            description: 'e.g., "10% Off", "Special Offer"'
-          }
-        }
-      ]
-    },
-    {
-      name: 'heroImage',
-      type: 'upload',
-      relationTo: 'media',
-      required: true
-    },
-    {
-      name: 'gallery',
       type: 'array',
+      labels: { singular: 'Day', plural: 'Itinerary' },
       fields: [
+        { name: 'dayNumber', type: 'number', required: true, min: 1 },
+        { name: 'title', type: 'text', required: true },
+        { name: 'description', type: 'richText' },
         {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-          required: true
+          name: 'mealsIncluded',
+          type: 'group',
+          fields: [
+            { name: 'breakfast', type: 'checkbox', defaultValue: false },
+            { name: 'lunch', type: 'checkbox', defaultValue: false },
+            { name: 'dinner', type: 'checkbox', defaultValue: false },
+          ],
         },
-        {
-          name: 'caption',
-          type: 'text'
-        }
-      ]
-    },
-    {
-      name: 'rating',
-      type: 'number',
-      min: 1,
-      max: 5,
-      admin: {
-        step: 0.1
-      }
-    },
-    {
-      name: 'reviewCount',
-      type: 'number',
-      defaultValue: 0
-    },
-    {
-      name: 'featured',
-      type: 'checkbox',
-      defaultValue: false
-    },
-    {
-      name: 'status',
-      type: 'select',
-      options: [
-        { label: 'Active', value: 'active' },
-        { label: 'Inactive', value: 'inactive' },
-        { label: 'Coming Soon', value: 'coming-soon' }
+        { name: 'image', type: 'upload', relationTo: 'media' },
+        { name: 'places', type: 'relationship', relationTo: 'places', hasMany: true },
+        { name: 'notes', type: 'textarea' },
       ],
-      defaultValue: 'active'
     },
+
     {
-      name: 'inclusions',
+      name: 'highlights',
       type: 'array',
+      labels: { singular: 'Highlight', plural: 'Highlights' },
+      fields: [{ name: 'text', type: 'text', required: true }],
+    },
+
+    {
+      name: 'goodToKnow',
+      type: 'array',
+      labels: { singular: 'Note', plural: 'Good To Know' },
+      fields: [{ name: 'text', type: 'text', required: true }],
+    },
+
+    {
+      name: 'prices',
+      type: 'array',
+      labels: { singular: 'Price', plural: 'Prices' },
       fields: [
         {
-          name: 'item',
-          type: 'text',
-          required: true
-        }
-      ]
-    },
-    {
-      name: 'exclusions',
-      type: 'array',
-      fields: [
+          name: 'roomOccupancy',
+          type: 'select',
+          options: [
+            { label: 'Single', value: 'single' },
+            { label: 'Double', value: 'double' },
+            { label: 'Triple', value: 'triple' },
+          ],
+          required: true,
+        },
+        { name: 'pricePerPerson', type: 'number', min: 0, required: true },
         {
-          name: 'item',
-          type: 'text',
-          required: true
-        }
-      ]
-    }
-  ]
+          name: 'currency',
+          type: 'select',
+          options: [
+            { label: 'INR', value: 'INR' },
+            { label: 'USD', value: 'USD' },
+            { label: 'EUR', value: 'EUR' },
+            { label: 'GBP', value: 'GBP' },
+          ],
+          required: true,
+        },
+        { name: 'validFrom', type: 'date' },
+        { name: 'validTo', type: 'date' },
+        { name: 'notes', type: 'text' },
+      ],
+    },
+
+    { name: 'categories', type: 'relationship', relationTo: 'package-categories', hasMany: true },
+    { name: 'activities', type: 'relationship', relationTo: 'activities', hasMany: true },
+    { name: 'amenities', type: 'relationship', relationTo: 'amenities', hasMany: true },
+    { name: 'accommodationTypes', type: 'relationship', relationTo: 'accommodation-types', hasMany: true },
+    { name: 'inclusions', type: 'relationship', relationTo: 'inclusions', hasMany: true },
+    { name: 'exclusions', type: 'relationship', relationTo: 'exclusions', hasMany: true },
+  ],
 }
+
+export default Packages

@@ -30,6 +30,7 @@ import { NonUniformCardCarousel } from '../../blocks/NonUniformCardCarousel/conf
 import { HeroMainBlock } from '../../blocks/HeroMainBlock/config'
 import {EnlargingCardCarousel} from '@/blocks/EnlargingCardCarousel/config'
 import {DestinationHeroCarousel} from '@/blocks/DestinationHeroCarousel/config'
+import InstagramCarouselBlock from '@/blocks/InstagramCarousel/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -85,7 +86,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, FeaturedDestinationsBlock, PopularNowBlock,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel,HeroMainBlock, UpDownCardCarousel,EnlargingCardCarousel,DestinationHeroCarousel],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, FeaturedDestinationsBlock, PopularNowBlock,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel,HeroMainBlock, UpDownCardCarousel,EnlargingCardCarousel,DestinationHeroCarousel,InstagramCarouselBlock],
               required: true,
               admin: {
                 initCollapsed: true,

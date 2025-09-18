@@ -20,8 +20,24 @@ import { PackageCategories } from './collections/PackageCategories'
 import { Destinations } from './collections/Destinations'
 import { Packages } from './collections/Packages'
 import { SearchFilters } from './collections/SearchFilters'
-import { Testimonials } from './collections/Testimonials'
 import { PackageLayout } from './PackageLayout/config'
+import { DestinationLayout } from './DestinationLayout/config'
+import { AccommodationTypes } from './collections/AccomodationTypes'
+import { Activities } from './collections/Activities'
+import { Amenities } from './collections/Amenities'
+import { Bookings } from './collections/Bookings'
+import { BulkBookingRequests } from './collections/BulkBookingRequests'
+import { Cities } from './collections/Cities'
+import { CustomTripRequests } from './collections/CustomTripRequests'
+import { Exclusions } from './collections/Exclusions'
+import { Favorites } from './collections/Favourites'
+import { Inclusions } from './collections/Inclusions'
+import { MarketingBanners } from './collections/MarketingBanners'
+import { Places } from './collections/Places'
+import { Promotions } from './collections/Promotions'
+import Regions from './collections/Regions'
+import { Reviews } from './collections/Reviews'
+import { SocialPosts } from './collections/SocialPosts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -68,9 +84,34 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users,PackageCategories, Destinations, Packages,Testimonials ],
+  collections: [
+    Pages,
+    Posts,
+    Media,
+    Categories,
+    Users,
+    PackageCategories,
+    Destinations,
+    Packages,
+    AccommodationTypes,
+    Activities,
+    Amenities,
+    Bookings,
+    BulkBookingRequests,
+    Cities,
+    CustomTripRequests,
+    Exclusions,
+    Favorites,
+    Inclusions,
+    MarketingBanners,
+    Places,
+    Promotions,
+    Regions,
+    Reviews,
+    SocialPosts,
+  ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, SearchFilters, PackageLayout],
+  globals: [Header, Footer, SearchFilters, PackageLayout, DestinationLayout],
   plugins: [
     ...plugins,
     // storage-adapter-placeholder
@@ -80,6 +121,40 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
+  // Add onInit hook to create admin user if none exist
+  onInit: async (payload) => {
+    try {
+      // Check if any users exist in the Users collection
+      const existingUsers = await payload.find({
+        collection: 'users',
+        limit: 1,
+      })
+
+      // If no users exist, create a default admin user
+      if (existingUsers.docs.length === 0) {
+        console.log('No users found. Creating default admin user...')
+        
+        await payload.create({
+          collection: 'users',
+          data: {
+            name: 'Admin',
+            email: 'admin@letstour.com',
+            password: 'admin123', // Payload automatically hashes this password
+            role: 'admin',
+          },
+        })
+
+        console.log('✅ Default admin user created successfully!')
+        console.log('📧 Email: admin@letstour.com')
+        console.log('🔑 Password: admin123')
+        console.log('⚠️  Please change the password after first login')
+      } else {
+        console.log(`✅ Found ${existingUsers.docs.length} existing user(s)`)
+      }
+    } catch (error) {
+      console.error('❌ Error during user initialization:', error)
+    }
+  }, // onInit hook runs when Payload initializes [web:198][web:3]
   jobs: {
     access: {
       run: ({ req }: { req: PayloadRequest }): boolean => {

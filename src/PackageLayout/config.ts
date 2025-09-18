@@ -1,79 +1,48 @@
-// payload/globals/PackageLayout.ts
+// src/PackageLayout/config.ts
 import type { GlobalConfig } from 'payload'
+
+import { Archive } from '@/blocks/ArchiveBlock/config'
+import { CallToAction } from '@/blocks/CallToAction/config'
+import { Content } from '@/blocks/Content/config'
+import { FormBlock } from '@/blocks/Form/config'           // Or `{ Form }` if that’s the export
+import { MediaBlock } from '@/blocks/MediaBlock/config'
+import { FeaturedDestinationsBlock } from '@/blocks/FeaturedDestinationsBlock/config'
+import { PopularNowBlock } from '@/blocks/PopularNowBlock/config'
+import { EnlargingCardCarousel } from '@/blocks/EnlargingCardCarousel/config'
+import { UniformCardCarousel } from '@/blocks/UniformCardCarousel/config'
+import { StaticImageBlock } from '@/blocks/StaticImageBlock/config'
+import { NonUniformCardCarousel } from '@/blocks/NonUniformCardCarousel/config'
+import { UpDownCardCarousel } from '@/blocks/UpDownCardCarousel/config'
+import { HeroMainBlock } from '@/blocks/HeroMainBlock/config'
+import { DestinationHeroCarousel } from '@/blocks/DestinationHeroCarousel/config'
 
 export const PackageLayout: GlobalConfig = {
   slug: 'packageLayout',
-  label: 'Package Page Settings',
+  label: 'Package Layout',
+  access: { read: () => true },
+  versions: { drafts: true },
   fields: [
     {
-      name: 'heroHeight',
-      type: 'select',
-      defaultValue: 'h-96',
-      options: [
-        { label: 'Small (300px)', value: 'h-80' },
-        { label: 'Medium (384px)', value: 'h-96' },
-        { label: 'Large (500px)', value: 'h-[500px]' },
+      name: 'layout',
+      label: 'Layout',
+      type: 'blocks',
+      blocks: [
+        Archive,
+        Content,
+        CallToAction,
+        FormBlock,                 // Or `Form`
+        MediaBlock,
+        FeaturedDestinationsBlock,
+        PopularNowBlock,
+        UniformCardCarousel,
+        StaticImageBlock,
+        NonUniformCardCarousel,
+        UpDownCardCarousel,
+        HeroMainBlock,
+        EnlargingCardCarousel,
+        DestinationHeroCarousel,
       ],
-    },
-    {
-      name: 'showDestination',
-      type: 'checkbox',
-      defaultValue: true,
-    },
-    {
-      name: 'showDuration',
-      type: 'checkbox',
-      defaultValue: true,
-    },
-    {
-      name: 'packageDetailsTitle',
-      type: 'text',
-      defaultValue: 'Package Details',
-    },
-    {
-      name: 'showItinerary',
-      type: 'checkbox',
-      defaultValue: true,
-    },
-    {
-      name: 'inclusionsTitle',
-      type: 'text',
-      defaultValue: 'Inclusions',
-    },
-    {
-      name: 'exclusionsTitle',
-      type: 'text',
-      defaultValue: 'Exclusions',
-    },
-    {
-      name: 'galleryTitle',
-      type: 'text',
-      defaultValue: 'Gallery',
-    },
-    {
-      name: 'galleryColumns',
-      type: 'select',
-      defaultValue: '3',
-      options: [
-        { label: '2 Columns', value: '2' },
-        { label: '3 Columns', value: '3' },
-        { label: '4 Columns', value: '4' },
-      ],
-    },
-    {
-      name: 'relatedPackagesTitle',
-      type: 'text',
-      defaultValue: 'More Packages',
-    },
-    {
-      name: 'bookButtonText',
-      type: 'text',
-      defaultValue: 'Book Now',
-    },
-    {
-      name: 'wishlistButtonText',
-      type: 'text',
-      defaultValue: 'Add to Wishlist ♡',
+      required: true,
     },
   ],
 }

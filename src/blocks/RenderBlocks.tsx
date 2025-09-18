@@ -16,7 +16,7 @@ import NonUniformCardCarousel from '@/blocks/NonUniformCardCarousel/Component'
 import UpDownCardCarousel from './UpDownCardCarousel/Component'
 import HeroMainBlock from '@/blocks/HeroMainBlock/Component'
 import DestinationHeroCarousel from './DestinationHeroCarousel/Component'
-
+import { InstagramCarousel } from './InstagramCarousel/Component'
 const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
@@ -32,6 +32,7 @@ const blockComponents = {
   heroMainBlock: HeroMainBlock,
   enlargingCardCarousel:EnlargingCardCarousel,
   destinationHeroCarousel: DestinationHeroCarousel,
+  instagramCarousel: InstagramCarousel,
 }
 
 export const RenderBlocks: React.FC<{

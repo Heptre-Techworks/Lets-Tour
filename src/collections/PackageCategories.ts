@@ -1,51 +1,30 @@
-
-import { CollectionConfig } from "payload"
+// src/collections/PackageCategories.ts
+import type { CollectionConfig } from 'payload'
 
 export const PackageCategories: CollectionConfig = {
   slug: 'package-categories',
-  labels: {
-    singular: 'Package Category',
-    plural: 'Package Categories'
-  },
-  admin: {
-    useAsTitle: 'name'
-  },
+  admin: { useAsTitle: 'name' },
   fields: [
+    { name: 'name', type: 'text', required: true }, // no slug
     {
-      name: 'name',
-      type: 'text',
-      required: true
+      name: 'type',
+      type: 'select',
+      options: [
+        { label: 'Experience', value: 'experience' },
+        { label: 'Trip Type', value: 'trip_type' },
+        { label: 'Vibe', value: 'vibe' },
+        { label: 'Destination Label', value: 'destination_label' },
+      ],
+      required: true,
     },
     {
-      name: 'slug',
-      type: 'text',
-      admin: { position: 'sidebar' },
-      hooks: {
-        beforeValidate: [
-          ({ value, operation, data }) => {
-            if (operation === 'create' || !value) {
-              return data?.name?.toLowerCase().replace(/ /g, '-')
-            }
-            return value
-          }
-        ]
-      }
+      name: 'parent',
+      type: 'relationship',
+      relationTo: 'package-categories',
+      admin: { description: 'Optional parent category' },
     },
-    {
-      name: 'description',
-      type: 'textarea'
-    },
-    {
-      name: 'icon',
-      type: 'upload',
-      relationTo: 'media'
-    },
-    {
-      name: 'color',
-      type: 'text',
-      admin: {
-        description: 'Hex color code for category styling'
-      }
-    }
-  ]
+    { name: 'description', type: 'textarea' },
+  ],
 }
+
+export default PackageCategories

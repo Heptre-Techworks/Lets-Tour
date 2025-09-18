@@ -101,3 +101,14 @@ html[data-theme='dark'],
 html[data-theme='light'] {
   opacity: initial;
 }
+/* Add to your global CSS file */
+header {
+  position: relative !important;
+  z-index: 9999 !important;
+}
+
+/* If you have a hero section, make sure it has lower z-index */
+.hero {
+  position: relative;
+  z-index: 1;
+}
