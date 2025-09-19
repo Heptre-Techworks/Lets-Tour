@@ -33,10 +33,18 @@ type MainHeroProps = {
 
 // --- REUSABLE SVG ICONS (FIXED) ---
 const AirplaneIcon = ({ className = '', style }: { className?: string; style?: React.CSSProperties }) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className={className} style={style}>
-    <path d="M21.4 14.6l-8.1-4.8V3.5c0-.8-.7-1.5-1.5-1.5s-1.5.7-1.5 1.5v6.3L2.2 14.6c-.3.2-.3.5 0 .7l1.2.8 6.7-3.9v5.6l-2 1.5V21l3.5-1 3.5 1v-1.5l-2-1.5V12l6.7 3.9 1.2-.8c.3-.2.3-.5 0-.7z"/>
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    style={{ transform: 'rotate(-90deg)', ...style }}
+  >
+    <path d="M21.4 14.6l-8.1-6.2V3.5c0-.8-.9-1.5-1.5-1.5s-1.5.7-1.5 0.5v6.3L2.2 14.6c-.3.2-.3.5 0 .7l1.2.8 6.7-3.9v5.6l-2 1.5V21l3.5-1 3.5 1v-1.5l-2-1.5V12l6.7 3.9 1.2-.8c.3-.2.3-.5 0-.7z"/>
   </svg>
-)
+);
+
 
 const ChevronLeftIcon = () => ( 
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
@@ -115,17 +123,26 @@ export const MainHero: React.FC<MainHeroProps> = ({
   return (
     <>
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Roboto:wght@300;400;500&display=swap');
-        .font-playfair { font-family: 'Playfair Display', serif; }
-        .font-roboto { font-family: 'Roboto', sans-serif; }
-        @keyframes fly-across {
-          from { left: 0; }
-          to { left: 100%; }
-        }
-        .animate-fly-across {
-          animation: fly-across 15s linear infinite;
-        }
-      `}</style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&family=Roboto:wght@300;400;500&display=swap');
+
+  .font-playfair { font-family: 'Playfair Display', serif; }
+  .font-roboto { font-family: 'Roboto', sans-serif; }
+
+  @keyframes plane-fly {
+    from { left: 87vw; }
+    to { left: 0vw; }
+  }
+
+  .animate-plane-fly {
+    animation: plane-fly 6s linear infinite;
+  }
+@keyframes dash-fade {
+    0%, 20% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+`}</style>
+
+
       
       <div
         className="relative -mt-[10.4rem] w-full h-screen overflow-hidden font-roboto text-white"
@@ -148,13 +165,37 @@ export const MainHero: React.FC<MainHeroProps> = ({
         <div className="relative z-10 w-full h-full">
           {/* Top Airplane Path Animation */}
           {enableAirplaneAnimation && (
-            <div className="absolute top-[20%] left-0 w-full px-16 pointer-events-none">
-              <div className="relative w-1/3 mx-auto">
-                 <div className="absolute w-full top-1/2 -translate-y-1/2 border-t-2 border-dashed border-white/50" />
-                 <AirplaneIcon className="absolute top-1/2 -translate-y-1/2 animate-fly-across" />
+          <div className="absolute top-[20%] left-0 w-full px-16 pointer-events-none">
+            <div className="relative w-full mx-auto">
+              {/* Path and plane together */}
+              <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full">
+                {/* Dashed line following the same path */}
+                {/* Dashes */}
+                <div className="absolute top-0 left-0 flex w-full h-0.5 space-x-2 flex-row-reverse" >
+                  {[...Array(30)].map((_, i, arr) => (
+                    <div
+                      key={i}
+                      className="w-2 h-0.5 bg-white "
+                      style={{
+                        marginRight: '2px', // small gap between dashes
+                        animation: `dash-fade 6s linear infinite`,
+                        animationDelay: `${(i / arr.length) * 6+0.35}s`, // start animation in-progress
+        animationFillMode: 'both',
+                      }}
+                    />
+                  ))}
+                </div>
+                {/* Plane aligned on same path */}
+                <AirplaneIcon 
+                  className="absolute text-white text-3xl animate-plane-fly" 
+                  style={{ top: '-0.7rem' }} 
+                />
               </div>
             </div>
-          )}
+          </div>
+        )}
+
+
 
           {/* Main Title */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -188,13 +229,13 @@ export const MainHero: React.FC<MainHeroProps> = ({
           )}
           
           {/* Bottom Section Container */}
-          <div className="absolute bottom-0 left-0 w-full h-1/2">
+          <div className="absolute bottom-0 left-0 w-full h-full">
             {/* Cloud Image Layer */}
             {cloudImage && (
-              <div className="absolute inset-0 -bottom-10">
+              <div className="absolute inset-0 ">
                 <MediaComponent 
                   resource={cloudImage}
-                  imgClassName="absolute bottom-0 left-0 w-full h-full object-cover object-bottom"
+                  imgClassName="absolute bottom-200 left-0 w-full h-full"
           
                 />
               </div>

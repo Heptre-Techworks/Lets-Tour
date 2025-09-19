@@ -2,100 +2,105 @@
 import type { Metadata } from 'next'
 import React, { cache } from 'react'
 import { draftMode } from 'next/headers'
-
+import { unstable_cache } from 'next/cache'
+import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { generateMeta } from '@/utilities/generateMeta'
-import type { Page } from '@/payload-types'
+import { LivePreviewListener } from '@/components/LivePreviewListener'
+import type { Page, Package } from '@/payload-types'
 
+// Build static params using document IDs, but keep the param name `slug`
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
-  const result = await payload.find({
+  const results = await payload.find({
     collection: 'packages',
     draft: false,
-    limit: 1000,
     overrideAccess: false,
+    depth: 0,
+    limit: 1000,
     pagination: false,
-    select: { slug: true },
   })
-
-  return (result.docs ?? [])
-    .filter((doc) => typeof doc.slug === 'string' && doc.slug.length > 0)
-    .map(({ slug }) => ({ slug }))
-}
-type BlocksRow = Page['layout']
-type Args = {
-  params: Promise<{
-    slug?: string
-  }>
+  return (results.docs ?? []).map((d: any) => ({ slug: String(d.id) }))
 }
 
-export default async function PackagePage({ params: paramsPromise }: Args) {
+type Args = { params: Promise<{ slug?: string }> }
+type BlocksArray = NonNullable<Page['layout']>
+
+// Cache the global layout similar to destinations
+const getPackageLayout = unstable_cache(
+  async (opts: { draft: boolean }) => {
+    const payload = await getPayload({ config: configPromise })
+    const global = await payload.findGlobal({
+      slug: 'packageLayout',
+      draft: opts.draft,
+      overrideAccess: opts.draft ? true : false,
+      depth: 2,
+    })
+    return global as { layout?: BlocksArray }
+  },
+  ['packages-layout-global'],
+  { tags: ['packages-layout'] },
+)
+
+// Page
+export default async function Page({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
-  const { slug = '' } = await paramsPromise
+  const { slug } = await paramsPromise
+  if (!slug) return <PayloadRedirects url="/packages" />
+
   const url = `/packages/${slug}`
 
-  const pkg = await queryPackageBySlug({ slug })
+  const [pkg, layoutGlobal] = await Promise.all([
+    queryPackageById({ id: slug }),
+    getPackageLayout({ draft }),
+  ])
+
   if (!pkg) {
     return <PayloadRedirects url={url} />
   }
-
-  const layoutGlobal = await getPackageLayout()
-  const blocks: BlocksArray = Array.isArray(layoutGlobal?.layout) ? layoutGlobal.layout : []
 
   return (
     <article className="pt-16 pb-24">
       <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
-      <RenderBlocks blocks={blocks} />
+      <RenderBlocks blocks={(layoutGlobal as any)?.layout ?? []} />
     </article>
   )
 }
 
-// generateMetadata (or the call site)
+// Metadata
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { slug = '' } = await paramsPromise
-  const pkg = await queryPackageBySlug({ slug }) // returns a single Package | null
-  return generateMeta({ doc: pkg })
+  const { isEnabled: draft } = await draftMode()
+  const { slug } = await paramsPromise
+  if (!slug) return {}
+
+  const [pkg, layoutGlobal] = await Promise.all([
+    queryPackageById({ id: slug }),
+    getPackageLayout({ draft }),
+  ])
+
+  // Prefer the specific package if found, otherwise fall back to the layout global
+  return generateMeta({ doc: (pkg as any) ?? (layoutGlobal as any) })
 }
 
-
-// Data helpers (cached)
-const queryPackageBySlug = cache(async ({ slug }: { slug: string }) => {
+// Data helper: single package by id (slug param acts as id)
+const queryPackageById = cache(async ({ id }: { id: string }) => {
   const { isEnabled: draft } = await draftMode()
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
     collection: 'packages',
     draft,
+    overrideAccess: draft ? true : false,
     limit: 1,
     pagination: false,
-    overrideAccess: draft,
-    where: { slug: { equals: slug } },
     depth: 2,
+    where: { id: { equals: id } },
   })
-  const doc = Array.isArray(result.docs) && result.docs.length > 0 ? result.docs : null
 
-  return doc
+  // If you have a generated type name, you can replace Package with RequiredDataFromCollectionSlug<'packages'>
+  return (result.docs?.[0] as RequiredDataFromCollectionSlug<'packages'>) || null
 })
-
-type BlocksArray = NonNullable<Page['layout']>
-type PackageLayoutGlobal = { layout?: BlocksArray }
-
-// Fetch the singleton global that stores the blocks layout for package pages
-const getPackageLayout = cache(async (): Promise<PackageLayoutGlobal> => {
-  const { isEnabled: draft } = await draftMode()
-  const payload = await getPayload({ config: configPromise })
-  const global = await payload.findGlobal({
-    slug: 'packageLayout', // ensure this matches your Global slug
-    draft,
-    depth: 2,
-  })
-  return global as PackageLayoutGlobal
-})
-
-// Optional: If live preview is used on this route
-import { LivePreviewListener } from '@/components/LivePreviewListener'
