@@ -1,11 +1,13 @@
 // app/destinations-sitemap.xml/route.ts
-import { getServerSideSitemap } from 'next-sitemap'
+import { getServerSideSitemap, type ISitemapField } from 'next-sitemap'
 import { unstable_cache } from 'next/cache'
-import { getPayload } from 'payload'
+import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
 import config from '@payload-config'
 
+type Dest = RequiredDataFromCollectionSlug<'destinations'>
+
 const getDestinationsSitemap = unstable_cache(
-  async () => {
+  async (): Promise<ISitemapField[]> => {
     const payload = await getPayload({ config })
     const SITE_URL =
       process.env.NEXT_PUBLIC_SERVER_URL ||
@@ -22,18 +24,22 @@ const getDestinationsSitemap = unstable_cache(
     })
 
     const dateFallback = new Date().toISOString()
-    return (results.docs ?? [])
-      .filter((d: any) => Boolean(d?.slug))
-      .map((d: any) => ({
+    const docs = (results.docs ?? []) as Dest[]
+
+    const fields: ISitemapField[] = docs
+      .filter((d) => Boolean(d.slug))
+      .map((d) => ({
         loc: `${SITE_URL}/destinations/${String(d.slug)}`,
-        lastmod: d.updatedAt || dateFallback,
+        lastmod: (d as any).updatedAt ?? dateFallback, // if updatedAt is in your schema, remove `as any`
       }))
+
+    return fields
   },
   ['destinations-sitemap'],
   { tags: ['destinations-sitemap'] },
 )
 
 export async function GET() {
-  const sitemap = await getDestinationsSitemap()
-  return getServerSideSitemap(sitemap)
+  const fields = await getDestinationsSitemap()
+  return getServerSideSitemap(fields)
 }

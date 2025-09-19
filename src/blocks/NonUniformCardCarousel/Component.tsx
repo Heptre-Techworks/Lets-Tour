@@ -1,8 +1,8 @@
-// components/blocks/NonUniformCardCarousel.tsx
 'use client'
 
 import React, { useRef, useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 type Destination = {
   id: string
@@ -49,33 +49,34 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
   const [maxScrollX, setMaxScrollX] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
 
-  // Generate card sizes based on pattern
   const destinationsWithSizes = useMemo(() => {
     if (destinations.length === 0) return []
-
     return destinations.map((dest, index) => {
       let size: CardSize
-
       switch (cardSizePattern) {
-        case 'pattern':
-          // Large-Medium-Small-Medium pattern
+        case 'pattern': {
           const patternIndex = index % 4
-          size = patternIndex === 0 ? 'large' : patternIndex === 1 || patternIndex === 3 ? 'medium' : 'small'
+          size =
+            patternIndex === 0
+              ? 'large'
+              : patternIndex === 1 || patternIndex === 3
+              ? 'medium'
+              : 'small'
           break
-        case 'random':
+        }
+        case 'random': {
           const sizes: CardSize[] = ['small', 'medium', 'large', 'xl']
           size = sizes[Math.floor(Math.random() * sizes.length)]
           break
+        }
         case 'varied':
         default:
-          // Varied pattern based on index for consistent layout
           if (index === 0 || index % 5 === 0) size = 'xl'
           else if (index % 3 === 0) size = 'large'
           else if (index % 2 === 0) size = 'medium'
           else size = 'small'
           break
       }
-
       return { ...dest, size }
     })
   }, [destinations, cardSizePattern])
@@ -107,7 +108,6 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
     }
   }
 
-  // Calculate scroll metrics
   useEffect(() => {
     const container = scrollContainerRef.current
     if (container) {
@@ -119,10 +119,7 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
     if (scrollContainerRef.current) {
       const scrollAmount = 320
       const newScrollX = Math.max(currentScrollX - scrollAmount, 0)
-      scrollContainerRef.current.scrollTo({
-        left: newScrollX,
-        behavior: 'smooth',
-      })
+      scrollContainerRef.current.scrollTo({ left: newScrollX, behavior: 'smooth' })
       setCurrentScrollX(newScrollX)
     }
   }
@@ -131,31 +128,22 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
     if (scrollContainerRef.current) {
       const scrollAmount = 320
       const newScrollX = Math.min(currentScrollX + scrollAmount, maxScrollX)
-      scrollContainerRef.current.scrollTo({
-        left: newScrollX,
-        behavior: 'smooth',
-      })
+      scrollContainerRef.current.scrollTo({ left: newScrollX, behavior: 'smooth' })
       setCurrentScrollX(newScrollX)
     }
   }
 
-  // Auto-scroll
   useEffect(() => {
     if (isHovered || maxScrollX === 0) return
-
     const interval = setInterval(() => {
       setCurrentScrollX((prev) => {
         const newScrollX = prev >= maxScrollX ? 0 : prev + 320
         if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollTo({
-            left: newScrollX,
-            behavior: 'smooth',
-          })
+          scrollContainerRef.current.scrollTo({ left: newScrollX, behavior: 'smooth' })
         }
         return newScrollX
       })
     }, 5000)
-
     return () => clearInterval(interval)
   }, [isHovered, maxScrollX])
 
@@ -177,13 +165,11 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
           <h1 className="text-5xl md:text-6xl font-serif font-bold text-gray-900 mb-3">
             {title}
           </h1>
-          {subtitle && (
-            <p className="text-gray-700 text-lg">"{subtitle}"</p>
-          )}
+          {subtitle && <p className="text-gray-700 text-lg">&quot;{subtitle}&quot;</p>}
         </div>
 
         {/* Carousel */}
-        <div 
+        <div
           className="relative"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -210,7 +196,7 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
             >
               {destinationsWithSizes.map((destination) => {
                 const { width, height } = getCardDimensions(destination.size)
-                
+
                 return (
                   <Link
                     key={destination.id}
@@ -221,11 +207,12 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
                     <div className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white">
                       {/* Image */}
                       <div className="relative" style={{ height: `${height}px` }}>
-                        <img
-                          src={destination.heroImage?.url}
+                        <Image
+                          src={destination.heroImage?.url || ''}
                           alt={destination.heroImage?.alt || destination.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
+                          fill
+                          sizes={`${width}px`}
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
                         />
 
                         {/* Discount Badge */}
@@ -239,12 +226,13 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
 
                         {/* Heart Icon */}
                         <div className="absolute top-4 right-4">
-                          <button 
+                          <button
                             className="w-10 h-10 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-opacity-40 transition-all duration-200"
                             onClick={(e) => {
                               e.preventDefault()
                               // Add to favorites logic
                             }}
+                            aria-label="Add to favorites"
                           >
                             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -254,39 +242,53 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
 
                         {/* Content Overlay */}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
-                          <h2 className={`font-serif text-white mb-2 italic font-medium ${
-                            destination.size === 'xl' ? 'text-3xl' :
-                            destination.size === 'large' ? 'text-2xl' :
-                            destination.size === 'medium' ? 'text-xl' : 'text-lg'
-                          }`}>
+                          <h2
+                            className={`font-serif text-white mb-2 italic font-medium ${
+                              destination.size === 'xl'
+                                ? 'text-3xl'
+                                : destination.size === 'large'
+                                ? 'text-2xl'
+                                : destination.size === 'medium'
+                                ? 'text-xl'
+                                : 'text-lg'
+                            }`}
+                          >
                             {destination.name}
                           </h2>
-                          
-                          {showLocationDetails && destination.locationDetails && destination.size !== 'small' && (
-                            <p className="text-white text-sm opacity-90 mb-3 leading-relaxed">
-                              {destination.locationDetails.length > 50 && destination.size === 'medium' 
-                                ? `${destination.locationDetails.substring(0, 50)}...`
-                                : destination.locationDetails
-                              }
-                            </p>
-                          )}
+
+                          {showLocationDetails &&
+                            destination.locationDetails &&
+                            destination.size !== 'small' && (
+                              <p className="text-white text-sm opacity-90 mb-3 leading-relaxed">
+                                {destination.locationDetails.length > 50 &&
+                                destination.size === 'medium'
+                                  ? `${destination.locationDetails.substring(0, 50)}...`
+                                  : destination.locationDetails}
+                              </p>
+                            )}
 
                           {/* Price */}
                           {destination.startingPrice && (
                             <div className="flex items-center justify-between">
                               <div className="text-white">
-                                <p className={`font-bold ${
-                                  destination.size === 'xl' ? 'text-2xl' :
-                                  destination.size === 'large' ? 'text-xl' :
-                                  'text-lg'
-                                }`}>
+                                <p
+                                  className={`font-bold ${
+                                    destination.size === 'xl'
+                                      ? 'text-2xl'
+                                      : destination.size === 'large'
+                                      ? 'text-xl'
+                                      : 'text-lg'
+                                  }`}
+                                >
                                   ₹{destination.startingPrice.toLocaleString()}
-                                  <span className="text-sm font-normal opacity-90 ml-1">(per person)</span>
+                                  <span className="text-sm font-normal opacity-90 ml-1">
+                                    (per person)
+                                  </span>
                                 </p>
                               </div>
 
                               {/* Action Arrow */}
-                              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
                                 <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
@@ -318,7 +320,7 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
         {/* Scroll Progress Bar */}
         <div className="mt-8 mx-20">
           <div className="w-full bg-gray-200 rounded-full h-1">
-            <div 
+            <div
               className="bg-gray-800 h-1 rounded-full transition-all duration-300"
               style={{ width: `${maxScrollX > 0 ? (currentScrollX / maxScrollX) * 100 : 0}%` }}
             />

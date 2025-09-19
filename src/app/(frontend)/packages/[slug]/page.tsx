@@ -10,7 +10,7 @@ import { PayloadRedirects } from '@/components/PayloadRedirects'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { generateMeta } from '@/utilities/generateMeta'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
-import type { Page, Package } from '@/payload-types'
+import type { Page } from '@/payload-types'
 
 // Build static params using document IDs, but keep the param name `slug`
 export async function generateStaticParams() {
@@ -18,7 +18,7 @@ export async function generateStaticParams() {
   const results = await payload.find({
     collection: 'packages',
     draft: false,
-    overrideAccess: false,
+    overrideAccess: true, // bypass ACL during build
     depth: 0,
     limit: 1000,
     pagination: false,
@@ -36,7 +36,7 @@ const getPackageLayout = unstable_cache(
     const global = await payload.findGlobal({
       slug: 'packageLayout',
       draft: opts.draft,
-      overrideAccess: opts.draft ? true : false,
+      overrideAccess: opts.draft ? true : true, // allow read during build and preview
       depth: 2,
     })
     return global as { layout?: BlocksArray }
@@ -54,7 +54,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   const url = `/packages/${slug}`
 
   const [pkg, layoutGlobal] = await Promise.all([
-    queryPackageById({ id: slug }),
+    queryPackageById({ id: slug, draft }),
     getPackageLayout({ draft }),
   ])
 
@@ -78,29 +78,26 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   if (!slug) return {}
 
   const [pkg, layoutGlobal] = await Promise.all([
-    queryPackageById({ id: slug }),
+    queryPackageById({ id: slug, draft }),
     getPackageLayout({ draft }),
   ])
 
-  // Prefer the specific package if found, otherwise fall back to the layout global
   return generateMeta({ doc: (pkg as any) ?? (layoutGlobal as any) })
 }
 
 // Data helper: single package by id (slug param acts as id)
-const queryPackageById = cache(async ({ id }: { id: string }) => {
-  const { isEnabled: draft } = await draftMode()
+const queryPackageById = cache(async ({ id, draft }: { id: string; draft: boolean }) => {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
     collection: 'packages',
-    draft,
-    overrideAccess: draft ? true : false,
+    draft, // when previewing, let Payload substitute newest draft content
+    overrideAccess: true, // bypass ACL for build/SSR
     limit: 1,
     pagination: false,
     depth: 2,
     where: { id: { equals: id } },
   })
 
-  // If you have a generated type name, you can replace Package with RequiredDataFromCollectionSlug<'packages'>
   return (result.docs?.[0] as RequiredDataFromCollectionSlug<'packages'>) || null
 })
