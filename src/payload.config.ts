@@ -1,6 +1,8 @@
 // storage-adapter-import-placeholder
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
+import { s3Storage } from '@payloadcms/storage-s3' // NEW
+
 import sharp from 'sharp' // sharp-import
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
@@ -45,11 +47,7 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     components: {
-      // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below.
       beforeLogin: ['@/components/BeforeLogin'],
-      // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
-      // Feel free to delete this at any time. Simply remove the line below.
       beforeDashboard: ['@/components/BeforeDashboard'],
     },
     importMap: {
@@ -58,28 +56,12 @@ export default buildConfig({
     user: Users.slug,
     livePreview: {
       breakpoints: [
-        {
-          label: 'Mobile',
-          name: 'mobile',
-          width: 375,
-          height: 667,
-        },
-        {
-          label: 'Tablet',
-          name: 'tablet',
-          width: 768,
-          height: 1024,
-        },
-        {
-          label: 'Desktop',
-          name: 'desktop',
-          width: 1440,
-          height: 900,
-        },
+        { label: 'Mobile', name: 'mobile', width: 375, height: 667 },
+        { label: 'Tablet', name: 'tablet', width: 768, height: 1024 },
+        { label: 'Desktop', name: 'desktop', width: 1440, height: 900 },
       ],
     },
   },
-  // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
@@ -114,36 +96,59 @@ export default buildConfig({
   globals: [Header, Footer, SearchFilters, PackageLayout, DestinationLayout],
   plugins: [
     ...plugins,
-    // storage-adapter-placeholder
+
+    // S3 Storage for Payload (v3) — map collection slugs to S3
+    s3Storage({
+      collections: {
+        // MUST equal your upload-enabled collection slug ("media" here)
+        media: true,
+        // You can add more upload collections here or pass per-collection options, e.g.:
+        // documents: { prefix: 'docs/' },
+        // mediaWithPresigned: {
+        //   signedDownloads: {
+        //     shouldUseSignedURL: ({ filename }) => filename.endsWith('.mp4'),
+        //   },
+        // },
+      },
+      bucket: process.env.S3_BUCKET as string,
+      config: {
+        region: process.env.S3_REGION as string,
+        credentials: {
+          accessKeyId: process.env.S3_ACCESS_KEY_ID as string,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY as string,
+        },
+        // For S3‑compatible providers only:
+        // endpoint: process.env.S3_ENDPOINT,
+        // forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+      },
+      // Global toggles you can enable if needed:
+      // clientUploads: true, // direct browser uploads (allow CORS PUT on bucket)
+      // signedDownloads: true, // presigned GETs while preserving access control
+    }),
   ],
   secret: process.env.PAYLOAD_SECRET,
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  // Add onInit hook to create admin user if none exist
   onInit: async (payload) => {
     try {
-      // Check if any users exist in the Users collection
       const existingUsers = await payload.find({
         collection: 'users',
         limit: 1,
       })
 
-      // If no users exist, create a default admin user
       if (existingUsers.docs.length === 0) {
         console.log('No users found. Creating default admin user...')
-        
         await payload.create({
           collection: 'users',
           data: {
             name: 'Admin',
             email: 'admin@letstour.com',
-            password: 'admin123', // Payload automatically hashes this password
+            password: 'admin123',
             role: 'admin',
           },
         })
-
         console.log('✅ Default admin user created successfully!')
         console.log('📧 Email: admin@letstour.com')
         console.log('🔑 Password: admin123')
@@ -154,16 +159,11 @@ export default buildConfig({
     } catch (error) {
       console.error('❌ Error during user initialization:', error)
     }
-  }, // onInit hook runs when Payload initializes [web:198][web:3]
+  }, // onInit hook runs when Payload initializes
   jobs: {
     access: {
       run: ({ req }: { req: PayloadRequest }): boolean => {
-        // Allow logged in users to execute this endpoint (default)
         if (req.user) return true
-
-        // If there is no logged in user, then check
-        // for the Vercel Cron secret to be present as an
-        // Authorization header:
         const authHeader = req.headers.get('authorization')
         return authHeader === `Bearer ${process.env.CRON_SECRET}`
       },
