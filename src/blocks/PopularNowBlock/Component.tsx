@@ -1,230 +1,131 @@
-// app/(wherever)/PopularNowBlock.tsx
-'use client'
+// src/blocks/PopularNow/Component.tsx
+'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
+import React, { useEffect, useRef } from 'react';
+import type { PopularNowBlock as PopularNowBlockProps } from '@/payload-types';
 
-type MediaDoc = { id: string; url: string; alt?: string } | null | undefined
+type MediaLike = { url?: string | null; alt?: string | null };
 
-type CardItem = {
-  id?: string | number
-  title: string
-  price?: number
-  image?: string | MediaDoc
-  link?: string
-  size?: 'large' | 'medium' | 'small'
-}
-
-type Props = {
-  title?: string
-  subtitle?: string
-  cards?: CardItem[]
-}
-
-const resolveMediaUrl = (img?: string | MediaDoc): string | null => {
-  if (!img) return null
-  if (typeof img === 'string') {
-    const t = img.trim()
-    return t ? t : null
+const getImageSrc = (card: { image?: MediaLike | string | null; imageUrl?: string | null }) => {
+  if (card?.image && typeof card.image === 'object' && 'url' in card.image && card.image?.url) {
+    return card.image.url as string;
   }
-  const t = img?.url?.trim()
-  return t ? t : null
-}
+  if (card?.imageUrl) return card.imageUrl;
+  return '';
+};
 
-const resolveMediaAlt = (img: string | MediaDoc | undefined, fallback: string): string => {
-  if (!img) return fallback
-  if (typeof img === 'string') return fallback
-  return img?.alt?.trim() || fallback
-}
-
-const sizeToWidthClasses = (size?: CardItem['size']) => {
-  switch (size) {
-    case 'large':
-      return 'w-[190px] h-[130px]'
-    case 'small':
-      return 'w-[135px] h-[92px]'
-    case 'medium':
-    default:
-      return 'w-[160px] h-[110px]'
-  }
-}
-
-export const PopularNowBlock: React.FC<Props> = ({
-  title = 'Popular now!',
-  subtitle = "Today's enemy is tomorrow's friend.",
-  cards = [],
+const DestinationCard: React.FC<{ name: string; price: string; src: string; alt?: string | null }> = ({
+  name,
+  price,
+  src,
+  alt,
 }) => {
-  const topRowRef = useRef<HTMLDivElement | null>(null)
-  const bottomRowRef = useRef<HTMLDivElement | null>(null)
-  const [isPaused, setIsPaused] = useState(false)
-  const rafScrollRef = useRef<number>(0)
-  const rafScaleRef = useRef<number>(0)
+  if (!src) return null;
+  return (
+    <li className="relative w-[300px] sm:w-[350px] md:w-[400px] h-64 flex-shrink-0 mx-4">
+      <img src={src} alt={alt || name} className="w-full h-full object-cover rounded-2xl shadow-lg" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-2xl" />
+      <div className="absolute bottom-0 left-0 p-6 text-white">
+        <h3 className="text-4xl font-bold">{name}</h3>
+        <p className="text-lg mt-1">
+          Starting from <span className="font-semibold">₹ {price}</span>
+        </p>
+      </div>
+    </li>
+  );
+};
 
-  const items = useMemo(() => cards ?? [], [cards])
-
-  const topRowCards = items.filter((_, index) => index % 2 === 0)
-  const bottomRowCards = items.filter((_, index) => index % 2 === 1)
-
-  useEffect(() => {
-    if (isPaused) return
-
-    const scrollStep = 0.8
-
-    const step = () => {
-      const advance = (row: HTMLDivElement) => {
-        const maxScroll = row.scrollWidth - row.clientWidth
-        if (maxScroll <= 0) return
-        if (row.scrollLeft <= 1) {
-          row.scrollLeft = maxScroll
-        } else {
-          row.scrollLeft = Math.max(0, row.scrollLeft - scrollStep)
-        }
-      }
-
-      if (topRowRef.current) advance(topRowRef.current)
-      if (bottomRowRef.current) advance(bottomRowRef.current)
-
-      rafScrollRef.current = requestAnimationFrame(step)
-    }
-
-    rafScrollRef.current = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(rafScrollRef.current)
-  }, [isPaused])
+const InfiniteScroller: React.FC<{
+  direction?: 'left' | 'right';
+  speed?: number;
+  pauseOnHover?: boolean;
+  children: React.ReactNode;
+}> = ({ direction = 'left', speed = 40, pauseOnHover = true, children }) => {
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const tick = () => {
-      const applyScale = (row: HTMLDivElement) => {
-        const rect = row.getBoundingClientRect()
-        const centerX = rect.left + rect.width / 2
-        const maxDist = rect.width / 2
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
 
-        const cards = row.querySelectorAll<HTMLDivElement>('[data-card]')
-        cards.forEach((card) => {
-          const b = card.getBoundingClientRect()
-          const cardCenter = b.left + b.width / 2
-          const dist = Math.abs(cardCenter - centerX)
-          const t = Math.min(dist / maxDist, 1)
-          const scale = 0.84 + (1 - t) * 0.22
-          const opacity = 0.75 + (1 - t) * 0.25
-          const z = Math.round(scale * 100)
+    if (!scroller.hasAttribute('data-animated')) {
+      scroller.setAttribute('data-animated', 'true');
+      const scrollerInner = scroller.querySelector('.scroller-inner');
+      const scrollerContent = scrollerInner ? Array.from(scrollerInner.children) : [];
 
-          card.style.transform = `scale(${scale})`
-          card.style.opacity = `${opacity}`
-          card.style.zIndex = `${z}`
-          card.style.filter = `saturate(${0.8 + (1 - t) * 0.4}) brightness(${0.9 + (1 - t) * 0.2})`
-        })
-      }
-
-      if (topRowRef.current) applyScale(topRowRef.current)
-      if (bottomRowRef.current) applyScale(bottomRowRef.current)
-
-      rafScaleRef.current = requestAnimationFrame(tick)
+      scrollerContent.forEach((item) => {
+        const clone = item.cloneNode(true) as HTMLElement;
+        clone.setAttribute('aria-hidden', 'true');
+        scrollerInner?.appendChild(clone);
+      });
     }
+  }, [children]);
 
-    rafScaleRef.current = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(rafScaleRef.current)
-  }, [])
-
-  const handleMouseEnter = () => setIsPaused(true)
-  const handleMouseLeave = () => setIsPaused(false)
-
-  const repeat = <T,>(arr: T[], times: number) => Array.from({ length: times }, () => arr).flat()
-
-  const topLoop = repeat(topRowCards, 4)
-  const bottomLoop = repeat(bottomRowCards, 4)
+  const directionClass = direction === 'left' ? 'scroll-left' : 'scroll-right';
 
   return (
-    <section className="py-10 md:py-14">
-      <div className="container mx-auto px-4">
-        <header className="mb-6 md:mb-8">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900">{title}</h2>
-          {subtitle && <p className="mt-2 text-gray-600 italic">&quot;{subtitle}&quot;</p>}
-        </header>
-
-        <div className="space-y-6" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-          {/* Top Row */}
-          <div
-            ref={topRowRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-            style={{ scrollBehavior: 'auto' }}
-          >
-            {topLoop.map((item, idx) => {
-              const copyIndex = topRowCards.length > 0 ? Math.floor(idx / topRowCards.length) : 0
-              const uniqueKey = `top-${item.id ?? idx}-${copyIndex}`
-              return <Card key={uniqueKey} item={item} />
-            })}
-          </div>
-
-          {/* Bottom Row */}
-          <div
-            ref={bottomRowRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
-            style={{ scrollBehavior: 'auto' }}
-          >
-            {bottomLoop.map((item, idx) => {
-              const copyIndex = bottomRowCards.length > 0 ? Math.floor(idx / bottomRowCards.length) : 0
-              const uniqueKey = `bottom-${item.id ?? idx}-${copyIndex}`
-              return <Card key={uniqueKey} item={item} />
-            })}
-          </div>
-        </div>
-      </div>
+    <div
+      ref={scrollerRef}
+      className="scroller overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]"
+      style={{ ['--duration' as any]: `${Math.max(5, speed)}s` }}
+    >
+      <ul className={`flex gap-4 w-max animate-infinite-scroll ${directionClass}`}>
+        <div className="scroller-inner flex">{children}</div>
+      </ul>
 
       <style>{`
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes scroll-left { to { transform: translateX(calc(-50% - 0.5rem)); } }
+        @keyframes scroll-right { to { transform: translateX(calc(50% + 0.5rem)); } }
+        .scroller-inner { animation-play-state: running; }
+        .scroller:hover .scroller-inner { animation-play-state: ${pauseOnHover ? 'paused' : 'running'}; }
+        .animate-infinite-scroll.scroll-left .scroller-inner { animation: scroll-left var(--duration, 40s) linear infinite; }
+        .animate-infinite-scroll.scroll-right .scroller-inner { animation: scroll-right var(--duration, 40s) linear infinite; }
       `}</style>
-    </section>
-  )
-}
-
-const Card: React.FC<{ item: CardItem }> = ({ item }) => {
-  const url = resolveMediaUrl(item.image)
-  const alt = resolveMediaAlt(item.image, item.title)
-  const sizeClass = sizeToWidthClasses(item.size)
-
-  const body = (
-    <div
-      data-card
-      className={`${sizeClass} relative rounded-2xl overflow-hidden bg-gray-100 shadow-sm hover:shadow-lg transition-shadow flex-shrink-0`}
-    >
-      {url ? (
-        <Image
-          src={url}
-          alt={alt}
-          fill
-          sizes="(max-width: 768px) 40vw, (max-width: 1280px) 25vw, 190px"
-          className="object-cover"
-          draggable={false}
-        />
-      ) : (
-        <div aria-label={`${alt} image placeholder`} className="absolute inset-0 bg-gray-200" />
-      )}
-
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
-
-      <div className="absolute bottom-0 left-0 right-0 p-3 flex items-end justify-between">
-        <div className="text-white">
-          <h3 className="text-lg font-serif drop-shadow-sm">{item.title}</h3>
-        </div>
-        {typeof item.price === 'number' && (
-          <div className="text-right text-white">
-            <p className="text-xs opacity-90">Starting from</p>
-            <p className="text-sm font-semibold">₹{item.price.toLocaleString('en-IN')}</p>
-          </div>
-        )}
-      </div>
     </div>
-  )
+  );
+};
 
-  return item.link ? (
-    <Link href={item.link} className="group">
-      {body}
-    </Link>
-  ) : (
-    body
-  )
-}
+export const PopularNow: React.FC<PopularNowBlockProps> = ({
+  heading = 'Popular now!',
+  subheading = "Today’s enemy is tomorrow’s friend.",
+  pauseOnHover: pauseRaw,
+  rows = [],
+}) => {
+  const pauseOnHover = pauseRaw ?? true;
+  return (
+    <section className="min-h-screen w-full bg-[#F3F4F6] text-[#111827] font-sans flex flex-col justify-center py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto w-full">
+        <header className="mb-10">
+          <div className="flex items-center gap-6">
+            <h1 className="text-5xl md:text-6xl font-bold flex-shrink-0">{heading}</h1>
+            <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
+          </div>
+          {subheading ? <p className="text-lg text-gray-500 mt-2">{subheading}</p> : null}
+        </header>
 
-export default PopularNowBlock
+        <div className="flex flex-col gap-8">
+          {Array.isArray(rows) &&
+            rows.map((row, idx) => {
+              const direction = row?.direction === 'right' ? 'right' : 'left';
+              const speedSeconds = typeof row?.speedSeconds === 'number' ? row.speedSeconds : 40;
+              return (
+                <InfiniteScroller key={idx} direction={direction} speed={speedSeconds} pauseOnHover={pauseOnHover}>
+                  {Array.isArray(row?.cards) &&
+                    row.cards.map((card: any, i: number) => (
+                      <DestinationCard
+                        key={`${idx}-${i}`}
+                        name={card?.name ?? ''}
+                        price={card?.price ?? ''}
+                        src={getImageSrc(card)}
+                        alt={card?.alt ?? card?.name}
+                      />
+                    ))}
+                </InfiniteScroller>
+              );
+            })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default PopularNow;

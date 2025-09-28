@@ -1,180 +1,166 @@
-// components/blocks/UpDownCardCarousel.tsx
-'use client'
+// src/blocks/UpDownCarousel/Component.tsx
+'use client';
 
-import React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import Link from 'next/link'
+import React, { useRef, useState } from 'react';
+import type { UpDownCardCarouselBlock as UpDownCardCarouselBlockProps } from '@/payload-types';
 
-interface Media {
-  url: string
-  alt?: string
-}
+type MediaLike = { url?: string | null; alt?: string | null };
 
-interface Destination {
-  name: string
-  slug: string
-  country: string
-  shortDescription?: string
-  heroImage?: Media | string
-  startingPrice?: number
-}
+const getImageSrc = (img?: MediaLike | string | null, url?: string | null) => {
+  if (img && typeof img === 'object' && 'url' in img && img?.url) return img.url as string;
+  if (url) return url;
+  return '';
+};
 
-interface UpDownCardCarouselProps {
-  title?: string
-  subtitle?: string
-  destinations?: Destination[]
-  layout?: 'masonry' | 'grid'
-  showStartingPrice?: boolean
-}
+const HeartIcon: React.FC<{ isFavorite: boolean; onClick: () => void }> = ({ isFavorite, onClick }) => (
+  <svg
+    onClick={onClick}
+    className={`w-6 h-6 cursor-pointer transition-all duration-300 ease-in-out ${isFavorite ? 'text-red-500 fill-current' : 'text-white'}`}
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+    aria-label="Favorite"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.5l1.318-1.182a4.5 4.5 0 116.364 6.364L12 21l-7.682-7.682a4.5 4.5 0 010-6.364z"
+    />
+  </svg>
+);
 
-export const UpDownCardCarousel: React.FC<UpDownCardCarouselProps> = ({
-  title = 'Popular now!',
-  subtitle = "Today's enemy is tomorrow's friend.",
-  destinations = [],
-  layout = 'masonry',
-  showStartingPrice = true,
+const ArrowRightIcon = () => (
+  <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+  </svg>
+);
+
+const ChevronLeftIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+  </svg>
+);
+
+const ChevronRightIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+  </svg>
+);
+
+export const UpDownCardCarousel: React.FC<UpDownCardCarouselBlockProps> = ({
+  heading = 'In Season',
+  subheading = "Today's enemy is tomorrow's friend.*",
+  cards = [],
 }) => {
-  const getImageUrl = (image: Media | string | undefined): string | null => {
-    if (!image) return null
-    return typeof image === 'string' ? image : image.url
-  }
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const formatPrice = (price: number | undefined): string => {
-    if (!price) return '117,927'
-    return price.toLocaleString('en-IN')
-  }
-
-  // Masonry layout positions for different card sizes
-  const masonryPositions = [
-    // Row 1
-    { 
-      className: "w-[329px] h-[202px] top-[207px] left-[25px]",
-      nameSize: "text-[32px] tracking-[-0.35px] leading-[28.2px]",
-      priceSize: "text-xs tracking-[-0.13px] leading-[10.6px]"
-    },
-    { 
-      className: "w-[479px] h-[264px] top-[137px] left-[374px]",
-      nameSize: "text-[40px] tracking-[-0.44px] leading-[35.2px] whitespace-nowrap",
-      priceSize: "text-base tracking-[-0.18px] leading-[14.1px]",
-      largePriceSize: "text-[32px] tracking-[-0.11px] leading-[28.2px]"
-    },
-    { 
-      className: "w-[379px] h-52 top-[193px] left-[873px]",
-      nameSize: "text-[32px] tracking-[-0.35px] leading-[28.2px]",
-      priceSize: "text-xs tracking-[-0.13px] leading-[10.6px]"
-    },
-    { 
-      className: "w-[329px] h-[181px] top-[220px] left-[1272px]",
-      nameSize: "text-[32px] tracking-[-0.35px] leading-[28.2px]",
-      priceSize: "text-xs tracking-[-0.13px] leading-[10.6px]"
-    },
-    // Row 2
-    { 
-      className: "w-[329px] h-[181px] top-[425px] left-[25px]",
-      nameSize: "text-[32px] tracking-[-0.35px] leading-[28.2px]",
-      priceSize: "text-xs tracking-[-0.13px] leading-[10.6px]"
-    },
-    { 
-      className: "w-[404px] h-[222px] top-[425px] left-[374px]",
-      nameSize: "text-[32px] tracking-[-0.35px] leading-[28.2px]",
-      priceSize: "text-xs tracking-[-0.13px] leading-[10.6px]"
-    },
-    { 
-      className: "w-[454px] h-[250px] top-[425px] left-[798px]",
-      nameSize: "text-[40px] tracking-[-0.44px] leading-[35.2px] whitespace-nowrap",
-      priceSize: "text-base tracking-[-0.18px] leading-[14.1px]",
-      largePriceSize: "text-[32px] tracking-[-0.11px] leading-[28.2px]"
-    },
-    { 
-      className: "w-[354px] h-[194px] top-[425px] left-[1272px]",
-      nameSize: "text-[32px] tracking-[-0.35px] leading-[28.2px]",
-      priceSize: "text-xs tracking-[-0.13px] leading-[10.6px]"
-    },
-  ]
-
-  const validDestinations = destinations.filter(dest => 
-    dest && getImageUrl(dest.heroImage) !== null
-  ).slice(0, 8) // Limit to 8 destinations max
-
-  if (validDestinations.length === 0) {
-    return (
-      <div className="w-full py-8 px-4 text-center text-gray-500">
-        No destinations available
-      </div>
-    )
-  }
+  const scroll = (direction: 'left' | 'right') => {
+    if (!scrollContainerRef.current) return;
+    const amount = direction === 'left' ? -300 : 300;
+    scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+  };
 
   return (
-    <section className="w-full relative">
-      <div className="relative w-full h-[675px]">
-        <header className="w-[1195px] h-[47px] mx-auto mb-3">
-          <h1 className="w-[1195px] h-[47px] [font-family:'Amiri',Helvetica] font-bold italic text-black text-[64px] tracking-[-0.70px] leading-[56.3px] whitespace-nowrap">
-            {title}
+    <section className="bg-gray-100 font-sans px-4 sm:px-8 py-8">
+      <div className="w-full max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-left mb-8 px-2">
+          <h1 className="text-5xl font-bold text-gray-800" style={{ fontFamily: 'serif' }}>
+            {heading}
           </h1>
-          <img
-            className="w-[823px] h-px object-cover mt-[27px] ml-[372px]"
-            alt="Line"
-            src="/line-6.png"
-          />
-        </header>
-        <p className="w-[1195px] mx-auto mb-[130px] [font-family:'NATS-Regular',Helvetica] font-normal text-black text-[26px] tracking-[-0.29px] leading-[22.9px] whitespace-nowrap">
-          {subtitle}
-        </p>
-        
-        <div className="relative w-full h-[468px]">
-          {validDestinations.map((destination, index) => {
-            const heroImageUrl = getImageUrl(destination.heroImage)
-            const position = masonryPositions[index] || masonryPositions[0]
-            
-            return (
-              <Card
-                key={`destination-${destination.slug}-${index}`}
-                className={`absolute ${position.className} rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300`}
-              >
-                <Link href={`/destinations/${destination.slug}`}>
-                  <CardContent className="p-0 relative h-full">
-                    <div className="relative h-full">
-                      {heroImageUrl && (
-                        <img
-                          className="absolute inset-0 w-full h-full rounded-xl object-cover"
-                          alt={destination.name}
-                          src={heroImageUrl}
-                        />
-                      )}
-                      <div className="absolute inset-0 rounded-xl bg-[linear-gradient(0deg,rgba(0,0,0,0.75)_40%,rgba(120,119,120,0)_100%)]" />
-                      
-                      {/* Destination Name */}
-                      <div className={`absolute bottom-12 left-6 [font-family:'Amiri',Helvetica] font-normal italic text-white ${position.nameSize}`}>
-                        {destination.name}
-                      </div>
-                      
-                      {/* Price */}
-                      <div className={`absolute bottom-12 right-6 [font-family:'NATS-Regular',Helvetica] font-normal text-white text-right ${position.priceSize}`}>
-                        {showStartingPrice && (
-                          <span className="tracking-[-0.02px]">Starting from </span>
+          {subheading ? <p className="text-gray-500 mt-2 text-lg">{subheading}</p> : null}
+          <div className="w-24 h-px bg-gray-300 mt-4" />
+        </div>
+
+        {/* Carousel */}
+        <div className="relative">
+          {/* Left button */}
+          <button
+            onClick={() => scroll('left')}
+            aria-label="Scroll left"
+            className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-md hover:bg-gray-200 transition-all hidden md:flex items-center justify-center w-12 h-12"
+            type="button"
+          >
+            <ChevronLeftIcon />
+          </button>
+
+          {/* Cards */}
+          <div ref={scrollContainerRef} className="flex items-center space-x-6 overflow-x-auto py-8">
+            {Array.isArray(cards) &&
+              cards.map((card, index) => {
+                const [isFavorite, setIsFavorite] = useState(false); // local per-card state
+                const isEven = index % 2 === 0;
+                const price = Number(card?.price) || 0;
+                const formattedPrice = new Intl.NumberFormat('en-IN').format(price);
+                const imgSrc = getImageSrc(card?.image as any, card?.imageUrl as any);
+                const alt = (card as any)?.alt || (card?.image as any)?.alt || card?.name || 'Image';
+
+                return (
+                  <div
+                    key={`${card?.name ?? 'card'}-${index}`}
+                    className={`relative flex-shrink-0 w-[280px] h-[400px] rounded-2xl overflow-hidden shadow-lg group transform transition-all duration-300 hover:scale-105 ${
+                      isEven ? '-translate-y-4' : 'translate-y-4'
+                    }`}
+                  >
+                    {/* Background */}
+                    {imgSrc ? (
+                      <img src={imgSrc} alt={alt} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                    ) : (
+                      <div className="w-full h-full bg-gray-300" aria-hidden="true" />
+                    )}
+
+                    {/* Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+                    {/* Content */}
+                    <div className="absolute inset-0 p-5 flex flex-col text-white">
+                      <div className="flex justify-between items-start">
+                        {card?.discount ? (
+                          <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">{card.discount}</span>
+                        ) : (
+                          <span />
                         )}
-                        <span className={position.largePriceSize || "text-2xl tracking-[-0.06px] leading-[21.1px]"}>
-                          ₹ {formatPrice(destination.startingPrice)}
-                        </span>
+                        <HeartIcon isFavorite={isFavorite} onClick={() => setIsFavorite(!isFavorite)} />
                       </div>
-                      
-                      {/* Decorative Line */}
-                      <img
-                        className="absolute bottom-6 left-6 right-6 h-px object-cover"
-                        alt="Vector"
-                        src="/vector-1.svg"
-                        style={{ width: 'calc(100% - 48px)' }}
-                      />
+
+                      <div className="mt-auto">
+                        <h3 className="text-3xl font-bold">{card?.name ?? ''}</h3>
+                        {card?.details ? <p className="text-sm opacity-90">{card.details}</p> : null}
+                        <div className="flex justify-between items-center mt-4">
+                          <div>
+                            <span className="text-2xl font-bold">₹ {formattedPrice}</span>
+                            <span className="text-sm opacity-80 ml-1">(per person)</span>
+                          </div>
+                          <button
+                            className="bg-white text-black rounded-full w-10 h-10 flex items-center justify-center transform transition-transform duration-300 hover:bg-gray-200 hover:scale-110"
+                            type="button"
+                            aria-label="View"
+                          >
+                            <ArrowRightIcon />
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </CardContent>
-                </Link>
-              </Card>
-            )
-          })}
+                  </div>
+                );
+              })}
+          </div>
+
+          {/* Right button */}
+          <button
+            onClick={() => scroll('right')}
+            aria-label="Scroll right"
+            className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-md hover:bg-gray-200 transition-all hidden md:flex items-center justify-center w-12 h-12"
+            type="button"
+          >
+            <ChevronRightIcon />
+          </button>
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default UpDownCardCarousel
+export default UpDownCardCarousel;

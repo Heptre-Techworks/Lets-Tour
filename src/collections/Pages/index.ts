@@ -7,7 +7,7 @@ import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
-import { FeaturedDestinationsBlock } from '../../blocks/FeaturedDestinationsBlock/config'
+import { DynamicScroller } from '@/blocks/DynamicScroller/config'
 import { UpDownCardCarousel } from '../../blocks/UpDownCardCarousel/config'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
@@ -22,15 +22,16 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { PopularNowBlock } from '../../blocks/PopularNowBlock/config'
+import { PopularNow } from '../../blocks/PopularNowBlock/config'
 import { UniformCardCarousel } from '../../blocks/UniformCardCarousel/config'
 import { StaticImageBlock } from '../../blocks/StaticImageBlock/config'
 import { NonUniformCardCarousel } from '../../blocks/NonUniformCardCarousel/config'
 
 import { HeroMainBlock } from '../../blocks/HeroMainBlock/config'
-import {EnlargingCardCarousel} from '@/blocks/EnlargingCardCarousel/config'
+import {ClientStories} from '@/blocks/ClientStories/config'
 import {DestinationHeroCarousel} from '@/blocks/DestinationHeroCarousel/config'
 import InstagramCarouselBlock from '@/blocks/InstagramCarousel/config'
+import ImageGrid from '@/blocks/ImageGrid/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -86,7 +87,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, FeaturedDestinationsBlock, PopularNowBlock,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel,HeroMainBlock, UpDownCardCarousel,EnlargingCardCarousel,DestinationHeroCarousel,InstagramCarouselBlock],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock,DynamicScroller, PopularNow,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel,HeroMainBlock, UpDownCardCarousel,ClientStories,DestinationHeroCarousel,InstagramCarouselBlock,ImageGrid],
               required: true,
               admin: {
                 initCollapsed: true,

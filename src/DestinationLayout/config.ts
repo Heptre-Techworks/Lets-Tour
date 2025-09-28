@@ -6,9 +6,9 @@ import { CallToAction } from '@/blocks/CallToAction/config'
 import { Content } from '@/blocks/Content/config'
 import { FormBlock } from '@/blocks/Form/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
-import { FeaturedDestinationsBlock } from '@/blocks/FeaturedDestinationsBlock/config'
-import { PopularNowBlock } from '@/blocks/PopularNowBlock/config'
-import { EnlargingCardCarousel } from '@/blocks/EnlargingCardCarousel/config'
+import { DynamicScroller } from '@/blocks/DynamicScroller/config'
+import { PopularNow } from '@/blocks/PopularNowBlock/config'
+import { ClientStories } from '@/blocks/ClientStories/config'
 import { UniformCardCarousel } from '@/blocks/UniformCardCarousel/config'
 import { StaticImageBlock } from '@/blocks/StaticImageBlock/config'
 import { NonUniformCardCarousel } from '@/blocks/NonUniformCardCarousel/config'
@@ -41,14 +41,14 @@ export const DestinationLayout: GlobalConfig = {
                 MediaBlock,
                 Archive,
                 FormBlock,
-                FeaturedDestinationsBlock,
-                PopularNowBlock,
+                DynamicScroller,
+                PopularNow,
                 UniformCardCarousel,
                 StaticImageBlock,
                 NonUniformCardCarousel,
                 HeroMainBlock,
                 UpDownCardCarousel,
-                EnlargingCardCarousel,
+                ClientStories,
                 DestinationHeroCarousel,
                 InstagramCarouselBlock,
               ],

@@ -11,8 +11,8 @@ type Destination = {
   country: string
   continent: string
   locationDetails?: string
-  heroImage: {
-    url: string
+  heroImage?: {
+    url?: string
     alt?: string
   }
   packageCount?: number
@@ -207,13 +207,22 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
                     <div className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white">
                       {/* Image */}
                       <div className="relative" style={{ height: `${height}px` }}>
-                        <Image
-                          src={destination.heroImage?.url || ''}
-                          alt={destination.heroImage?.alt || destination.name}
-                          fill
-                          sizes={`${width}px`}
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
+                        {destination.heroImage?.url ? (
+                          <Image
+                            src={destination.heroImage.url}
+                            alt={destination.heroImage?.alt || destination.name}
+                            fill
+                            sizes={`${width}px`}
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div
+                            className="h-full w-full bg-gray-200 flex items-center justify-center"
+                            aria-label="Image unavailable"
+                          >
+                            <span className="text-gray-500">No image</span>
+                          </div>
+                        )}
 
                         {/* Discount Badge */}
                         {showDiscountBadge && destination.discount && (

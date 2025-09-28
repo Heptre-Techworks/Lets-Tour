@@ -263,29 +263,8 @@ export interface Page {
     | MediaBlock
     | ArchiveBlock
     | FormBlock
-    | {
-        title?: string | null;
-        subtitle?: string | null;
-        destinations?: (string | Destination)[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'featuredDestinationsBlock';
-      }
-    | {
-        title?: string | null;
-        subtitle?: string | null;
-        /**
-         * Select destinations; the order chosen here is preserved on the page.
-         */
-        destinations: (string | Destination)[];
-        /**
-         * Maximum number of destinations to render.
-         */
-        limit?: number | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'popularNowBlock';
-      }
+    | DynamicScrollerBlock
+    | PopularNowBlock
     | {
         /**
          * Main title for the carousel section
@@ -383,48 +362,8 @@ export interface Page {
         blockName?: string | null;
         blockType: 'heroMainBlock';
       }
-    | {
-        /**
-         * Main heading for the carousel section
-         */
-        title: string;
-        /**
-         * Subtitle text below the main title
-         */
-        subtitle?: string | null;
-        /**
-         * Select destinations to display in the masonry layout
-         */
-        destinations?: (string | Destination)[] | null;
-        /**
-         * Choose the layout style for the cards
-         */
-        layout?: ('masonry' | 'grid') | null;
-        showStartingPrice?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'upDownCardCarousel';
-      }
-    | {
-        /**
-         * Main heading for the carousel section
-         */
-        title: string;
-        /**
-         * Subtitle text below the main title
-         */
-        subtitle?: string | null;
-        /**
-         * Select destinations to display in the enlarging carousel
-         */
-        destinations?: (string | Destination)[] | null;
-        showNavigation?: boolean | null;
-        autoPlay?: boolean | null;
-        enlargeOnHover?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'enlargingCardCarousel';
-      }
+    | UpDownCardCarouselBlock
+    | ClientStoriesBlock
     | {
         /**
          * Main title for the hero section
@@ -470,6 +409,7 @@ export interface Page {
         blockType: 'destinationHeroCarousel';
       }
     | InstagramCarouselBlock
+    | ImageGridBlock
   )[];
   meta?: {
     title?: string | null;
@@ -589,9 +529,9 @@ export interface Destination {
   heroImage?: (string | null) | Media;
   startingFromPricePerPerson?: number | null;
   /**
-   * Destination label chips like Popular/In Season
+   * Destination label chips like Popular / In Season / Featured
    */
-  labels?: (string | PackageCategory)[] | null;
+  labels?: (string | Category)[] | null;
   slug?: string | null;
   slugLock?: boolean | null;
   updatedAt: string;
@@ -599,17 +539,25 @@ export interface Destination {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "package-categories".
+ * via the `definition` "categories".
  */
-export interface PackageCategory {
+export interface Category {
   id: string;
   name: string;
   type: 'experience' | 'trip_type' | 'vibe' | 'destination_label';
-  /**
-   * Optional parent category
-   */
-  parent?: (string | null) | PackageCategory;
   description?: string | null;
+  /**
+   * Optional parent category for hierarchy
+   */
+  parent?: (string | null) | Category;
+  breadcrumbs?:
+    | {
+        doc?: (string | null) | Category;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -707,30 +655,6 @@ export interface Post {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  name: string;
-  type: 'experience' | 'trip_type' | 'vibe' | 'destination_label';
-  description?: string | null;
-  /**
-   * Optional parent category for hierarchy
-   */
-  parent?: (string | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (string | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1056,6 +980,166 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScrollerBlock".
+ */
+export interface DynamicScrollerBlock {
+  sections?:
+    | {
+        id?: string | null;
+        type: 'package' | 'itinerary';
+        title?: string | null;
+        subtitle?: string | null;
+        theme?: {
+          background?: string | null;
+          headerAccent?: string | null;
+          titleColor?: string | null;
+          subtitleColor?: string | null;
+        };
+        navigation?: {
+          position?: ('bottom-left' | 'bottom-center' | 'bottom-right') | null;
+        };
+        items?: (DynamicScroller_PackageItem | DynamicScroller_ItineraryDay)[] | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'dynamicScroller';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_PackageItem".
+ */
+export interface DynamicScroller_PackageItem {
+  id?: string | null;
+  title: string;
+  price: string;
+  image: string | Media;
+  tag?: string | null;
+  tagColor?: string | null;
+  blockName?: string | null;
+  blockType: 'packageItem';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_ItineraryDay".
+ */
+export interface DynamicScroller_ItineraryDay {
+  day: string;
+  activities?:
+    | {
+        icon?: (string | null) | Media;
+        description: string;
+        detailsImage?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'itineraryDay';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PopularNowBlock".
+ */
+export interface PopularNowBlock {
+  heading?: string | null;
+  subheading?: string | null;
+  pauseOnHover?: boolean | null;
+  rows: {
+    direction?: ('left' | 'right') | null;
+    /**
+     * Loop duration in seconds (lower is faster).
+     */
+    speedSeconds?: number | null;
+    cards: {
+      name: string;
+      price: string;
+      image?: (string | null) | Media;
+      /**
+       * Optional external image URL (e.g., Unsplash).
+       */
+      imageUrl?: string | null;
+      alt?: string | null;
+      id?: string | null;
+    }[];
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'popularNow';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UpDownCardCarouselBlock".
+ */
+export interface UpDownCardCarouselBlock {
+  heading?: string | null;
+  /**
+   * Optional tagline shown under the heading.
+   */
+  subheading?: string | null;
+  cards: {
+    name: string;
+    details?: string | null;
+    /**
+     * Price in INR.
+     */
+    price: number;
+    discount?: string | null;
+    /**
+     * Select from Media collection.
+     */
+    image?: (string | null) | Media;
+    /**
+     * Optional external image URL.
+     */
+    imageUrl?: string | null;
+    /**
+     * Image alt text.
+     */
+    alt?: string | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'upDownCardCarousel';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ClientStoriesBlock".
+ */
+export interface ClientStoriesBlock {
+  heading?: string | null;
+  subheading?: string | null;
+  buttonText?: string | null;
+  background?: (string | null) | Media;
+  /**
+   * Optional external image URL.
+   */
+  backgroundUrl?: string | null;
+  /**
+   * How many cards are visible at once.
+   */
+  cardsPerView?: number | null;
+  gapPx?: number | null;
+  cards: {
+    name: string;
+    rating: number;
+    story: string;
+    avatar?: (string | null) | Media;
+    avatarUrl?: string | null;
+    /**
+     * Image alt text.
+     */
+    alt?: string | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'clientStories';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "InstagramCarouselBlock".
  */
 export interface InstagramCarouselBlock {
@@ -1104,6 +1188,82 @@ export interface InstagramCarouselBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'instagramCarousel';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageGridBlock".
+ */
+export interface ImageGridBlock {
+  leftHero?: {
+    title?: string | null;
+    rating?: number | null;
+    trail?: string | null;
+    image?: (string | null) | Media;
+    imageUrl?: string | null;
+    alt?: string | null;
+  };
+  explore?: {
+    subtitle?: string | null;
+    title?: string | null;
+    description?: string | null;
+    button?: {
+      label?: string | null;
+      href?: string | null;
+    };
+  };
+  spots?:
+    | {
+        name?: string | null;
+        rating?: number | null;
+        location?: string | null;
+        image?: (string | null) | Media;
+        imageUrl?: string | null;
+        alt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  activities?: {
+    subtitle?: string | null;
+    title?: string | null;
+    description?: string | null;
+    button?: {
+      label?: string | null;
+      href?: string | null;
+    };
+    tag?: string | null;
+    image?: (string | null) | Media;
+    imageUrl?: string | null;
+    alt?: string | null;
+  };
+  /**
+   * Optional symbols or labels so even icons/markers can be editor-controlled.
+   */
+  labels?: {
+    ratingPrefix?: string | null;
+  };
+  theme?: {
+    dark?: boolean | null;
+    container?: boolean | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'imageGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "package-categories".
+ */
+export interface PackageCategory {
+  id: string;
+  name: string;
+  type: 'experience' | 'trip_type' | 'vibe' | 'destination_label';
+  /**
+   * Optional parent category
+   */
+  parent?: (string | null) | PackageCategory;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1878,25 +2038,8 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
-        featuredDestinationsBlock?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              id?: T;
-              blockName?: T;
-            };
-        popularNowBlock?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              limit?: T;
-              id?: T;
-              blockName?: T;
-            };
+        dynamicScroller?: T | DynamicScrollerBlockSelect<T>;
+        popularNow?: T | PopularNowBlockSelect<T>;
         uniformCardCarousel?:
           | T
           | {
@@ -1970,29 +2113,8 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        upDownCardCarousel?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              layout?: T;
-              showStartingPrice?: T;
-              id?: T;
-              blockName?: T;
-            };
-        enlargingCardCarousel?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              showNavigation?: T;
-              autoPlay?: T;
-              enlargeOnHover?: T;
-              id?: T;
-              blockName?: T;
-            };
+        upDownCardCarousel?: T | UpDownCardCarouselBlockSelect<T>;
+        clientStories?: T | ClientStoriesBlockSelect<T>;
         destinationHeroCarousel?:
           | T
           | {
@@ -2017,6 +2139,7 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
         instagramCarousel?: T | InstagramCarouselBlockSelect<T>;
+        imageGrid?: T | ImageGridBlockSelect<T>;
       };
   meta?:
     | T
@@ -2118,6 +2241,147 @@ export interface FormBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScrollerBlock_select".
+ */
+export interface DynamicScrollerBlockSelect<T extends boolean = true> {
+  sections?:
+    | T
+    | {
+        id?: T;
+        type?: T;
+        title?: T;
+        subtitle?: T;
+        theme?:
+          | T
+          | {
+              background?: T;
+              headerAccent?: T;
+              titleColor?: T;
+              subtitleColor?: T;
+            };
+        navigation?:
+          | T
+          | {
+              position?: T;
+            };
+        items?:
+          | T
+          | {
+              packageItem?: T | DynamicScroller_PackageItemSelect<T>;
+              itineraryDay?: T | DynamicScroller_ItineraryDaySelect<T>;
+            };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_PackageItem_select".
+ */
+export interface DynamicScroller_PackageItemSelect<T extends boolean = true> {
+  id?: T;
+  title?: T;
+  price?: T;
+  image?: T;
+  tag?: T;
+  tagColor?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_ItineraryDay_select".
+ */
+export interface DynamicScroller_ItineraryDaySelect<T extends boolean = true> {
+  day?: T;
+  activities?:
+    | T
+    | {
+        icon?: T;
+        description?: T;
+        detailsImage?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PopularNowBlock_select".
+ */
+export interface PopularNowBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  pauseOnHover?: T;
+  rows?:
+    | T
+    | {
+        direction?: T;
+        speedSeconds?: T;
+        cards?:
+          | T
+          | {
+              name?: T;
+              price?: T;
+              image?: T;
+              imageUrl?: T;
+              alt?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UpDownCardCarouselBlock_select".
+ */
+export interface UpDownCardCarouselBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  cards?:
+    | T
+    | {
+        name?: T;
+        details?: T;
+        price?: T;
+        discount?: T;
+        image?: T;
+        imageUrl?: T;
+        alt?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ClientStoriesBlock_select".
+ */
+export interface ClientStoriesBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  buttonText?: T;
+  background?: T;
+  backgroundUrl?: T;
+  cardsPerView?: T;
+  gapPx?: T;
+  cards?:
+    | T
+    | {
+        name?: T;
+        rating?: T;
+        story?: T;
+        avatar?: T;
+        avatarUrl?: T;
+        alt?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "InstagramCarouselBlock_select".
  */
 export interface InstagramCarouselBlockSelect<T extends boolean = true> {
@@ -2146,6 +2410,76 @@ export interface InstagramCarouselBlockSelect<T extends boolean = true> {
         id?: T;
       };
   caption?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageGridBlock_select".
+ */
+export interface ImageGridBlockSelect<T extends boolean = true> {
+  leftHero?:
+    | T
+    | {
+        title?: T;
+        rating?: T;
+        trail?: T;
+        image?: T;
+        imageUrl?: T;
+        alt?: T;
+      };
+  explore?:
+    | T
+    | {
+        subtitle?: T;
+        title?: T;
+        description?: T;
+        button?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+            };
+      };
+  spots?:
+    | T
+    | {
+        name?: T;
+        rating?: T;
+        location?: T;
+        image?: T;
+        imageUrl?: T;
+        alt?: T;
+        id?: T;
+      };
+  activities?:
+    | T
+    | {
+        subtitle?: T;
+        title?: T;
+        description?: T;
+        button?:
+          | T
+          | {
+              label?: T;
+              href?: T;
+            };
+        tag?: T;
+        image?: T;
+        imageUrl?: T;
+        alt?: T;
+      };
+  labels?:
+    | T
+    | {
+        ratingPrefix?: T;
+      };
+  theme?:
+    | T
+    | {
+        dark?: T;
+        container?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -2947,7 +3281,74 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  navGroups?:
+    | {
+        groupLabel: string;
+        links?:
+          | {
+              link: {
+                type?: ('reference' | 'custom') | null;
+                newTab?: boolean | null;
+                reference?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'posts';
+                      value: string | Post;
+                    } | null);
+                url?: string | null;
+                label: string;
+              };
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  socialLinks?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  legalLinks?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
   showThemeSelector?: boolean | null;
+  copyright?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2988,29 +3389,8 @@ export interface PackageLayout {
     | CallToActionBlock
     | FormBlock
     | MediaBlock
-    | {
-        title?: string | null;
-        subtitle?: string | null;
-        destinations?: (string | Destination)[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'featuredDestinationsBlock';
-      }
-    | {
-        title?: string | null;
-        subtitle?: string | null;
-        /**
-         * Select destinations; the order chosen here is preserved on the page.
-         */
-        destinations: (string | Destination)[];
-        /**
-         * Maximum number of destinations to render.
-         */
-        limit?: number | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'popularNowBlock';
-      }
+    | DynamicScrollerBlock
+    | PopularNowBlock
     | {
         /**
          * Main title for the carousel section
@@ -3061,28 +3441,7 @@ export interface PackageLayout {
         blockName?: string | null;
         blockType: 'nonUniformCardCarousel';
       }
-    | {
-        /**
-         * Main heading for the carousel section
-         */
-        title: string;
-        /**
-         * Subtitle text below the main title
-         */
-        subtitle?: string | null;
-        /**
-         * Select destinations to display in the masonry layout
-         */
-        destinations?: (string | Destination)[] | null;
-        /**
-         * Choose the layout style for the cards
-         */
-        layout?: ('masonry' | 'grid') | null;
-        showStartingPrice?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'upDownCardCarousel';
-      }
+    | UpDownCardCarouselBlock
     | {
         slides?:
           | {
@@ -3130,26 +3489,7 @@ export interface PackageLayout {
         blockName?: string | null;
         blockType: 'heroMainBlock';
       }
-    | {
-        /**
-         * Main heading for the carousel section
-         */
-        title: string;
-        /**
-         * Subtitle text below the main title
-         */
-        subtitle?: string | null;
-        /**
-         * Select destinations to display in the enlarging carousel
-         */
-        destinations?: (string | Destination)[] | null;
-        showNavigation?: boolean | null;
-        autoPlay?: boolean | null;
-        enlargeOnHover?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'enlargingCardCarousel';
-      }
+    | ClientStoriesBlock
     | {
         /**
          * Main title for the hero section
@@ -3276,29 +3616,8 @@ export interface DestinationLayout {
     | MediaBlock
     | ArchiveBlock
     | FormBlock
-    | {
-        title?: string | null;
-        subtitle?: string | null;
-        destinations?: (string | Destination)[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'featuredDestinationsBlock';
-      }
-    | {
-        title?: string | null;
-        subtitle?: string | null;
-        /**
-         * Select destinations; the order chosen here is preserved on the page.
-         */
-        destinations: (string | Destination)[];
-        /**
-         * Maximum number of destinations to render.
-         */
-        limit?: number | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'popularNowBlock';
-      }
+    | DynamicScrollerBlock
+    | PopularNowBlock
     | {
         /**
          * Main title for the carousel section
@@ -3396,48 +3715,8 @@ export interface DestinationLayout {
         blockName?: string | null;
         blockType: 'heroMainBlock';
       }
-    | {
-        /**
-         * Main heading for the carousel section
-         */
-        title: string;
-        /**
-         * Subtitle text below the main title
-         */
-        subtitle?: string | null;
-        /**
-         * Select destinations to display in the masonry layout
-         */
-        destinations?: (string | Destination)[] | null;
-        /**
-         * Choose the layout style for the cards
-         */
-        layout?: ('masonry' | 'grid') | null;
-        showStartingPrice?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'upDownCardCarousel';
-      }
-    | {
-        /**
-         * Main heading for the carousel section
-         */
-        title: string;
-        /**
-         * Subtitle text below the main title
-         */
-        subtitle?: string | null;
-        /**
-         * Select destinations to display in the enlarging carousel
-         */
-        destinations?: (string | Destination)[] | null;
-        showNavigation?: boolean | null;
-        autoPlay?: boolean | null;
-        enlargeOnHover?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'enlargingCardCarousel';
-      }
+    | UpDownCardCarouselBlock
+    | ClientStoriesBlock
     | {
         /**
          * Main title for the hero section
@@ -3532,7 +3811,56 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  navGroups?:
+    | T
+    | {
+        groupLabel?: T;
+        links?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                  };
+              id?: T;
+            };
+        id?: T;
+      };
+  socialLinks?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  legalLinks?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
   showThemeSelector?: T;
+  copyright?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -3569,25 +3897,8 @@ export interface PackageLayoutSelect<T extends boolean = true> {
         cta?: T | CallToActionBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
-        featuredDestinationsBlock?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              id?: T;
-              blockName?: T;
-            };
-        popularNowBlock?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              limit?: T;
-              id?: T;
-              blockName?: T;
-            };
+        dynamicScroller?: T | DynamicScrollerBlockSelect<T>;
+        popularNow?: T | PopularNowBlockSelect<T>;
         uniformCardCarousel?:
           | T
           | {
@@ -3620,17 +3931,7 @@ export interface PackageLayoutSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        upDownCardCarousel?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              layout?: T;
-              showStartingPrice?: T;
-              id?: T;
-              blockName?: T;
-            };
+        upDownCardCarousel?: T | UpDownCardCarouselBlockSelect<T>;
         heroMainBlock?:
           | T
           | {
@@ -3672,18 +3973,7 @@ export interface PackageLayoutSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        enlargingCardCarousel?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              showNavigation?: T;
-              autoPlay?: T;
-              enlargeOnHover?: T;
-              id?: T;
-              blockName?: T;
-            };
+        clientStories?: T | ClientStoriesBlockSelect<T>;
         destinationHeroCarousel?:
           | T
           | {
@@ -3790,25 +4080,8 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
-        featuredDestinationsBlock?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              id?: T;
-              blockName?: T;
-            };
-        popularNowBlock?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              limit?: T;
-              id?: T;
-              blockName?: T;
-            };
+        dynamicScroller?: T | DynamicScrollerBlockSelect<T>;
+        popularNow?: T | PopularNowBlockSelect<T>;
         uniformCardCarousel?:
           | T
           | {
@@ -3882,29 +4155,8 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        upDownCardCarousel?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              layout?: T;
-              showStartingPrice?: T;
-              id?: T;
-              blockName?: T;
-            };
-        enlargingCardCarousel?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              showNavigation?: T;
-              autoPlay?: T;
-              enlargeOnHover?: T;
-              id?: T;
-              blockName?: T;
-            };
+        upDownCardCarousel?: T | UpDownCardCarouselBlockSelect<T>;
+        clientStories?: T | ClientStoriesBlockSelect<T>;
         destinationHeroCarousel?:
           | T
           | {

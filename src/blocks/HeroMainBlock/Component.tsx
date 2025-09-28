@@ -2,7 +2,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import Image from 'next/image'
+import Image, { StaticImageData } from 'next/image'
 
 // --- TYPE DEFINITIONS ---
 type Media = { url: string; alt?: string }
@@ -25,6 +25,41 @@ type Props = {
     category?: string
   }
 }
+
+// --- Helpers: ensure next/image receives only valid sources ---
+const isValidSrcString = (s: string) =>
+  s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/') // allowed by next/image [web:189]
+
+function resolveImageSrc(
+  candidate?: string | StaticImageData | null,
+  relation?: Media | string | null,
+): string | StaticImageData | null {
+  // 1) Prefer explicit candidate if valid
+  if (typeof candidate === 'string') {
+    const t = candidate.trim()
+    return t && isValidSrcString(t) ? t : null
+  }
+  if (candidate && typeof candidate === 'object') {
+    // Static import (StaticImageData)
+    return candidate
+  }
+
+  // 2) Fall back to relation
+  if (relation) {
+    if (typeof relation === 'string') {
+      const t = relation.trim()
+      return t && isValidSrcString(t) ? t : null
+    }
+    if (typeof relation === 'object') {
+      const t = relation.url?.trim() || ''
+      return t && isValidSrcString(t) ? t : null
+    }
+  }
+  return null
+}
+
+const getAlt = (img: Media | string | undefined, fallback: string) =>
+  typeof img === 'object' && img?.alt?.trim() ? img.alt.trim() : fallback
 
 // --- REUSABLE SVG ICONS ---
 const AirplaneIcon = ({ className = '' }: { className?: string }) => (
@@ -107,7 +142,12 @@ export const HeroMainBlock: React.FC<Props> = ({
 
   if (!slides || slides.length === 0) return null
   const activeSlide = slides[currentSlide]
-  const cloudImageUrl = typeof cloudImage === 'string' ? cloudImage : cloudImage?.url
+
+  // Resolve cloud image safely
+  const cloudImageUrl = resolveImageSrc(
+    typeof cloudImage === 'string' ? cloudImage : cloudImage?.url,
+    typeof cloudImage === 'string' ? cloudImage : cloudImage,
+  )
 
   return (
     <>
@@ -123,15 +163,24 @@ export const HeroMainBlock: React.FC<Props> = ({
         {/* Background Image Slider */}
         <div className="absolute inset-0">
           {slides.map((slide, index) => {
-            const src = typeof slide.image === 'string' ? slide.image : slide.image?.url || ''
+            const src = resolveImageSrc(
+              typeof slide.image === 'string' ? slide.image : slide.image?.url,
+              slide.image,
+            )
+            if (!src) return null // Skip invalid URLs/IDs to avoid next/image runtime errors [web:189][web:181]
+
+            const alt = getAlt(slide.image, activeSlide.title)
+
             return (
               <div key={index} className="absolute inset-0">
                 <Image
                   src={src}
-                  alt={activeSlide.title}
+                  alt={alt}
                   fill
                   sizes="100vw"
-                  className={`object-cover transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
+                  className={`object-cover transition-opacity duration-1000 ${
+                    index === currentSlide ? 'opacity-100' : 'opacity-0'
+                  }`}
                   priority={index === 0}
                 />
               </div>

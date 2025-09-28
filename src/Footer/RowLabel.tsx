@@ -1,11 +1,29 @@
 'use client'
-import { Footer } from '@/payload-types'
-import { RowLabelProps, useRowLabel } from '@payloadcms/ui'
+import type { Footer } from '@/payload-types'
+import type { RowLabelProps } from '@payloadcms/ui'
+import { useRowLabel } from '@payloadcms/ui'
 
 export const RowLabel: React.FC<RowLabelProps> = () => {
-  const data = useRowLabel<NonNullable<Footer['navItems']>[number]>()
-  const label = data?.data?.link?.label
-    ? `Nav item ${data.rowNumber !== undefined ? data.rowNumber + 1 : ''}: ${data?.data?.link?.label}`
-    : 'Row'
+  const data = useRowLabel<
+    NonNullable<Footer['navItems']>[number] |
+    NonNullable<Footer['legalLinks']>[number] |
+    NonNullable<Footer['socialLinks']>[number] |
+    NonNullable<Footer['navGroups']>[number]
+  >()
+
+  // Try to derive a meaningful title across supported rows
+  const groupLabel = (data?.data as any)?.groupLabel
+  const linkLabel = (data?.data as any)?.link?.label
+  const nestedLinkLabel = (data?.data as any)?.links ? undefined : linkLabel
+
+  const label =
+    groupLabel
+      ? `Group: ${groupLabel}`
+      : nestedLinkLabel
+        ? `Link: ${nestedLinkLabel}`
+        : linkLabel
+          ? `Link: ${linkLabel}`
+          : `Row ${data?.rowNumber !== undefined ? data.rowNumber + 1 : ''}`
+
   return <div>{label}</div>
 }

@@ -7,9 +7,9 @@ import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
-import { FeaturedDestinationsBlock } from '@/blocks/FeaturedDestinationsBlock/Component'
-import { PopularNowBlock } from '@/blocks/PopularNowBlock/Component'
-import {EnlargingCardCarousel} from './EnlargingCardCarousel/Component'
+import { DynamicScrollerBlockComponent } from './DynamicScroller/Component'
+import { PopularNow } from '@/blocks/PopularNowBlock/Component'
+import { ClientStories } from '@/blocks/ClientStories/Component'
 import {UniformCardCarousel} from '@/blocks/UniformCardCarousel/Component'
 import StaticImageBlock from '@/blocks/StaticImageBlock/Component'
 import NonUniformCardCarousel from '@/blocks/NonUniformCardCarousel/Component'
@@ -17,22 +17,24 @@ import UpDownCardCarousel from './UpDownCardCarousel/Component'
 import HeroMainBlock from '@/blocks/HeroMainBlock/Component'
 import DestinationHeroCarousel from './DestinationHeroCarousel/Component'
 import { InstagramCarousel } from './InstagramCarousel/Component'
+import ImageGrid from './ImageGrid/Component'
 const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
-  featuredDestinationsBlock: FeaturedDestinationsBlock,
-  popularNowBlock: PopularNowBlock,
+  dynamicScroller:DynamicScrollerBlockComponent,
+  popularNow: PopularNow,
   uniformCardCarousel: UniformCardCarousel,
   staticImageBlock: StaticImageBlock,
   nonUniformCardCarousel: NonUniformCardCarousel,
   upDownCardCarousel:UpDownCardCarousel,
   heroMainBlock: HeroMainBlock,
-  enlargingCardCarousel:EnlargingCardCarousel,
+  clientStories: ClientStories,
   destinationHeroCarousel: DestinationHeroCarousel,
   instagramCarousel: InstagramCarousel,
+  imageGrid: ImageGrid
 }
 
 export const RenderBlocks: React.FC<{
@@ -54,8 +56,8 @@ export const RenderBlocks: React.FC<{
             if (Block) {
               return (
                 <div className="my-16" key={index}>
-                  {/* @ts-expect-error there may be some mismatch between the expected types here */}
-                  <Block {...block} disableInnerContainer />
+                  {}
+                  <Block {...(block as any)} disableInnerContainer />
                 </div>
               )
             }

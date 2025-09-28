@@ -10,9 +10,9 @@ interface FooterLogoProps {
   className?: string
 }
 
-export const FooterLogo: React.FC<FooterLogoProps> = ({ 
-  data, 
-  className = "flex items-center" 
+export const FooterLogo: React.FC<FooterLogoProps> = ({
+  data,
+  className = 'flex items-center',
 }) => {
   const logo = data?.logo as Media
 

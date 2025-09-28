@@ -1,59 +1,56 @@
-// payload/blocks/UpDownCardCarousel.ts
-import type { Block } from 'payload'
+// src/blocks/UpDownCarousel/config.ts
+import type { Block } from 'payload';
 
 export const UpDownCardCarousel: Block = {
   slug: 'upDownCardCarousel',
-  labels: {
-    singular: 'Up Down Card Carousel',
-    plural: 'Up Down Card Carousels',
-  },
+  interfaceName: 'UpDownCardCarouselBlock',
+  labels: { singular: 'Up Down Carousel', plural: 'Up Down Carousel' },
   fields: [
+    { name: 'heading', type: 'text', defaultValue: 'In Season' },
     {
-      name: 'title',
+      name: 'subheading',
       type: 'text',
-      defaultValue: 'Popular now!',
+      defaultValue: "Today's enemy is tomorrow's friend.*",
+      admin: { description: 'Optional tagline shown under the heading.' },
+    },
+    {
+      name: 'cards',
+      type: 'array',
       required: true,
-      admin: {
-        description: 'Main heading for the carousel section',
-      },
-    },
-    {
-      name: 'subtitle',
-      type: 'text',
-      defaultValue: "Today's enemy is tomorrow's friend.",
-      admin: {
-        description: 'Subtitle text below the main title',
-      },
-    },
-    {
-      name: 'destinations',
-      type: 'relationship',
-      relationTo: 'destinations',
-      hasMany: true,
-      maxRows: 8,
-      admin: {
-        description: 'Select destinations to display in the masonry layout',
-      },
-    },
-    {
-      name: 'layout',
-      type: 'select',
-      defaultValue: 'masonry',
-      options: [
-        { label: 'Masonry Layout', value: 'masonry' },
-        { label: 'Grid Layout', value: 'grid' },
+      labels: { singular: 'Destination Card', plural: 'Destination Cards' },
+      fields: [
+        { name: 'name', type: 'text', required: true },
+        { name: 'details', type: 'text' },
+        {
+          name: 'price',
+          type: 'number',
+          required: true,
+          min: 0,
+          admin: { step: 1, description: 'Price in INR.' },
+        },
+        { name: 'discount', type: 'text' },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'image',
+              label: 'Image (upload)',
+              type: 'upload',
+              relationTo: 'media',
+              admin: { description: 'Select from Media collection.' },
+            },
+            {
+              name: 'imageUrl',
+              label: 'Image (external URL)',
+              type: 'text',
+              admin: { description: 'Optional external image URL.' },
+            },
+          ],
+        },
+        { name: 'alt', type: 'text', admin: { description: 'Image alt text.' } },
       ],
-      admin: {
-        description: 'Choose the layout style for the cards',
-      },
-    },
-    {
-      name: 'showStartingPrice',
-      type: 'checkbox',
-      label: 'Show Starting Price Text',
-      defaultValue: true,
     },
   ],
-}
+};
 
-export default UpDownCardCarousel
+export default UpDownCardCarousel;
