@@ -1,13 +1,27 @@
 // src/blocks/UpDownCarousel/Component.tsx
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import type { UpDownCardCarouselBlock as UpDownCardCarouselBlockProps } from '@/payload-types';
 
 type MediaLike = { url?: string | null; alt?: string | null };
 
+type CardLike = {
+  name?: string | null;
+  details?: string | null;
+  discount?: string | null;
+  price?: number | string | null;
+  image?: MediaLike | string | null;
+  imageUrl?: string | null;
+  alt?: string | null;
+};
+
+const isMediaLike = (v: unknown): v is MediaLike =>
+  !!v && typeof v === 'object' && ('url' in (v as Record<string, unknown>) || 'alt' in (v as Record<string, unknown>));
+
 const getImageSrc = (img?: MediaLike | string | null, url?: string | null) => {
-  if (img && typeof img === 'object' && 'url' in img && img?.url) return img.url as string;
+  if (typeof img === 'string' && img) return img;
+  if (isMediaLike(img) && img.url) return img.url;
   if (url) return url;
   return '';
 };
@@ -49,6 +63,70 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
+// Child card component so hooks live at top level of a component (not inside map)
+const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isEven }) => {
+  const [isFavorite, setIsFavorite] = React.useState(false);
+
+  const priceNum =
+    typeof card?.price === 'string' ? Number(card.price) : typeof card?.price === 'number' ? card.price : 0;
+  const safePrice = Number.isFinite(priceNum) ? priceNum : 0;
+  const formattedPrice = new Intl.NumberFormat('en-IN').format(safePrice);
+
+  const imgSrc = getImageSrc(card?.image, card?.imageUrl);
+  const alt =
+    (card?.alt && String(card.alt)) ||
+    (isMediaLike(card?.image) && card?.image?.alt) ||
+    card?.name ||
+    'Image';
+
+  return (
+    <div
+      className={`relative flex-shrink-0 w-[280px] h-[400px] rounded-2xl overflow-hidden shadow-lg group transform transition-all duration-300 hover:scale-105 ${
+        isEven ? '-translate-y-4' : 'translate-y-4'
+      }`}
+    >
+      {imgSrc ? (
+        // Note: Using <img> retains current behavior; Next.js recommends <Image /> for perf
+        // Replace with next/image if desired to remove the lint warning.
+        <img src={imgSrc} alt={alt ?? 'Image'} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+      ) : (
+        <div className="w-full h-full bg-gray-300" aria-hidden="true" />
+      )}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+      <div className="absolute inset-0 p-5 flex flex-col text-white">
+        <div className="flex justify-between items-start">
+          {card?.discount ? (
+            <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">{card.discount}</span>
+          ) : (
+            <span />
+          )}
+          <HeartIcon isFavorite={isFavorite} onClick={() => setIsFavorite(v => !v)} />
+        </div>
+
+        <div className="mt-auto">
+          <h3 className="text-3xl font-bold">{card?.name ?? ''}</h3>
+          {card?.details ? <p className="text-sm opacity-90">{card.details}</p> : null}
+          <div className="flex justify-between items-center mt-4">
+            <div>
+              <span className="text-2xl font-bold">₹ {formattedPrice}</span>
+              <span className="text-sm opacity-80 ml-1">(per person)</span>
+            </div>
+            <button
+              className="bg-white text-black rounded-full w-10 h-10 flex items-center justify-center transform transition-transform duration-300 hover:bg-gray-200 hover:scale-110"
+              type="button"
+              aria-label="View"
+            >
+              <ArrowRightIcon />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const UpDownCardCarousel: React.FC<UpDownCardCarouselBlockProps> = ({
   heading = 'In Season',
   subheading = "Today's enemy is tomorrow's friend.*",
@@ -89,63 +167,13 @@ export const UpDownCardCarousel: React.FC<UpDownCardCarouselBlockProps> = ({
           {/* Cards */}
           <div ref={scrollContainerRef} className="flex items-center space-x-6 overflow-x-auto py-8">
             {Array.isArray(cards) &&
-              cards.map((card, index) => {
-                const [isFavorite, setIsFavorite] = useState(false); // local per-card state
-                const isEven = index % 2 === 0;
-                const price = Number(card?.price) || 0;
-                const formattedPrice = new Intl.NumberFormat('en-IN').format(price);
-                const imgSrc = getImageSrc(card?.image as any, card?.imageUrl as any);
-                const alt = (card as any)?.alt || (card?.image as any)?.alt || card?.name || 'Image';
-
-                return (
-                  <div
-                    key={`${card?.name ?? 'card'}-${index}`}
-                    className={`relative flex-shrink-0 w-[280px] h-[400px] rounded-2xl overflow-hidden shadow-lg group transform transition-all duration-300 hover:scale-105 ${
-                      isEven ? '-translate-y-4' : 'translate-y-4'
-                    }`}
-                  >
-                    {/* Background */}
-                    {imgSrc ? (
-                      <img src={imgSrc} alt={alt} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
-                    ) : (
-                      <div className="w-full h-full bg-gray-300" aria-hidden="true" />
-                    )}
-
-                    {/* Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-                    {/* Content */}
-                    <div className="absolute inset-0 p-5 flex flex-col text-white">
-                      <div className="flex justify-between items-start">
-                        {card?.discount ? (
-                          <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">{card.discount}</span>
-                        ) : (
-                          <span />
-                        )}
-                        <HeartIcon isFavorite={isFavorite} onClick={() => setIsFavorite(!isFavorite)} />
-                      </div>
-
-                      <div className="mt-auto">
-                        <h3 className="text-3xl font-bold">{card?.name ?? ''}</h3>
-                        {card?.details ? <p className="text-sm opacity-90">{card.details}</p> : null}
-                        <div className="flex justify-between items-center mt-4">
-                          <div>
-                            <span className="text-2xl font-bold">₹ {formattedPrice}</span>
-                            <span className="text-sm opacity-80 ml-1">(per person)</span>
-                          </div>
-                          <button
-                            className="bg-white text-black rounded-full w-10 h-10 flex items-center justify-center transform transition-transform duration-300 hover:bg-gray-200 hover:scale-110"
-                            type="button"
-                            aria-label="View"
-                          >
-                            <ArrowRightIcon />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              cards.map((card, index) => (
+                <CarouselCard
+                  key={`${(card as CardLike)?.name ?? 'card'}-${index}`}
+                  card={card as CardLike}
+                  isEven={index % 2 === 0}
+                />
+              ))}
           </div>
 
           {/* Right button */}
