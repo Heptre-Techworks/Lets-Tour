@@ -1,4 +1,3 @@
-// payload/configs/DestinationHeroConfig.ts
 import type { Field } from 'payload'
 
 export const DestinationHeroConfig: Field[] = [
@@ -7,30 +6,64 @@ export const DestinationHeroConfig: Field[] = [
     label: 'Destination Hero Fields',
     type: 'group',
     admin: {
-      // render this group only when the hero type is destinationHero
       condition: (_, siblingData) => siblingData?.type === 'destinationHero',
     },
     fields: [
       {
         name: 'destination',
-        type: 'relationship',
-        relationTo: 'destinations',
+        type: 'text',
+        label: 'Destination Name',
         required: true,
-        maxDepth: 1, // keep REST depth small; component can request more if needed
+        admin: {
+          description: 'The main heading displayed on the hero',
+        },
       },
       {
-        name: 'presentation',
-        type: 'group',
+        name: 'cities',
+        type: 'array',
+        label: 'Cities',
+        required: true,
+        minRows: 3,
+        maxRows: 20,
+        labels: {
+          singular: 'City',
+          plural: 'Cities',
+        },
         fields: [
-          { name: 'overlay', type: 'number', label: 'Dark overlay (0–1)', defaultValue: 0.35 },
-          { name: 'showArrows', type: 'checkbox', label: 'Show arrows', defaultValue: true },
           {
-            name: 'titleOverride',
+            name: 'name',
             type: 'text',
-            label: 'Optional title text',
-            admin: { description: 'Defaults to destination.name if left empty' },
+            label: 'City Name',
+            required: true,
+          },
+          {
+            name: 'image',
+            type: 'upload',
+            relationTo: 'media',
+            label: 'City Background Image',
+            required: true,
+            admin: {
+              description: 'High-resolution image for the city background',
+            },
           },
         ],
+        admin: {
+          initCollapsed: true,
+          // components: {
+          //   RowLabel: '@/heros/DestinationHero/RowLabel#CityRowLabel',
+          // },
+        },
+      },
+      {
+        name: 'autoplayInterval',
+        type: 'number',
+        label: 'Autoplay Interval (milliseconds)',
+        defaultValue: 5000,
+        min: 2000,
+        max: 10000,
+        admin: {
+          description: 'Time in milliseconds between automatic slide changes',
+        },
       },
     ],
   },

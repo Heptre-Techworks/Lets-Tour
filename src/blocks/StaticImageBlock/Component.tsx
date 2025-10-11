@@ -1,53 +1,56 @@
-// components/blocks/StaticImageBlock.tsx
-import React from 'react'
+import React from 'react';
 
-interface Props {
-  image: {
-    url: string
-    alt?: string
-  } | string
-  overlay?: boolean
-  height?: 'small' | 'medium' | 'large' | 'xl'
+interface Media {
+  url: string;
+  alt?: string;
 }
 
-const StaticImageBlock: React.FC<Props> = ({ 
-  image, 
-  overlay = true, 
-  height = 'medium' 
+interface Props {
+  image: Media;
+  overlay?: boolean;
+  overlayOpacity?: number;
+  height?: 'small' | 'medium' | 'large' | 'xl';
+}
+
+const StaticImageBlock: React.FC<Props> = ({
+  image,
+  overlay = true,
+  overlayOpacity = 0.5,
+  height = 'medium',
 }) => {
-  const imageUrl = typeof image === 'string' ? image : image?.url
-  const altText = typeof image === 'string' ? '' : image?.alt || ''
+  if (!image?.url) {
+    return null;
+  }
 
   const getHeightClass = () => {
     switch (height) {
       case 'small':
-        return 'h-80'
+        return 'h-80';
       case 'large':
-        return 'h-[500px]'
+        return 'h-[500px]';
       case 'xl':
-        return 'h-[600px]'
+        return 'h-[600px]';
       case 'medium':
       default:
-        return 'h-96'
+        return 'h-96';
     }
-  }
-
-  if (!imageUrl) {
-    return null
-  }
+  };
 
   return (
-    <section className={`relative w-full ${getHeightClass()}`}>
+    <section className={`relative w-full overflow-hidden ${getHeightClass()}`}>
       <img
-        src={imageUrl}
-        alt={altText}
-        className="absolute inset-0 w-full h-full object-cover"
+        src={image.url}
+        alt={image.alt || ''}
+        className="w-full h-full object-cover"
       />
       {overlay && (
-        <div className="absolute inset-0 bg-black bg-opacity-50" />
+        <div
+          className="absolute inset-0 bg-black pointer-events-none"
+          style={{ opacity: overlayOpacity }}
+        />
       )}
     </section>
-  )
-}
+  );
+};
 
-export default StaticImageBlock
+export default StaticImageBlock;

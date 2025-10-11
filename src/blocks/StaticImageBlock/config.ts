@@ -1,5 +1,4 @@
-// payload/blocks/StaticImageBlock.ts
-import type { Block } from 'payload'
+import type { Block } from 'payload';
 
 export const StaticImageBlock: Block = {
   slug: 'staticImageBlock',
@@ -14,7 +13,7 @@ export const StaticImageBlock: Block = {
       relationTo: 'media',
       required: true,
       admin: {
-        description: 'Background image for the block',
+        description: 'Select the image to display',
       },
     },
     {
@@ -22,20 +21,35 @@ export const StaticImageBlock: Block = {
       type: 'checkbox',
       label: 'Show dark overlay',
       defaultValue: true,
+      admin: {
+        description: 'Add a dark overlay on top of the image',
+      },
+    },
+    {
+      name: 'overlayOpacity',
+      type: 'number',
+      required: false,
+      min: 0,
+      max: 1,
+      defaultValue: 0.5,
+      admin: {
+        description: 'Adjust darkness of overlay (0 = transparent, 1 = fully black)',
+        condition: (data) => data.overlay === true,
+      },
     },
     {
       name: 'height',
       type: 'select',
       defaultValue: 'medium',
       options: [
-        { label: 'Small (300px)', value: 'small' },
-        { label: 'Medium (400px)', value: 'medium' },
+        { label: 'Small (320px)', value: 'small' },
+        { label: 'Medium (384px)', value: 'medium' },
         { label: 'Large (500px)', value: 'large' },
         { label: 'Extra Large (600px)', value: 'xl' },
       ],
       admin: {
-        description: 'Height of the image block',
+        description: 'Choose the height of the image block',
       },
     },
   ],
-}
+};

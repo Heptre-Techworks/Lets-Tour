@@ -7,18 +7,49 @@ import type { Page, Media } from '@/payload-types'
 
 type RenderHeroProps = { hero: Page['hero'] | null | undefined }
 
-type DestinationFieldsShape = {
-  destination?: string | {
-    id: string
-    name: string
-    slug: string
-    heroImage: Media | string
-    places?: { name: string; slug: string }[]
+type City = {
+  name: string
+  image: Media | string
+  id?: string
+}
+
+type DestinationHeroFieldsShape = {
+  destination?: string
+  cities?: City[]
+  autoplayInterval?: number
+}
+
+type VacationType = {
+  type: string
+  label: string
+  icon: string
+  percentage: number
+  id?: string
+}
+
+type RecentBooking = {
+  avatar: Media | string
+  id?: string
+}
+
+type TravelPackageFieldsShape = {
+  title?: string
+  rating?: number
+  location?: string
+  description?: string
+  vacationTypes?: VacationType[]
+  pricing?: {
+    originalPrice?: string
+    discountedPrice?: string
+    currency?: string
   }
-  presentation?: {
-    overlay?: number
-    showArrows?: boolean
-    titleOverride?: string
+  bookingCount?: string
+  recentBookings?: RecentBooking[]
+  mainImage?: Media | string
+  backgroundImage?: Media | string
+  buttons?: {
+    bookNowLabel?: string
+    enableDownload?: boolean
   }
 }
 
@@ -62,33 +93,58 @@ export const RenderHero: React.FC<RenderHeroProps> = ({ hero }) => {
     }
 
     case 'destinationHero': {
-      // Read from the correct group and help TS with a local shape
-      const dh = hero.destinationHeroFields as DestinationFieldsShape | undefined
-      if (!dh) return null
-
-      const rel = dh.destination
-      const dest = typeof rel === 'object' ? rel : undefined
-      if (!dest) return null
+      const dh = hero.destinationHeroFields as DestinationHeroFieldsShape | undefined
+      if (!dh || !dh.cities || dh.cities.length === 0) return null
 
       return (
         <DestinationHero
-          heroImage={dest.heroImage}
-          title={dh.presentation?.titleOverride || dest.name}
-          places={dest.places ?? []}
-          overlay={dh.presentation?.overlay ?? 0.35}
-          showArrows={dh.presentation?.showArrows ?? true}
+          cities={dh.cities}
+          autoplayInterval={dh.autoplayInterval ?? 5000}
         />
       )
     }
 
-    case 'packageHero':
+    case 'packageHero': {
+      // Type assertion to access travelPackageFields (matches your config condition)
+      const tp = (hero as any).travelPackageFields as TravelPackageFieldsShape | undefined
+      if (!tp) return null
+
       return (
         <PackageHero
-          packageName={hero.packageHeroFields?.packageName ?? 'Default Package'}
-          description={hero.packageHeroFields?.description ?? ''}
-          packageImage={hero.packageHeroFields?.packageImage ?? '/fallback.jpg'}
+          title={tp.title ?? 'Spanish Escape'}
+          rating={tp.rating ?? 5}
+          location={tp.location ?? 'Madrid 2N, Seville 2N, Granada 1N, Barcelona 3N'}
+          description={tp.description ?? ''}
+          vacationTypes={tp.vacationTypes ?? [
+            {
+              type: 'Couples',
+              label: 'For Newlywed Vacations',
+              icon: '❤️',
+              percentage: 75,
+            },
+            {
+              type: 'Family',
+              label: 'For Family Vacations',
+              icon: '👨‍👩‍👧‍👦',
+              percentage: 25,
+            },
+          ]}
+          pricing={{
+            originalPrice: tp.pricing?.originalPrice ?? '150,450',
+            discountedPrice: tp.pricing?.discountedPrice ?? '117,927',
+            currency: tp.pricing?.currency ?? '₹',
+          }}
+          bookingCount={tp.bookingCount ?? '250+'}
+          recentBookings={tp.recentBookings ?? []}
+          mainImage={tp.mainImage ?? ''}
+          backgroundImage={tp.backgroundImage ?? ''}
+          buttons={{
+            bookNowLabel: tp.buttons?.bookNowLabel ?? 'Book now',
+            enableDownload: tp.buttons?.enableDownload ?? true,
+          }}
         />
       )
+    }
 
     default:
       return null

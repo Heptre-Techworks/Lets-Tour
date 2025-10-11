@@ -18,6 +18,8 @@ import HeroMainBlock from '@/blocks/HeroMainBlock/Component'
 import DestinationHeroCarousel from './DestinationHeroCarousel/Component'
 import { InstagramCarousel } from './InstagramCarousel/Component'
 import ImageGrid from './ImageGrid/Component'
+import { TravelPackageExplorer } from '@/blocks/TravelPackageExplorer/Component'
+
 const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
@@ -34,7 +36,8 @@ const blockComponents = {
   clientStories: ClientStories,
   destinationHeroCarousel: DestinationHeroCarousel,
   instagramCarousel: InstagramCarousel,
-  imageGrid: ImageGrid
+  imageGrid: ImageGrid,
+  travelPackageExplorer: TravelPackageExplorer
 }
 
 export const RenderBlocks: React.FC<{

@@ -32,6 +32,7 @@ import {ClientStories} from '@/blocks/ClientStories/config'
 import {DestinationHeroCarousel} from '@/blocks/DestinationHeroCarousel/config'
 import InstagramCarouselBlock from '@/blocks/InstagramCarousel/config'
 import ImageGrid from '@/blocks/ImageGrid/config'
+import TravelPackageExplorer from '@/blocks/TravelPackageExplorer/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -87,7 +88,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock,DynamicScroller, PopularNow,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel,HeroMainBlock, UpDownCardCarousel,ClientStories,DestinationHeroCarousel,InstagramCarouselBlock,ImageGrid],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock,DynamicScroller, PopularNow,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel,HeroMainBlock, UpDownCardCarousel,ClientStories,DestinationHeroCarousel,InstagramCarouselBlock,ImageGrid,TravelPackageExplorer],
               required: true,
               admin: {
                 initCollapsed: true,

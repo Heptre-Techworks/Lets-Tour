@@ -1,4 +1,3 @@
-// src/blocks/PopularNow/Component.tsx
 'use client';
 
 import React, { useEffect, useRef } from 'react';
@@ -22,13 +21,13 @@ const DestinationCard: React.FC<{ name: string; price: string; src: string; alt?
 }) => {
   if (!src) return null;
   return (
-    <li className="relative w-[300px] sm:w-[350px] md:w-[400px] h-64 flex-shrink-0 mx-4">
+    <li className="relative w-[300px] sm:w-[350px] md:w-[400px] h-64 flex-shrink-0">
       <img src={src} alt={alt || name} className="w-full h-full object-cover rounded-2xl shadow-lg" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-2xl" />
       <div className="absolute bottom-0 left-0 p-6 text-white">
-        <h3 className="text-4xl font-bold">{name}</h3>
+        <h3 className="text-3xl md:text-4xl font-bold">{name}</h3>
         <p className="text-lg mt-1">
-          Starting from <span className="font-semibold">₹ {price}</span>
+          Starting from <span className="font-semibold">₹{price}</span>
         </p>
       </div>
     </li>
@@ -40,45 +39,103 @@ const InfiniteScroller: React.FC<{
   speed?: number;
   pauseOnHover?: boolean;
   children: React.ReactNode;
-}> = ({ direction = 'left', speed = 40, pauseOnHover = true, children }) => {
+  centerOffset?: number;
+  transformOrigin?: string;
+  alignItems?: string;
+}> = ({
+  direction = 'left',
+  speed = 40,
+  pauseOnHover = true,
+  children,
+  centerOffset = 0,
+  transformOrigin = 'center',
+  alignItems = 'items-center'
+}) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const scrollerInnerRef = useRef<HTMLUListElement | null>(null);
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
+  // Clone items for seamless loop
   useEffect(() => {
     const scroller = scrollerRef.current;
-    if (!scroller) return;
+    const scrollerInner = scrollerInnerRef.current;
+    if (!scroller || !scrollerInner || scroller.dataset.initialized) return;
 
-    if (!scroller.hasAttribute('data-animated')) {
-      scroller.setAttribute('data-animated', 'true');
-      const scrollerInner = scroller.querySelector('.scroller-inner');
-      const scrollerContent = scrollerInner ? Array.from(scrollerInner.children) : [];
-
-      scrollerContent.forEach((item) => {
-        const clone = item.cloneNode(true) as HTMLElement;
-        clone.setAttribute('aria-hidden', 'true');
-        scrollerInner?.appendChild(clone);
-      });
-    }
+    const originalChildren = Array.from(scrollerInner.children);
+    originalChildren.forEach((item) => {
+      const clone = item.cloneNode(true) as HTMLElement;
+      clone.setAttribute('aria-hidden', 'true');
+      scrollerInner.appendChild(clone);
+    });
+    scroller.dataset.initialized = 'true';
   }, [children]);
+
+  // Scaling animation
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    const scrollerInner = scrollerInnerRef.current;
+    if (!scroller || !scrollerInner) return;
+
+    const applyScaling = () => {
+      // Guard at the top for type safety
+      if (!scrollerRef.current || !scrollerInnerRef.current) return;
+
+      const scrollerWidth = scrollerRef.current.offsetWidth;
+      const offsetPixels = scrollerWidth * (centerOffset / 100);
+      const scrollerCenterX = (scrollerWidth / 2) + offsetPixels;
+      const scrollerRect = scrollerRef.current.getBoundingClientRect();
+
+      const children = Array.from(scrollerInnerRef.current.children) as HTMLLIElement[];
+      children.forEach(child => {
+        const childRect = child.getBoundingClientRect();
+        const childCenterX = childRect.left - scrollerRect.left + childRect.width / 2;
+        const distanceFromCenter = Math.abs(scrollerCenterX - childCenterX);
+        const scale = Math.max(0.8, 1.1 - (distanceFromCenter / scrollerWidth));
+        child.style.transformOrigin = transformOrigin;
+        child.style.transform = `scale(${scale})`;
+        child.style.transition = 'transform 150ms linear';
+      });
+    };
+
+    const updateLoop = () => {
+      applyScaling();
+      animationFrameRef.current = requestAnimationFrame(updateLoop);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(updateLoop);
+
+    return () => {
+      if (animationFrameRef.current !== undefined) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [centerOffset, transformOrigin]);
 
   const directionClass = direction === 'left' ? 'scroll-left' : 'scroll-right';
 
   return (
-    <div
-      ref={scrollerRef}
-      className="scroller overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]"
-      style={{ ['--duration' as any]: `${Math.max(5, speed)}s` }}
-    >
-      <ul className={`flex gap-4 w-max animate-infinite-scroll ${directionClass}`}>
-        <div className="scroller-inner flex">{children}</div>
+    <div ref={scrollerRef} className="scroller overflow-hidden">
+      <ul
+        ref={scrollerInnerRef}
+        className={`flex gap-4 w-max ${alignItems} py-2 scroller-inner ${directionClass}`}
+        style={{ '--duration': `${speed}s` } as React.CSSProperties}
+      >
+        {children}
       </ul>
-
       <style>{`
-        @keyframes scroll-left { to { transform: translateX(calc(-50% - 0.5rem)); } }
-        @keyframes scroll-right { to { transform: translateX(calc(50% + 0.5rem)); } }
-        .scroller-inner { animation-play-state: running; }
-        .scroller:hover .scroller-inner { animation-play-state: ${pauseOnHover ? 'paused' : 'running'}; }
-        .animate-infinite-scroll.scroll-left .scroller-inner { animation: scroll-left var(--duration, 40s) linear infinite; }
-        .animate-infinite-scroll.scroll-right .scroller-inner { animation: scroll-right var(--duration, 40s) linear infinite; }
+        @keyframes scroll-left { 
+          from { transform: translateX(0%); }
+          to { transform: translateX(-50%); } 
+        }
+        @keyframes scroll-right { 
+          from { transform: translateX(-50%); }
+          to { transform: translateX(0%); } 
+        }
+        .scroller-inner.scroll-left { animation: scroll-left var(--duration, 40s) linear infinite; }
+        .scroller-inner.scroll-right { animation: scroll-right var(--duration, 40s) linear infinite; }
+        .scroller:hover .scroller-inner { 
+          animation-play-state: ${pauseOnHover ? 'paused' : 'running'}; 
+        }
       `}</style>
     </div>
   );
@@ -86,7 +143,7 @@ const InfiniteScroller: React.FC<{
 
 export const PopularNow: React.FC<PopularNowBlockProps> = ({
   heading = 'Popular now!',
-  subheading = "Today’s enemy is tomorrow’s friend.",
+  subheading = "Today's enemy is tomorrow's friend.",
   pauseOnHover: pauseRaw,
   rows = [],
 }) => {
@@ -102,13 +159,25 @@ export const PopularNow: React.FC<PopularNowBlockProps> = ({
           {subheading ? <p className="text-lg text-gray-500 mt-2">{subheading}</p> : null}
         </header>
 
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-2">
           {Array.isArray(rows) &&
             rows.map((row, idx) => {
               const direction = row?.direction === 'right' ? 'right' : 'left';
               const speedSeconds = typeof row?.speedSeconds === 'number' ? row.speedSeconds : 40;
+              const centerOffset = idx === 0 ? -20 : 20;
+              const transformOrigin = idx === 0 ? 'bottom' : 'top';
+              const alignItems = idx === 0 ? 'items-end' : 'items-start';
+
               return (
-                <InfiniteScroller key={idx} direction={direction} speed={speedSeconds} pauseOnHover={pauseOnHover}>
+                <InfiniteScroller
+                  key={idx}
+                  direction={direction}
+                  speed={speedSeconds}
+                  pauseOnHover={pauseOnHover}
+                  centerOffset={centerOffset}
+                  transformOrigin={transformOrigin}
+                  alignItems={alignItems}
+                >
                   {Array.isArray(row?.cards) &&
                     row.cards.map((card: any, i: number) => (
                       <DestinationCard

@@ -241,20 +241,98 @@ export interface Page {
       };
     };
     destinationHeroFields?: {
-      destination: string | Destination;
-      presentation?: {
-        overlay?: number | null;
-        showArrows?: boolean | null;
+      /**
+       * The main heading displayed on the hero
+       */
+      destination: string;
+      cities: {
+        name: string;
         /**
-         * Defaults to destination.name if left empty
+         * High-resolution image for the city background
          */
-        titleOverride?: string | null;
-      };
+        image: string | Media;
+        id?: string | null;
+      }[];
+      /**
+       * Time in milliseconds between automatic slide changes
+       */
+      autoplayInterval?: number | null;
     };
-    packageHeroFields?: {
-      packageName: string;
-      packageImage: string | Media;
-      description?: string | null;
+    travelPackageFields?: {
+      /**
+       * The main title of the travel package
+       */
+      title: string;
+      /**
+       * Rating out of 5 stars
+       */
+      rating: number;
+      /**
+       * Location itinerary description
+       */
+      location: string;
+      /**
+       * Detailed description of the travel package
+       */
+      description: string;
+      vacationTypes: {
+        /**
+         * Type name (e.g., Couples, Family)
+         */
+        type: string;
+        /**
+         * Descriptive label for the vacation type
+         */
+        label: string;
+        /**
+         * Emoji icon for the vacation type
+         */
+        icon: string;
+        /**
+         * Percentage value (0-100)
+         */
+        percentage: number;
+        id?: string | null;
+      }[];
+      pricing: {
+        /**
+         * Original price (formatted with commas)
+         */
+        originalPrice: string;
+        /**
+         * Discounted price (formatted with commas)
+         */
+        discountedPrice: string;
+        /**
+         * Currency symbol
+         */
+        currency?: string | null;
+      };
+      /**
+       * Number of bookings (e.g., 250+)
+       */
+      bookingCount: string;
+      /**
+       * Profile images of recent customers
+       */
+      recentBookings?:
+        | {
+            avatar: string | Media;
+            id?: string | null;
+          }[]
+        | null;
+      /**
+       * The main promotional image for the package
+       */
+      mainImage: string | Media;
+      /**
+       * Background image for the card
+       */
+      backgroundImage: string | Media;
+      buttons?: {
+        bookNowLabel?: string | null;
+        enableDownload?: boolean | null;
+      };
     };
   };
   layout: (
@@ -285,12 +363,19 @@ export interface Page {
       }
     | {
         /**
-         * Background image for the block
+         * Select the image to display
          */
         image: string | Media;
+        /**
+         * Add a dark overlay on top of the image
+         */
         overlay?: boolean | null;
         /**
-         * Height of the image block
+         * Adjust darkness of overlay (0 = transparent, 1 = fully black)
+         */
+        overlayOpacity?: number | null;
+        /**
+         * Choose the height of the image block
          */
         height?: ('small' | 'medium' | 'large' | 'xl') | null;
         id?: string | null;
@@ -410,6 +495,7 @@ export interface Page {
       }
     | InstagramCarouselBlock
     | ImageGridBlock
+    | TravelPackageExplorerBlock
   )[];
   meta?: {
     title?: string | null;
@@ -520,49 +606,6 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "destinations".
- */
-export interface Destination {
-  id: string;
-  name: string;
-  summary?: string | null;
-  heroImage?: (string | null) | Media;
-  startingFromPricePerPerson?: number | null;
-  /**
-   * Destination label chips like Popular / In Season / Featured
-   */
-  labels?: (string | Category)[] | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  name: string;
-  type: 'experience' | 'trip_type' | 'vibe' | 'destination_label';
-  description?: string | null;
-  /**
-   * Optional parent category for hierarchy
-   */
-  parent?: (string | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (string | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
@@ -655,6 +698,30 @@ export interface Post {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  name: string;
+  type: 'experience' | 'trip_type' | 'vibe' | 'destination_label';
+  description?: string | null;
+  /**
+   * Optional parent category for hierarchy
+   */
+  parent?: (string | null) | Category;
+  breadcrumbs?:
+    | {
+        doc?: (string | null) | Category;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1046,9 +1113,12 @@ export interface PopularNowBlock {
   subheading?: string | null;
   pauseOnHover?: boolean | null;
   rows: {
+    /**
+     * Scroll direction for this row.
+     */
     direction?: ('left' | 'right') | null;
     /**
-     * Loop duration in seconds (lower is faster).
+     * How many seconds should a full loop take?
      */
     speedSeconds?: number | null;
     cards: {
@@ -1056,9 +1126,12 @@ export interface PopularNowBlock {
       price: string;
       image?: (string | null) | Media;
       /**
-       * Optional external image URL (e.g., Unsplash).
+       * Optional external image URL.
        */
       imageUrl?: string | null;
+      /**
+       * Image alt text.
+       */
       alt?: string | null;
       id?: string | null;
     }[];
@@ -1067,6 +1140,25 @@ export interface PopularNowBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'popularNow';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinations".
+ */
+export interface Destination {
+  id: string;
+  name: string;
+  summary?: string | null;
+  heroImage?: (string | null) | Media;
+  startingFromPricePerPerson?: number | null;
+  /**
+   * Destination label chips like Popular / In Season / Featured
+   */
+  labels?: (string | Category)[] | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1118,6 +1210,10 @@ export interface ClientStoriesBlock {
    */
   backgroundUrl?: string | null;
   /**
+   * Decorative overlay image placed behind cards.
+   */
+  overlay?: (string | null) | Media;
+  /**
    * How many cards are visible at once.
    */
   cardsPerView?: number | null;
@@ -1126,12 +1222,6 @@ export interface ClientStoriesBlock {
     name: string;
     rating: number;
     story: string;
-    avatar?: (string | null) | Media;
-    avatarUrl?: string | null;
-    /**
-     * Image alt text.
-     */
-    alt?: string | null;
     id?: string | null;
   }[];
   id?: string | null;
@@ -1248,6 +1338,116 @@ export interface ImageGridBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'imageGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TravelPackageExplorerBlock".
+ */
+export interface TravelPackageExplorerBlock {
+  packages: {
+    /**
+     * Package title (e.g., "Spanish Escape")
+     */
+    title: string;
+    /**
+     * Location details (e.g., "Madrid 2N, Granada 1N, Valencia 1N, Ibiza 2N")
+     */
+    location: string;
+    /**
+     * Rating (1-5 stars)
+     */
+    rating: number;
+    /**
+     * Number of reviews
+     */
+    reviews: number;
+    /**
+     * Package description
+     */
+    description: string;
+    /**
+     * Current price in ₹
+     */
+    price: number;
+    /**
+     * Original price (for showing discount)
+     */
+    originalPrice: number;
+    /**
+     * Duration in days
+     */
+    duration: number;
+    /**
+     * Types of experiences offered
+     */
+    experiences: ('Adventure' | 'Relaxing' | 'Cultural' | 'Sightseeing' | 'Party')[];
+    accommodationType: 'Hotel' | 'Resort' | 'Boutique Hotel' | 'Villa / Townhouse';
+    /**
+     * Amenities included
+     */
+    amenities: (
+      | 'Free Wifi'
+      | 'Swimming Pool'
+      | 'Breakfast Included'
+      | 'Gym'
+      | 'Airport Transfer'
+      | 'City View'
+      | 'Private Pool'
+      | 'Beach Access'
+    )[];
+    province: 'Madrid' | 'Andalusia' | 'Catalonia' | 'Balearic Islands';
+    /**
+     * Upload package image
+     */
+    image?: (string | null) | Media;
+    /**
+     * Or provide external image URL
+     */
+    imageUrl?: string | null;
+    /**
+     * What is included in the package
+     */
+    inclusions: (
+      | 'Flights'
+      | 'Stay'
+      | 'Cruise tickets'
+      | 'Transfers'
+      | 'Breakfast'
+      | 'Tour guide'
+      | 'City Tour Pass'
+      | 'Ferry Tickets'
+      | 'Club Access'
+      | 'Villa Stay'
+    )[];
+    suitability: {
+      /**
+       * Suitability percentage for couples (0-100)
+       */
+      couples: number;
+      /**
+       * Suitability percentage for families (0-100)
+       */
+      family: number;
+    };
+    /**
+     * Number of recent bookings to display
+     */
+    recentBookings: number;
+    /**
+     * Key sights and attractions included in the package
+     */
+    sights: {
+      /**
+       * Sight or attraction name
+       */
+      name: string;
+      id?: string | null;
+    }[];
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'travelPackageExplorer';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2014,20 +2214,53 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               destination?: T;
-              presentation?:
+              cities?:
                 | T
                 | {
-                    overlay?: T;
-                    showArrows?: T;
-                    titleOverride?: T;
+                    name?: T;
+                    image?: T;
+                    id?: T;
                   };
+              autoplayInterval?: T;
             };
-        packageHeroFields?:
+        travelPackageFields?:
           | T
           | {
-              packageName?: T;
-              packageImage?: T;
+              title?: T;
+              rating?: T;
+              location?: T;
               description?: T;
+              vacationTypes?:
+                | T
+                | {
+                    type?: T;
+                    label?: T;
+                    icon?: T;
+                    percentage?: T;
+                    id?: T;
+                  };
+              pricing?:
+                | T
+                | {
+                    originalPrice?: T;
+                    discountedPrice?: T;
+                    currency?: T;
+                  };
+              bookingCount?: T;
+              recentBookings?:
+                | T
+                | {
+                    avatar?: T;
+                    id?: T;
+                  };
+              mainImage?: T;
+              backgroundImage?: T;
+              buttons?:
+                | T
+                | {
+                    bookNowLabel?: T;
+                    enableDownload?: T;
+                  };
             };
       };
   layout?:
@@ -2055,6 +2288,7 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               image?: T;
               overlay?: T;
+              overlayOpacity?: T;
               height?: T;
               id?: T;
               blockName?: T;
@@ -2140,6 +2374,7 @@ export interface PagesSelect<T extends boolean = true> {
             };
         instagramCarousel?: T | InstagramCarouselBlockSelect<T>;
         imageGrid?: T | ImageGridBlockSelect<T>;
+        travelPackageExplorer?: T | TravelPackageExplorerBlockSelect<T>;
       };
   meta?:
     | T
@@ -2364,6 +2599,7 @@ export interface ClientStoriesBlockSelect<T extends boolean = true> {
   buttonText?: T;
   background?: T;
   backgroundUrl?: T;
+  overlay?: T;
   cardsPerView?: T;
   gapPx?: T;
   cards?:
@@ -2372,9 +2608,6 @@ export interface ClientStoriesBlockSelect<T extends boolean = true> {
         name?: T;
         rating?: T;
         story?: T;
-        avatar?: T;
-        avatarUrl?: T;
-        alt?: T;
         id?: T;
       };
   id?: T;
@@ -2479,6 +2712,47 @@ export interface ImageGridBlockSelect<T extends boolean = true> {
     | {
         dark?: T;
         container?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TravelPackageExplorerBlock_select".
+ */
+export interface TravelPackageExplorerBlockSelect<T extends boolean = true> {
+  packages?:
+    | T
+    | {
+        title?: T;
+        location?: T;
+        rating?: T;
+        reviews?: T;
+        description?: T;
+        price?: T;
+        originalPrice?: T;
+        duration?: T;
+        experiences?: T;
+        accommodationType?: T;
+        amenities?: T;
+        province?: T;
+        image?: T;
+        imageUrl?: T;
+        inclusions?: T;
+        suitability?:
+          | T
+          | {
+              couples?: T;
+              family?: T;
+            };
+        recentBookings?: T;
+        sights?:
+          | T
+          | {
+              name?: T;
+              id?: T;
+            };
+        id?: T;
       };
   id?: T;
   blockName?: T;
@@ -3411,12 +3685,19 @@ export interface PackageLayout {
       }
     | {
         /**
-         * Background image for the block
+         * Select the image to display
          */
         image: string | Media;
+        /**
+         * Add a dark overlay on top of the image
+         */
         overlay?: boolean | null;
         /**
-         * Height of the image block
+         * Adjust darkness of overlay (0 = transparent, 1 = fully black)
+         */
+        overlayOpacity?: number | null;
+        /**
+         * Choose the height of the image block
          */
         height?: ('small' | 'medium' | 'large' | 'xl') | null;
         id?: string | null;
@@ -3594,20 +3875,98 @@ export interface DestinationLayout {
       };
     };
     destinationHeroFields?: {
-      destination: string | Destination;
-      presentation?: {
-        overlay?: number | null;
-        showArrows?: boolean | null;
+      /**
+       * The main heading displayed on the hero
+       */
+      destination: string;
+      cities: {
+        name: string;
         /**
-         * Defaults to destination.name if left empty
+         * High-resolution image for the city background
          */
-        titleOverride?: string | null;
-      };
+        image: string | Media;
+        id?: string | null;
+      }[];
+      /**
+       * Time in milliseconds between automatic slide changes
+       */
+      autoplayInterval?: number | null;
     };
-    packageHeroFields?: {
-      packageName: string;
-      packageImage: string | Media;
-      description?: string | null;
+    travelPackageFields?: {
+      /**
+       * The main title of the travel package
+       */
+      title: string;
+      /**
+       * Rating out of 5 stars
+       */
+      rating: number;
+      /**
+       * Location itinerary description
+       */
+      location: string;
+      /**
+       * Detailed description of the travel package
+       */
+      description: string;
+      vacationTypes: {
+        /**
+         * Type name (e.g., Couples, Family)
+         */
+        type: string;
+        /**
+         * Descriptive label for the vacation type
+         */
+        label: string;
+        /**
+         * Emoji icon for the vacation type
+         */
+        icon: string;
+        /**
+         * Percentage value (0-100)
+         */
+        percentage: number;
+        id?: string | null;
+      }[];
+      pricing: {
+        /**
+         * Original price (formatted with commas)
+         */
+        originalPrice: string;
+        /**
+         * Discounted price (formatted with commas)
+         */
+        discountedPrice: string;
+        /**
+         * Currency symbol
+         */
+        currency?: string | null;
+      };
+      /**
+       * Number of bookings (e.g., 250+)
+       */
+      bookingCount: string;
+      /**
+       * Profile images of recent customers
+       */
+      recentBookings?:
+        | {
+            avatar: string | Media;
+            id?: string | null;
+          }[]
+        | null;
+      /**
+       * The main promotional image for the package
+       */
+      mainImage: string | Media;
+      /**
+       * Background image for the card
+       */
+      backgroundImage: string | Media;
+      buttons?: {
+        bookNowLabel?: string | null;
+        enableDownload?: boolean | null;
+      };
     };
   };
   layout: (
@@ -3638,12 +3997,19 @@ export interface DestinationLayout {
       }
     | {
         /**
-         * Background image for the block
+         * Select the image to display
          */
         image: string | Media;
+        /**
+         * Add a dark overlay on top of the image
+         */
         overlay?: boolean | null;
         /**
-         * Height of the image block
+         * Adjust darkness of overlay (0 = transparent, 1 = fully black)
+         */
+        overlayOpacity?: number | null;
+        /**
+         * Choose the height of the image block
          */
         height?: ('small' | 'medium' | 'large' | 'xl') | null;
         id?: string | null;
@@ -3762,6 +4128,7 @@ export interface DestinationLayout {
         blockType: 'destinationHeroCarousel';
       }
     | InstagramCarouselBlock
+    | TravelPackageExplorerBlock
   )[];
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -3914,6 +4281,7 @@ export interface PackageLayoutSelect<T extends boolean = true> {
           | {
               image?: T;
               overlay?: T;
+              overlayOpacity?: T;
               height?: T;
               id?: T;
               blockName?: T;
@@ -4056,20 +4424,53 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
           | T
           | {
               destination?: T;
-              presentation?:
+              cities?:
                 | T
                 | {
-                    overlay?: T;
-                    showArrows?: T;
-                    titleOverride?: T;
+                    name?: T;
+                    image?: T;
+                    id?: T;
                   };
+              autoplayInterval?: T;
             };
-        packageHeroFields?:
+        travelPackageFields?:
           | T
           | {
-              packageName?: T;
-              packageImage?: T;
+              title?: T;
+              rating?: T;
+              location?: T;
               description?: T;
+              vacationTypes?:
+                | T
+                | {
+                    type?: T;
+                    label?: T;
+                    icon?: T;
+                    percentage?: T;
+                    id?: T;
+                  };
+              pricing?:
+                | T
+                | {
+                    originalPrice?: T;
+                    discountedPrice?: T;
+                    currency?: T;
+                  };
+              bookingCount?: T;
+              recentBookings?:
+                | T
+                | {
+                    avatar?: T;
+                    id?: T;
+                  };
+              mainImage?: T;
+              backgroundImage?: T;
+              buttons?:
+                | T
+                | {
+                    bookNowLabel?: T;
+                    enableDownload?: T;
+                  };
             };
       };
   layout?:
@@ -4097,6 +4498,7 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
           | {
               image?: T;
               overlay?: T;
+              overlayOpacity?: T;
               height?: T;
               id?: T;
               blockName?: T;
@@ -4181,6 +4583,7 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
               blockName?: T;
             };
         instagramCarousel?: T | InstagramCarouselBlockSelect<T>;
+        travelPackageExplorer?: T | TravelPackageExplorerBlockSelect<T>;
       };
   _status?: T;
   updatedAt?: T;

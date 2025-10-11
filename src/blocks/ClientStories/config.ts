@@ -32,6 +32,13 @@ export const ClientStories: Block = {
       ],
     },
     {
+      name: 'overlay',
+      label: 'Overlay (upload)',
+      type: 'upload',
+      relationTo: 'media',
+      admin: { description: 'Decorative overlay image placed behind cards.' },
+    },
+    {
       name: 'cardsPerView',
       label: 'Cards per view (desktop)',
       type: 'number',
@@ -70,23 +77,6 @@ export const ClientStories: Block = {
           required: true,
           admin: { rows: 4 },
         },
-        {
-          type: 'row',
-          fields: [
-            {
-              name: 'avatar',
-              label: 'Avatar (upload)',
-              type: 'upload',
-              relationTo: 'media',
-            },
-            {
-              name: 'avatarUrl',
-              label: 'Avatar (external URL)',
-              type: 'text',
-            },
-          ],
-        },
-        { name: 'alt', type: 'text', admin: { description: 'Image alt text.' } },
       ],
     },
   ],

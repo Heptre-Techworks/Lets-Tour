@@ -1,136 +1,224 @@
-// components/DestinationHero.tsx
 'use client'
 
-import React, { useEffect, useRef } from 'react'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
+import React, { useEffect, useRef, useState } from 'react'
+import { useParams } from 'next/navigation'
 import type { Media } from '@/payload-types'
-import { Media as MediaComponent } from '@/components/Media'
 
-type Place = { name: string; slug: string }
+// Helper component for the navigation arrows
+const ArrowIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    aria-hidden="true"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+  </svg>
+)
 
-type DestinationHeroProps = {
-  heroImage: Media | string | null | undefined
-  title: string
-  places: Place[]
-  overlay?: number
-  showArrows?: boolean
+type City = {
+  name: string
+  image: Media | string
+  id?: string
 }
 
-const ChevronLeftIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-    <path d="M15 18L9 12L15 6" />
-  </svg>
-)
-
-const ChevronRightIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-    <path d="M9 18L15 12L9 6" />
-  </svg>
-)
+type DestinationHeroProps = {
+  cities: City[]
+  autoplayInterval?: number
+}
 
 export const DestinationHero: React.FC<DestinationHeroProps> = ({
-  heroImage,
-  title,
-  places = [],
-  overlay = 0.35,
-  showArrows = true,
+  cities,
+  autoplayInterval = 5000,
 }) => {
   const { setHeaderTheme } = useHeaderTheme()
-  const scrollerRef = useRef<HTMLDivElement>(null)
+  const params = useParams<{ destinationname: string }>()
+  const cityListRef = useRef<HTMLUListElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const isJumpingRef = useRef(false)
 
+  // Extract destination from URL - this is now the single source of truth
+  const destination = params?.destinationname 
+    ? decodeURIComponent(params.destinationname).replace(/-/g, ' ')
+    : 'Destination'
+
+  // Create extended cities array for infinite loop illusion
+  const extendedCities = [...cities, ...cities, ...cities]
+  const initialDisplayIndex = cities.length // Start with first city in the middle block
+
+  const [displayIndex, setDisplayIndex] = useState(initialDisplayIndex)
+
+  // The actual active city index for the background image
+  const activeCityIndex = displayIndex % cities.length
+
+  // Helper to get image URL from Media object or string
+  const getImageUrl = (image: Media | string): string => {
+    if (typeof image === 'string') return image
+    return image?.url || ''
+  }
+
+  // --- NAVIGATION & AUTOPLAY ---
+  const resetAutoplay = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+    }
+    timerRef.current = setInterval(() => {
+      setDisplayIndex((prevIndex) => prevIndex + 1)
+    }, autoplayInterval)
+  }
+
+  const handleUserInteraction = (index: number) => {
+    isJumpingRef.current = false
+    setDisplayIndex(index)
+    resetAutoplay()
+  }
+
+  // --- EFFECTS ---
   useEffect(() => {
     setHeaderTheme('dark')
   }, [setHeaderTheme])
 
-  const scrollBy = (dir: 'left' | 'right') => {
-    const el = scrollerRef.current
-    if (!el) return
-    const delta = dir === 'left' ? -280 : 280
-    el.scrollBy({ left: delta, behavior: 'smooth' })
-  }
+  useEffect(() => {
+    resetAutoplay()
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+    }
+  }, [autoplayInterval])
 
-  // Guards and normalization for strict-null-safety and valid <Image src>
-  const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0
-const isValidMedia = (v: unknown): v is Media => {
-  if (!v || typeof v !== 'object') return false
-  const url = (v as { url?: unknown }).url
-  return typeof url === 'string' && url.trim().length > 0
-}
-  const looksLikeURL = (s: string) => s.startsWith('/') || s.startsWith('http')
+  // Effect to scroll the active city into view WITHOUT scrolling the page
+  useEffect(() => {
+    const activeCityElement = cityListRef.current?.children[displayIndex] as HTMLElement
+    const scrollContainer = containerRef.current
+    
+    if (activeCityElement && scrollContainer) {
+      // Calculate the scroll position manually instead of using scrollIntoView
+      const containerRect = scrollContainer.getBoundingClientRect()
+      const elementRect = activeCityElement.getBoundingClientRect()
+      
+      // Calculate how much to scroll to center the element
+      const scrollLeft = scrollContainer.scrollLeft
+      const elementCenter = elementRect.left - containerRect.left + (elementRect.width / 2)
+      const containerCenter = containerRect.width / 2
+      const targetScrollLeft = scrollLeft + elementCenter - containerCenter
+      
+      // Use scrollTo instead of scrollIntoView to avoid page scroll
+      scrollContainer.scrollTo({
+        left: targetScrollLeft,
+        behavior: isJumpingRef.current ? 'auto' : 'smooth',
+      })
+    }
+    isJumpingRef.current = false
+  }, [displayIndex])
 
-  const normalizedResource: Media | string | null =
-    isValidMedia(heroImage) ? heroImage :
-    (isNonEmptyString(heroImage) && looksLikeURL(heroImage)) ? heroImage :
-    null
+  // Effect to handle the "jump" for the infinite loop illusion
+  useEffect(() => {
+    const scrollAnimationTime = 500
+    let jumpTimeout: NodeJS.Timeout
 
-  const clampedOverlay = Math.max(0, Math.min(1, overlay ?? 0.35))
+    const isAtEnd = displayIndex >= cities.length * 2
+    const isAtStart = displayIndex < cities.length
+
+    if (isAtEnd || isAtStart) {
+      jumpTimeout = setTimeout(() => {
+        isJumpingRef.current = true
+        const newIndex = (displayIndex % cities.length) + cities.length
+        setDisplayIndex(newIndex)
+      }, scrollAnimationTime)
+    }
+
+    return () => clearTimeout(jumpTimeout)
+  }, [displayIndex, cities.length])
 
   return (
     <section
-      className="relative -mt-[10.4rem] w-full h-screen overflow-hidden font-roboto text-white"
+      className="relative -mt-[10.4rem] w-full h-screen bg-gray-900 font-sans antialiased overflow-hidden"
       data-theme="dark"
     >
       {/* Background Image */}
-      <div className="absolute inset-0">
-        {normalizedResource ? (
-          <MediaComponent
-            fill
-            resource={normalizedResource}
-            imgClassName="object-cover"
-            priority
-          />
-        ) : null}
-        <div
-          className="absolute inset-0"
-          style={{ background: `rgba(0,0,0,${clampedOverlay})` }}
-        />
-      </div>
+      <div
+        key={activeCityIndex}
+        style={{
+          backgroundImage: `url(${getImageUrl(cities[activeCityIndex].image)})`,
+        }}
+        className="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 ease-in-out"
+      />
 
-      {/* Centered Title */}
-      <div className="relative z-10 h-full flex items-center">
-        <h1 className="ml-8 sm:ml-12 lg:ml-16 font-playfair italic text-[12vw] leading-none font-bold drop-shadow-xl">
-          {title}
-        </h1>
-      </div>
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
-      {/* Bottom Places Rail */}
-      {places.length > 0 && (
-        <div className="absolute bottom-6 left-0 w-full z-10">
-          <div className="mx-6 md:mx-12 bg-black/35 rounded-full backdrop-blur px-3 py-2 sm:px-4 sm:py-3 flex items-center">
-            {showArrows && (
-              <button
-                aria-label="previous"
-                onClick={() => scrollBy('left')}
-                className="shrink-0 mr-2 rounded-full bg-white/15 hover:bg-white/25 w-8 h-8 grid place-items-center"
+      {/* Main Content */}
+      <div className="relative w-full h-full flex flex-col justify-end text-white p-6 sm:p-8 md:p-12">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+          <h1
+            className="text-7xl lg:text-9xl font-serif capitalize"
+            style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}
+          >
+            {destination}
+          </h1>
+
+          {/* City Navigation */}
+          <nav className="flex items-center justify-end gap-3 sm:gap-4 text-gray-200 w-full md:w-auto">
+            <button
+              onClick={() => handleUserInteraction(displayIndex - 1)}
+              className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200 hidden sm:block"
+              aria-label="Previous city"
+            >
+              <ArrowIcon className="w-5 h-5" />
+            </button>
+            <div
+              ref={containerRef}
+              className="overflow-x-auto whitespace-nowrap scrollbar-hide max-w-[60vw] md:max-w-lg"
+              style={{
+                maskImage:
+                  'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+                WebkitMaskImage:
+                  'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+              }}
+            >
+              <ul
+                ref={cityListRef}
+                className="flex items-center justify-start gap-4 sm:gap-6 text-sm sm:text-base tracking-wider px-28 sm:px-48 md:px-64"
               >
-                <ChevronLeftIcon />
-              </button>
-            )}
-
-            <div ref={scrollerRef} className="flex gap-6 overflow-x-auto scrollbar-none px-2">
-              {places.map((p) => (
-                <a
-                  key={p.slug}
-                  href={`/destinations/${p.slug}`}
-                  className="text-white/90 hover:text-white whitespace-nowrap"
-                >
-                  {p.name}
-                </a>
-              ))}
+                {extendedCities.map((city, index) => (
+                  <li key={`${city.name}-${index}`}>
+                    <a
+                      href={`#${city.name.toLowerCase()}`}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleUserInteraction(index)
+                      }}
+                      className={`py-1 transition-all duration-300 text-lg ${
+                        displayIndex === index
+                          ? 'text-white scale-110 border-b-2 border-white font-semibold'
+                          : 'text-gray-300 hover:text-white border-b-2 border-transparent'
+                      }`}
+                    >
+                      {city.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
-
-            {showArrows && (
-              <button
-                aria-label="next"
-                onClick={() => scrollBy('right')}
-                className="shrink-0 ml-2 rounded-full bg-white/15 hover:bg-white/25 w-8 h-8 grid place-items-center"
-              >
-                <ChevronRightIcon />
-              </button>
-            )}
-          </div>
+            <button
+              onClick={() => handleUserInteraction(displayIndex + 1)}
+              className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200 hidden sm:block"
+              aria-label="Next city"
+            >
+              <ArrowIcon className="w-5 h-5 rotate-180" />
+            </button>
+          </nav>
         </div>
-      )}
+      </div>
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </section>
   )
 }
