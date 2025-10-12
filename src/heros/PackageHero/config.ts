@@ -3,22 +3,13 @@ import type { Field } from 'payload'
 
 export const PackageHeroConfig: Field[] = [
   {
-    name: 'travelPackageFields',
-    label: 'Travel Package Fields',
+    name: 'packageHeroFields',
+    label: 'Package Hero Fields',
     type: 'group',
     admin: {
-      condition: (_, siblingData) => siblingData?.type === 'travelPackage',
+      condition: (_, siblingData) => siblingData?.type === 'packageHero',
     },
     fields: [
-      {
-        name: 'title',
-        type: 'text',
-        required: true,
-        defaultValue: 'Spanish Escape',
-        admin: {
-          description: 'The main title of the travel package',
-        },
-      },
       {
         name: 'rating',
         type: 'number',

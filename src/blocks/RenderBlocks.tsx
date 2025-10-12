@@ -14,11 +14,13 @@ import {UniformCardCarousel} from '@/blocks/UniformCardCarousel/Component'
 import StaticImageBlock from '@/blocks/StaticImageBlock/Component'
 import NonUniformCardCarousel from '@/blocks/NonUniformCardCarousel/Component'
 import UpDownCardCarousel from './UpDownCardCarousel/Component'
-import HeroMainBlock from '@/blocks/HeroMainBlock/Component'
 import DestinationHeroCarousel from './DestinationHeroCarousel/Component'
 import { InstagramCarousel } from './InstagramCarousel/Component'
 import ImageGrid from './ImageGrid/Component'
 import { TravelPackageExplorer } from '@/blocks/TravelPackageExplorer/Component'
+import { PackageHighlights} from '@/blocks/PackageHighlights/Component'
+import {FeatureCarousel} from '@/blocks/FeatureCarousel/Component'
+import {HeaderPoints} from '@/blocks/HeaderPoints/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -32,12 +34,14 @@ const blockComponents = {
   staticImageBlock: StaticImageBlock,
   nonUniformCardCarousel: NonUniformCardCarousel,
   upDownCardCarousel:UpDownCardCarousel,
-  heroMainBlock: HeroMainBlock,
   clientStories: ClientStories,
   destinationHeroCarousel: DestinationHeroCarousel,
   instagramCarousel: InstagramCarousel,
   imageGrid: ImageGrid,
-  travelPackageExplorer: TravelPackageExplorer
+  travelPackageExplorer: TravelPackageExplorer,
+  packageHighlights: PackageHighlights,
+  featureCarousel: FeatureCarousel,
+  headerPoints: HeaderPoints
 }
 
 export const RenderBlocks: React.FC<{

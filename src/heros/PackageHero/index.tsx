@@ -1,7 +1,9 @@
+// src/heros/PackageHero/index.tsx
 'use client'
 
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import React, { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import type { Media as MediaType } from '@/payload-types'
 import { Media } from '@/components/Media'
 
@@ -44,7 +46,7 @@ type RecentBooking = {
 }
 
 type PackageHeroProps = {
-  title: string
+  title?: string // Make title optional since we'll derive it from URL
   rating: number
   location: string
   description: string
@@ -66,7 +68,7 @@ type PackageHeroProps = {
 
 // --- Main Component ---
 export const PackageHero: React.FC<PackageHeroProps> = ({
-  title,
+  title: titleProp,
   rating,
   location,
   description,
@@ -79,10 +81,26 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   buttons = {},
 }) => {
   const { setHeaderTheme } = useHeaderTheme()
+  const pathname = usePathname()
 
   useEffect(() => {
     setHeaderTheme('dark')
   }, [setHeaderTheme])
+
+  // Extract slug from URL and format as title if title prop not provided
+  const getSlugFromPath = () => {
+    // pathname will be something like "/packages/spanish-escape"
+    const segments = pathname.split('/')
+    const slug = segments[segments.length - 1]
+    
+    // Format slug: "spanish-escape" → "Spanish Escape"
+    return slug
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+  }
+
+  const title = titleProp || getSlugFromPath()
 
   const { bookNowLabel = 'Book now', enableDownload = true } = buttons
   const currency = pricing.currency || '₹'
@@ -210,3 +228,5 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
     </section>
   )
 }
+
+export default PackageHero

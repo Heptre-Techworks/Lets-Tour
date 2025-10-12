@@ -258,11 +258,7 @@ export interface Page {
        */
       autoplayInterval?: number | null;
     };
-    travelPackageFields?: {
-      /**
-       * The main title of the travel package
-       */
-      title: string;
+    packageHeroFields?: {
       /**
        * Rating out of 5 stars
        */
@@ -399,53 +395,6 @@ export interface Page {
         id?: string | null;
         blockName?: string | null;
         blockType: 'nonUniformCardCarousel';
-      }
-    | {
-        slides?:
-          | {
-              /**
-               * The main background image for the slide.
-               */
-              image: string | Media;
-              title?: string | null;
-              subtitle?: string | null;
-              location?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        /**
-         * Upload a PNG image of clouds with a transparent background. This will be layered at the bottom.
-         */
-        cloudImage: string | Media;
-        enableAirplaneAnimation?: boolean | null;
-        /**
-         * Autoplay interval in milliseconds (e.g., 8000 = 8 seconds).
-         */
-        autoplayDuration?: number | null;
-        destinationOptions?:
-          | {
-              label: string;
-              value: string;
-              id?: string | null;
-            }[]
-          | null;
-        categoryOptions?:
-          | {
-              label: string;
-              value: string;
-              id?: string | null;
-            }[]
-          | null;
-        buttonLabel?: string | null;
-        placeholders?: {
-          destination?: string | null;
-          date?: string | null;
-          people?: string | null;
-          category?: string | null;
-        };
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'heroMainBlock';
       }
     | UpDownCardCarouselBlock
     | ClientStoriesBlock
@@ -1472,6 +1421,10 @@ export interface PackageCategory {
 export interface Package {
   id: string;
   name: string;
+  /**
+   * URL-friendly identifier for the package
+   */
+  slug: string;
   tagline?: string | null;
   summary?: string | null;
   description?: {
@@ -2223,10 +2176,9 @@ export interface PagesSelect<T extends boolean = true> {
                   };
               autoplayInterval?: T;
             };
-        travelPackageFields?:
+        packageHeroFields?:
           | T
           | {
-              title?: T;
               rating?: T;
               location?: T;
               description?: T;
@@ -2303,47 +2255,6 @@ export interface PagesSelect<T extends boolean = true> {
               showLocationDetails?: T;
               cardSizePattern?: T;
               backgroundColor?: T;
-              id?: T;
-              blockName?: T;
-            };
-        heroMainBlock?:
-          | T
-          | {
-              slides?:
-                | T
-                | {
-                    image?: T;
-                    title?: T;
-                    subtitle?: T;
-                    location?: T;
-                    id?: T;
-                  };
-              cloudImage?: T;
-              enableAirplaneAnimation?: T;
-              autoplayDuration?: T;
-              destinationOptions?:
-                | T
-                | {
-                    label?: T;
-                    value?: T;
-                    id?: T;
-                  };
-              categoryOptions?:
-                | T
-                | {
-                    label?: T;
-                    value?: T;
-                    id?: T;
-                  };
-              buttonLabel?: T;
-              placeholders?:
-                | T
-                | {
-                    destination?: T;
-                    date?: T;
-                    people?: T;
-                    category?: T;
-                  };
               id?: T;
               blockName?: T;
             };
@@ -2960,6 +2871,7 @@ export interface DestinationsSelect<T extends boolean = true> {
  */
 export interface PackagesSelect<T extends boolean = true> {
   name?: T;
+  slug?: T;
   tagline?: T;
   summary?: T;
   description?: T;
@@ -3657,175 +3569,6 @@ export interface SearchFilter {
  */
 export interface PackageLayout {
   id: string;
-  layout: (
-    | ArchiveBlock
-    | ContentBlock
-    | CallToActionBlock
-    | FormBlock
-    | MediaBlock
-    | DynamicScrollerBlock
-    | PopularNowBlock
-    | {
-        /**
-         * Main title for the carousel section
-         */
-        title?: string | null;
-        /**
-         * Subtitle text below the main title
-         */
-        subtitle?: string | null;
-        /**
-         * Select destinations to display in the carousel
-         */
-        destinations?: (string | Destination)[] | null;
-        showNavigation?: boolean | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'uniformCardCarousel';
-      }
-    | {
-        /**
-         * Select the image to display
-         */
-        image: string | Media;
-        /**
-         * Add a dark overlay on top of the image
-         */
-        overlay?: boolean | null;
-        /**
-         * Adjust darkness of overlay (0 = transparent, 1 = fully black)
-         */
-        overlayOpacity?: number | null;
-        /**
-         * Choose the height of the image block
-         */
-        height?: ('small' | 'medium' | 'large' | 'xl') | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'staticImageBlock';
-      }
-    | {
-        title?: string | null;
-        subtitle?: string | null;
-        /**
-         * Select destinations - they will automatically get varied card sizes
-         */
-        destinations?: (string | Destination)[] | null;
-        showDiscountBadge?: boolean | null;
-        showLocationDetails?: boolean | null;
-        /**
-         * How to distribute different card sizes
-         */
-        cardSizePattern?: ('varied' | 'pattern' | 'random') | null;
-        backgroundColor?: ('gray' | 'white' | 'cream') | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'nonUniformCardCarousel';
-      }
-    | UpDownCardCarouselBlock
-    | {
-        slides?:
-          | {
-              /**
-               * The main background image for the slide.
-               */
-              image: string | Media;
-              title?: string | null;
-              subtitle?: string | null;
-              location?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        /**
-         * Upload a PNG image of clouds with a transparent background. This will be layered at the bottom.
-         */
-        cloudImage: string | Media;
-        enableAirplaneAnimation?: boolean | null;
-        /**
-         * Autoplay interval in milliseconds (e.g., 8000 = 8 seconds).
-         */
-        autoplayDuration?: number | null;
-        destinationOptions?:
-          | {
-              label: string;
-              value: string;
-              id?: string | null;
-            }[]
-          | null;
-        categoryOptions?:
-          | {
-              label: string;
-              value: string;
-              id?: string | null;
-            }[]
-          | null;
-        buttonLabel?: string | null;
-        placeholders?: {
-          destination?: string | null;
-          date?: string | null;
-          people?: string | null;
-          category?: string | null;
-        };
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'heroMainBlock';
-      }
-    | ClientStoriesBlock
-    | {
-        /**
-         * Main title for the hero section
-         */
-        title: string;
-        stops?:
-          | {
-              /**
-               * Name of the attraction (e.g., Park Güell)
-               */
-              name: string;
-              /**
-               * City where the attraction is located
-               */
-              city: string;
-              /**
-               * Hero image for the attraction
-               */
-              image: string | Media;
-              /**
-               * Short description of the attraction
-               */
-              excerpt: string;
-              /**
-               * URL slug for the attraction page (optional)
-               */
-              slug?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        displaySettings?: {
-          /**
-           * Scale up the centered card
-           */
-          showActiveScale?: boolean | null;
-          /**
-           * Number of cards visible at once
-           */
-          visibleWindow?: number | null;
-        };
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'destinationHeroCarousel';
-      }
-  )[];
-  _status?: ('draft' | 'published') | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "destinationLayout".
- */
-export interface DestinationLayout {
-  id: string;
   hero: {
     type: 'mainHero' | 'destinationHero' | 'packageHero';
     mainHeroFields?: {
@@ -3892,11 +3635,7 @@ export interface DestinationLayout {
        */
       autoplayInterval?: number | null;
     };
-    travelPackageFields?: {
-      /**
-       * The main title of the travel package
-       */
-      title: string;
+    packageHeroFields?: {
       /**
        * Rating out of 5 stars
        */
@@ -4034,52 +3773,367 @@ export interface DestinationLayout {
         blockName?: string | null;
         blockType: 'nonUniformCardCarousel';
       }
+    | UpDownCardCarouselBlock
+    | ClientStoriesBlock
     | {
-        slides?:
+        /**
+         * Main title for the hero section
+         */
+        title: string;
+        stops?:
           | {
               /**
-               * The main background image for the slide.
+               * Name of the attraction (e.g., Park Güell)
+               */
+              name: string;
+              /**
+               * City where the attraction is located
+               */
+              city: string;
+              /**
+               * Hero image for the attraction
                */
               image: string | Media;
-              title?: string | null;
-              subtitle?: string | null;
-              location?: string | null;
+              /**
+               * Short description of the attraction
+               */
+              excerpt: string;
+              /**
+               * URL slug for the attraction page (optional)
+               */
+              slug?: string | null;
               id?: string | null;
             }[]
           | null;
-        /**
-         * Upload a PNG image of clouds with a transparent background. This will be layered at the bottom.
-         */
-        cloudImage: string | Media;
-        enableAirplaneAnimation?: boolean | null;
-        /**
-         * Autoplay interval in milliseconds (e.g., 8000 = 8 seconds).
-         */
-        autoplayDuration?: number | null;
-        destinationOptions?:
-          | {
-              label: string;
-              value: string;
-              id?: string | null;
-            }[]
-          | null;
-        categoryOptions?:
-          | {
-              label: string;
-              value: string;
-              id?: string | null;
-            }[]
-          | null;
-        buttonLabel?: string | null;
-        placeholders?: {
-          destination?: string | null;
-          date?: string | null;
-          people?: string | null;
-          category?: string | null;
+        displaySettings?: {
+          /**
+           * Scale up the centered card
+           */
+          showActiveScale?: boolean | null;
+          /**
+           * Number of cards visible at once
+           */
+          visibleWindow?: number | null;
         };
         id?: string | null;
         blockName?: string | null;
-        blockType: 'heroMainBlock';
+        blockType: 'destinationHeroCarousel';
+      }
+    | InstagramCarouselBlock
+    | TravelPackageExplorerBlock
+    | PackageHighlightsBlock
+    | FeatureCarouselBlock
+    | HeaderPointsBlock
+    | ImageGridBlock
+  )[];
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PackageHighlightsBlock".
+ */
+export interface PackageHighlightsBlock {
+  /**
+   * Main heading for the package highlights section
+   */
+  heading: string;
+  /**
+   * Subtitle text below the heading
+   */
+  subheading?: string | null;
+  /**
+   * List of package highlights (each with a star icon)
+   */
+  highlights: {
+    highlightText: string;
+    id?: string | null;
+  }[];
+  /**
+   * Exactly 7 images for the gallery mosaic layout (positions are pre-defined)
+   */
+  galleryImages: {
+    /**
+     * Upload an image for the gallery
+     */
+    image: string | Media;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'packageHighlights';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureCarouselBlock".
+ */
+export interface FeatureCarouselBlock {
+  /**
+   * Main heading displayed at the top of the carousel.
+   */
+  heading: string;
+  /**
+   * Optional subheading displayed below the main heading.
+   */
+  subheading?: string | null;
+  /**
+   * Add feature cards to display in the scrollable carousel.
+   */
+  cards: {
+    title: string;
+    description: string;
+    id?: string | null;
+  }[];
+  /**
+   * Display left/right navigation buttons for manual scrolling.
+   */
+  showNavigationButtons?: boolean | null;
+  /**
+   * Percentage of container width to scroll on button click (10-100).
+   */
+  scrollPercentage?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureCarousel';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeaderPointsBlock".
+ */
+export interface HeaderPointsBlock {
+  /**
+   * Main heading displayed at the top.
+   */
+  heading: string;
+  /**
+   * Optional subheading displayed below the main heading. Leave empty to hide.
+   */
+  subheading?: string | null;
+  /**
+   * Choose how the list items should be displayed.
+   */
+  listStyle?: ('decimal' | 'disc') | null;
+  /**
+   * Add points or items to display in the list.
+   */
+  points: {
+    text: string;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'headerPoints';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinationLayout".
+ */
+export interface DestinationLayout {
+  id: string;
+  hero: {
+    type: 'mainHero' | 'destinationHero' | 'packageHero';
+    mainHeroFields?: {
+      slides: {
+        /**
+         * The main background image for the slide.
+         */
+        backgroundImage: string | Media;
+        headline: string;
+        subtitle?: string | null;
+        location?: string | null;
+        id?: string | null;
+      }[];
+      /**
+       * Upload a PNG image of clouds with a transparent background. This will be layered at the bottom.
+       */
+      cloudImage: string | Media;
+      enableAirplaneAnimation?: boolean | null;
+      /**
+       * Autoplay interval in milliseconds (e.g., 8000 = 8 seconds).
+       */
+      autoplayDuration?: number | null;
+      /**
+       * Slide transition duration in milliseconds.
+       */
+      transitionDuration?: number | null;
+      destinationOptions?:
+        | {
+            label: string;
+            value: string;
+            id?: string | null;
+          }[]
+        | null;
+      categoryOptions?:
+        | {
+            label: string;
+            value: string;
+            id?: string | null;
+          }[]
+        | null;
+      buttonLabel?: string | null;
+      placeholders?: {
+        destination?: string | null;
+        date?: string | null;
+        people?: string | null;
+        category?: string | null;
+      };
+    };
+    destinationHeroFields?: {
+      /**
+       * The main heading displayed on the hero
+       */
+      destination: string;
+      cities: {
+        name: string;
+        /**
+         * High-resolution image for the city background
+         */
+        image: string | Media;
+        id?: string | null;
+      }[];
+      /**
+       * Time in milliseconds between automatic slide changes
+       */
+      autoplayInterval?: number | null;
+    };
+    packageHeroFields?: {
+      /**
+       * Rating out of 5 stars
+       */
+      rating: number;
+      /**
+       * Location itinerary description
+       */
+      location: string;
+      /**
+       * Detailed description of the travel package
+       */
+      description: string;
+      vacationTypes: {
+        /**
+         * Type name (e.g., Couples, Family)
+         */
+        type: string;
+        /**
+         * Descriptive label for the vacation type
+         */
+        label: string;
+        /**
+         * Emoji icon for the vacation type
+         */
+        icon: string;
+        /**
+         * Percentage value (0-100)
+         */
+        percentage: number;
+        id?: string | null;
+      }[];
+      pricing: {
+        /**
+         * Original price (formatted with commas)
+         */
+        originalPrice: string;
+        /**
+         * Discounted price (formatted with commas)
+         */
+        discountedPrice: string;
+        /**
+         * Currency symbol
+         */
+        currency?: string | null;
+      };
+      /**
+       * Number of bookings (e.g., 250+)
+       */
+      bookingCount: string;
+      /**
+       * Profile images of recent customers
+       */
+      recentBookings?:
+        | {
+            avatar: string | Media;
+            id?: string | null;
+          }[]
+        | null;
+      /**
+       * The main promotional image for the package
+       */
+      mainImage: string | Media;
+      /**
+       * Background image for the card
+       */
+      backgroundImage: string | Media;
+      buttons?: {
+        bookNowLabel?: string | null;
+        enableDownload?: boolean | null;
+      };
+    };
+  };
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | ArchiveBlock
+    | FormBlock
+    | DynamicScrollerBlock
+    | PopularNowBlock
+    | {
+        /**
+         * Main title for the carousel section
+         */
+        title?: string | null;
+        /**
+         * Subtitle text below the main title
+         */
+        subtitle?: string | null;
+        /**
+         * Select destinations to display in the carousel
+         */
+        destinations?: (string | Destination)[] | null;
+        showNavigation?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'uniformCardCarousel';
+      }
+    | {
+        /**
+         * Select the image to display
+         */
+        image: string | Media;
+        /**
+         * Add a dark overlay on top of the image
+         */
+        overlay?: boolean | null;
+        /**
+         * Adjust darkness of overlay (0 = transparent, 1 = fully black)
+         */
+        overlayOpacity?: number | null;
+        /**
+         * Choose the height of the image block
+         */
+        height?: ('small' | 'medium' | 'large' | 'xl') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'staticImageBlock';
+      }
+    | {
+        title?: string | null;
+        subtitle?: string | null;
+        /**
+         * Select destinations - they will automatically get varied card sizes
+         */
+        destinations?: (string | Destination)[] | null;
+        showDiscountBadge?: boolean | null;
+        showLocationDetails?: boolean | null;
+        /**
+         * How to distribute different card sizes
+         */
+        cardSizePattern?: ('varied' | 'pattern' | 'random') | null;
+        backgroundColor?: ('gray' | 'white' | 'cream') | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'nonUniformCardCarousel';
       }
     | UpDownCardCarouselBlock
     | ClientStoriesBlock
@@ -4256,126 +4310,6 @@ export interface SearchFiltersSelect<T extends boolean = true> {
  * via the `definition` "packageLayout_select".
  */
 export interface PackageLayoutSelect<T extends boolean = true> {
-  layout?:
-    | T
-    | {
-        archive?: T | ArchiveBlockSelect<T>;
-        content?: T | ContentBlockSelect<T>;
-        cta?: T | CallToActionBlockSelect<T>;
-        formBlock?: T | FormBlockSelect<T>;
-        mediaBlock?: T | MediaBlockSelect<T>;
-        dynamicScroller?: T | DynamicScrollerBlockSelect<T>;
-        popularNow?: T | PopularNowBlockSelect<T>;
-        uniformCardCarousel?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              showNavigation?: T;
-              id?: T;
-              blockName?: T;
-            };
-        staticImageBlock?:
-          | T
-          | {
-              image?: T;
-              overlay?: T;
-              overlayOpacity?: T;
-              height?: T;
-              id?: T;
-              blockName?: T;
-            };
-        nonUniformCardCarousel?:
-          | T
-          | {
-              title?: T;
-              subtitle?: T;
-              destinations?: T;
-              showDiscountBadge?: T;
-              showLocationDetails?: T;
-              cardSizePattern?: T;
-              backgroundColor?: T;
-              id?: T;
-              blockName?: T;
-            };
-        upDownCardCarousel?: T | UpDownCardCarouselBlockSelect<T>;
-        heroMainBlock?:
-          | T
-          | {
-              slides?:
-                | T
-                | {
-                    image?: T;
-                    title?: T;
-                    subtitle?: T;
-                    location?: T;
-                    id?: T;
-                  };
-              cloudImage?: T;
-              enableAirplaneAnimation?: T;
-              autoplayDuration?: T;
-              destinationOptions?:
-                | T
-                | {
-                    label?: T;
-                    value?: T;
-                    id?: T;
-                  };
-              categoryOptions?:
-                | T
-                | {
-                    label?: T;
-                    value?: T;
-                    id?: T;
-                  };
-              buttonLabel?: T;
-              placeholders?:
-                | T
-                | {
-                    destination?: T;
-                    date?: T;
-                    people?: T;
-                    category?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-        clientStories?: T | ClientStoriesBlockSelect<T>;
-        destinationHeroCarousel?:
-          | T
-          | {
-              title?: T;
-              stops?:
-                | T
-                | {
-                    name?: T;
-                    city?: T;
-                    image?: T;
-                    excerpt?: T;
-                    slug?: T;
-                    id?: T;
-                  };
-              displaySettings?:
-                | T
-                | {
-                    showActiveScale?: T;
-                    visibleWindow?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-      };
-  _status?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "destinationLayout_select".
- */
-export interface DestinationLayoutSelect<T extends boolean = true> {
   hero?:
     | T
     | {
@@ -4433,10 +4367,9 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
                   };
               autoplayInterval?: T;
             };
-        travelPackageFields?:
+        packageHeroFields?:
           | T
           | {
-              title?: T;
               rating?: T;
               location?: T;
               description?: T;
@@ -4516,14 +4449,118 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        heroMainBlock?:
+        upDownCardCarousel?: T | UpDownCardCarouselBlockSelect<T>;
+        clientStories?: T | ClientStoriesBlockSelect<T>;
+        destinationHeroCarousel?:
+          | T
+          | {
+              title?: T;
+              stops?:
+                | T
+                | {
+                    name?: T;
+                    city?: T;
+                    image?: T;
+                    excerpt?: T;
+                    slug?: T;
+                    id?: T;
+                  };
+              displaySettings?:
+                | T
+                | {
+                    showActiveScale?: T;
+                    visibleWindow?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        instagramCarousel?: T | InstagramCarouselBlockSelect<T>;
+        travelPackageExplorer?: T | TravelPackageExplorerBlockSelect<T>;
+        packageHighlights?: T | PackageHighlightsBlockSelect<T>;
+        featureCarousel?: T | FeatureCarouselBlockSelect<T>;
+        headerPoints?: T | HeaderPointsBlockSelect<T>;
+        imageGrid?: T | ImageGridBlockSelect<T>;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PackageHighlightsBlock_select".
+ */
+export interface PackageHighlightsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  highlights?:
+    | T
+    | {
+        highlightText?: T;
+        id?: T;
+      };
+  galleryImages?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureCarouselBlock_select".
+ */
+export interface FeatureCarouselBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  cards?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        id?: T;
+      };
+  showNavigationButtons?: T;
+  scrollPercentage?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeaderPointsBlock_select".
+ */
+export interface HeaderPointsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  listStyle?: T;
+  points?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "destinationLayout_select".
+ */
+export interface DestinationLayoutSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        type?: T;
+        mainHeroFields?:
           | T
           | {
               slides?:
                 | T
                 | {
-                    image?: T;
-                    title?: T;
+                    backgroundImage?: T;
+                    headline?: T;
                     subtitle?: T;
                     location?: T;
                     id?: T;
@@ -4531,6 +4568,7 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
               cloudImage?: T;
               enableAirplaneAnimation?: T;
               autoplayDuration?: T;
+              transitionDuration?: T;
               destinationOptions?:
                 | T
                 | {
@@ -4554,6 +4592,99 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
                     people?: T;
                     category?: T;
                   };
+            };
+        destinationHeroFields?:
+          | T
+          | {
+              destination?: T;
+              cities?:
+                | T
+                | {
+                    name?: T;
+                    image?: T;
+                    id?: T;
+                  };
+              autoplayInterval?: T;
+            };
+        packageHeroFields?:
+          | T
+          | {
+              rating?: T;
+              location?: T;
+              description?: T;
+              vacationTypes?:
+                | T
+                | {
+                    type?: T;
+                    label?: T;
+                    icon?: T;
+                    percentage?: T;
+                    id?: T;
+                  };
+              pricing?:
+                | T
+                | {
+                    originalPrice?: T;
+                    discountedPrice?: T;
+                    currency?: T;
+                  };
+              bookingCount?: T;
+              recentBookings?:
+                | T
+                | {
+                    avatar?: T;
+                    id?: T;
+                  };
+              mainImage?: T;
+              backgroundImage?: T;
+              buttons?:
+                | T
+                | {
+                    bookNowLabel?: T;
+                    enableDownload?: T;
+                  };
+            };
+      };
+  layout?:
+    | T
+    | {
+        cta?: T | CallToActionBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        mediaBlock?: T | MediaBlockSelect<T>;
+        archive?: T | ArchiveBlockSelect<T>;
+        formBlock?: T | FormBlockSelect<T>;
+        dynamicScroller?: T | DynamicScrollerBlockSelect<T>;
+        popularNow?: T | PopularNowBlockSelect<T>;
+        uniformCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              showNavigation?: T;
+              id?: T;
+              blockName?: T;
+            };
+        staticImageBlock?:
+          | T
+          | {
+              image?: T;
+              overlay?: T;
+              overlayOpacity?: T;
+              height?: T;
+              id?: T;
+              blockName?: T;
+            };
+        nonUniformCardCarousel?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              destinations?: T;
+              showDiscountBadge?: T;
+              showLocationDetails?: T;
+              cardSizePattern?: T;
+              backgroundColor?: T;
               id?: T;
               blockName?: T;
             };

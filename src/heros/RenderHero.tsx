@@ -32,7 +32,7 @@ type RecentBooking = {
   id?: string
 }
 
-type TravelPackageFieldsShape = {
+type packageHeroFieldsShape = {
   title?: string
   rating?: number
   location?: string
@@ -105,8 +105,7 @@ export const RenderHero: React.FC<RenderHeroProps> = ({ hero }) => {
     }
 
     case 'packageHero': {
-      // Type assertion to access travelPackageFields (matches your config condition)
-      const tp = (hero as any).travelPackageFields as TravelPackageFieldsShape | undefined
+      const tp = (hero as any).packageHeroFields as packageHeroFieldsShape | undefined
       if (!tp) return null
 
       return (

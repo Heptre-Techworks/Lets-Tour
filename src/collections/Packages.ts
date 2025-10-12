@@ -4,8 +4,24 @@ import type { CollectionConfig } from 'payload'
 export const Packages: CollectionConfig = {
   slug: 'packages',
   admin: { useAsTitle: 'name' },
+  access: {
+    read: () => true, // Allow public read for frontend
+    create: ({ req }) => Boolean(req?.user),
+    update: ({ req }) => req?.user?.role === 'admin',
+    delete: ({ req }) => req?.user?.role === 'admin',
+  },
   fields: [
-    { name: 'name', type: 'text', required: true }, // no slug; use id
+    { name: 'name', type: 'text', required: true },
+    { 
+      name: 'slug', 
+      type: 'text', 
+      required: true, 
+      unique: true,
+      admin: {
+        position: 'sidebar',
+        description: 'URL-friendly identifier for the package',
+      },
+    },
     { name: 'tagline', type: 'text' },
     { name: 'summary', type: 'textarea' },
     { name: 'description', type: 'richText' },

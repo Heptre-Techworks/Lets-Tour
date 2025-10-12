@@ -13,7 +13,6 @@ import { UniformCardCarousel } from '@/blocks/UniformCardCarousel/config'
 import { StaticImageBlock } from '@/blocks/StaticImageBlock/config'
 import { NonUniformCardCarousel } from '@/blocks/NonUniformCardCarousel/config'
 import { UpDownCardCarousel } from '@/blocks/UpDownCardCarousel/config'
-import { HeroMainBlock } from '@/blocks/HeroMainBlock/config'
 import { DestinationHeroCarousel } from '@/blocks/DestinationHeroCarousel/config'
 import InstagramCarouselBlock from '@/blocks/InstagramCarousel/config'
 import {TravelPackageExplorer} from '@/blocks/TravelPackageExplorer/config'
@@ -47,7 +46,6 @@ export const DestinationLayout: GlobalConfig = {
                 UniformCardCarousel,
                 StaticImageBlock,
                 NonUniformCardCarousel,
-                HeroMainBlock,
                 UpDownCardCarousel,
                 ClientStories,
                 DestinationHeroCarousel,

@@ -1,4 +1,4 @@
-// app/packages/[slug]/page.tsx
+// app/(frontend)/packages/[slug]/page.tsx
 import type { Metadata } from 'next'
 import React, { cache } from 'react'
 import { draftMode } from 'next/headers'
@@ -36,7 +36,7 @@ const getPackageLayout = unstable_cache(
     const global = await payload.findGlobal({
       slug: 'packageLayout',
       draft: opts.draft,
-      overrideAccess: opts.draft ? true : false,
+      overrideAccess: true, // Always true to allow access
     })
     return global
   },
@@ -89,7 +89,7 @@ const queryPackageBySlug = cache(async ({ slug }: { slug: string }) => {
   const result = await payload.find({
     collection: 'packages',
     draft,
-    overrideAccess: draft ? true : false,
+    overrideAccess: true, // Always true to allow access
     limit: 1,
     pagination: false,
     depth: 0,
