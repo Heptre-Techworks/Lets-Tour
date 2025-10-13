@@ -223,24 +223,17 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   const navEnabled = Boolean((section as any).navigation ?? false)
 
   return (
-    <section className={`relative py-12 overflow-hidden ${section?.theme?.background || 'bg-white'}`}>
-      <div className="absolute top-36 left-0 h-96 w-1/3 bg-yellow-300/50" aria-hidden="true" />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {(section.title || section.subtitle) && (
-          <div className="mb-8">
-            <div className="flex items-center gap-4">
-              {section.title && (
-                <h2 className={`text-4xl font-bold font-amiri ${section?.theme?.titleColor || 'text-gray-900'}`}>
-                  {section.title}
-                </h2>
-              )}
-              <div className="flex-1"><DashedRule /></div>
-            </div>
-            {section.subtitle && (
-              <p className={`mt-2 ${section?.theme?.subtitleColor || 'text-gray-900'}`}>{section.subtitle}</p>
-            )}
+    <section className={`relative overflow-hidden ${section?.theme?.background || 'bg-white'}`}>
+      <div className="px-4 absolute top-28 left-0 h-[50vh] w-2/3 bg-[rgba(251,174,61,0.9)]" aria-hidden="true" />
+      <header className="mb-10">
+          <div className="flex items-center gap-6">
+            <h1 className="text-5xl md:text-6xl font-bold flex-shrink-0 pl-[5%]">{section.title}</h1>
+            <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
           </div>
-        )}
+          {section.subtitle ? <p className="text-lg text-gray-500 mt-2 pl-[5%]">{section.subtitle}</p> : null}
+        </header>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+        
 
         <div
           ref={scrollRef}
@@ -292,7 +285,7 @@ export const DynamicScroller: React.FC<{ sections?: Section[] }> = ({ sections =
       @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
       .font-amiri { font-family: 'Amiri', serif; }
     `}</style>
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen font-sans">
       {sections.map((section, idx) => (
         <DynamicSection key={(section as any)?.id || idx} section={section} />
       ))}

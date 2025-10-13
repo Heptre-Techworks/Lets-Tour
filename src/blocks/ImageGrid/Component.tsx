@@ -52,11 +52,11 @@ export const ImageGrid: React.FC<ImageGridBlockProps & { className?: string }> =
       className={cn(
         dark ? 'text-white bg-[#111111]' : 'text-black',
         wrap ? 'container' : '',
-        'mx-auto p-4 md:p-8',
+        'mx-auto',
         className
       )}
     >
-      <main className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <main className="grid grid-cols-1 lg:grid-cols-5 gap-0">
         {/* Left Hero */}
         <div className="relative col-span-1 lg:col-span-2 h-[400px] md:h-[600px] lg:h-auto rounded-lg overflow-hidden group">
           {leftHeroSrc && (
@@ -67,8 +67,8 @@ export const ImageGrid: React.FC<ImageGridBlockProps & { className?: string }> =
             />
           )}
           {(leftHero?.title || leftHero?.rating !== undefined || leftHero?.trail) && (
-            <div className="absolute bottom-0 left-0 p-6 w-full">
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
+            <div className="absolute bottom-0 left-0 p-6 pl-16 w-full">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent" />
               <div className="relative flex items-baseline space-x-2 drop-shadow">
                 {leftHero?.title && <h2 className="text-2xl md:text-3xl font-bold">{leftHero.title}</h2>}
                 {typeof leftHero?.rating === 'number' && (
@@ -88,15 +88,15 @@ export const ImageGrid: React.FC<ImageGridBlockProps & { className?: string }> =
         </div>
 
         {/* Right Grid */}
-        <div className="col-span-1 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="col-span-1 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-0">
           {/* Column 1 */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-0">
             {/* Explore card */}
             {(explore?.subtitle ||
               explore?.title ||
               explore?.description ||
               explore?.button?.label) && (
-              <div className="flex flex-col justify-center p-6 md:p-10 rounded-lg bg-[#1a1a1a]">
+              <div className="flex flex-col justify-center p-2 md:p-10 rounded-lg bg-[#1a1a1a]">
                 {explore?.subtitle && (
                   <p className="text-sm font-semibold tracking-widest text-gray-400">{explore.subtitle}</p>
                 )}
@@ -152,7 +152,7 @@ export const ImageGrid: React.FC<ImageGridBlockProps & { className?: string }> =
           </div>
 
           {/* Column 2 */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-0">
             {/* Spot index 0 */}
             {spotsSafe[0] && (
               <div className="relative rounded-lg overflow-hidden group">
@@ -237,7 +237,7 @@ export const ImageGrid: React.FC<ImageGridBlockProps & { className?: string }> =
         activities?.description ||
         activities?.button?.label ||
         activities?.tag) && (
-        <section className="relative mt-6 h-[500px] md:h-[600px] rounded-lg overflow-hidden flex items-center group">
+        <section className="relative h-[500px] md:h-[600px] rounded-lg overflow-hidden flex items-center group">
           {activitiesSrc && (
             <img
               src={activitiesSrc}

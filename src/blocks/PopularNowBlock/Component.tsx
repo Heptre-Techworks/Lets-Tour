@@ -90,7 +90,7 @@ const InfiniteScroller: React.FC<{
         const childRect = child.getBoundingClientRect();
         const childCenterX = childRect.left - scrollerRect.left + childRect.width / 2;
         const distanceFromCenter = Math.abs(scrollerCenterX - childCenterX);
-        const scale = Math.max(0.8, 1.1 - (distanceFromCenter / scrollerWidth));
+        const scale = Math.max(0.8, 1 - (distanceFromCenter / scrollerWidth));
         child.style.transformOrigin = transformOrigin;
         child.style.transform = `scale(${scale})`;
         child.style.transition = 'transform 150ms linear';
@@ -117,7 +117,7 @@ const InfiniteScroller: React.FC<{
     <div ref={scrollerRef} className="scroller overflow-hidden">
       <ul
         ref={scrollerInnerRef}
-        className={`flex gap-4 w-max ${alignItems} py-2 scroller-inner ${directionClass}`}
+        className={`flex w-max ${alignItems} py-2 scroller-inner ${directionClass}`}
         style={{ '--duration': `${speed}s` } as React.CSSProperties}
       >
         {children}
@@ -149,17 +149,17 @@ export const PopularNow: React.FC<PopularNowBlockProps> = ({
 }) => {
   const pauseOnHover = pauseRaw ?? true;
   return (
-    <section className="min-h-screen w-full bg-[#F3F4F6] text-[#111827] font-sans flex flex-col justify-center py-16 px-4 sm:px-6 lg:px-8">
+    <section className="min-h-screen w-full text-[#111827] font-sans flex flex-col justify-center py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto w-full">
         <header className="mb-10">
           <div className="flex items-center gap-6">
-            <h1 className="text-5xl md:text-6xl font-bold flex-shrink-0">{heading}</h1>
+            <h1 className="text-5xl md:text-6xl font-bold flex-shrink-0 pl-[5%]">{heading}</h1>
             <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
           </div>
-          {subheading ? <p className="text-lg text-gray-500 mt-2">{subheading}</p> : null}
+          {subheading ? <p className="text-lg text-gray-500 mt-2 pl-[5%]">{subheading}</p> : null}
         </header>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
           {Array.isArray(rows) &&
             rows.map((row, idx) => {
               const direction = row?.direction === 'right' ? 'right' : 'left';

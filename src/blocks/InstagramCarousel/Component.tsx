@@ -79,7 +79,7 @@ const InstagramImageGrid: React.FC<{
   }, [columnsDesktop, columnsTablet, columnsMobile, gutter]);
 
   // Column heights
-  const columnHeight = Math.round(cardWidth * aspect * 1.6);
+  const columnHeight = Math.round(cardWidth * aspect * 3);
   const bigH = Math.round(columnHeight * 0.62);
   const smallH = columnHeight - bigH;
   const embedWidth = cardWidth + 160;
@@ -205,20 +205,20 @@ export const InstagramCarousel: React.FC<
 
           {/* Title and post count */}
           <div className="flex flex-col">
-            <h3 className="text-lg font-semibold leading-tight">
+            <h3 className="text-2xl font-semibold leading-tight">
               {heading ?? 'Latest on Instagram'}
             </h3>
-            <span className="text-xs text-gray-500 leading-snug">{postCount} posts</span>
+            <span className="text-sm text-gray-500 leading-snug">{postCount} posts</span>
           </div>
 
           {/* Vertical divider between title and button */}
-          <div className="mx-3 h-6 w-px bg-gray-300" aria-hidden="true" />
+          <div className="mx-3 h-10 w-px bg-gray-300" aria-hidden="true" />
 
           {/* Follow button with Instagram icon */}
           {profile?.profileUrl && (
             <a
               href={profile.profileUrl}
-              className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 hover:bg-gray-50 transition"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2 text-md text-gray-900 hover:bg-gray-50 transition"
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -176,10 +176,10 @@ export const UpDownCardCarousel: React.FC<UpDownCardCarouselBlockProps> = ({
   };
 
   return (
-    <section className="bg-gray-100 font-sans px-4 sm:px-8 py-20">
+    <section className="font-sans px-4 sm:px-8">
       <div className="w-full max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-10">
+        <div className="mb-4">
           <div className="flex items-center gap-4">
             <h1 className="text-5xl font-bold text-gray-800" style={{ fontFamily: 'serif' }}>
               {heading}
@@ -192,7 +192,7 @@ export const UpDownCardCarousel: React.FC<UpDownCardCarouselBlockProps> = ({
         </div>
 
         {/* Carousel */}
-        <div className="relative">
+        <div className="relative py-12 ">
           {/* Left button */}
           <button
             onClick={() => scroll('left')}
@@ -206,7 +206,7 @@ export const UpDownCardCarousel: React.FC<UpDownCardCarouselBlockProps> = ({
           {/* Cards */}
           <div
             ref={scrollContainerRef}
-            className="flex items-center space-x-8 overflow-x-auto py-8 px-4 -mx-4"
+            className="flex items-center space-x-8 py-12 px-4 -mx-4 overflow-x-auto"
             style={{ scrollbarWidth: 'none' } as any}
           >
             {Array.isArray(cards) &&
@@ -232,6 +232,7 @@ export const UpDownCardCarousel: React.FC<UpDownCardCarouselBlockProps> = ({
             <ChevronRightIcon />
           </button>
         </div>
+
       </div>
     </section>
   );

@@ -229,7 +229,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
       `}</style>
 
       <section
-        className="relative -mt-[10.4rem] w-full h-[190vh] overflow-hidden font-roboto text-white"
+        className="relative -mt-[10.4rem] w-full h-[170vh] overflow-hidden font-roboto text-white"
         data-theme="dark"
       >
         {/* Background Image Slider */}
@@ -298,29 +298,29 @@ export const MainHero: React.FC<MainHeroProps> = ({
           </div>
 
           {/* Middle Content */}
-          <div className="relative z-10 flex-grow flex flex-col justify-center items-center px-8 md:px-24 space-y-20 pb-24">
+          <div className="relative z-10 flex-grow flex flex-col justify-center items-center px-8 md:px-24 space-y-20 pb-100">
             {/* Main Title */}
-            <div className="text-center w-full max-w-4xl">
-              <h1 className="font-playfair italic text-5xl md:text-7xl font-bold drop-shadow-lg">
+            <div className="text-center w-full max-w-[50%]">
+              <h1 className="font-playfair italic text-6xl md:text-8xl font-bold drop-shadow-lg pb-10">
                 {activeSlide.headline || 'To travel is to live!'}
               </h1>
             </div>
 
             {/* Location Info & Progress */}
-            <div className="w-full max-w-5xl h-12 relative">
+            <div className="w-full max-w-5xl h-8 relative ">
               {/* Left Aligned Text */}
               <div
                 className="absolute left-0 top-1/2 -translate-y-1/2 text-left"
                 style={textAnimation}
               >
-                <p className="text-xs font-light">{activeSlide.subtitle}</p>
-                <h2 className="text-2xl font-light">{activeSlide.location}</h2>
+                <p className="text-sm font-light">{activeSlide.subtitle}</p>
+                <h2 className="text-3xl font-light">{activeSlide.location}</h2>
               </div>
 
               {/* Centered Progress Bar */}
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full w-28">
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/4 h-full w-28">
                 {/* Static SVG dashed line on the left */}
-                <div className="absolute top-1/2 right-full -translate-y-1/2 w-20 h-0.5 mr-4">
+                <div className="absolute top-1/2 right-full -translate-y-1/2 w-48 h-0.5 mr-4">
                   <svg className="w-full h-full">
                     <line
                       x1="0"
@@ -440,7 +440,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
               {/* Search Form */}
               <form
                 onSubmit={(e) => e.preventDefault()}
-                className="w-full max-w-3xl relative px-4 pointer-events-auto"
+                className="w-full max-w-4xl relative px-4 pointer-events-auto h-8"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 bg-[#f0b95a] rounded-lg shadow-2xl overflow-hidden text-black/70">
                   <input

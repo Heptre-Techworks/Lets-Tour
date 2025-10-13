@@ -57,7 +57,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
   backgroundUrl,
   overlay,
   cardsPerView: cardsPerViewRaw = 2,
-  gapPx: gapPxRaw = 24,
+  gapPx: gapPxRaw = 32,
   cards = [],
 }) => {
   const cardsPerView = Math.max(1, Number(cardsPerViewRaw) || 2);
@@ -102,15 +102,15 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
       {/* Overlay visual effect */}
       {overlaySrc && (
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute pointer-events-none pt-[54vh] "
           style={{ zIndex: 1 }}
         >
           <img
             src={overlaySrc}
             alt={overlay?.alt || 'Decorative Overlay'}
-            className="w-full h-full object-cover"
+            className="w-full h-[40%] object-cover"
             style={{
-              opacity: 0.4,                // BOOST visibility for demonstration
+              opacity: 0.9,                // BOOST visibility for demonstration
               mixBlendMode: 'overlay',     // Try multiply or soft-light as alternative effects
             }}
           />
@@ -121,7 +121,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
       <div className="relative z-10 flex flex-col justify-between h-full p-8 md:p-16">
         <div className="flex flex-col lg:flex-row lg:items-start w-full flex-grow relative">
           {/* Left column */}
-          <div className="w-full lg:w-1/3 lg:pr-12 space-y-4 text-left mb-12 lg:mb-0 lg:pt-16">
+          <div className="w-full lg:w-1/3 lg:pr-12 space-y-4 text-left mb-12 lg:mb-0">
             <h1 className="text-5xl md:text-6xl font-serif italic">{heading}</h1>
             {subheading ? <p className="text-base text-gray-200">{subheading}</p> : null}
             {buttonText ? (
@@ -135,7 +135,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
           </div>
 
           {/* Right column */}
-          <div className="w-full lg:w-2/3 overflow-hidden">
+          <div className="p-4 pt-10 w-full lg:w-2/3 h-full overflow-hidden">
             <div
               className="flex transition-transform duration-500 ease-in-out"
               style={{
@@ -145,29 +145,44 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
               aria-live="polite"
             >
               {Array.isArray(cards) &&
-                cards.map((card, idx) => (
-                  <div
-                    key={`${card?.name ?? 'card'}-${idx}`}
-                    className="flex-shrink-0"
-                    style={{ width: `calc(${cardWidthPct}% - ${gapPx - gapPx / cardsPerView}px)` }}
-                  >
-                    <div className="h-[320px] p-6 bg-white/10 backdrop-blur-md rounded-2xl text-left">
-                      <div className="flex flex-col h-full">
-                        <div className="mb-4 shrink-0">
-                          <h3 className="text-xl font-bold">{card?.name ?? ''}</h3>
-                          <StarRating rating={card?.rating as number} />
-                        </div>
-                        <div className="flex-1 overflow-y-auto overscroll-contain pr-2">
-                          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-                            {card?.story ? `"${card.story}"` : ''}
-                          </p>
+                cards.map((card, idx) => {
+                  // Calculate if this card is at the leftmost visible position
+                  const currentCardIndex = Math.round((translatePct / 100) * (cards.length / cardsPerView));
+                  const isLeftmost = idx === currentCardIndex;
+                  
+                  return (
+                    <div
+                      key={`${card?.name ?? 'card'}-${idx}`}
+                      className={`flex-shrink-0 transition-transform duration-500 ease-in-out ${
+                        isLeftmost ? 'scale-110 z-10' : 'scale-100'
+                      }`}
+                      style={{ 
+                        width: `calc(${cardWidthPct}% - ${gapPx - gapPx / cardsPerView}px)`,
+                      }}
+                    >
+                      <div className={`h-[320px] p-6 backdrop-blur-md rounded-2xl text-left transition-all duration-500 ${
+                        isLeftmost 
+                          ? 'bg-white/20 shadow-2xl' 
+                          : 'bg-white/10 shadow-lg'
+                      }`}>
+                        <div className="flex flex-col h-full">
+                          <div className="mb-4 shrink-0">
+                            <h3 className="text-xl font-bold">{card?.name ?? ''}</h3>
+                            <StarRating rating={card?.rating as number} />
+                          </div>
+                          <div className="flex-1 overflow-y-auto overscroll-contain pr-2">
+                            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                              {card?.story ? `"${card.story}"` : ''}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
+
         </div>
 
         {/* Bottom navigation */}
