@@ -16,6 +16,7 @@ import { UpDownCardCarousel } from '@/blocks/UpDownCardCarousel/config'
 import { DestinationHeroCarousel } from '@/blocks/DestinationHeroCarousel/config'
 import InstagramCarouselBlock from '@/blocks/InstagramCarousel/config'
 import {TravelPackageExplorer} from '@/blocks/TravelPackageExplorer/config'
+import ImageGrid from '@/blocks/ImageGrid/config'
 
 export const DestinationLayout: GlobalConfig = {
   slug: 'destinationLayout',
@@ -50,7 +51,8 @@ export const DestinationLayout: GlobalConfig = {
                 ClientStories,
                 DestinationHeroCarousel,
                 InstagramCarouselBlock,
-                TravelPackageExplorer
+                TravelPackageExplorer,
+                ImageGrid
               ],
               admin: { initCollapsed: true },
             },
