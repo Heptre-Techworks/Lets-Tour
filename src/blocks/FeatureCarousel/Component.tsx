@@ -69,7 +69,7 @@ export const FeatureCarousel: React.FC<FeatureCarouselBlockProps> = ({
           {subheading && <p className="text-gray-600 mt-2">{subheading}</p>}
         </div>
 
-        <div className="relative rounded-xl p-4">
+        <div className="relative rounded-xl p-4 mr-16">
           <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#08121E]"></div>
           <div className="overflow-hidden">
             <div

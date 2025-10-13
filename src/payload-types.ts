@@ -241,10 +241,6 @@ export interface Page {
       };
     };
     destinationHeroFields?: {
-      /**
-       * The main heading displayed on the hero
-       */
-      destination: string;
       cities: {
         name: string;
         /**
@@ -2166,7 +2162,6 @@ export interface PagesSelect<T extends boolean = true> {
         destinationHeroFields?:
           | T
           | {
-              destination?: T;
               cities?:
                 | T
                 | {
@@ -3446,7 +3441,17 @@ export interface Header {
  */
 export interface Footer {
   id: string;
+  /**
+   * Upload your logo for the footer (optional)
+   */
   logo?: (string | null) | Media;
+  /**
+   * Brief description or tagline displayed under the logo
+   */
+  description?: string | null;
+  /**
+   * Used when Nav Groups are not defined. Define Quick Links here.
+   */
   navItems?:
     | {
         link: {
@@ -3467,8 +3472,14 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Create organized footer columns (recommended: 3-4 columns). Each group becomes a column.
+   */
   navGroups?:
     | {
+        /**
+         * e.g., "Company", "Resources", "Support"
+         */
         groupLabel: string;
         links?:
           | {
@@ -3493,6 +3504,9 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Add your social media profiles. Use the label for the platform name (e.g., "Facebook", "Instagram")
+   */
   socialLinks?:
     | {
         link: {
@@ -3513,6 +3527,9 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Add legal pages like Privacy Policy, Terms of Service, Cookie Policy, etc.
+   */
   legalLinks?:
     | {
         link: {
@@ -3533,8 +3550,14 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Enable/disable the dark/light theme toggle
+   */
   showThemeSelector?: boolean | null;
-  copyright?: string | null;
+  /**
+   * Copyright notice displayed at the bottom of the footer
+   */
+  copyright: string;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -3618,10 +3641,6 @@ export interface PackageLayout {
       };
     };
     destinationHeroFields?: {
-      /**
-       * The main heading displayed on the hero
-       */
-      destination: string;
       cities: {
         name: string;
         /**
@@ -3980,10 +3999,6 @@ export interface DestinationLayout {
       };
     };
     destinationHeroFields?: {
-      /**
-       * The main heading displayed on the hero
-       */
-      destination: string;
       cities: {
         name: string;
         /**
@@ -4218,6 +4233,7 @@ export interface HeaderSelect<T extends boolean = true> {
  */
 export interface FooterSelect<T extends boolean = true> {
   logo?: T;
+  description?: T;
   navItems?:
     | T
     | {
@@ -4357,7 +4373,6 @@ export interface PackageLayoutSelect<T extends boolean = true> {
         destinationHeroFields?:
           | T
           | {
-              destination?: T;
               cities?:
                 | T
                 | {
@@ -4596,7 +4611,6 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
         destinationHeroFields?:
           | T
           | {
-              destination?: T;
               cities?:
                 | T
                 | {

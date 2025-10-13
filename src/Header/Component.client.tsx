@@ -1,4 +1,5 @@
 'use client'
+
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -18,32 +19,25 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
 
   useEffect(() => {
     setHeaderTheme(null)
-  }, [pathname])
+  }, [pathname, setHeaderTheme])
 
   useEffect(() => {
     if (headerTheme && headerTheme !== theme) setTheme(headerTheme)
-  }, [headerTheme])
+  }, [headerTheme, theme])
 
   return (
     <header 
-      className="w-full"
-      style={{ 
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 99999,
-        background: 'transparent' // TRANSPARENT BACKGROUND
-      }}
+      className="w-full py-6"
       {...(theme ? { 'data-theme': theme } : {})}
     >
-      <div className="container relative">
-        <div className="py-6 flex justify-between items-center">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center">
           <HeaderLogo data={data} />
           <div className="flex items-center gap-4">
             <Navigation data={data} />
-            <UserProfile />
+            
           </div>
+          <UserProfile />
         </div>
       </div>
     </header>

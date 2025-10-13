@@ -10,15 +10,6 @@ export const DestinationHeroConfig: Field[] = [
     },
     fields: [
       {
-        name: 'destination',
-        type: 'text',
-        label: 'Destination Name',
-        required: true,
-        admin: {
-          description: 'The main heading displayed on the hero',
-        },
-      },
-      {
         name: 'cities',
         type: 'array',
         label: 'Cities',

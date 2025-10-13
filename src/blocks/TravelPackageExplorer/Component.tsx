@@ -244,7 +244,7 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
       {/* Image container with "card-in-card" effect */}
       <div className="md:w-64 p-3 flex-shrink-0">
         <img
-          className="h-48 w-full object-cover rounded-xl shadow-md"
+          className="h-[48vh] w-full object-cover rounded-xl shadow-md"
           src={imageSrc}
           alt={pkg.title}
           onError={(e) => {

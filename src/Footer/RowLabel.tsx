@@ -11,7 +11,6 @@ export const RowLabel: React.FC<RowLabelProps> = () => {
     NonNullable<Footer['navGroups']>[number]
   >()
 
-  // Try to derive a meaningful title across supported rows
   const groupLabel = (data?.data as any)?.groupLabel
   const linkLabel = (data?.data as any)?.link?.label
   const nestedLinkLabel = (data?.data as any)?.links ? undefined : linkLabel

@@ -7,12 +7,12 @@ export const FooterNav: React.FC<{ data: { navItems?: FooterType['navItems'] } }
   const navItems = data?.navItems || []
 
   return (
-    <nav className="flex flex-col gap-2">
+    <nav className="flex flex-col gap-3">
       {navItems.map((item, i) => {
         if (!item?.link) return null
         return (
           <CMSLink
-            className="text-white text-sm hover:opacity-80"
+            className="text-sm text-gray-400 hover:text-white transition-colors duration-300 inline-block"
             key={i}
             {...item.link}
           />

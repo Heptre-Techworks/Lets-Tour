@@ -35,17 +35,30 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
   autoplayInterval = 5000,
 }) => {
   const { setHeaderTheme } = useHeaderTheme()
-  const params = useParams<{ destinationname: string }>()
+  const params = useParams<{ slug: string }>()
   const cityListRef = useRef<HTMLUListElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const isJumpingRef = useRef(false)
 
-  // Extract destination from URL - this is now the single source of truth
-  const destination = params?.destinationname 
-    ? decodeURIComponent(params.destinationname).replace(/-/g, ' ')
-    : 'Destination'
-
+  // Extract destination from URL: /destinations/south-korea -> South Korea
+  const getDestinationTitle = () => {
+    const destinationParam = params?.slug
+    
+    if (!destinationParam) {
+      return 'Destination'
+    }
+    
+    // Handle both string and array (Next.js can return either)
+    const slug = Array.isArray(destinationParam) ? destinationParam[0] : destinationParam
+    
+    // Convert slug to title: south-korea -> South Korea
+    return slug
+      .split('-')
+      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+  }
+  const destination = getDestinationTitle()
   // Create extended cities array for infinite loop illusion
   const extendedCities = [...cities, ...cities, ...cities]
   const initialDisplayIndex = cities.length // Start with first city in the middle block

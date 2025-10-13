@@ -12,6 +12,19 @@ export const Footer: GlobalConfig = {
       relationTo: 'media',
       label: 'Footer Logo',
       required: false,
+      admin: {
+        description: 'Upload your logo for the footer (optional)',
+      },
+    },
+    {
+      name: 'description',
+      type: 'textarea',
+      label: 'Footer Description',
+      required: false,
+      admin: {
+        description: 'Brief description or tagline displayed under the logo',
+        placeholder: 'Discover unforgettable travel experiences and create memories that last a lifetime.',
+      },
     },
     {
       name: 'navItems',
@@ -19,6 +32,7 @@ export const Footer: GlobalConfig = {
       label: 'Top-level Nav',
       maxRows: 10,
       admin: {
+        description: 'Used when Nav Groups are not defined. Define Quick Links here.',
         initCollapsed: true,
         components: { RowLabel: '@/Footer/RowLabel#RowLabel' },
       },
@@ -29,8 +43,10 @@ export const Footer: GlobalConfig = {
     {
       name: 'navGroups',
       type: 'array',
-      label: 'Nav Groups (Columns)',
+      label: 'Nav Groups (Footer Columns)',
+      maxRows: 4,
       admin: {
+        description: 'Create organized footer columns (recommended: 3-4 columns). Each group becomes a column.',
         initCollapsed: true,
         components: { RowLabel: '@/Footer/RowLabel#RowLabel' },
       },
@@ -39,12 +55,16 @@ export const Footer: GlobalConfig = {
           name: 'groupLabel',
           type: 'text',
           required: true,
-          label: 'Group Label',
+          label: 'Column Heading',
+          admin: {
+            description: 'e.g., "Company", "Resources", "Support"',
+          },
         },
         {
           name: 'links',
           type: 'array',
           label: 'Links',
+          maxRows: 8,
           admin: {
             initCollapsed: true,
             components: { RowLabel: '@/Footer/RowLabel#RowLabel' },
@@ -56,9 +76,10 @@ export const Footer: GlobalConfig = {
     {
       name: 'socialLinks',
       type: 'array',
-      label: 'Social Links',
-      maxRows: 10,
+      label: 'Social Media Links',
+      maxRows: 6,
       admin: {
+        description: 'Add your social media profiles. Use the label for the platform name (e.g., "Facebook", "Instagram")',
         initCollapsed: true,
         components: { RowLabel: '@/Footer/RowLabel#RowLabel' },
       },
@@ -67,9 +88,10 @@ export const Footer: GlobalConfig = {
     {
       name: 'legalLinks',
       type: 'array',
-      label: 'Legal Links',
-      maxRows: 10,
+      label: 'Legal & Policy Links',
+      maxRows: 6,
       admin: {
+        description: 'Add legal pages like Privacy Policy, Terms of Service, Cookie Policy, etc.',
         initCollapsed: true,
         components: { RowLabel: '@/Footer/RowLabel#RowLabel' },
       },
@@ -80,12 +102,19 @@ export const Footer: GlobalConfig = {
       type: 'checkbox',
       label: 'Show Theme Selector',
       defaultValue: true,
+      admin: {
+        description: 'Enable/disable the dark/light theme toggle',
+      },
     },
     {
       name: 'copyright',
       type: 'text',
       label: 'Copyright Text',
-      required: false,
+      required: true,
+      defaultValue: `© ${new Date().getFullYear()} Tour. All rights reserved.`,
+      admin: {
+        description: 'Copyright notice displayed at the bottom of the footer',
+      },
     },
   ],
   hooks: {

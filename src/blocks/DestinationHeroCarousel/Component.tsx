@@ -2,6 +2,7 @@
 'use client'
 
 import React, { useRef, useState, useEffect, useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -38,9 +39,31 @@ export const DestinationHeroCarousel: React.FC<DestinationHeroCarouselProps> = (
     visibleWindow: 3,
   },
 }) => {
+  const params = useParams<{ slug: string }>()
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [visibleCards, setVisibleCards] = useState(3)
+
+  // Get destination from URL: /destinations/south-korea -> South Korea
+  const getDestinationFromUrl = () => {
+    const destinationParam = params?.slug
+    
+    if (!destinationParam) {
+      return 'Spain' // Fallback
+    }
+    
+    const slug = Array.isArray(destinationParam) ? destinationParam[0] : destinationParam
+    
+    return slug
+      .split('-')
+      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+  }
+
+  const destinationFromUrl = getDestinationFromUrl()
+  
+  // Replace {destination} placeholder in title with actual destination
+  const displayTitle = title.replace(/{destination}/gi, destinationFromUrl)
 
   const getImageUrl = (image: Media | string | undefined): string => {
     if (!image) return '/placeholder-image.jpg'
@@ -88,10 +111,13 @@ export const DestinationHeroCarousel: React.FC<DestinationHeroCarouselProps> = (
 
   return (
     <section className="relative w-full bg-white overflow-hidden">
-      {/* Title */}
+      {/* Title - Now replaces {destination} placeholder */}
       <h1 className="text-3xl md:text-4xl font-bold text-center mt-4 mb-6">
-        {title}
+        {displayTitle}
       </h1>
+
+      {/* Rest of the component remains exactly the same... */}
+
 
       {/* Arc with 3 planes + labels matching visibleStops */}
       <div className="relative w-full" style={{ height: '320px' }}>

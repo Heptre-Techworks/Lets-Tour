@@ -88,8 +88,25 @@
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground min-h-[100vh] flex flex-col;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Remove margins from main container */
+  main {
+    @apply flex-grow;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Remove bottom margin/padding from last elements before footer */
+  main > *:last-child,
+  main section:last-child,
+  main div:last-child {
+    margin-bottom: 0 !important;
   }
 }
 
@@ -101,14 +118,20 @@ html[data-theme='dark'],
 html[data-theme='light'] {
   opacity: initial;
 }
-/* Add to your global CSS file */
+
+/* Header positioning - Since your header is NOT fixed, this can be simplified */
 header {
-  position: relative !important;
-  z-index: 9999 !important;
+  position: relative;
+  z-index: 50;
 }
 
-/* If you have a hero section, make sure it has lower z-index */
+/* Hero section styling */
 .hero {
   position: relative;
   z-index: 1;
+}
+
+/* Ensure footer has no top margin */
+footer {
+  margin-top: 0 !important;
 }
