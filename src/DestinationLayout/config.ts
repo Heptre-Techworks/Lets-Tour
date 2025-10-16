@@ -15,14 +15,21 @@ import { NonUniformCardCarousel } from '@/blocks/NonUniformCardCarousel/config'
 import { UpDownCardCarousel } from '@/blocks/UpDownCardCarousel/config'
 import { DestinationHeroCarousel } from '@/blocks/DestinationHeroCarousel/config'
 import InstagramCarouselBlock from '@/blocks/InstagramCarousel/config'
-import {TravelPackageExplorer} from '@/blocks/TravelPackageExplorer/config'
-import ImageGrid from '@/blocks/ImageGrid/config'
+import { TravelPackageExplorer } from '@/blocks/TravelPackageExplorer/config'
+import { PackageHighlights } from '@/blocks/PackageHighlights/config'
+import { revalidateDestinationLayout } from './hooks/revalidateDestinationLayout'
+import { FeatureCarousel } from '@/blocks/FeatureCarousel/config'
+import { ImageGrid } from '@/blocks/ImageGrid/config'
+import InfoPanel from '@/blocks/InfoPanel/config'
 
 export const DestinationLayout: GlobalConfig = {
   slug: 'destinationLayout',
   label: 'Destination Layout',
   access: { read: () => true },
   versions: { drafts: true },
+  hooks: {
+    afterChange: [revalidateDestinationLayout],
+  },
   fields: [
     {
       type: 'tabs',
@@ -52,7 +59,10 @@ export const DestinationLayout: GlobalConfig = {
                 DestinationHeroCarousel,
                 InstagramCarouselBlock,
                 TravelPackageExplorer,
-                ImageGrid
+                PackageHighlights,
+                FeatureCarousel,
+                InfoPanel,
+                ImageGrid,
               ],
               admin: { initCollapsed: true },
             },

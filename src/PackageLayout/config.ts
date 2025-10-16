@@ -18,9 +18,9 @@ import InstagramCarouselBlock from '@/blocks/InstagramCarousel/config'
 import { TravelPackageExplorer } from '@/blocks/TravelPackageExplorer/config'
 import { PackageHighlights } from '@/blocks/PackageHighlights/config'
 import { revalidatePackageLayout } from './hooks/revalidatePackageLayout'
-import FeatureCarousel from '@/blocks/FeatureCarousel/config'
-import HeaderPoints from '@/blocks/HeaderPoints/config'
-import ImageGrid from '@/blocks/ImageGrid/config'
+import {FeatureCarousel} from '@/blocks/FeatureCarousel/config'
+import {ImageGrid} from '@/blocks/ImageGrid/config'
+import InfoPanel from '@/blocks/InfoPanel/config'
 
 export const PackageLayout: GlobalConfig = {
   slug: 'packageLayout',
@@ -61,7 +61,7 @@ export const PackageLayout: GlobalConfig = {
                 TravelPackageExplorer,
                 PackageHighlights,
                 FeatureCarousel,
-                HeaderPoints,
+                InfoPanel,
                 ImageGrid
               ],
               admin: { initCollapsed: true },

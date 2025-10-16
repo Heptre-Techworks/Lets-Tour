@@ -3,57 +3,22 @@ import React from 'react'
 import { MainHero } from './MainHero'
 import { DestinationHero } from './DestinationHero'
 import { PackageHero } from './PackageHero'
-import type { Page, Media } from '@/payload-types'
+import type { Page, Destination, Package, Review } from '@/payload-types'
 
-type RenderHeroProps = { hero: Page['hero'] | null | undefined }
-
-type City = {
-  name: string
-  image: Media | string
-  id?: string
+type RenderHeroProps = { 
+  hero: Page['hero'] | null | undefined
+  // Optional: Pass fetched data for server-side rendering (to avoid double fetch)
+  destinationData?: Destination
+  packageData?: Package
+  reviewsData?: Review[]
 }
 
-type DestinationHeroFieldsShape = {
-  destination?: string
-  cities?: City[]
-  autoplayInterval?: number
-}
-
-type VacationType = {
-  type: string
-  label: string
-  icon: string
-  percentage: number
-  id?: string
-}
-
-type RecentBooking = {
-  avatar: Media | string
-  id?: string
-}
-
-type packageHeroFieldsShape = {
-  title?: string
-  rating?: number
-  location?: string
-  description?: string
-  vacationTypes?: VacationType[]
-  pricing?: {
-    originalPrice?: string
-    discountedPrice?: string
-    currency?: string
-  }
-  bookingCount?: string
-  recentBookings?: RecentBooking[]
-  mainImage?: Media | string
-  backgroundImage?: Media | string
-  buttons?: {
-    bookNowLabel?: string
-    enableDownload?: boolean
-  }
-}
-
-export const RenderHero: React.FC<RenderHeroProps> = ({ hero }) => {
+export const RenderHero: React.FC<RenderHeroProps> = ({ 
+  hero, 
+  destinationData,
+  packageData,
+  reviewsData = []
+}) => {
   if (!hero) return null
 
   switch (hero.type) {
@@ -66,6 +31,34 @@ export const RenderHero: React.FC<RenderHeroProps> = ({ hero }) => {
           location: s.location || 'Mount Everest',
         })) ?? []
 
+      // Transform destinations for search form
+      const destinationOptions = hero.mainHeroFields?.destinationOptions
+        ? (Array.isArray(hero.mainHeroFields.destinationOptions) 
+            ? hero.mainHeroFields.destinationOptions 
+            : []
+          ).map((dest) => {
+            const destination = typeof dest === 'object' ? dest : null
+            return {
+              label: destination?.name || '',
+              value: destination?.slug || '',
+            }
+          })
+        : []
+
+      // Transform categories for search form
+      const categoryOptions = hero.mainHeroFields?.categoryOptions
+        ? (Array.isArray(hero.mainHeroFields.categoryOptions)
+            ? hero.mainHeroFields.categoryOptions
+            : []
+          ).map((cat) => {
+            const category = typeof cat === 'object' ? cat : null
+            return {
+              label: category?.name || '',
+              value: category?.slug || category?.name?.toLowerCase().replace(/\s+/g, '-') || '',
+            }
+          })
+        : []
+
       return (
         <MainHero
           slides={slides}
@@ -73,14 +66,8 @@ export const RenderHero: React.FC<RenderHeroProps> = ({ hero }) => {
           enableAirplaneAnimation={hero.mainHeroFields?.enableAirplaneAnimation ?? true}
           autoplayDuration={hero.mainHeroFields?.autoplayDuration ?? 8000}
           transitionDuration={hero.mainHeroFields?.transitionDuration ?? 1000}
-          destinationOptions={hero.mainHeroFields?.destinationOptions ?? [
-            { label: 'Spain', value: 'spain' },
-            { label: 'France', value: 'france' },
-          ]}
-          categoryOptions={hero.mainHeroFields?.categoryOptions ?? [
-            { label: 'Adventure', value: 'adventure' },
-            { label: 'Honeymoon', value: 'honeymoon' },
-          ]}
+          destinationOptions={destinationOptions}
+          categoryOptions={categoryOptions}
           buttonLabel={hero.mainHeroFields?.buttonLabel ?? 'Apply'}
           placeholders={{
             destination: hero.mainHeroFields?.placeholders?.destination ?? 'Destination',
@@ -93,54 +80,27 @@ export const RenderHero: React.FC<RenderHeroProps> = ({ hero }) => {
     }
 
     case 'destinationHero': {
-      const dh = hero.destinationHeroFields as DestinationHeroFieldsShape | undefined
-      if (!dh || !dh.cities || dh.cities.length === 0) return null
-
+      // ✅ FIXED: No longer looking for destination field in config
+      // DestinationHero will auto-fetch from URL or use passed data
       return (
         <DestinationHero
-          cities={dh.cities}
-          autoplayInterval={dh.autoplayInterval ?? 5000}
+          destination={destinationData} // Optional: pass if already fetched
+          autoplayInterval={hero.destinationHeroFields?.autoplayInterval ?? 5000}
         />
       )
     }
 
     case 'packageHero': {
-      const tp = (hero as any).packageHeroFields as packageHeroFieldsShape | undefined
-      if (!tp) return null
-
+      // ✅ FIXED: No longer looking for package field in config
+      // PackageHero will auto-fetch from URL or use passed data
       return (
         <PackageHero
-          title={tp.title ?? 'Spanish Escape'}
-          rating={tp.rating ?? 5}
-          location={tp.location ?? 'Madrid 2N, Seville 2N, Granada 1N, Barcelona 3N'}
-          description={tp.description ?? ''}
-          vacationTypes={tp.vacationTypes ?? [
-            {
-              type: 'Couples',
-              label: 'For Newlywed Vacations',
-              icon: '❤️',
-              percentage: 75,
-            },
-            {
-              type: 'Family',
-              label: 'For Family Vacations',
-              icon: '👨‍👩‍👧‍👦',
-              percentage: 25,
-            },
-          ]}
-          pricing={{
-            originalPrice: tp.pricing?.originalPrice ?? '150,450',
-            discountedPrice: tp.pricing?.discountedPrice ?? '117,927',
-            currency: tp.pricing?.currency ?? '₹',
-          }}
-          bookingCount={tp.bookingCount ?? '250+'}
-          recentBookings={tp.recentBookings ?? []}
-          mainImage={tp.mainImage ?? ''}
-          backgroundImage={tp.backgroundImage ?? ''}
+          package={packageData} // Optional: pass if already fetched
           buttons={{
-            bookNowLabel: tp.buttons?.bookNowLabel ?? 'Book now',
-            enableDownload: tp.buttons?.enableDownload ?? true,
+            bookNowLabel: hero.packageHeroFields?.buttons?.bookNowLabel ?? 'Book now',
+            enableDownload: hero.packageHeroFields?.buttons?.enableDownload ?? true,
           }}
+          recentReviews={reviewsData}
         />
       )
     }

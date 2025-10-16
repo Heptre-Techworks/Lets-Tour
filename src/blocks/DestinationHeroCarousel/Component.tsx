@@ -1,10 +1,69 @@
-// components/blocks/DestinationHeroCarousel.tsx
+// src/blocks/DestinationHeroCarousel/Component.tsx
 'use client'
 
-import React, { useRef, useState, useEffect, useMemo } from 'react'
-import { useParams } from 'next/navigation'
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import React, { useRef, useState, useMemo, useEffect } from 'react'
+
+// --- Helper Components ---
+
+const ChevronLeftIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="m15 18-6-6 6-6" />
+  </svg>
+)
+
+const ChevronRightIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="m9 18 6-6-6-6" />
+  </svg>
+)
+
+const Button = ({
+  children,
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+  <button className={className} {...props}>
+    {children}
+  </button>
+)
+
+function PlaneIcon({ className = 'w-6 h-6', style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg 
+      viewBox="0 0 24 24" 
+      className={className} 
+      fill="currentColor" 
+      aria-hidden="true"
+      style={style}
+    >
+      <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9L2 14v2l8-2.5V20l-2 1.5V23l3-1 3 1v-1.5L13 20v-6.5l8 2.5Z" />
+    </svg>
+  )
+}
+
+// --- Types ---
 
 interface Media {
   url: string
@@ -20,108 +79,145 @@ interface Stop {
   slug?: string
 }
 
-interface DisplaySettings {
-  showActiveScale?: boolean
-  visibleWindow?: number
+interface TimingSettings {
+  autoplayDelay?: number
+  transitionDuration?: number
 }
 
 interface DestinationHeroCarouselProps {
   title?: string
+  destination?: string
   stops?: Stop[]
-  displaySettings?: DisplaySettings
+  timingSettings?: TimingSettings
 }
 
+// --- Destination Hero Carousel Component ---
+
 export const DestinationHeroCarousel: React.FC<DestinationHeroCarouselProps> = ({
-  title = 'Things to do in Spain',
+  title = 'Things to do in {destination}',
+  destination = 'Spain',
   stops = [],
-  displaySettings = {
-    showActiveScale: true,
-    visibleWindow: 3,
-  },
+  timingSettings = {},
 }) => {
-  const params = useParams<{ slug: string }>()
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [visibleCards, setVisibleCards] = useState(3)
+  const AUTOPLAY_DELAY = timingSettings?.autoplayDelay || 5000
+  const TRANSITION_DURATION_MS = timingSettings?.transitionDuration || 500
 
-  // Get destination from URL: /destinations/south-korea -> South Korea
-  const getDestinationFromUrl = () => {
-    const destinationParam = params?.slug
-    
-    if (!destinationParam) {
-      return 'Spain' // Fallback
-    }
-    
-    const slug = Array.isArray(destinationParam) ? destinationParam[0] : destinationParam
-    
-    return slug
-      .split('-')
-      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ')
-  }
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [isPaused, setIsPaused] = useState(false)
+  const [viewportWidth, setViewportWidth] = useState(0)
 
-  const destinationFromUrl = getDestinationFromUrl()
-  
-  // Replace {destination} placeholder in title with actual destination
-  const displayTitle = title.replace(/{destination}/gi, destinationFromUrl)
+  useEffect(() => {
+    const updateWidth = () => setViewportWidth(window.innerWidth)
+    updateWidth()
+    window.addEventListener('resize', updateWidth)
+    return () => window.removeEventListener('resize', updateWidth)
+  }, [])
+
+  const displayTitle = title.replace(/{destination}/gi, destination)
 
   const getImageUrl = (image: Media | string | undefined): string => {
-    if (!image) return '/placeholder-image.jpg'
+    if (!image) return 'https://placehold.co/480x460/FDBA74/FFFFFF?text=Explore!'
     return typeof image === 'string' ? image : image.url
   }
 
-  // Add IDs to stops if they don't exist
   const processedStops = useMemo(
-    () =>
-      stops.map((stop, index) => ({
-        ...stop,
-        id: stop.slug || `stop-${index}`,
-      })),
+    () => stops.map((stop, index) => ({ ...stop, id: stop.slug || `stop-${index}` })),
     [stops]
   )
 
-  // Calculate the maximum scroll index
-  const maxIndex = Math.max(0, processedStops.length - visibleCards)
-
-  // Scroll functions
-  const scrollLeft = () => {
-    setCurrentIndex((prev) => Math.max(0, prev - 1))
-  }
-
-  const scrollRight = () => {
-    setCurrentIndex((prev) => Math.min(maxIndex, prev + 1))
-  }
-
-  // Get current visible stops (synced with cards)
-  const visibleStops = useMemo(
-    () => processedStops.slice(currentIndex, currentIndex + visibleCards),
-    [processedStops, currentIndex, visibleCards]
+  const [currentIndex, setCurrentIndex] = useState(2)
+  const [transitionStyle, setTransitionStyle] = useState(
+    `transform ${TRANSITION_DURATION_MS}ms ease-out`
+  )
+  const [planeTransitionStyle, setPlaneTransitionStyle] = useState(
+    `offset-distance ${TRANSITION_DURATION_MS}ms ease-out, opacity ${TRANSITION_DURATION_MS}ms ease-out`
   )
 
-  // Compute arc positions for the 3 planes: left, center, right
-  const pathPositions = useMemo(() => [0.25, 0.5, 0.75], [])
+  const infiniteStops = useMemo(() => {
+    if (processedStops.length < 3) return processedStops
+    const clonesStart = processedStops.slice(processedStops.length - 2)
+    const clonesEnd = processedStops.slice(0, 2)
+    return [...clonesStart, ...processedStops, ...clonesEnd]
+  }, [processedStops])
+
+  const handleTransitionEnd = () => {
+    if (currentIndex === processedStops.length + 2) {
+      setTransitionStyle('none')
+      setPlaneTransitionStyle('none')
+      setCurrentIndex(2)
+    }
+    if (currentIndex === 1) {
+      setTransitionStyle('none')
+      setPlaneTransitionStyle('none')
+      setCurrentIndex(processedStops.length + 1)
+    }
+  }
+
+  useEffect(() => {
+    if (transitionStyle === 'none') {
+      const timer = setTimeout(() => {
+        requestAnimationFrame(() => {
+          setTransitionStyle(`transform ${TRANSITION_DURATION_MS}ms ease-out`)
+          setPlaneTransitionStyle(
+            `offset-distance ${TRANSITION_DURATION_MS}ms ease-out, opacity ${TRANSITION_DURATION_MS}ms ease-out`
+          )
+        })
+      }, 50)
+      return () => clearTimeout(timer)
+    }
+  }, [transitionStyle, TRANSITION_DURATION_MS])
+
+  const scrollLeft = () => setCurrentIndex((prev) => prev - 1)
+  const scrollRight = () => setCurrentIndex((prev) => prev + 1)
+
+  useEffect(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    if (!isPaused && infiniteStops.length > 3) {
+      timeoutRef.current = setTimeout(() => {
+        scrollLeft()
+      }, AUTOPLAY_DELAY)
+    }
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [currentIndex, isPaused, infiniteStops.length, AUTOPLAY_DELAY])
+
+  const baseCardWidth = 280
+  const centerCardWidth = 450
+  const gap = 0
+
+  const transformValue = useMemo(() => {
+    if (viewportWidth === 0) return 0
+    const itemContainerWidth = centerCardWidth + gap
+    const totalPrecedingWidth = currentIndex * itemContainerWidth
+    const centerScreenOffset = viewportWidth / 2 - itemContainerWidth / 2
+    return totalPrecedingWidth - centerScreenOffset
+  }, [currentIndex, viewportWidth, centerCardWidth, gap])
+
+  const arcPath = 'M20 360 C 600 20, 1400 20, 1980 360'
 
   if (processedStops.length === 0) {
-    return (
-      <div className="w-full py-8 px-4 text-center text-gray-500">
-        No destinations available
-      </div>
-    )
+    return <div className="w-full py-8 px-4 text-center text-gray-500">No destinations available</div>
   }
 
   return (
-    <section className="relative w-full bg-white overflow-hidden">
-      {/* Title - Now replaces {destination} placeholder */}
-      <h1 className="text-3xl md:text-4xl font-bold text-center mt-4 mb-6">
+    <section
+      className="relative w-full bg-white font-sans overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <svg className="w-0 h-0 absolute">
+        <defs>
+          <clipPath id="card-shape" clipPathUnits="userSpaceOnUse">
+            <path d="M225,0 L195,30 L8,30 A8,8 0 0 0 0,38 L0,300 L450,300 L450,38 A8,8 0 0 0 442,30 L255,30 Z" />
+          </clipPath>
+        </defs>
+      </svg>
+      <h1 className="text-3xl md:text-4xl font-bold text-center mt-8 mb-6 text-gray-800">
         {displayTitle}
       </h1>
 
-      {/* Rest of the component remains exactly the same... */}
-
-
-      {/* Arc with 3 planes + labels matching visibleStops */}
-      <div className="relative w-full" style={{ height: '320px' }}>
-        {/* Arc */}
+      <div className="relative w-full" style={{ height: '100px' }}>
         <svg
           className="absolute inset-x-0 -top-4 h-[340px] w-[2000px] max-w-none left-1/2 -translate-x-1/2 pointer-events-none"
           viewBox="0 0 2000 340"
@@ -129,7 +225,7 @@ export const DestinationHeroCarousel: React.FC<DestinationHeroCarouselProps> = (
         >
           <path
             id="flight-arc"
-            d="M20 320 C 600 -40, 1400 -40, 1980 320"
+            d={arcPath}
             stroke="#9CA3AF"
             strokeWidth="3"
             strokeDasharray="6 8"
@@ -137,175 +233,165 @@ export const DestinationHeroCarousel: React.FC<DestinationHeroCarouselProps> = (
           />
         </svg>
 
-        {/* Animated Planes + labels synced with cards */}
         <svg
           className="absolute inset-x-0 -top-4 h-[340px] w-[2000px] max-w-none left-1/2 -translate-x-1/2"
           viewBox="0 0 2000 340"
         >
-          <defs>
-            <path id="arcPath" d="M20 320 C 600 -40, 1400 -40, 1980 320" />
-          </defs>
-          {visibleStops.map((stop, localIdx) => (
-            <g key={`${stop.id}-${currentIndex}`}>
-              <foreignObject x="0" y="0" width="2000" height="340">
-                <div
-                  style={{
-                    offsetPath: "path('M20 320 C 600 -40, 1400 -40, 1980 320')",
-                    offsetRotate: 'auto 90deg',
-                    offsetDistance: `${pathPositions[localIdx] * 100}%`,
-                    transition: 'offset-distance 0.5s ease-out, transform 0.5s ease-out',
-                  }}
-                  className="absolute"
-                >
-                  <div className="flex items-center gap-2 translate-y-[-6px]">
+          {infiniteStops.map((stop, idx) => {
+            const centerPlaneDataIndex = currentIndex
+            const positionDelta = idx - centerPlaneDataIndex
+            const distance = Math.abs(positionDelta)
+
+            if (distance > 3) return null
+
+            const spacing = 0.12
+            const centerPosition = 0.5
+            const positionMultiplier = distance >= 3 ? 1.5 : 1
+            const targetPosition = centerPosition + positionDelta * spacing * positionMultiplier
+            const opacity = distance >= 3 ? 0 : distance === 2 ? 0.5 : 1
+            const isCenter = positionDelta === 0
+            const isOuter = distance === 2
+
+            return (
+              <g key={`${stop.id}-${idx}`}>
+                <foreignObject x="0" y="15" width="100%" height="100%" style={{ overflow: 'visible' }}>
+                  <div
+                    style={{
+                      offsetPath: `path('${arcPath}')`,
+                      offsetRotate: 'auto 90deg',
+                      offsetDistance: `${targetPosition * 100}%`,
+                      transition: planeTransitionStyle,
+                      position: 'absolute',
+                      opacity: opacity,
+                    }}
+                  >
                     <PlaneIcon
                       className={`w-6 h-6 md:w-7 md:h-7 transition-all duration-500 ${
-                        localIdx === 1 
-                          ? 'text-black scale-110' 
-                          : 'text-gray-800 scale-100'
-                      }`}
+                        isCenter ? 'text-black scale-110' : 'text-gray-800 scale-100'
+                      } ${isOuter ? 'scale-90' : ''}`}
+                      style={{ transform: 'translateX(-50%) translateY(-80%)' }}
                     />
+                  </div>
+                </foreignObject>
+                <foreignObject x="0" y="0" width="100%" height="100%" style={{ overflow: 'visible' }}>
+                  <div
+                    style={{
+                      offsetPath: `path('${arcPath}')`,
+                      offsetRotate: '0deg',
+                      offsetDistance: `${targetPosition * 100}%`,
+                      transition: planeTransitionStyle,
+                      position: 'absolute',
+                      opacity: opacity,
+                    }}
+                  >
                     <div
-                      className={`px-3 py-1.5 rounded-full bg-white border text-xs md:text-sm whitespace-nowrap transition-all duration-500 ${
-                        localIdx === 1
-                          ? 'border-gray-300 shadow-md scale-105 font-semibold'
-                          : 'border-gray-200/70 shadow-sm opacity-90 scale-100'
-                      }`}
+                      className={`flex flex-col items-center text-center transition-all duration-500 ${
+                        isCenter ? 'scale-105' : 'scale-90'
+                      } ${isOuter ? 'scale-90' : ''}`}
+                      style={{ transform: 'translateY(40px)' }}
                     >
-                      {stop.name}, {stop.city}
+                      <div className="px-3 py-1.5 rounded-full bg-white border">
+                        <span className="font-semibold text-sm block">{stop.name}</span>
+                        <span className="text-xs -mt-1 block">{stop.city}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </foreignObject>
-            </g>
-          ))}
+                </foreignObject>
+              </g>
+            )
+          })}
         </svg>
       </div>
 
-      {/* Navigation Controls + Cards */}
-      <div className="relative mx-auto max-w-6xl px-4 pb-12">
-        <div className="flex items-center justify-between">
-          {/* Left Arrow */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={scrollLeft}
-            disabled={currentIndex === 0}
-            className="w-[50px] h-[50px] bg-gray-300/75 rounded-full shadow-lg opacity-50 hover:opacity-75 transition-opacity z-10 disabled:opacity-25"
-            aria-label="Previous destinations"
-          >
-            <ChevronLeftIcon className="w-6 h-6" />
-          </Button>
+      <div className="relative pb-12 w-full">
+        <Button
+          onClick={scrollLeft}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-[50px] h-[50px] bg-gray-200/75 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-all z-50 flex items-center justify-center"
+          aria-label="Previous destinations"
+        >
+          <ChevronLeftIcon className="w-6 h-6" />
+        </Button>
+        <Button
+          onClick={scrollRight}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-[50px] h-[50px] bg-gray-200/75 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-all z-50 flex items-center justify-center"
+          aria-label="Next destinations"
+        >
+          <ChevronRightIcon className="w-6 h-6" />
+        </Button>
 
-          {/* Cards Container */}
-          <div className="flex-1 mx-8 overflow-hidden">
-            <div
-              ref={containerRef}
-              className="flex gap-6 transition-transform duration-500 ease-out"
-              style={{
-                transform: `translateX(-${currentIndex * 310}px)`,
-              }}
-            >
-              {processedStops.map((stop, idx) => {
-                // Determine if this card is in the center position
-                const relativePosition = idx - currentIndex
-                const isCenter = relativePosition === 1 && visibleCards === 3
-                const isVisible = relativePosition >= 0 && relativePosition < visibleCards
-                
-                return (
+        <div className="overflow-hidden w-full">
+          <div
+            onTransitionEnd={handleTransitionEnd}
+            style={{
+              width: 'max-content',
+              transform: `translateX(-${transformValue}px)`,
+              transition: transitionStyle,
+            }}
+            className="flex items-end gap-0 pt-16 pb-12"
+          >
+            {infiniteStops.map((stop, idx) => {
+              const isCenter = idx === currentIndex
+
+              return (
+                <div
+                  key={`${stop.id}-${idx}`}
+                  className="flex justify-center items-end"
+                  style={{ width: `${centerCardWidth}px` }}
+                >
                   <div
-                    key={stop.id}
-                    className={`shrink-0 transition-all duration-500 ease-out ${
-                      isCenter && displaySettings.showActiveScale
-                        ? 'w-[350px] h-[450px] scale-105 z-10'
-                        : 'w-[286px] h-[386px] z-0'
-                    } ${isVisible ? 'opacity-100' : 'opacity-60'}`}
+                    className={`relative shrink-0 transition-all ease-out ${
+                      isCenter ? `w-[450px] h-[480px] translate-y-8` : `w-[280px] h-[340px]`
+                    }`}
+                    style={{ transitionDuration: `${TRANSITION_DURATION_MS}ms` }}
                   >
-                    <article className="bg-white rounded-lg overflow-hidden border border-gray-200 shadow-[0_6px_18px_rgba(0,0,0,0.08)] hover:shadow-xl transition-shadow duration-300 h-full">
-                      <div className={`w-full overflow-hidden transition-all duration-500 ${isCenter ? 'h-56 md:h-64' : 'h-40 md:h-56'}`}>
-                        <img
-                          src={getImageUrl(stop.image)}
-                          alt={`${stop.name}, ${stop.city}`}
-                          className="h-full w-full object-cover hover:scale-105 transition-transform duration-300"
-                          draggable={false}
-                        />
-                      </div>
-                      
-                      <div className="bg-orange-400 text-white px-4 py-3">
-                        <h3 className={`font-serif italic transition-all duration-500 ${isCenter ? 'text-xl md:text-2xl' : 'text-lg md:text-xl'}`}>
-                          {stop.name}
-                        </h3>
-                      </div>
-                      
-                      <div className="px-4 py-3 text-gray-700 transition-all duration-500">
-                        <p className={isCenter ? 'text-sm md:text-base' : 'text-[13px] md:text-sm'}>
-                          {stop.excerpt}
-                        </p>
-                        <p className="mt-2 text-[12px] text-gray-500">
-                          {stop.city}, Spain
-                        </p>
-                      </div>
+                    <article
+                      className={`group rounded-lg overflow-hidden h-full flex flex-col shadow-lg ${
+                        isCenter ? 'bg-transparent' : 'bg-white'
+                      }`}
+                    >
+                      {isCenter ? (
+                        <>
+                          <div
+                            className="w-full overflow-hidden"
+                            style={{
+                              height: '300px',
+                              clipPath: 'url(#card-shape)',
+                            }}
+                          >
+                            <img
+                              src={getImageUrl(stop.image)}
+                              alt={`${stop.name}, ${stop.city}`}
+                              className="h-full w-full object-cover"
+                              draggable={false}
+                            />
+                          </div>
+                          <div className="bg-orange-400 text-white px-4 h-[180px] flex flex-col justify-center text-center rounded-b-lg">
+                            <h3 className="font-serif italic text-xl md:text-2xl">{stop.name}</h3>
+                            <p className="text-sm mt-1">{stop.excerpt}</p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="relative w-full h-full">
+                          <img
+                            src={getImageUrl(stop.image)}
+                            alt={`${stop.name}, ${stop.city}`}
+                            className="h-full w-full object-cover rounded-lg"
+                            draggable={false}
+                          />
+                          <div className="absolute bottom-0 left-0 w-full bg-orange-400/90 h-20 flex items-center justify-center text-center rounded-b-lg">
+                            <h3 className="font-serif italic text-white text-lg">{`${stop.name}, ${stop.city}`}</h3>
+                          </div>
+                        </div>
+                      )}
                     </article>
                   </div>
-                )
-              })}
-            </div>
+                </div>
+              )
+            })}
           </div>
-
-          {/* Right Arrow */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={scrollRight}
-            disabled={currentIndex >= maxIndex}
-            className="w-[50px] h-[50px] bg-gray-300/75 rounded-full shadow-lg opacity-50 hover:opacity-75 transition-opacity z-10 disabled:opacity-25"
-            aria-label="Next destinations"
-          >
-            <ChevronRightIcon className="w-6 h-6" />
-          </Button>
-        </div>
-
-        {/* Dot Indicators */}
-        <div className="flex justify-center mt-8 gap-2">
-          {Array.from({ length: maxIndex + 1 }).map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                currentIndex === index 
-                  ? 'bg-orange-400 w-8' 
-                  : 'bg-gray-300 hover:bg-gray-400'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
         </div>
       </div>
-
-      <style jsx>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
     </section>
-  )
-}
-
-/* Plane icon */
-function PlaneIcon({ className = 'w-6 h-6' }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9L2 14v2l8-2.5V20l-2 1.5V23l3-1 3 1v-1.5L13 20v-6.5l8 2.5Z" />
-    </svg>
   )
 }
 

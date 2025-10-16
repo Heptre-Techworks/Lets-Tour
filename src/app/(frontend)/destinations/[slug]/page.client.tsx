@@ -1,4 +1,4 @@
-// app/destinations/[slug]/page.client.tsx
+// app/(frontend)/destinations/[slug]/page.client.tsx
 'use client'
 import React, { useEffect } from 'react'
 import { useHeaderTheme } from '@/providers/HeaderTheme'

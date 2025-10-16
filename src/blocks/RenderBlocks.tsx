@@ -20,7 +20,7 @@ import ImageGrid from './ImageGrid/Component'
 import { TravelPackageExplorer } from '@/blocks/TravelPackageExplorer/Component'
 import { PackageHighlights} from '@/blocks/PackageHighlights/Component'
 import {FeatureCarousel} from '@/blocks/FeatureCarousel/Component'
-import {HeaderPoints} from '@/blocks/HeaderPoints/Component'
+import {InfoPanel} from '@/blocks/InfoPanel/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -41,7 +41,7 @@ const blockComponents = {
   travelPackageExplorer: TravelPackageExplorer,
   packageHighlights: PackageHighlights,
   featureCarousel: FeatureCarousel,
-  headerPoints: HeaderPoints
+  infoPanel: InfoPanel
 }
 
 export const RenderBlocks: React.FC<{

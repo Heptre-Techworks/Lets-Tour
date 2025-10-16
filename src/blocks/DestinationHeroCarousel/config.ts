@@ -1,4 +1,4 @@
-// payload/blocks/DestinationHeroCarousel.ts
+// src/blocks/DestinationHeroCarousel/config.ts
 import type { Block } from 'payload'
 
 export const DestinationHeroCarousel: Block = {
@@ -11,10 +11,19 @@ export const DestinationHeroCarousel: Block = {
     {
       name: 'title',
       type: 'text',
-      defaultValue: 'Things to do in Spain',
+      defaultValue: 'Things to do in {destination}',
       required: true,
       admin: {
-        description: 'Main title for the hero section',
+        description: 'Main title for the hero section. Use {destination} as a placeholder for the destination name.',
+      },
+    },
+    {
+      name: 'destination',
+      type: 'text',
+      defaultValue: 'Spain',
+      required: true,
+      admin: {
+        description: 'Destination name (e.g., Spain, France, Italy)',
       },
     },
     {
@@ -29,7 +38,7 @@ export const DestinationHeroCarousel: Block = {
           type: 'text',
           required: true,
           admin: {
-            description: 'Name of the attraction (e.g., Park Güell)',
+            description: 'Name of the attraction (e.g., Sagrada Familia)',
           },
         },
         {
@@ -67,25 +76,32 @@ export const DestinationHeroCarousel: Block = {
       ],
     },
     {
-      name: 'displaySettings',
+      name: 'timingSettings',
       type: 'group',
-      label: 'Display Settings',
+      label: 'Timing Settings',
       fields: [
         {
-          name: 'showActiveScale',
-          type: 'checkbox',
-          defaultValue: true,
-          label: 'Scale Active Card',
+          name: 'autoplayDelay',
+          type: 'number',
+          defaultValue: 5000,
+          min: 1000,
+          max: 20000,
+          required: true,
           admin: {
-            description: 'Scale up the centered card',
+            description: 'Time in milliseconds before auto-scrolling to next slide (1000ms = 1 second)',
+            step: 500,
           },
         },
         {
-          name: 'visibleWindow',
+          name: 'transitionDuration',
           type: 'number',
-          defaultValue: 3,
+          defaultValue: 500,
+          min: 100,
+          max: 2000,
+          required: true,
           admin: {
-            description: 'Number of cards visible at once',
+            description: 'Transition animation duration in milliseconds (1000ms = 1 second)',
+            step: 100,
           },
         },
       ],
