@@ -298,7 +298,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
           </div>
 
           {/* Middle Content */}
-          <div className="relative z-10 flex-grow flex flex-col justify-center items-center px-8 md:px-24 space-y-20 pb-100">
+          <div className="relative z-10 flex-grow flex flex-col justify-center items-center space-y-20 ">
             {/* Main Title */}
             <div className="text-center w-full max-w-[50%]">
               <h1 className="font-playfair italic text-6xl md:text-8xl font-bold drop-shadow-lg pb-10">
@@ -307,14 +307,14 @@ export const MainHero: React.FC<MainHeroProps> = ({
             </div>
 
             {/* Location Info & Progress */}
-            <div className="w-full max-w-5xl h-8 relative ">
+            <div className="w-full max-w-6xl h-8 relative ">
               {/* Left Aligned Text */}
               <div
                 className="absolute left-0 top-1/2 -translate-y-1/2 text-left"
                 style={textAnimation}
               >
-                <p className="text-sm font-light">{activeSlide.subtitle}</p>
-                <h2 className="text-3xl font-light">{activeSlide.location}</h2>
+                <p className="text-md font-light">{activeSlide.subtitle}</p>
+                <h2 className="text-4xl font-light">{activeSlide.location}</h2>
               </div>
 
               {/* Centered Progress Bar */}
@@ -424,7 +424,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
           </div>
 
           {/* Bottom Section */}
-          <div className="relative w-full h-80">
+          <div className="relative w-full h-48">
             {cloudImage && (
               <div className="absolute inset-0 z-0 pointer-events-none">
                 <MediaComponent
@@ -440,7 +440,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
               {/* Search Form */}
               <form
                 onSubmit={(e) => e.preventDefault()}
-                className="w-full max-w-4xl relative px-4 pointer-events-auto h-8"
+                className="w-full max-w-6xl relative px-4 pointer-events-auto h-50"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 bg-[#f0b95a] rounded-lg shadow-2xl overflow-hidden text-black/70">
                   <input

@@ -5,10 +5,6 @@ import configPromise from '@payload-config'
 import { PopularNowClient } from './Component.client'
 import type { PopularNowBlock } from '@/payload-types'
 
-type PopularNowProps = PopularNowBlock & {
-  slug?: string  // Optional slug from page context
-}
-
 const getCurrencySymbol = (currency: string) => {
   const symbols: Record<string, string> = {
     INR: '₹',
@@ -19,142 +15,141 @@ const getCurrencySymbol = (currency: string) => {
   return symbols[currency] || '₹'
 }
 
-export const PopularNow = async (props: PopularNowProps) => {
+export const PopularNow = async (props: PopularNowBlock) => {
   const { rows, ...rest } = props as any
 
+  console.log('🎯 PopularNow - Number of rows:', rows?.length)
+
   if (!Array.isArray(rows) || rows.length === 0) {
+    console.warn('⚠️ PopularNow - No rows configured')
     return <PopularNowClient {...rest} rows={[]} />
   }
 
   const payload = await getPayload({ config: configPromise })
   
-  // Process each row
   const processedRows = await Promise.all(
-    rows.map(async (row: any) => {
-      const { dataSource, itemLimit, cards, ...rowConfig } = row
+    rows.map(async (row: any, rowIndex: number) => {
+      // ✅ FIX: Use defaults if dataSource is missing
+      const dataSource = row.dataSource || 'featured'  // Default to 'featured'
+      const itemLimit = row.itemLimit || 10  // Default to 10
+      const cards = row.cards
 
-      // Manual mode - return as-is
+      console.log(`🔄 Row ${rowIndex + 1} - DataSource: ${dataSource}, Limit: ${itemLimit}`)
+
       if (dataSource === 'manual') {
-        return { ...rowConfig, cards: cards || [] }
+        console.log(`📝 Row ${rowIndex + 1} - Using manual cards:`, cards?.length || 0)
+        return { 
+          direction: row.direction || 'left',
+          speedSeconds: row.speedSeconds || 40,
+          cards: cards || [] 
+        }
       }
 
       let fetchedCards: any[] = []
 
       try {
-        // Fetch from collections
-        switch (dataSource) {
-          case 'featured-destinations':
-            console.log('📍 Fetching featured destinations')
-            const featuredDest = await payload.find({
-              collection: 'destinations',
-              where: {
-                isFeatured: { equals: true },
-                isPublished: { equals: true },
-              },
-              limit: itemLimit || 10,
-              depth: 1,
-              sort: '-popularityScore',
-            })
+        // Destinations
+        if (['featured', 'popular', 'inSeason'].includes(dataSource)) {
+          const query: any = {
+            limit: itemLimit,
+            depth: 2,
+            where: {
+              isPublished: { equals: true },
+            },
+            sort: '-popularityScore',
+          }
 
-            fetchedCards = featuredDest.docs.map((dest: any) => ({
+          if (dataSource === 'featured') {
+            query.where.isFeatured = { equals: true }
+            console.log(`⭐ Row ${rowIndex + 1} - Fetching featured destinations`)
+          } else if (dataSource === 'popular') {
+            query.where.isPopular = { equals: true }
+            console.log(`🔥 Row ${rowIndex + 1} - Fetching popular destinations`)
+          } else if (dataSource === 'inSeason') {
+            query.where.isInSeason = { equals: true }
+            console.log(`🌸 Row ${rowIndex + 1} - Fetching in-season destinations`)
+          }
+
+          const result = await payload.find({
+            collection: 'destinations',
+            ...query,
+          })
+
+          console.log(`✅ Row ${rowIndex + 1} - Found ${result.docs.length} destinations`)
+
+          fetchedCards = result.docs.map((dest: any) => {
+            const currencySymbol = getCurrencySymbol(dest.currency || 'INR')
+            return {
               name: dest.name,
               price: dest.startingPrice
-                ? `${getCurrencySymbol(dest.currency || 'INR')}${dest.startingPrice.toLocaleString()}`
+                ? `${currencySymbol}${dest.startingPrice.toLocaleString()}`
                 : 'Contact for pricing',
               image: dest.featuredImage,
               alt: dest.name,
-            }))
-            console.log(`✅ Loaded ${fetchedCards.length} featured destinations`)
-            break
-
-          case 'popular-destinations':
-            console.log('📍 Fetching popular destinations')
-            const popularDest = await payload.find({
-              collection: 'destinations',
-              where: {
-                isPopular: { equals: true },
-                isPublished: { equals: true },
-              },
-              limit: itemLimit || 10,
-              depth: 1,
-              sort: '-popularityScore',
-            })
-
-            fetchedCards = popularDest.docs.map((dest: any) => ({
-              name: dest.name,
-              price: dest.startingPrice
-                ? `${getCurrencySymbol(dest.currency || 'INR')}${dest.startingPrice.toLocaleString()}`
-                : 'Contact for pricing',
-              image: dest.featuredImage,
-              alt: dest.name,
-            }))
-            console.log(`✅ Loaded ${fetchedCards.length} popular destinations`)
-            break
-
-          case 'featured-packages':
-            console.log('📦 Fetching featured packages')
-            const featuredPkg = await payload.find({
-              collection: 'packages',
-              where: {
-                isFeatured: { equals: true },
-                isPublished: { equals: true },
-              },
-              limit: itemLimit || 10,
-              depth: 1,
-              sort: '-rating',
-            })
-
-            fetchedCards = featuredPkg.docs.map((pkg: any) => ({
-              name: pkg.name,
-              price: pkg.discountedPrice
-                ? `${getCurrencySymbol(pkg.currency || 'INR')}${pkg.discountedPrice.toLocaleString()}`
-                : pkg.price
-                  ? `${getCurrencySymbol(pkg.currency || 'INR')}${pkg.price.toLocaleString()}`
-                  : 'Contact for pricing',
-              image: pkg.heroImage,
-              alt: pkg.name,
-            }))
-            console.log(`✅ Loaded ${fetchedCards.length} featured packages`)
-            break
-
-          case 'recent-packages':
-            console.log('📦 Fetching recent packages')
-            const recentPkg = await payload.find({
-              collection: 'packages',
-              where: {
-                isPublished: { equals: true },
-              },
-              limit: itemLimit || 10,
-              depth: 1,
-              sort: '-createdAt',
-            })
-
-            fetchedCards = recentPkg.docs.map((pkg: any) => ({
-              name: pkg.name,
-              price: pkg.discountedPrice
-                ? `${getCurrencySymbol(pkg.currency || 'INR')}${pkg.discountedPrice.toLocaleString()}`
-                : pkg.price
-                  ? `${getCurrencySymbol(pkg.currency || 'INR')}${pkg.price.toLocaleString()}`
-                  : 'Contact for pricing',
-              image: pkg.heroImage,
-              alt: pkg.name,
-            }))
-            console.log(`✅ Loaded ${fetchedCards.length} recent packages`)
-            break
-
-          default:
-            fetchedCards = []
+            }
+          })
         }
+
+        // Packages
+        else if (['featuredPackages', 'recentPackages', 'honeymoonPackages', 'familyPackages'].includes(dataSource)) {
+          const query: any = {
+            limit: itemLimit,
+            depth: 2,
+            where: {
+              isPublished: { equals: true },
+            },
+          }
+
+          if (dataSource === 'featuredPackages') {
+            query.where.isFeatured = { equals: true }
+            query.sort = '-rating'
+            console.log(`⭐ Row ${rowIndex + 1} - Fetching featured packages`)
+          } else if (dataSource === 'recentPackages') {
+            query.sort = '-createdAt'
+            console.log(`🆕 Row ${rowIndex + 1} - Fetching recent packages`)
+          } else if (dataSource === 'honeymoonPackages') {
+            query.where.isHoneymoon = { equals: true }
+            query.sort = '-rating'
+            console.log(`💑 Row ${rowIndex + 1} - Fetching honeymoon packages`)
+          } else if (dataSource === 'familyPackages') {
+            query.where.isFamilyFriendly = { equals: true }
+            query.sort = '-rating'
+            console.log(`👨‍👩‍👧‍👦 Row ${rowIndex + 1} - Fetching family packages`)
+          }
+
+          const result = await payload.find({
+            collection: 'packages',
+            ...query,
+          })
+
+          console.log(`✅ Row ${rowIndex + 1} - Found ${result.docs.length} packages`)
+
+          fetchedCards = result.docs.map((pkg: any) => {
+            const currencySymbol = getCurrencySymbol(pkg.currency || 'INR')
+            const displayPrice = pkg.discountedPrice || pkg.price || 0
+
+            return {
+              name: pkg.name,
+              price: `${currencySymbol}${displayPrice.toLocaleString()}`,
+              image: pkg.heroImage,
+              alt: pkg.name,
+            }
+          })
+        }
+
       } catch (error) {
-        console.error(`❌ Error fetching data for row with source ${dataSource}:`, error)
+        console.error(`❌ Row ${rowIndex + 1} - Error:`, error)
       }
 
       return {
-        ...rowConfig,
+        direction: row.direction || 'left',
+        speedSeconds: row.speedSeconds || 40,
         cards: fetchedCards,
       }
     })
   )
+
+  console.log('✅ PopularNow - All rows processed')
 
   return <PopularNowClient {...rest} rows={processedRows} />
 }

@@ -19,7 +19,8 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
   packageData,
   reviewsData = []
 }) => {
-  if (!hero) return null
+  // ✅ Return null if no hero or type is 'none'
+  if (!hero || hero.type === 'none') return null
 
   switch (hero.type) {
     case 'mainHero': {
@@ -80,22 +81,18 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
     }
 
     case 'destinationHero': {
-      // ✅ FIXED: No longer looking for destination field in config
-      // DestinationHero will auto-fetch from URL or use passed data
       return (
         <DestinationHero
-          destination={destinationData} // Optional: pass if already fetched
+          destination={destinationData}
           autoplayInterval={hero.destinationHeroFields?.autoplayInterval ?? 5000}
         />
       )
     }
 
     case 'packageHero': {
-      // ✅ FIXED: No longer looking for package field in config
-      // PackageHero will auto-fetch from URL or use passed data
       return (
         <PackageHero
-          package={packageData} // Optional: pass if already fetched
+          package={packageData}
           buttons={{
             bookNowLabel: hero.packageHeroFields?.buttons?.bookNowLabel ?? 'Book now',
             enableDownload: hero.packageHeroFields?.buttons?.enableDownload ?? true,

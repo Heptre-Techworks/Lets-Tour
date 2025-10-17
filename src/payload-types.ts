@@ -193,7 +193,7 @@ export interface Page {
   id: string;
   title: string;
   hero: {
-    type: 'mainHero' | 'destinationHero' | 'packageHero';
+    type: 'none' | 'mainHero' | 'destinationHero' | 'packageHero';
     mainHeroFields?: {
       slides: {
         /**
@@ -4218,7 +4218,7 @@ export interface SearchFilter {
 export interface PackageLayout {
   id: string;
   hero: {
-    type: 'mainHero' | 'destinationHero' | 'packageHero';
+    type: 'none' | 'mainHero' | 'destinationHero' | 'packageHero';
     mainHeroFields?: {
       slides: {
         /**
@@ -4501,7 +4501,7 @@ export interface InfoPanelBlock {
 export interface DestinationLayout {
   id: string;
   hero: {
-    type: 'mainHero' | 'destinationHero' | 'packageHero';
+    type: 'none' | 'mainHero' | 'destinationHero' | 'packageHero';
     mainHeroFields?: {
       slides: {
         /**
