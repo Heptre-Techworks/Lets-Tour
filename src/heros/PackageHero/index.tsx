@@ -24,7 +24,7 @@ type PackageHeroProps = {
     bookNowLabel?: string
     enableDownload?: boolean
   }
-  package?: Package // Optional: Can be passed or will be fetched
+  package?: Package
   recentReviews?: Review[]
 }
 
@@ -40,7 +40,6 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   const [recentReviews, setRecentReviews] = useState<Review[]>(recentReviewsProp)
   const [loading, setLoading] = useState(!packageProp)
 
-  // Auto-fetch package from URL slug
   useEffect(() => {
     if (packageProp) return
 
@@ -60,7 +59,6 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
         if (data.docs && data.docs[0]) {
           setPackage(data.docs[0])
 
-          // Fetch reviews for this package
           const reviewsResponse = await fetch(`/api/reviews?where[package][equals]=${data.docs[0].id}&where[published][equals]=true&limit=10&depth=2`)
           const reviewsData = await reviewsResponse.json()
           if (reviewsData.docs) {
@@ -85,7 +83,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
 
   if (loading) {
     return (
-      <section className="relative -mt-[10.4rem] w-full min-h-screen bg-gray-900 flex items-center justify-center text-white" data-theme="dark">
+      <section className="relative -mt-[10.4rem] w-screen min-h-screen bg-gray-900 flex items-center justify-center text-white" data-theme="dark">
         Loading package...
       </section>
     )
@@ -93,7 +91,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
 
   if (!pkg) {
     return (
-      <section className="relative -mt-[10.4rem] w-full min-h-screen bg-gray-900 flex items-center justify-center text-white" data-theme="dark">
+      <section className="relative -mt-[10.4rem] w-screen min-h-screen bg-gray-900 flex items-center justify-center text-white" data-theme="dark">
         Package not found
       </section>
     )
@@ -139,18 +137,22 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   const backgroundImage = pkg.gallery?.[0] || pkg.heroImage
 
   return (
-    <section className="relative -mt-[10.4rem] w-full min-h-screen bg-gray-900 flex items-center justify-center font-sans p-4" data-theme="dark">
-      <div className="relative w-full max-w-6xl mx-auto rounded-2xl shadow-2xl overflow-hidden bg-black/50">
-        <div className="absolute top-0 left-0 w-full h-full opacity-30 z-0">
-          <Media resource={backgroundImage} imgClassName="object-cover w-full h-full" />
-        </div>
+    <section className="relative -mt-[10.4rem] w-screen min-h-screen bg-gray-900 font-sans" data-theme="dark">
+      {/* ✅ Background image - full screen */}
+      <div className="absolute inset-0 w-full h-full opacity-30 z-0">
+        <Media resource={backgroundImage} imgClassName="object-cover w-full h-full" />
+      </div>
 
-        <div className="relative z-10 px-8 pb-8 pt-20 md:px-12 md:pb-12 md:pt-24 text-white">
+      {/* ✅ Content wrapper - full width with overlay */}
+      <div className="relative w-full h-full flex items-center justify-center bg-black/50 py-20 md:py-24">
+        <div className="relative z-10 w-full px-8 py-20 md:px-16 md:py-24 text-white max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+            {/* Image */}
             <div className="w-full h-full">
               <Media resource={mainImage} imgClassName="rounded-2xl w-full h-full object-cover shadow-lg" />
             </div>
 
+            {/* Content */}
             <div className="flex flex-col space-y-4">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white">{title}</h1>
 

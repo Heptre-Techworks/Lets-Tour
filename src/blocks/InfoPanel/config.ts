@@ -1,3 +1,4 @@
+// src/blocks/InfoPanel/config.ts
 import type { Block } from 'payload';
 
 export const InfoPanel: Block = {
@@ -9,13 +10,48 @@ export const InfoPanel: Block = {
   },
   fields: [
     {
+      name: 'dataSource',
+      type: 'select',
+      label: 'Data Source',
+      defaultValue: 'manual',
+      required: true,
+      options: [
+        { label: 'Manual Entry', value: 'manual' },
+        { label: 'From Package (URL)', value: 'auto' },
+        { label: 'Select Package', value: 'package' },
+      ],
+    },
+    {
+      name: 'package',
+      type: 'relationship',
+      relationTo: 'packages',
+      admin: {
+        condition: (_, siblingData) => siblingData.dataSource === 'package',
+      },
+    },
+    {
+      name: 'panelType',
+      type: 'select',
+      label: 'Panel Type',
+      defaultValue: 'goodToKnow',
+      options: [
+        { label: 'Good to Know', value: 'goodToKnow' },
+        { label: 'Inclusions', value: 'inclusions' },
+        { label: 'Exclusions', value: 'exclusions' },
+      ],
+      admin: {
+        condition: (_, siblingData) => siblingData.dataSource !== 'manual',
+      },
+    },
+
+    // Manual fields (same as before)
+    {
       name: 'title',
       type: 'text',
       label: 'Panel Title',
       defaultValue: 'Good to Know',
-      required: true,
       admin: {
-        description: 'Main title displayed at the top of the panel.',
+        condition: (_, siblingData) => siblingData.dataSource === 'manual',
       },
     },
     {
@@ -23,7 +59,7 @@ export const InfoPanel: Block = {
       type: 'textarea',
       label: 'Subheading',
       admin: {
-        description: 'Optional subheading text displayed below the title. Leave empty to hide.',
+        condition: (_, siblingData) => siblingData.dataSource === 'manual',
         rows: 2,
       },
     },
@@ -33,24 +69,14 @@ export const InfoPanel: Block = {
       label: 'List Type',
       defaultValue: 'disc',
       options: [
-        {
-          label: 'Bullet Points',
-          value: 'disc',
-        },
-        {
-          label: 'Numbered (1, 2, 3...)',
-          value: 'decimal',
-        },
+        { label: 'Bullet Points', value: 'disc' },
+        { label: 'Numbered (1, 2, 3...)', value: 'decimal' },
       ],
-      admin: {
-        description: 'Choose how the list items should be displayed.',
-      },
     },
     {
       name: 'items',
       type: 'array',
       label: 'Information Items',
-      required: true,
       minRows: 1,
       maxRows: 20,
       labels: {
@@ -58,8 +84,7 @@ export const InfoPanel: Block = {
         plural: 'Items',
       },
       admin: {
-        description: 'Add information items to display in the list.',
-        initCollapsed: false,
+        condition: (_, siblingData) => siblingData.dataSource === 'manual',
       },
       fields: [
         {
@@ -68,7 +93,6 @@ export const InfoPanel: Block = {
           label: 'Item Text',
           required: true,
           admin: {
-            placeholder: 'e.g., Please note hotels provided shall be located in outskirts of cities...',
             rows: 3,
           },
         },

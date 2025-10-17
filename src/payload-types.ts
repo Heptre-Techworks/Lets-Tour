@@ -322,45 +322,38 @@ export interface Page {
     | ClientStoriesBlock
     | {
         /**
-         * Main title for the hero section. Use {destination} as a placeholder for the destination name.
+         * Main title. Use {slug} for auto-replacement (e.g., "Things to do in {slug}" → "Things to do in Spain")
          */
         title: string;
         /**
-         * Destination name (e.g., Spain, France, Italy)
+         * How to populate attractions
          */
-        destination: string;
+        populateBy?: ('auto' | 'destination' | 'manual') | null;
+        /**
+         * Select destination to show its places
+         */
+        destination?: (string | null) | Destination;
+        /**
+         * Number of places to show
+         */
+        limit?: number | null;
         stops?:
           | {
-              /**
-               * Name of the attraction (e.g., Sagrada Familia)
-               */
               name: string;
-              /**
-               * City where the attraction is located
-               */
               city: string;
-              /**
-               * Hero image for the attraction
-               */
               image: string | Media;
-              /**
-               * Short description of the attraction
-               */
               excerpt: string;
-              /**
-               * URL slug for the attraction page (optional)
-               */
               slug?: string | null;
               id?: string | null;
             }[]
           | null;
         timingSettings: {
           /**
-           * Time in milliseconds before auto-scrolling to next slide (1000ms = 1 second)
+           * Auto-scroll delay in milliseconds
            */
           autoplayDelay: number;
           /**
-           * Transition animation duration in milliseconds (1000ms = 1 second)
+           * Transition duration in milliseconds
            */
           transitionDuration: number;
         };
@@ -371,6 +364,7 @@ export interface Page {
     | InstagramCarouselBlock
     | ImageGridBlock
     | TravelPackageExplorerBlock
+    | DynamicFormBlock
   )[];
   meta?: {
     title?: string | null;
@@ -1257,59 +1251,71 @@ export interface Form {
  * via the `definition` "DynamicScrollerBlock".
  */
 export interface DynamicScrollerBlock {
-  sections?:
-    | {
-        id?: string | null;
-        type: 'package' | 'itinerary';
-        title?: string | null;
-        subtitle?: string | null;
-        theme?: {
-          background?: string | null;
-          headerAccent?: string | null;
-          titleColor?: string | null;
-          subtitleColor?: string | null;
-        };
-        navigation?: {
-          position?: ('bottom-left' | 'bottom-center' | 'bottom-right') | null;
-        };
-        items?: (DynamicScroller_PackageItem | DynamicScroller_ItineraryDay)[] | null;
-      }[]
-    | null;
+  sections: (DynamicScroller_PackageSection | DynamicScroller_ItinerarySection)[];
   id?: string | null;
   blockName?: string | null;
   blockType: 'dynamicScroller';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "DynamicScroller_PackageItem".
+ * via the `definition` "DynamicScroller_PackageSection".
  */
-export interface DynamicScroller_PackageItem {
-  id?: string | null;
-  title: string;
-  price: string;
-  image: string | Media;
-  tag?: string | null;
-  tagColor?: string | null;
-  blockName?: string | null;
-  blockType: 'packageItem';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "DynamicScroller_ItineraryDay".
- */
-export interface DynamicScroller_ItineraryDay {
-  day: string;
-  activities?:
+export interface DynamicScroller_PackageSection {
+  /**
+   * Use {slug} for auto-replacement
+   */
+  title?: string | null;
+  subtitle?: string | null;
+  populatePackagesBy: 'manual' | 'auto' | 'featured' | 'destination';
+  destination?: (string | null) | Destination;
+  packageLimit?: number | null;
+  manualItems?:
     | {
-        icon?: (string | null) | Media;
-        description: string;
-        detailsImage?: (string | null) | Media;
+        title: string;
+        price: string;
+        image: string | Media;
+        tag?: string | null;
+        tagColor?: string | null;
         id?: string | null;
       }[]
     | null;
+  theme?: {
+    background?: string | null;
+  };
+  showNavigation?: boolean | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'itineraryDay';
+  blockType: 'packageSection';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_ItinerarySection".
+ */
+export interface DynamicScroller_ItinerarySection {
+  title?: string | null;
+  subtitle?: string | null;
+  itinerarySource: 'manual' | 'package';
+  manualDays?:
+    | {
+        day: string;
+        activities?:
+          | {
+              icon?: (string | null) | Media;
+              description: string;
+              detailsImage?: (string | null) | Media;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  theme?: {
+    background?: string | null;
+  };
+  showNavigation?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'itinerarySection';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1321,27 +1327,31 @@ export interface PopularNowBlock {
   pauseOnHover?: boolean | null;
   rows: {
     /**
-     * Scroll direction for this row.
+     * Choose data source for this row
+     */
+    dataSource: 'manual' | 'featured-destinations' | 'popular-destinations' | 'featured-packages' | 'recent-packages';
+    /**
+     * Number of items to display in this row
+     */
+    itemLimit?: number | null;
+    /**
+     * Scroll direction for this row
      */
     direction?: ('left' | 'right') | null;
     /**
-     * How many seconds should a full loop take?
+     * How many seconds for a full loop
      */
     speedSeconds?: number | null;
-    cards: {
-      name: string;
-      price: string;
-      image?: (string | null) | Media;
-      /**
-       * Optional external image URL.
-       */
-      imageUrl?: string | null;
-      /**
-       * Image alt text.
-       */
-      alt?: string | null;
-      id?: string | null;
-    }[];
+    cards?:
+      | {
+          name: string;
+          price: string;
+          image?: (string | null) | Media;
+          imageUrl?: string | null;
+          alt?: string | null;
+          id?: string | null;
+        }[]
+      | null;
     id?: string | null;
   }[];
   id?: string | null;
@@ -1353,33 +1363,43 @@ export interface PopularNowBlock {
  * via the `definition` "UpDownCardCarouselBlock".
  */
 export interface UpDownCardCarouselBlock {
+  /**
+   * Choose destinations or packages to display
+   */
+  dataSource:
+    | 'inSeason'
+    | 'featured'
+    | 'popular'
+    | 'featuredPackages'
+    | 'recentPackages'
+    | 'honeymoonPackages'
+    | 'familyPackages'
+    | 'manual';
+  /**
+   * Number of items to display
+   */
+  itemLimit?: number | null;
   heading?: string | null;
   /**
    * Optional tagline shown under the heading.
    */
   subheading?: string | null;
-  cards: {
-    name: string;
-    details?: string | null;
-    /**
-     * Price in INR.
-     */
-    price: number;
-    discount?: string | null;
-    /**
-     * Select from Media collection.
-     */
-    image?: (string | null) | Media;
-    /**
-     * Optional external image URL.
-     */
-    imageUrl?: string | null;
-    /**
-     * Image alt text.
-     */
-    alt?: string | null;
-    id?: string | null;
-  }[];
+  cards?:
+    | {
+        name: string;
+        details?: string | null;
+        /**
+         * Price in INR.
+         */
+        price: number;
+        discount?: string | null;
+        image?: (string | null) | Media;
+        imageUrl?: string | null;
+        alt?: string | null;
+        href?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'upDownCardCarousel';
@@ -1389,7 +1409,13 @@ export interface UpDownCardCarouselBlock {
  * via the `definition` "ClientStoriesBlock".
  */
 export interface ClientStoriesBlock {
+  /**
+   * Use {slug} to auto-replace with destination/package name
+   */
   heading?: string | null;
+  /**
+   * Use {slug} for dynamic text replacement
+   */
   subheading?: string | null;
   buttonText?: string | null;
   background?: (string | null) | Media;
@@ -1406,12 +1432,22 @@ export interface ClientStoriesBlock {
    */
   cardsPerView?: number | null;
   gapPx?: number | null;
-  cards: {
-    name: string;
-    rating: number;
-    story: string;
-    id?: string | null;
-  }[];
+  /**
+   * Choose how to populate review cards
+   */
+  populateBy?: ('manual' | 'collection' | 'featured') | null;
+  /**
+   * Number of reviews to fetch from collection
+   */
+  limit?: number | null;
+  cards?:
+    | {
+        name: string;
+        rating: number;
+        story: string;
+        id?: string | null;
+      }[]
+    | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'clientStories';
@@ -1422,32 +1458,49 @@ export interface ClientStoriesBlock {
  */
 export interface InstagramCarouselBlock {
   /**
-   * E.g., "Latest on Instagram"
+   * Choose where to load Instagram posts from
+   */
+  dataSource: 'manual' | 'featured' | 'recent';
+  /**
+   * Number of posts to display
+   */
+  postLimit?: number | null;
+  posts?:
+    | {
+        url: string;
+        /**
+         * Show caption for this post
+         */
+        captioned?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Section heading
    */
   heading?: string | null;
-  /**
-   * Optional header with a follow button
-   */
   profile?: {
     handle?: string | null;
     profileUrl?: string | null;
     followLabel?: string | null;
+    avatarUrl?: (string | null) | Media;
   };
   layout?: {
     columnsDesktop?: number | null;
     columnsTablet?: number | null;
     columnsMobile?: number | null;
+    /**
+     * Space between posts (e.g., 12px, 1rem)
+     */
     gutter?: string | null;
+    /**
+     * Show Instagram captions on all posts
+     */
     showCaptions?: boolean | null;
   };
-  posts: {
-    url: string;
-    /**
-     * Force captions for this post only
-     */
-    captioned?: boolean | null;
-    id?: string | null;
-  }[];
+  /**
+   * Optional text below the grid
+   */
   caption?: {
     root: {
       type: string;
@@ -1472,50 +1525,47 @@ export interface InstagramCarouselBlock {
  * via the `definition` "ImageGridBlock".
  */
 export interface ImageGridBlock {
-  leftHero?: {
-    title?: string | null;
-    rating?: number | null;
-    trail?: string | null;
-    image?: (string | null) | Media;
-    imageUrl?: string | null;
-    alt?: string | null;
-  };
-  explore?: {
-    subtitle?: string | null;
-    title?: string | null;
-    description?: string | null;
-    button?: {
-      label?: string | null;
-      href?: string | null;
+  dataSource: 'manual' | 'featured' | 'destination' | 'package';
+  destination?: (string | null) | Destination;
+  package?: (string | null) | Package;
+  featuredLimit?: number | null;
+  manualData?: {
+    leftHero?: {
+      title?: string | null;
+      rating?: number | null;
+      trail?: string | null;
+      image?: (string | null) | Media;
+    };
+    explore?: {
+      subtitle?: string | null;
+      title?: string | null;
+      description?: string | null;
+      button?: {
+        label?: string | null;
+        href?: string | null;
+      };
+    };
+    spots?:
+      | {
+          name?: string | null;
+          rating?: number | null;
+          location?: string | null;
+          image?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
+    activities?: {
+      subtitle?: string | null;
+      title?: string | null;
+      description?: string | null;
+      button?: {
+        label?: string | null;
+        href?: string | null;
+      };
+      tag?: string | null;
+      image?: (string | null) | Media;
     };
   };
-  spots?:
-    | {
-        name?: string | null;
-        rating?: number | null;
-        location?: string | null;
-        image?: (string | null) | Media;
-        imageUrl?: string | null;
-        alt?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  activities?: {
-    subtitle?: string | null;
-    title?: string | null;
-    description?: string | null;
-    button?: {
-      label?: string | null;
-      href?: string | null;
-    };
-    tag?: string | null;
-    image?: (string | null) | Media;
-    imageUrl?: string | null;
-    alt?: string | null;
-  };
-  /**
-   * Optional symbols or labels so even icons/markers can be editor-controlled.
-   */
   labels?: {
     ratingPrefix?: string | null;
   };
@@ -1526,116 +1576,6 @@ export interface ImageGridBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'imageGrid';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TravelPackageExplorerBlock".
- */
-export interface TravelPackageExplorerBlock {
-  packages: {
-    /**
-     * Package title (e.g., "Spanish Escape")
-     */
-    title: string;
-    /**
-     * Location details (e.g., "Madrid 2N, Granada 1N, Valencia 1N, Ibiza 2N")
-     */
-    location: string;
-    /**
-     * Rating (1-5 stars)
-     */
-    rating: number;
-    /**
-     * Number of reviews
-     */
-    reviews: number;
-    /**
-     * Package description
-     */
-    description: string;
-    /**
-     * Current price in ₹
-     */
-    price: number;
-    /**
-     * Original price (for showing discount)
-     */
-    originalPrice: number;
-    /**
-     * Duration in days
-     */
-    duration: number;
-    /**
-     * Types of experiences offered
-     */
-    experiences: ('Adventure' | 'Relaxing' | 'Cultural' | 'Sightseeing' | 'Party')[];
-    accommodationType: 'Hotel' | 'Resort' | 'Boutique Hotel' | 'Villa / Townhouse';
-    /**
-     * Amenities included
-     */
-    amenities: (
-      | 'Free Wifi'
-      | 'Swimming Pool'
-      | 'Breakfast Included'
-      | 'Gym'
-      | 'Airport Transfer'
-      | 'City View'
-      | 'Private Pool'
-      | 'Beach Access'
-    )[];
-    province: 'Madrid' | 'Andalusia' | 'Catalonia' | 'Balearic Islands';
-    /**
-     * Upload package image
-     */
-    image?: (string | null) | Media;
-    /**
-     * Or provide external image URL
-     */
-    imageUrl?: string | null;
-    /**
-     * What is included in the package
-     */
-    inclusions: (
-      | 'Flights'
-      | 'Stay'
-      | 'Cruise tickets'
-      | 'Transfers'
-      | 'Breakfast'
-      | 'Tour guide'
-      | 'City Tour Pass'
-      | 'Ferry Tickets'
-      | 'Club Access'
-      | 'Villa Stay'
-    )[];
-    suitability: {
-      /**
-       * Suitability percentage for couples (0-100)
-       */
-      couples: number;
-      /**
-       * Suitability percentage for families (0-100)
-       */
-      family: number;
-    };
-    /**
-     * Number of recent bookings to display
-     */
-    recentBookings: number;
-    /**
-     * Key sights and attractions included in the package
-     */
-    sights: {
-      /**
-       * Sight or attraction name
-       */
-      name: string;
-      id?: string | null;
-    }[];
-    id?: string | null;
-  }[];
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'travelPackageExplorer';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1722,23 +1662,50 @@ export interface Package {
    */
   starRating?: number | null;
   /**
-   * Complete day-by-day itinerary for DynamicScroller
+   * Complete day-by-day itinerary - used by DynamicScroller block
    */
   itinerary?:
     | {
+        /**
+         * Day number (e.g., 1, 2, 3)
+         */
         dayNumber: number;
         /**
-         * Day title (e.g., "Arrival Into Paris - The City Of Romance")
+         * Day label for DynamicScroller (e.g., "Day 1 - Arrival Into Paris")
          */
-        title: string;
+        day: string;
+        /**
+         * Activities shown in DynamicScroller itinerary cards
+         */
+        activities?:
+          | {
+              /**
+               * Small icon for this activity (e.g., plane, hotel, food)
+               */
+              icon?: (string | null) | Media;
+              /**
+               * Activity description (e.g., "Check-in at hotel", "Visit Eiffel Tower")
+               */
+              description: string;
+              /**
+               * Optional thumbnail image for this activity
+               */
+              detailsImage?: (string | null) | Media;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Additional title (for package detail page)
+         */
+        title?: string | null;
         /**
          * Optional subtitle
          */
         subtitle?: string | null;
         /**
-         * Full day description with activities
+         * Full day description for package detail page
          */
-        description: {
+        description?: {
           root: {
             type: string;
             children: {
@@ -1752,24 +1719,26 @@ export interface Package {
             version: number;
           };
           [k: string]: unknown;
-        };
+        } | null;
+        /**
+         * City visited on this day
+         */
         city?: (string | null) | City;
         /**
-         * Places visited on this day
+         * Places/attractions visited on this day
          */
         places?: (string | Place)[] | null;
-        activities?: (string | Activity)[] | null;
         mealsIncluded?: {
           breakfast?: boolean | null;
           lunch?: boolean | null;
           dinner?: boolean | null;
         };
         /**
-         * Image for this day
+         * Hero image for this day
          */
         image?: (string | null) | Media;
         /**
-         * Additional notes for this day
+         * Additional notes/tips for this day
          */
         notes?: string | null;
         id?: string | null;
@@ -1840,19 +1809,6 @@ export interface Package {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "activities".
- */
-export interface Activity {
-  id: string;
-  name: string;
-  type: 'adventure' | 'leisure' | 'cultural' | 'water_sports' | 'nature' | 'dining' | 'other';
-  description?: string | null;
-  icon?: (string | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "inclusions".
  */
 export interface Inclusion {
@@ -1893,6 +1849,19 @@ export interface Exclusion {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activities".
+ */
+export interface Activity {
+  id: string;
+  name: string;
+  type: 'adventure' | 'leisure' | 'cultural' | 'water_sports' | 'nature' | 'dining' | 'other';
+  description?: string | null;
+  icon?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "amenities".
  */
 export interface Amenity {
@@ -1918,6 +1887,90 @@ export interface AccommodationType {
   description?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TravelPackageExplorerBlock".
+ */
+export interface TravelPackageExplorerBlock {
+  /**
+   * Auto detects destination from URL slug
+   */
+  dataSource: 'auto' | 'destination' | 'all';
+  destination?: (string | null) | Destination;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'travelPackageExplorer';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicFormBlock".
+ */
+export interface DynamicFormBlock {
+  /**
+   * Where should form submissions be saved?
+   */
+  formType: 'review' | 'booking' | 'bulkBooking' | 'customTrip';
+  /**
+   * Form heading
+   */
+  title: string;
+  /**
+   * Optional description below heading
+   */
+  subtitle?: string | null;
+  /**
+   * Add custom fields to your form
+   */
+  fields: {
+    /**
+     * Field label shown to users
+     */
+    label: string;
+    /**
+     * Field name (used for data mapping)
+     */
+    name: string;
+    /**
+     * Field input type
+     */
+    type: 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea' | 'select' | 'checkbox';
+    /**
+     * Placeholder text (optional)
+     */
+    placeholder?: string | null;
+    required?: boolean | null;
+    /**
+     * Options for select dropdown
+     */
+    options?:
+      | {
+          label: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Number of rows for textarea
+     */
+    rows?: number | null;
+    /**
+     * Field width in the form
+     */
+    width?: ('full' | 'half' | 'third') | null;
+    id?: string | null;
+  }[];
+  /**
+   * Submit button text
+   */
+  submitButtonText?: string | null;
+  /**
+   * Success message after submission
+   */
+  successMessage?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'dynamicForm';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2678,7 +2731,9 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
+              populateBy?: T;
               destination?: T;
+              limit?: T;
               stops?:
                 | T
                 | {
@@ -2701,6 +2756,7 @@ export interface PagesSelect<T extends boolean = true> {
         instagramCarousel?: T | InstagramCarouselBlockSelect<T>;
         imageGrid?: T | ImageGridBlockSelect<T>;
         travelPackageExplorer?: T | TravelPackageExplorerBlockSelect<T>;
+        dynamicForm?: T | DynamicFormBlockSelect<T>;
       };
   meta?:
     | T
@@ -2808,60 +2864,69 @@ export interface DynamicScrollerBlockSelect<T extends boolean = true> {
   sections?:
     | T
     | {
-        id?: T;
-        type?: T;
-        title?: T;
-        subtitle?: T;
-        theme?:
-          | T
-          | {
-              background?: T;
-              headerAccent?: T;
-              titleColor?: T;
-              subtitleColor?: T;
-            };
-        navigation?:
-          | T
-          | {
-              position?: T;
-            };
-        items?:
-          | T
-          | {
-              packageItem?: T | DynamicScroller_PackageItemSelect<T>;
-              itineraryDay?: T | DynamicScroller_ItineraryDaySelect<T>;
-            };
+        packageSection?: T | DynamicScroller_PackageSectionSelect<T>;
+        itinerarySection?: T | DynamicScroller_ItinerarySectionSelect<T>;
       };
   id?: T;
   blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "DynamicScroller_PackageItem_select".
+ * via the `definition` "DynamicScroller_PackageSection_select".
  */
-export interface DynamicScroller_PackageItemSelect<T extends boolean = true> {
-  id?: T;
+export interface DynamicScroller_PackageSectionSelect<T extends boolean = true> {
   title?: T;
-  price?: T;
-  image?: T;
-  tag?: T;
-  tagColor?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "DynamicScroller_ItineraryDay_select".
- */
-export interface DynamicScroller_ItineraryDaySelect<T extends boolean = true> {
-  day?: T;
-  activities?:
+  subtitle?: T;
+  populatePackagesBy?: T;
+  destination?: T;
+  packageLimit?: T;
+  manualItems?:
     | T
     | {
-        icon?: T;
-        description?: T;
-        detailsImage?: T;
+        title?: T;
+        price?: T;
+        image?: T;
+        tag?: T;
+        tagColor?: T;
         id?: T;
       };
+  theme?:
+    | T
+    | {
+        background?: T;
+      };
+  showNavigation?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_ItinerarySection_select".
+ */
+export interface DynamicScroller_ItinerarySectionSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  itinerarySource?: T;
+  manualDays?:
+    | T
+    | {
+        day?: T;
+        activities?:
+          | T
+          | {
+              icon?: T;
+              description?: T;
+              detailsImage?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  theme?:
+    | T
+    | {
+        background?: T;
+      };
+  showNavigation?: T;
   id?: T;
   blockName?: T;
 }
@@ -2876,6 +2941,8 @@ export interface PopularNowBlockSelect<T extends boolean = true> {
   rows?:
     | T
     | {
+        dataSource?: T;
+        itemLimit?: T;
         direction?: T;
         speedSeconds?: T;
         cards?:
@@ -2898,6 +2965,8 @@ export interface PopularNowBlockSelect<T extends boolean = true> {
  * via the `definition` "UpDownCardCarouselBlock_select".
  */
 export interface UpDownCardCarouselBlockSelect<T extends boolean = true> {
+  dataSource?: T;
+  itemLimit?: T;
   heading?: T;
   subheading?: T;
   cards?:
@@ -2910,6 +2979,7 @@ export interface UpDownCardCarouselBlockSelect<T extends boolean = true> {
         image?: T;
         imageUrl?: T;
         alt?: T;
+        href?: T;
         id?: T;
       };
   id?: T;
@@ -2928,6 +2998,8 @@ export interface ClientStoriesBlockSelect<T extends boolean = true> {
   overlay?: T;
   cardsPerView?: T;
   gapPx?: T;
+  populateBy?: T;
+  limit?: T;
   cards?:
     | T
     | {
@@ -2944,6 +3016,15 @@ export interface ClientStoriesBlockSelect<T extends boolean = true> {
  * via the `definition` "InstagramCarouselBlock_select".
  */
 export interface InstagramCarouselBlockSelect<T extends boolean = true> {
+  dataSource?: T;
+  postLimit?: T;
+  posts?:
+    | T
+    | {
+        url?: T;
+        captioned?: T;
+        id?: T;
+      };
   heading?: T;
   profile?:
     | T
@@ -2951,6 +3032,7 @@ export interface InstagramCarouselBlockSelect<T extends boolean = true> {
         handle?: T;
         profileUrl?: T;
         followLabel?: T;
+        avatarUrl?: T;
       };
   layout?:
     | T
@@ -2961,13 +3043,6 @@ export interface InstagramCarouselBlockSelect<T extends boolean = true> {
         gutter?: T;
         showCaptions?: T;
       };
-  posts?:
-    | T
-    | {
-        url?: T;
-        captioned?: T;
-        id?: T;
-      };
   caption?: T;
   id?: T;
   blockName?: T;
@@ -2977,56 +3052,58 @@ export interface InstagramCarouselBlockSelect<T extends boolean = true> {
  * via the `definition` "ImageGridBlock_select".
  */
 export interface ImageGridBlockSelect<T extends boolean = true> {
-  leftHero?:
+  dataSource?: T;
+  destination?: T;
+  package?: T;
+  featuredLimit?: T;
+  manualData?:
     | T
     | {
-        title?: T;
-        rating?: T;
-        trail?: T;
-        image?: T;
-        imageUrl?: T;
-        alt?: T;
-      };
-  explore?:
-    | T
-    | {
-        subtitle?: T;
-        title?: T;
-        description?: T;
-        button?:
+        leftHero?:
           | T
           | {
-              label?: T;
-              href?: T;
+              title?: T;
+              rating?: T;
+              trail?: T;
+              image?: T;
             };
-      };
-  spots?:
-    | T
-    | {
-        name?: T;
-        rating?: T;
-        location?: T;
-        image?: T;
-        imageUrl?: T;
-        alt?: T;
-        id?: T;
-      };
-  activities?:
-    | T
-    | {
-        subtitle?: T;
-        title?: T;
-        description?: T;
-        button?:
+        explore?:
           | T
           | {
-              label?: T;
-              href?: T;
+              subtitle?: T;
+              title?: T;
+              description?: T;
+              button?:
+                | T
+                | {
+                    label?: T;
+                    href?: T;
+                  };
             };
-        tag?: T;
-        image?: T;
-        imageUrl?: T;
-        alt?: T;
+        spots?:
+          | T
+          | {
+              name?: T;
+              rating?: T;
+              location?: T;
+              image?: T;
+              id?: T;
+            };
+        activities?:
+          | T
+          | {
+              subtitle?: T;
+              title?: T;
+              description?: T;
+              button?:
+                | T
+                | {
+                    label?: T;
+                    href?: T;
+                  };
+              tag?: T;
+              image?: T;
+            };
       };
   labels?:
     | T
@@ -3047,39 +3124,40 @@ export interface ImageGridBlockSelect<T extends boolean = true> {
  * via the `definition` "TravelPackageExplorerBlock_select".
  */
 export interface TravelPackageExplorerBlockSelect<T extends boolean = true> {
-  packages?:
+  dataSource?: T;
+  destination?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicFormBlock_select".
+ */
+export interface DynamicFormBlockSelect<T extends boolean = true> {
+  formType?: T;
+  title?: T;
+  subtitle?: T;
+  fields?:
     | T
     | {
-        title?: T;
-        location?: T;
-        rating?: T;
-        reviews?: T;
-        description?: T;
-        price?: T;
-        originalPrice?: T;
-        duration?: T;
-        experiences?: T;
-        accommodationType?: T;
-        amenities?: T;
-        province?: T;
-        image?: T;
-        imageUrl?: T;
-        inclusions?: T;
-        suitability?:
+        label?: T;
+        name?: T;
+        type?: T;
+        placeholder?: T;
+        required?: T;
+        options?:
           | T
           | {
-              couples?: T;
-              family?: T;
-            };
-        recentBookings?: T;
-        sights?:
-          | T
-          | {
-              name?: T;
+              label?: T;
+              value?: T;
               id?: T;
             };
+        rows?: T;
+        width?: T;
         id?: T;
       };
+  submitButtonText?: T;
+  successMessage?: T;
   id?: T;
   blockName?: T;
 }
@@ -3360,12 +3438,20 @@ export interface PackagesSelect<T extends boolean = true> {
     | T
     | {
         dayNumber?: T;
+        day?: T;
+        activities?:
+          | T
+          | {
+              icon?: T;
+              description?: T;
+              detailsImage?: T;
+              id?: T;
+            };
         title?: T;
         subtitle?: T;
         description?: T;
         city?: T;
         places?: T;
-        activities?: T;
         mealsIncluded?:
           | T
           | {
@@ -4261,45 +4347,38 @@ export interface PackageLayout {
     | ClientStoriesBlock
     | {
         /**
-         * Main title for the hero section. Use {destination} as a placeholder for the destination name.
+         * Main title. Use {slug} for auto-replacement (e.g., "Things to do in {slug}" → "Things to do in Spain")
          */
         title: string;
         /**
-         * Destination name (e.g., Spain, France, Italy)
+         * How to populate attractions
          */
-        destination: string;
+        populateBy?: ('auto' | 'destination' | 'manual') | null;
+        /**
+         * Select destination to show its places
+         */
+        destination?: (string | null) | Destination;
+        /**
+         * Number of places to show
+         */
+        limit?: number | null;
         stops?:
           | {
-              /**
-               * Name of the attraction (e.g., Sagrada Familia)
-               */
               name: string;
-              /**
-               * City where the attraction is located
-               */
               city: string;
-              /**
-               * Hero image for the attraction
-               */
               image: string | Media;
-              /**
-               * Short description of the attraction
-               */
               excerpt: string;
-              /**
-               * URL slug for the attraction page (optional)
-               */
               slug?: string | null;
               id?: string | null;
             }[]
           | null;
         timingSettings: {
           /**
-           * Time in milliseconds before auto-scrolling to next slide (1000ms = 1 second)
+           * Auto-scroll delay in milliseconds
            */
           autoplayDelay: number;
           /**
-           * Transition animation duration in milliseconds (1000ms = 1 second)
+           * Transition duration in milliseconds
            */
           transitionDuration: number;
         };
@@ -4324,9 +4403,17 @@ export interface PackageLayout {
  */
 export interface PackageHighlightsBlock {
   /**
-   * Main heading for the package highlights section
+   * Choose where to load highlights from
    */
-  heading: string;
+  dataSource: 'manual' | 'auto' | 'package';
+  /**
+   * Select a specific package
+   */
+  package?: (string | null) | Package;
+  /**
+   * Main heading for the highlights section
+   */
+  heading?: string | null;
   /**
    * Subtitle text below the heading
    */
@@ -4334,20 +4421,21 @@ export interface PackageHighlightsBlock {
   /**
    * List of package highlights (each with a star icon)
    */
-  highlights: {
-    highlightText: string;
-    id?: string | null;
-  }[];
+  highlights?:
+    | {
+        highlightText: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
-   * Exactly 7 images for the gallery mosaic layout (positions are pre-defined)
+   * Exactly 7 images for the gallery mosaic layout
    */
-  galleryImages: {
-    /**
-     * Upload an image for the gallery
-     */
-    image: string | Media;
-    id?: string | null;
-  }[];
+  galleryImages?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'packageHighlights';
@@ -4390,25 +4478,18 @@ export interface FeatureCarouselBlock {
  * via the `definition` "InfoPanelBlock".
  */
 export interface InfoPanelBlock {
-  /**
-   * Main title displayed at the top of the panel.
-   */
-  title: string;
-  /**
-   * Optional subheading text displayed below the title. Leave empty to hide.
-   */
+  dataSource: 'manual' | 'auto' | 'package';
+  package?: (string | null) | Package;
+  panelType?: ('goodToKnow' | 'inclusions' | 'exclusions') | null;
+  title?: string | null;
   subheading?: string | null;
-  /**
-   * Choose how the list items should be displayed.
-   */
   listType?: ('disc' | 'decimal') | null;
-  /**
-   * Add information items to display in the list.
-   */
-  items: {
-    text: string;
-    id?: string | null;
-  }[];
+  items?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'infoPanel';
@@ -4549,45 +4630,38 @@ export interface DestinationLayout {
     | ClientStoriesBlock
     | {
         /**
-         * Main title for the hero section. Use {destination} as a placeholder for the destination name.
+         * Main title. Use {slug} for auto-replacement (e.g., "Things to do in {slug}" → "Things to do in Spain")
          */
         title: string;
         /**
-         * Destination name (e.g., Spain, France, Italy)
+         * How to populate attractions
          */
-        destination: string;
+        populateBy?: ('auto' | 'destination' | 'manual') | null;
+        /**
+         * Select destination to show its places
+         */
+        destination?: (string | null) | Destination;
+        /**
+         * Number of places to show
+         */
+        limit?: number | null;
         stops?:
           | {
-              /**
-               * Name of the attraction (e.g., Sagrada Familia)
-               */
               name: string;
-              /**
-               * City where the attraction is located
-               */
               city: string;
-              /**
-               * Hero image for the attraction
-               */
               image: string | Media;
-              /**
-               * Short description of the attraction
-               */
               excerpt: string;
-              /**
-               * URL slug for the attraction page (optional)
-               */
               slug?: string | null;
               id?: string | null;
             }[]
           | null;
         timingSettings: {
           /**
-           * Time in milliseconds before auto-scrolling to next slide (1000ms = 1 second)
+           * Auto-scroll delay in milliseconds
            */
           autoplayDelay: number;
           /**
-           * Transition animation duration in milliseconds (1000ms = 1 second)
+           * Transition duration in milliseconds
            */
           transitionDuration: number;
         };
@@ -4834,7 +4908,9 @@ export interface PackageLayoutSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
+              populateBy?: T;
               destination?: T;
+              limit?: T;
               stops?:
                 | T
                 | {
@@ -4871,6 +4947,8 @@ export interface PackageLayoutSelect<T extends boolean = true> {
  * via the `definition` "PackageHighlightsBlock_select".
  */
 export interface PackageHighlightsBlockSelect<T extends boolean = true> {
+  dataSource?: T;
+  package?: T;
   heading?: T;
   subheading?: T;
   highlights?:
@@ -4912,6 +4990,9 @@ export interface FeatureCarouselBlockSelect<T extends boolean = true> {
  * via the `definition` "InfoPanelBlock_select".
  */
 export interface InfoPanelBlockSelect<T extends boolean = true> {
+  dataSource?: T;
+  package?: T;
+  panelType?: T;
   title?: T;
   subheading?: T;
   listType?: T;
@@ -5026,7 +5107,9 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
+              populateBy?: T;
               destination?: T;
+              limit?: T;
               stops?:
                 | T
                 | {

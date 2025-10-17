@@ -11,67 +11,81 @@ export const DestinationHeroCarousel: Block = {
     {
       name: 'title',
       type: 'text',
-      defaultValue: 'Things to do in {destination}',
+      defaultValue: 'Things to do in {slug}',
       required: true,
       admin: {
-        description: 'Main title for the hero section. Use {destination} as a placeholder for the destination name.',
+        description: 'Main title. Use {slug} for auto-replacement (e.g., "Things to do in {slug}" → "Things to do in Spain")',
+      },
+    },
+    
+    // ✅ COLLECTION INTEGRATION
+    {
+      name: 'populateBy',
+      type: 'select',
+      defaultValue: 'auto',
+      options: [
+        { label: 'Auto (from URL)', value: 'auto' },
+        { label: 'Select Destination', value: 'destination' },
+        { label: 'Manual Stops', value: 'manual' },
+      ],
+      admin: {
+        description: 'How to populate attractions',
       },
     },
     {
       name: 'destination',
-      type: 'text',
-      defaultValue: 'Spain',
-      required: true,
+      type: 'relationship',
+      relationTo: 'destinations',
       admin: {
-        description: 'Destination name (e.g., Spain, France, Italy)',
+        condition: (_, siblingData) => siblingData.populateBy === 'destination',
+        description: 'Select destination to show its places',
+      },
+    },
+    {
+      name: 'limit',
+      type: 'number',
+      defaultValue: 8,
+      min: 3,
+      max: 15,
+      admin: {
+        condition: (_, siblingData) => siblingData.populateBy !== 'manual',
+        description: 'Number of places to show',
       },
     },
     {
       name: 'stops',
-      label: 'Travel Stops',
+      label: 'Manual Travel Stops',
       type: 'array',
       minRows: 3,
       maxRows: 10,
+      admin: {
+        condition: (_, siblingData) => siblingData.populateBy === 'manual',
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
           required: true,
-          admin: {
-            description: 'Name of the attraction (e.g., Sagrada Familia)',
-          },
         },
         {
           name: 'city',
           type: 'text',
           required: true,
-          admin: {
-            description: 'City where the attraction is located',
-          },
         },
         {
           name: 'image',
           type: 'upload',
           relationTo: 'media',
           required: true,
-          admin: {
-            description: 'Hero image for the attraction',
-          },
         },
         {
           name: 'excerpt',
           type: 'textarea',
           required: true,
-          admin: {
-            description: 'Short description of the attraction',
-          },
         },
         {
           name: 'slug',
           type: 'text',
-          admin: {
-            description: 'URL slug for the attraction page (optional)',
-          },
         },
       ],
     },
@@ -88,7 +102,7 @@ export const DestinationHeroCarousel: Block = {
           max: 20000,
           required: true,
           admin: {
-            description: 'Time in milliseconds before auto-scrolling to next slide (1000ms = 1 second)',
+            description: 'Auto-scroll delay in milliseconds',
             step: 500,
           },
         },
@@ -100,7 +114,7 @@ export const DestinationHeroCarousel: Block = {
           max: 2000,
           required: true,
           admin: {
-            description: 'Transition animation duration in milliseconds (1000ms = 1 second)',
+            description: 'Transition duration in milliseconds',
             step: 100,
           },
         },

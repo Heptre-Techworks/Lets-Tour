@@ -59,8 +59,10 @@ export const FeatureCarousel: React.FC<FeatureCarouselBlockProps> = ({
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center font-sans p-8">
-      <div className="w-full max-w-5xl relative">
+    <div className="w-full min-h-screen flex flex-col justify-center font-sans py-12">
+      {/* ✅ Full width container with padding only on sides */}
+      <div className="w-full px-8 md:px-16">
+        {/* Header section */}
         <div className="text-left mb-8">
           <div className="flex items-center">
             <h1 className="text-4xl font-bold text-gray-800 whitespace-nowrap pr-6">{heading}</h1>
@@ -69,9 +71,13 @@ export const FeatureCarousel: React.FC<FeatureCarouselBlockProps> = ({
           {subheading && <p className="text-gray-600 mt-2">{subheading}</p>}
         </div>
 
-        <div className="relative rounded-xl p-4 mr-16">
-          <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#08121E]"></div>
-          <div className="overflow-hidden">
+        {/* ✅ Carousel section - full width */}
+        <div className="relative">
+          {/* Background accent */}
+          <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#08121E] -z-10"></div>
+          
+          {/* Scrollable container */}
+          <div className="overflow-hidden py-4">
             <div
               ref={containerRef}
               className="flex transition-transform duration-500 ease-in-out"
@@ -82,47 +88,48 @@ export const FeatureCarousel: React.FC<FeatureCarouselBlockProps> = ({
               ))}
             </div>
           </div>
-        </div>
 
-        {showNavigationButtons && (
-          <div className="absolute -bottom-20 left-0 w-full flex items-center">
-            <div className="flex-grow border-t border-dashed border-gray-400 mr-6"></div>
-            <div className="flex space-x-3">
-              <button
-                onClick={() => handleScroll('left')}
-                disabled={scrollPosition === 0}
-                className="w-12 h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
-                aria-label="Scroll left"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+          {/* ✅ Navigation buttons - positioned relative to container */}
+          {showNavigationButtons && (
+            <div className="flex items-center mt-8">
+              <div className="flex-grow border-t border-dashed border-gray-400 mr-6"></div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => handleScroll('left')}
+                  disabled={scrollPosition === 0}
+                  className="w-12 h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
+                  aria-label="Scroll left"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                onClick={() => handleScroll('right')}
-                disabled={scrollPosition >= maxScroll - 1}
-                className="w-12 h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
-                aria-label="Scroll right"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => handleScroll('right')}
+                  disabled={scrollPosition >= maxScroll - 1}
+                  className="w-12 h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
+                  aria-label="Scroll right"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

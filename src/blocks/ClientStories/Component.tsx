@@ -1,6 +1,32 @@
+// src/blocks/ClientStories/Component.tsx
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import type { Review } from '@/payload-types';
+
+// ✅ Slug replacement hook
+const useSlugReplacement = () => {
+  const pathname = usePathname();
+
+  const slugInfo = useMemo(() => {
+    const segments = pathname.split('/').filter(Boolean);
+    const rawSlug = segments[segments.length - 1] || '';
+    const formattedSlug = rawSlug
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    
+    return { raw: rawSlug, formatted: formattedSlug };
+  }, [pathname]);
+
+  const replaceSlug = (text: string | undefined | null): string => {
+    if (!text) return '';
+    return text.replace(/{slug}/gi, slugInfo.formatted);
+  };
+
+  return { slug: slugInfo.formatted, rawSlug: slugInfo.raw, replaceSlug };
+};
 
 type MediaLike = { url?: string | null; alt?: string | null };
 
@@ -13,6 +39,8 @@ type ClientStoriesBlockProps = {
   overlay?: MediaLike | null;
   cardsPerView?: number | null;
   gapPx?: number | null;
+  populateBy?: 'manual' | 'collection' | 'featured';
+  limit?: number;
   cards?: Array<{
     name?: string | null;
     rating?: number | null;
@@ -50,21 +78,89 @@ const StarRating: React.FC<{ rating?: number | null }> = ({ rating = 0 }) => {
 };
 
 export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
-  heading = 'Our client stories!',
-  subheading = 'Explore the wild west in all its glory this summer with your family and LetsTour',
+  heading = 'Our client stories from {slug}!',
+  subheading = 'Hear what travelers say about {slug}',
   buttonText = 'View all',
   background,
   backgroundUrl,
   overlay,
   cardsPerView: cardsPerViewRaw = 2,
   gapPx: gapPxRaw = 32,
-  cards = [],
+  populateBy = 'manual',
+  limit = 10,
+  cards: manualCards = [],
 }) => {
+  // ✅ Slug replacement
+  const { replaceSlug, rawSlug } = useSlugReplacement();
+  const displayHeading = replaceSlug(heading);
+  const displaySubheading = replaceSlug(subheading);
+
   const cardsPerView = Math.max(1, Number(cardsPerViewRaw) || 2);
   const gapPx = Math.max(0, Number(gapPxRaw) || 24);
 
+  // ✅ Fetch reviews from collection if needed
+  const [reviewsFromCollection, setReviewsFromCollection] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(populateBy !== 'manual');
+
+  useEffect(() => {
+    if (populateBy === 'manual') return;
+
+    const fetchReviews = async () => {
+      try {
+        let url = `/api/reviews?limit=${limit}&depth=2&sort=-createdAt`;
+        
+        if (populateBy === 'featured') {
+          url += '&where[featured][equals]=true';
+        }
+        
+        // Auto-filter by current destination/package from URL
+        const pathname = window.location.pathname;
+        if (pathname.includes('/destinations/')) {
+          const destSlug = pathname.split('/destinations/')[1]?.split('/')[0];
+          if (destSlug) {
+            url += `&where[destination.slug][equals]=${destSlug}`;
+          }
+        } else if (pathname.includes('/packages/')) {
+          const pkgSlug = pathname.split('/packages/')[1]?.split('/')[0];
+          if (pkgSlug) {
+            url += `&where[package.slug][equals]=${pkgSlug}`;
+          }
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.docs) {
+          setReviewsFromCollection(data.docs);
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [populateBy, limit, rawSlug]);
+
+// ✅ Transform reviews to card format (Final fixed version)
+  const cards = useMemo(() => {
+    if (populateBy === 'manual') {
+      return Array.isArray(manualCards) ? manualCards : [];
+    }
+
+  return reviewsFromCollection.map(review => {
+    const user = typeof review.user === 'object' ? review.user : null;
+    return {
+      name: user?.name || 'Anonymous',
+      rating: review.rating || 5,
+      story: review.body || '', // ✅ Using 'body' field from Reviews collection
+    };
+  });
+}, [populateBy, manualCards, reviewsFromCollection]);
+
   const totalSlides = useMemo(
-    () => Math.max(1, Math.ceil((Array.isArray(cards) ? cards.length : 0) / cardsPerView)),
+    () => Math.max(1, Math.ceil(cards.length / cardsPerView)),
     [cards, cardsPerView],
   );
   const [currentSlide, setCurrentSlide] = useState(1);
@@ -79,11 +175,29 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
   const cardWidthPct = 100 / cardsPerView;
   const translatePct = (currentSlide - 1) * (cardWidthPct * cardsPerView);
 
-  // Media and URL fallbacks
   const bgSrc = getImageSrc(background as any, backgroundUrl as any);
   const overlaySrc =
     getImageSrc(overlay) ||
-    'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png'; // fallback debug
+    'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png';
+
+  if (loading) {
+    return (
+      <section className="relative w-full h-screen font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading stories...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (cards.length === 0) {
+    return (
+      <section className="relative w-full h-screen font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
+        <p className="text-gray-400">No client stories available yet.</p>
+      </section>
+    );
+  }
 
   return (
     <section className="relative w-full h-screen font-sans overflow-hidden text-white bg-gray-900">
@@ -110,8 +224,8 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
             alt={overlay?.alt || 'Decorative Overlay'}
             className="w-full h-[40%] object-cover"
             style={{
-              opacity: 0.9,                // BOOST visibility for demonstration
-              mixBlendMode: 'overlay',     // Try multiply or soft-light as alternative effects
+              opacity: 0.9,
+              mixBlendMode: 'overlay',
             }}
           />
         </div>
@@ -122,8 +236,8 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
         <div className="flex flex-col lg:flex-row lg:items-start w-full flex-grow relative">
           {/* Left column */}
           <div className="w-full lg:w-1/3 lg:pr-12 space-y-4 text-left mb-12 lg:mb-0">
-            <h1 className="text-5xl md:text-6xl font-serif italic">{heading}</h1>
-            {subheading ? <p className="text-base text-gray-200">{subheading}</p> : null}
+            <h1 className="text-5xl md:text-6xl font-serif italic">{displayHeading}</h1>
+            {displaySubheading ? <p className="text-base text-gray-200">{displaySubheading}</p> : null}
             {buttonText ? (
               <button
                 type="button"
@@ -144,45 +258,42 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
               }}
               aria-live="polite"
             >
-              {Array.isArray(cards) &&
-                cards.map((card, idx) => {
-                  // Calculate if this card is at the leftmost visible position
-                  const currentCardIndex = Math.round((translatePct / 100) * (cards.length / cardsPerView));
-                  const isLeftmost = idx === currentCardIndex;
-                  
-                  return (
-                    <div
-                      key={`${card?.name ?? 'card'}-${idx}`}
-                      className={`flex-shrink-0 transition-transform duration-500 ease-in-out ${
-                        isLeftmost ? 'scale-110 z-10' : 'scale-100'
-                      }`}
-                      style={{ 
-                        width: `calc(${cardWidthPct}% - ${gapPx - gapPx / cardsPerView}px)`,
-                      }}
-                    >
-                      <div className={`h-[320px] p-6 backdrop-blur-md rounded-2xl text-left transition-all duration-500 ${
-                        isLeftmost 
-                          ? 'bg-white/20 shadow-2xl' 
-                          : 'bg-white/10 shadow-lg'
-                      }`}>
-                        <div className="flex flex-col h-full">
-                          <div className="mb-4 shrink-0">
-                            <h3 className="text-xl font-bold">{card?.name ?? ''}</h3>
-                            <StarRating rating={card?.rating as number} />
-                          </div>
-                          <div className="flex-1 overflow-y-auto overscroll-contain pr-2">
-                            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-                              {card?.story ? `"${card.story}"` : ''}
-                            </p>
-                          </div>
+              {cards.map((card, idx) => {
+                const currentCardIndex = Math.round((translatePct / 100) * (cards.length / cardsPerView));
+                const isLeftmost = idx === currentCardIndex;
+                
+                return (
+                  <div
+                    key={`${card?.name ?? 'card'}-${idx}`}
+                    className={`flex-shrink-0 transition-transform duration-500 ease-in-out ${
+                      isLeftmost ? 'scale-110 z-10' : 'scale-100'
+                    }`}
+                    style={{ 
+                      width: `calc(${cardWidthPct}% - ${gapPx - gapPx / cardsPerView}px)`,
+                    }}
+                  >
+                    <div className={`h-[320px] p-6 backdrop-blur-md rounded-2xl text-left transition-all duration-500 ${
+                      isLeftmost 
+                        ? 'bg-white/20 shadow-2xl' 
+                        : 'bg-white/10 shadow-lg'
+                    }`}>
+                      <div className="flex flex-col h-full">
+                        <div className="mb-4 shrink-0">
+                          <h3 className="text-xl font-bold">{card?.name ?? ''}</h3>
+                          <StarRating rating={card?.rating as number} />
+                        </div>
+                        <div className="flex-1 overflow-y-auto overscroll-contain pr-2">
+                          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                            {card?.story ? `"${card.story}"` : ''}
+                          </p>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                );
+              })}
             </div>
           </div>
-
         </div>
 
         {/* Bottom navigation */}

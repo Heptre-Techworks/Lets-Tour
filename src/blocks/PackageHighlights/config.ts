@@ -1,3 +1,4 @@
+// src/blocks/PackageHighlights/config.ts
 import type { Block } from 'payload';
 
 export const PackageHighlights: Block = {
@@ -9,12 +10,38 @@ export const PackageHighlights: Block = {
   },
   fields: [
     {
+      name: 'dataSource',
+      type: 'select',
+      label: 'Data Source',
+      defaultValue: 'manual',
+      required: true,
+      options: [
+        { label: 'Manual Entry', value: 'manual' },
+        { label: 'From Package (URL)', value: 'auto' },
+        { label: 'Select Package', value: 'package' },
+      ],
+      admin: {
+        description: 'Choose where to load highlights from',
+      },
+    },
+    {
+      name: 'package',
+      type: 'relationship',
+      relationTo: 'packages',
+      admin: {
+        condition: (_, siblingData) => siblingData.dataSource === 'package',
+        description: 'Select a specific package',
+      },
+    },
+
+    // Manual fields
+    {
       name: 'heading',
       type: 'text',
       defaultValue: 'Package highlights',
-      required: true,
       admin: {
-        description: 'Main heading for the package highlights section',
+        condition: (_, siblingData) => siblingData.dataSource === 'manual',
+        description: 'Main heading for the highlights section',
       },
     },
     {
@@ -22,13 +49,13 @@ export const PackageHighlights: Block = {
       type: 'text',
       defaultValue: "Today's enemy is tomorrow's friend.",
       admin: {
+        condition: (_, siblingData) => siblingData.dataSource === 'manual',
         description: 'Subtitle text below the heading',
       },
     },
     {
       name: 'highlights',
       type: 'array',
-      required: true,
       labels: { 
         singular: 'Highlight', 
         plural: 'Highlights' 
@@ -36,6 +63,7 @@ export const PackageHighlights: Block = {
       minRows: 1,
       maxRows: 20,
       admin: {
+        condition: (_, siblingData) => siblingData.dataSource === 'manual',
         description: 'List of package highlights (each with a star icon)',
       },
       fields: [
@@ -52,7 +80,6 @@ export const PackageHighlights: Block = {
     {
       name: 'galleryImages',
       type: 'array',
-      required: true,
       labels: { 
         singular: 'Gallery Image', 
         plural: 'Gallery Images' 
@@ -60,7 +87,8 @@ export const PackageHighlights: Block = {
       minRows: 7,
       maxRows: 7,
       admin: {
-        description: 'Exactly 7 images for the gallery mosaic layout (positions are pre-defined)',
+        condition: (_, siblingData) => siblingData.dataSource === 'manual',
+        description: 'Exactly 7 images for the gallery mosaic layout',
       },
       fields: [
         {
@@ -68,9 +96,6 @@ export const PackageHighlights: Block = {
           type: 'upload',
           relationTo: 'media',
           required: true,
-          admin: {
-            description: 'Upload an image for the gallery',
-          },
         },
       ],
     },

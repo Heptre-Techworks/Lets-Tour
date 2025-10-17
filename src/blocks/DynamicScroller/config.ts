@@ -1,51 +1,113 @@
 // src/blocks/DynamicScroller/config.ts
-import type { Block, Field } from 'payload'
+import type { Block } from 'payload'
 
-const PackageItemBlock: Block = {
-  slug: 'packageItem',
-  interfaceName: 'DynamicScroller_PackageItem',
-  labels: { singular: 'Package Item', plural: 'Package Items' },
+// Define section blocks
+const PackageSectionBlock: Block = {
+  slug: 'packageSection',
+  interfaceName: 'DynamicScroller_PackageSection',
+  labels: { singular: 'Package Section', plural: 'Package Sections' },
   fields: [
-    { name: 'id', type: 'text' },
-    { name: 'title', type: 'text', required: true },
-    { name: 'price', type: 'text', required: true }, // keep string to allow commas
+    { name: 'title', type: 'text', admin: { description: 'Use {slug} for auto-replacement' } },
+    { name: 'subtitle', type: 'text' },
     {
-      name: 'image',
-      type: 'upload',
-      relationTo: 'media',
+      name: 'populatePackagesBy',
+      type: 'select',
+      defaultValue: 'manual',
       required: true,
+      options: [
+        { label: 'Manual', value: 'manual' },
+        { label: 'Auto (from URL)', value: 'auto' },
+        { label: 'Featured Packages', value: 'featured' },
+        { label: 'Select Destination', value: 'destination' },
+      ],
     },
-    { name: 'tag', type: 'text' },
-    { name: 'tagColor', type: 'text' },
+    {
+      name: 'destination',
+      type: 'relationship',
+      relationTo: 'destinations',
+      admin: {
+        condition: (_, siblingData) => siblingData.populatePackagesBy === 'destination',
+      },
+    },
+    {
+      name: 'packageLimit',
+      type: 'number',
+      defaultValue: 6,
+      min: 1,
+      max: 20,
+      admin: {
+        condition: (_, siblingData) => siblingData.populatePackagesBy !== 'manual',
+      },
+    },
+    {
+      name: 'manualItems',
+      type: 'array',
+      admin: {
+        condition: (_, siblingData) => siblingData.populatePackagesBy === 'manual',
+      },
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        { name: 'price', type: 'text', required: true },
+        { name: 'image', type: 'upload', relationTo: 'media', required: true },
+        { name: 'tag', type: 'text' },
+        { name: 'tagColor', type: 'text' },
+      ],
+    },
+    {
+      name: 'theme',
+      type: 'group',
+      fields: [
+        { name: 'background', type: 'text', defaultValue: 'bg-white' },
+      ],
+    },
+    { name: 'showNavigation', type: 'checkbox', defaultValue: true },
   ],
 }
 
-const ItineraryDayBlock: Block = {
-  slug: 'itineraryDay',
-  interfaceName: 'DynamicScroller_ItineraryDay',
-  labels: { singular: 'Itinerary Day', plural: 'Itinerary Days' },
+const ItinerarySectionBlock: Block = {
+  slug: 'itinerarySection',
+  interfaceName: 'DynamicScroller_ItinerarySection',
+  labels: { singular: 'Itinerary Section', plural: 'Itinerary Sections' },
   fields: [
-    { name: 'day', type: 'text', required: true },
+    { name: 'title', type: 'text' },
+    { name: 'subtitle', type: 'text' },
     {
-      name: 'activities',
+      name: 'itinerarySource',
+      type: 'select',
+      defaultValue: 'manual',
+      required: true,
+      options: [
+        { label: 'Manual', value: 'manual' },
+        { label: 'From Current Package (URL)', value: 'package' },
+      ],
+    },
+    {
+      name: 'manualDays',
       type: 'array',
-      admin: { initCollapsed: true },
+      admin: {
+        condition: (_, siblingData) => siblingData.itinerarySource === 'manual',
+      },
       fields: [
+        { name: 'day', type: 'text', required: true },
         {
-          name: 'icon',
-          type: 'upload',
-          relationTo: 'media',
-          required: false,
-        },
-        { name: 'description', type: 'textarea', required: true },
-        {
-          name: 'detailsImage',
-          type: 'upload',
-          relationTo: 'media',
-          required: false,
+          name: 'activities',
+          type: 'array',
+          fields: [
+            { name: 'icon', type: 'upload', relationTo: 'media' },
+            { name: 'description', type: 'textarea', required: true },
+            { name: 'detailsImage', type: 'upload', relationTo: 'media' },
+          ],
         },
       ],
     },
+    {
+      name: 'theme',
+      type: 'group',
+      fields: [
+        { name: 'background', type: 'text', defaultValue: 'bg-white' },
+      ],
+    },
+    { name: 'showNavigation', type: 'checkbox', defaultValue: true },
   ],
 }
 
@@ -56,69 +118,12 @@ export const DynamicScroller: Block = {
   fields: [
     {
       name: 'sections',
-      type: 'array',
-      admin: { initCollapsed: true },
-      fields: [
-        { name: 'id', type: 'text' },
-        {
-          name: 'type',
-          type: 'select',
-          required: true,
-          defaultValue: 'package',
-          options: [
-            { label: 'Package', value: 'package' },
-            { label: 'Itinerary', value: 'itinerary' },
-          ],
-        },
-        { name: 'title', type: 'text' },
-        { name: 'subtitle', type: 'text' },
-        {
-          name: 'theme',
-          type: 'group',
-          fields: [
-            { name: 'background', type: 'text', defaultValue: 'bg-white' },
-            { name: 'headerAccent', type: 'text' },
-            { name: 'titleColor', type: 'text' },
-            { name: 'subtitleColor', type: 'text' },
-          ],
-        },
-        {
-          name: 'navigation',
-          type: 'group',
-          fields: [
-            {
-              name: 'position',
-              type: 'select',
-              defaultValue: 'bottom-left',
-              options: [
-                { label: 'Bottom Left', value: 'bottom-left' },
-                { label: 'Bottom Center', value: 'bottom-center' },
-                { label: 'Bottom Right', value: 'bottom-right' },
-              ],
-            },
-          ],
-        },
-        {
-          name: 'items',
-          type: 'blocks',
-          blocks: [PackageItemBlock, ItineraryDayBlock],
-          validate: (value, { siblingData }) => {
-            type SectionType = 'package' | 'itinerary'
-            const sectionType = (
-              siblingData as { type?: SectionType } | undefined
-            )?.type
-
-            const rows = Array.isArray(value) ? value : []
-            const invalid = rows.some((row: any) => {
-              if (sectionType === 'package') return row?.blockType !== 'packageItem'
-              if (sectionType === 'itinerary') return row?.blockType !== 'itineraryDay'
-              return false
-            })
-
-            return invalid ? 'Items do not match section type.' : true
-          },
-        } as Field,
-      ],
+      type: 'blocks',
+      blocks: [PackageSectionBlock, ItinerarySectionBlock],
+      required: true,
+      minRows: 1,
     },
   ],
 }
+
+export default DynamicScroller

@@ -1,102 +1,88 @@
-'use client';
+// src/blocks/PackageHighlights/Component.tsx
+import React from 'react'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
+import { PackageHighlightsClient } from './Component.client'
+import type { PackageHighlightsBlock } from '@/payload-types'
 
-import React from 'react';
-import type { PackageHighlightsBlock as PackageHighlightsBlockProps } from '@/payload-types';
+type PackageHighlightsProps = PackageHighlightsBlock & {
+  slug?: string  // Package slug from page context
+}
 
-type MediaLike = { url?: string | null; alt?: string | null };
+export const PackageHighlights = async (props: PackageHighlightsProps) => {
+  const { dataSource, package: pkgProp, slug, ...manualData } = props as any
 
-const getImageSrc = (image: MediaLike | string | null | undefined): string => {
-  if (image && typeof image === 'object' && 'url' in image && image?.url) {
-    return image.url as string;
+  // Manual mode - return as-is
+  if (dataSource === 'manual') {
+    return <PackageHighlightsClient {...manualData} />
   }
-  return '';
-};
 
-// --- Reusable Star Icon Component ---
-const StarIcon = () => (
-  <svg
-    className="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0"
-    fill="currentColor"
-    viewBox="0 0 20 20"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-  </svg>
-);
+  const payload = await getPayload({ config: configPromise })
+  let highlightsData: any = {}
 
-// Positional styles for the gallery images
-const imagePositions = [
-  { width: '40.4%', height: '36.7%', left: '0%', top: '9.3%' },
-  { width: '47.6%', height: '35.8%', left: '41.8%', top: '0%' },
-  { width: '34.6%', height: '62.7%', left: '41.8%', top: '37.3%' },
-  { width: '34.6%', height: '25.3%', left: '5.8%', top: '47.6%' },
-  { width: '22.2%', height: '17.2%', left: '18.2%', top: '74.5%' },
-  { width: '22.2%', height: '17.2%', left: '77.8%', top: '37.3%' },
-  { width: '22.2%', height: '28%', left: '77.8%', top: '56.1%' },
-];
+  try {
+    let pkgId: string | undefined
 
-export const PackageHighlights: React.FC<PackageHighlightsBlockProps> = ({
-  heading = 'Package highlights',
-  subheading = "Today's enemy is tomorrow's friend.",
-  highlights = [],
-  galleryImages = [],
-}) => {
-  return (
-    <div className="font-sans p-4 sm:p-6 md:p-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        
-        {/* Left Column: Text Content */}
-        <div className="text-[#3C2A21]">
-          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold mb-4 italic">
-            {heading}
-          </h1>
-          <p className="text-lg md:text-xl text-gray-600 mb-8">
-            {subheading}
-          </p>
-          <ul className="space-y-3">
-            {Array.isArray(highlights) &&
-              highlights.map((item, index) => (
-                <li key={index} className="flex items-start">
-                  <StarIcon />
-                  <span className="text-base md:text-lg">{item?.highlightText || ''}</span>
-                </li>
-              ))}
-          </ul>
-        </div>
+    // Get package ID
+    if (dataSource === 'auto' && slug) {
+      console.log('🎯 Auto-detecting package from slug:', slug)
+      
+      const pkg = await payload.find({
+        collection: 'packages',
+        where: { slug: { equals: slug } },
+        limit: 1,
+        depth: 2,
+      })
+      
+      if (pkg.docs[0]) {
+        pkgId = pkg.docs[0].id
+        console.log('✅ Found package:', pkg.docs[0].name)
+      }
+    } else if (dataSource === 'package' && pkgProp) {
+      pkgId = typeof pkgProp === 'object' ? pkgProp.id : pkgProp
+      console.log('📦 Using selected package:', pkgId)
+    }
 
-        {/* Right Column: Absolutely Positioned Image Gallery */}
-        <div className="w-full relative" style={{ paddingBottom: '91.18%' }}>
-          {Array.isArray(galleryImages) &&
-            galleryImages.slice(0, 7).map((imageItem, index) => {
-              const imageSrc = getImageSrc(imageItem?.image);
-              if (!imageSrc) return null;
+    // Fetch package data
+    if (pkgId) {
+      const pkg = await payload.findByID({
+        collection: 'packages',
+        id: pkgId,
+        depth: 2,
+      })
 
-              return (
-                <div
-                  key={index}
-                  className="absolute overflow-hidden rounded-lg shadow-xl transition-transform duration-300 ease-in-out hover:shadow-2xl hover:scale-105"
-                  style={imagePositions[index]}
-                >
-                  <img
-                    src={imageSrc}
-                    alt={
-                      imageItem?.image && typeof imageItem.image === 'object'
-                        ? imageItem.image.alt || `Gallery image ${index + 1}`
-                        : `Gallery image ${index + 1}`
-                    }
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = 'https://placehold.co/400/CCCCCC/FFFFFF?text=Image+Error';
-                    }}
-                  />
-                </div>
-              );
-            })}
-        </div>
-      </div>
-    </div>
-  );
-};
+      // Transform highlights from Package schema
+      // Package highlights have { icon, text } - we only need text
+      const transformedHighlights = (pkg.highlights || []).map((h: any) => ({
+        highlightText: h.text || h.highlightText || ''
+      }))
 
-export default PackageHighlights;
+      // Get gallery images from package gallery (first 7)
+      const galleryArray = Array.isArray(pkg.gallery) ? pkg.gallery : []
+      const transformedGallery = galleryArray.slice(0, 7).map((img: any) => ({
+        image: img
+      }))
+
+      // Fill remaining slots if less than 7 images
+      while (transformedGallery.length < 7) {
+        transformedGallery.push({ image: pkg.heroImage })
+      }
+
+      highlightsData = {
+        heading: `${pkg.name} Highlights`,
+        subheading: pkg.tagline || pkg.summary || 'Discover what makes this package special',
+        highlights: transformedHighlights,
+        galleryImages: transformedGallery,
+      }
+
+      console.log(`✅ Loaded ${transformedHighlights.length} highlights and ${transformedGallery.length} images`)
+    }
+
+  } catch (error) {
+    console.error('❌ PackageHighlights error:', error)
+  }
+
+  return <PackageHighlightsClient {...highlightsData} />
+}
+
+export default PackageHighlights
