@@ -187,13 +187,13 @@ export const Packages: CollectionConfig = {
       },
     },
 
-    // ==================== ITINERARY (Day-wise) ====================
+    // ==================== ITINERARY (Day-wise) - ENHANCED ====================
     {
       name: 'itinerary',
       type: 'array',
       labels: { singular: 'Day', plural: 'Day-wise Itinerary' },
       admin: {
-        description: 'Complete day-by-day itinerary for DynamicScroller',
+        description: 'Complete day-by-day itinerary - used by DynamicScroller block',
       },
       fields: [
         {
@@ -201,13 +201,62 @@ export const Packages: CollectionConfig = {
           type: 'number',
           required: true,
           min: 1,
+          admin: {
+            description: 'Day number (e.g., 1, 2, 3)',
+          },
         },
         {
-          name: 'title',
+          name: 'day',
           type: 'text',
           required: true,
           admin: {
-            description: 'Day title (e.g., "Arrival Into Paris - The City Of Romance")',
+            description: 'Day label for DynamicScroller (e.g., "Day 1 - Arrival Into Paris")',
+          },
+        },
+        
+        // ✅ ADDED: Activities array for DynamicScroller itinerary cards
+        {
+          name: 'activities',
+          type: 'array',
+          labels: { singular: 'Activity', plural: 'Activities for Itinerary Card' },
+          admin: {
+            description: 'Activities shown in DynamicScroller itinerary cards',
+            initCollapsed: true,
+          },
+          fields: [
+            {
+              name: 'icon',
+              type: 'upload',
+              relationTo: 'media',
+              admin: {
+                description: 'Small icon for this activity (e.g., plane, hotel, food)',
+              },
+            },
+            {
+              name: 'description',
+              type: 'text',
+              required: true,
+              admin: {
+                description: 'Activity description (e.g., "Check-in at hotel", "Visit Eiffel Tower")',
+              },
+            },
+            {
+              name: 'detailsImage',
+              type: 'upload',
+              relationTo: 'media',
+              admin: {
+                description: 'Optional thumbnail image for this activity',
+              },
+            },
+          ],
+        },
+        
+        // Existing fields for detail page
+        {
+          name: 'title',
+          type: 'text',
+          admin: {
+            description: 'Additional title (for package detail page)',
           },
         },
         {
@@ -220,15 +269,17 @@ export const Packages: CollectionConfig = {
         {
           name: 'description',
           type: 'richText',
-          required: true,
           admin: {
-            description: 'Full day description with activities',
+            description: 'Full day description for package detail page',
           },
         },
         {
           name: 'city',
           type: 'relationship',
           relationTo: 'cities',
+          admin: {
+            description: 'City visited on this day',
+          },
         },
         {
           name: 'places',
@@ -236,22 +287,32 @@ export const Packages: CollectionConfig = {
           relationTo: 'places',
           hasMany: true,
           admin: {
-            description: 'Places visited on this day',
+            description: 'Places/attractions visited on this day',
           },
-        },
-        {
-          name: 'activities',
-          type: 'relationship',
-          relationTo: 'activities',
-          hasMany: true,
         },
         {
           name: 'mealsIncluded',
           type: 'group',
+          label: 'Meals Included',
           fields: [
-            { name: 'breakfast', type: 'checkbox', defaultValue: false },
-            { name: 'lunch', type: 'checkbox', defaultValue: false },
-            { name: 'dinner', type: 'checkbox', defaultValue: false },
+            { 
+              name: 'breakfast', 
+              type: 'checkbox', 
+              defaultValue: false,
+              label: 'Breakfast',
+            },
+            { 
+              name: 'lunch', 
+              type: 'checkbox', 
+              defaultValue: false,
+              label: 'Lunch',
+            },
+            { 
+              name: 'dinner', 
+              type: 'checkbox', 
+              defaultValue: false,
+              label: 'Dinner',
+            },
           ],
         },
         {
@@ -259,14 +320,14 @@ export const Packages: CollectionConfig = {
           type: 'upload',
           relationTo: 'media',
           admin: {
-            description: 'Image for this day',
+            description: 'Hero image for this day',
           },
         },
         {
           name: 'notes',
           type: 'textarea',
           admin: {
-            description: 'Additional notes for this day',
+            description: 'Additional notes/tips for this day',
           },
         },
       ],
