@@ -4,6 +4,7 @@ import { revalidateDestination, revalidateDestinationDelete } from './hooks/reva
 import { slugField } from '@/fields/slug'
 import { anyone } from '@/access/anyone'
 import { authenticated } from '@/access/authenticated'
+import { revalidateSite, revalidateSiteOnDelete } from '@/hooks/revalidateSite'
 
 export const Destinations: CollectionConfig = {
   slug: 'destinations',
@@ -391,9 +392,10 @@ export const Destinations: CollectionConfig = {
   ],
 
   hooks: {
-    afterChange: [revalidateDestination],
-    afterDelete: [revalidateDestinationDelete],
+    afterChange: [revalidateDestination,revalidateSite],
+    afterDelete: [revalidateDestinationDelete,revalidateSiteOnDelete],
   },
+  
 }
 
 export default Destinations

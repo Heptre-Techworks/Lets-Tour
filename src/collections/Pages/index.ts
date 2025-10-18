@@ -33,6 +33,7 @@ import InstagramCarouselBlock from '@/blocks/InstagramCarousel/config'
 import ImageGrid from '@/blocks/ImageGrid/config'
 import TravelPackageExplorer from '@/blocks/TravelPackageExplorer/config'
 import DynamicFormBlock from '@/blocks/DynamicForm/config'
+import { revalidateSite, revalidateSiteOnDelete } from '@/hooks/revalidateSite'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -136,9 +137,9 @@ export const Pages: CollectionConfig<'pages'> = {
     ...slugField(),
   ],
   hooks: {
-    afterChange: [revalidatePage],
+    afterChange: [revalidatePage,revalidateSite],
     beforeChange: [populatePublishedAt],
-    afterDelete: [revalidateDelete],
+    afterDelete: [revalidateDelete,revalidateSiteOnDelete],
   },
   versions: {
     drafts: {

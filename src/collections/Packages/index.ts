@@ -4,6 +4,7 @@ import { revalidatePackage, revalidatePackageDelete } from './hooks/revalidatePa
 import { slugField } from '@/fields/slug'
 import { anyone } from '@/access/anyone'
 import { authenticated } from '@/access/authenticated'
+import { revalidateSite, revalidateSiteOnDelete } from '@/hooks/revalidateSite'
 
 export const Packages: CollectionConfig = {
   slug: 'packages',
@@ -528,8 +529,14 @@ export const Packages: CollectionConfig = {
   ],
   
   hooks: {
-    afterChange: [revalidatePackage],
-    afterDelete: [revalidatePackageDelete],
+    afterChange: [
+      revalidatePackage,    // Your existing specific hook
+      revalidateSite,       // ✅ Add global revalidation
+    ],
+    afterDelete: [
+      revalidatePackageDelete,    // Your existing hook
+      revalidateSiteOnDelete,     // ✅ Add global revalidation
+    ],
   },
 }
 

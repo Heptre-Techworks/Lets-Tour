@@ -2,6 +2,7 @@
 import type { CollectionConfig } from 'payload'
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
+import { revalidateSite, revalidateSiteOnDelete } from '@/hooks/revalidateSite'
 
 export const AccommodationTypes: CollectionConfig = {
   slug: 'accommodation-types',
@@ -45,6 +46,14 @@ export const AccommodationTypes: CollectionConfig = {
       type: 'textarea',
     },
   ],
+  hooks: {
+      afterChange: [   // Your existing specific hook
+        revalidateSite,       // ✅ Add global revalidation
+      ],
+      afterDelete: [  // Your existing hook
+        revalidateSiteOnDelete,     // ✅ Add global revalidation
+      ],
+    },
 }
 
 export default AccommodationTypes

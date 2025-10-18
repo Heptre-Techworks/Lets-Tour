@@ -1,3 +1,4 @@
+import { revalidateSite, revalidateSiteOnDelete } from '@/hooks/revalidateSite'
 import type { CollectionConfig } from 'payload'
 
 const isAdmin = (u?: { role?: string }) => u?.role === 'admin'
@@ -50,5 +51,13 @@ export const Users: CollectionConfig = {
     { name: 'marketingOptIn', type: 'checkbox', defaultValue: false },
   ],
   timestamps: true,
+  hooks: {
+    afterChange: [   // Your existing specific hook
+      revalidateSite,       // ✅ Add global revalidation
+    ],
+    afterDelete: [  // Your existing hook
+      revalidateSiteOnDelete,     // ✅ Add global revalidation
+    ],
+  },
 }
 export default Users
