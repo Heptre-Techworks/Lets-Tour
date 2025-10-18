@@ -13,7 +13,7 @@ export const Reviews: CollectionConfig = {
   },
 
   access: {
-    create: authenticated,
+    create: anyone,  // ✅ Changed from 'authenticated' to 'anyone'
     delete: authenticated,
     read: anyone,
     update: authenticated,
@@ -24,9 +24,9 @@ export const Reviews: CollectionConfig = {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
-      required: true,
+      // ✅ Removed 'required: true' - make optional for public forms
       admin: {
-        description: 'Reviewer',
+        description: 'Reviewer (leave empty for public submissions)',
       },
     },
     {
@@ -43,6 +43,21 @@ export const Reviews: CollectionConfig = {
       relationTo: 'destinations',
       admin: {
         description: 'Destination reviewed (optional)',
+      },
+    },
+    // ✅ ADD these fields for anonymous submissions
+    {
+      name: 'submitterName',
+      type: 'text',
+      admin: {
+        description: 'Name (for anonymous submissions)',
+      },
+    },
+    {
+      name: 'submitterEmail',
+      type: 'email',
+      admin: {
+        description: 'Email (for anonymous submissions)',
       },
     },
     {
@@ -101,7 +116,7 @@ export const Reviews: CollectionConfig = {
     {
       name: 'published',
       type: 'checkbox',
-      defaultValue: false,
+      defaultValue: false,  // ✅ Default to false, admin reviews before publishing
       admin: {
         position: 'sidebar',
         description: 'Publish to show on frontend',

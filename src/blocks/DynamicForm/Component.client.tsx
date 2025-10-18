@@ -7,11 +7,11 @@ type FormField = {
   label: string;
   name: string;
   type: 'text' | 'email' | 'tel' | 'number' | 'date' | 'textarea' | 'select' | 'checkbox';
-  placeholder?: string;
+  placeholder?: string | null;
   required?: boolean;
-  options?: Array<{ label: string; value: string }>;
-  rows?: number;
-  width?: 'full' | 'half' | 'third';
+  options?: Array<{ label: string; value: string }> | null;
+  rows?: number | null;
+  width?: 'full' | 'half' | 'third' | null;
 };
 
 type DynamicFormClientProps = {
@@ -29,7 +29,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
   subtitle,
   fields = [],
   submitButtonText = 'Submit',
-  successMessage = 'Thank you! We\'ll get back to you soon.',
+  successMessage = "Thank you! We'll get back to you soon.",
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,60 +47,151 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
     }
   };
 
+  /**
+   * SMART DATA TRANSFORMER
+   * Automatically handles nested fields and type conversions
+   */
+  const transformFormData = (data: Record<string, any>, type: string) => {
+    const transformed: Record<string, any> = {};
+
+    // Process each field
+    Object.entries(data).forEach(([key, value]) => {
+      // Handle nested fields (e.g., "contactDetails.phone" → contactDetails: { phone: value })
+      if (key.includes('.')) {
+        const parts = key.split('.');
+        const parentKey = parts[0];
+        const childKey = parts.slice(1).join('.');
+
+        if (!transformed[parentKey]) {
+          transformed[parentKey] = {};
+        }
+
+        // Handle deep nesting
+        if (childKey.includes('.')) {
+          const childParts = childKey.split('.');
+          let current = transformed[parentKey];
+          for (let i = 0; i < childParts.length - 1; i++) {
+            if (!current[childParts[i]]) {
+              current[childParts[i]] = {};
+            }
+            current = current[childParts[i]];
+          }
+          current[childParts[childParts.length - 1]] = value;
+        } else {
+          transformed[parentKey][childKey] = value;
+        }
+      } else {
+        transformed[key] = value;
+      }
+    });
+
+    // Convert number strings to actual numbers
+    Object.entries(transformed).forEach(([key, value]) => {
+      if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
+        // Check if the field name suggests it should be a number
+        if (['price', 'amount', 'rating', 'adults', 'children', 'infants', 'people', 'total'].some(keyword => key.toLowerCase().includes(keyword))) {
+          transformed[key] = Number(value);
+        }
+      }
+    });
+
+    // Type-specific defaults and validations
+    if (type === 'booking') {
+      // Set required defaults for bookings
+      if (!transformed.totalPrice) transformed.totalPrice = 0;
+      if (!transformed.currency) transformed.currency = 'INR';
+      if (!transformed.status) transformed.status = 'pending';
+      if (!transformed.paymentStatus) transformed.paymentStatus = 'pending';
+      
+      // Ensure numberOfPeople has defaults
+      if (transformed.numberOfPeople && typeof transformed.numberOfPeople === 'object') {
+        transformed.numberOfPeople = {
+          adults: Number(transformed.numberOfPeople.adults) || 1,
+          children: Number(transformed.numberOfPeople.children) || 0,
+          infants: Number(transformed.numberOfPeople.infants) || 0,
+        };
+      }
+    }
+
+    if (type === 'review') {
+      // Ensure rating is a number
+      if (transformed.rating && typeof transformed.rating === 'string') {
+        transformed.rating = Number(transformed.rating);
+      }
+      // Default published to false for moderation
+      if (transformed.published === undefined) {
+        transformed.published = false;
+      }
+    }
+
+    return transformed;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus('idle');
     setErrorMessage('');
 
+    console.log('📤 Raw form data:', formData)
+
     try {
-      // Determine API endpoint
-      const endpoints: Record<string, string> = {
-        review: '/api/reviews',
-        booking: '/api/bookings',
-        bulkBooking: '/api/bulk-booking-requests',
-        customTrip: '/api/custom-trip-requests',
+      const collectionMap: Record<string, string> = {
+        review: 'reviews',
+        booking: 'bookings',
+        bulkBooking: 'bulk-booking-requests',
+        customTrip: 'custom-trip-requests',
       };
 
-      const endpoint = endpoints[formType] || '/api/reviews';
+      const collection = collectionMap[formType] || 'reviews';
+      const endpoint = `/api/${collection}`;
+
+      const transformedData = transformFormData(formData, formType);
+      
+      console.log('🔄 Transformed data:', JSON.stringify(transformedData, null, 2))
+      console.log('🎯 Posting to:', endpoint)
 
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(transformedData),
       });
 
+      const responseData = await response.json();
+      console.log('📥 Response:', responseData)
+
       if (!response.ok) {
-        throw new Error('Submission failed');
+        const errorDetails = responseData.errors?.map((err: any) => `${err.field || 'Field'}: ${err.message}`).join(', ') || responseData.message || 'Submission failed';
+        throw new Error(errorDetails);
       }
 
       setSubmitStatus('success');
       setFormData({});
-    } catch (error) {
-      console.error('Form submission error:', error);
+    } catch (error: any) {
+      console.error('❌ Form submission error:', error);
       setSubmitStatus('error');
-      setErrorMessage('Something went wrong. Please try again.');
+      setErrorMessage(error.message || 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const getWidthClass = (width?: string) => {
+  const getWidthClass = (width?: string | null) => {
     switch (width) {
       case 'half':
-        return 'w-full md:w-1/2';
+        return 'w-full md:w-1/2 px-2';
       case 'third':
-        return 'w-full md:w-1/3';
+        return 'w-full md:w-1/3 px-2';
       default:
-        return 'w-full';
+        return 'w-full px-2';
     }
   };
 
   const renderField = (field: FormField, index: number) => {
     const widthClass = getWidthClass(field.width);
-    const inputClasses = "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent";
+    const inputClasses = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all";
 
     const fieldElement = (() => {
       switch (field.type) {
@@ -112,7 +203,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
               onChange={handleChange}
               required={field.required}
               rows={field.rows || 4}
-              placeholder={field.placeholder}
+              placeholder={field.placeholder || undefined}
               className={inputClasses}
             />
           );
@@ -137,17 +228,19 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
 
         case 'checkbox':
           return (
-            <div className="flex items-center">
+            <div className="flex items-center pt-2">
               <input
                 type="checkbox"
                 name={field.name}
+                id={`field-${index}`}
                 checked={formData[field.name] || false}
                 onChange={handleChange}
                 required={field.required}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
               />
-              <label htmlFor={field.name} className="ml-2 block text-sm text-gray-700">
+              <label htmlFor={`field-${index}`} className="ml-3 block text-sm text-gray-700 cursor-pointer">
                 {field.label}
+                {field.required && <span className="text-red-500 ml-1">*</span>}
               </label>
             </div>
           );
@@ -160,7 +253,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
               value={formData[field.name] || ''}
               onChange={handleChange}
               required={field.required}
-              placeholder={field.placeholder}
+              placeholder={field.placeholder || undefined}
               className={inputClasses}
             />
           );
@@ -168,9 +261,9 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
     })();
 
     return (
-      <div key={index} className={widthClass}>
+      <div key={index} className={`${widthClass} mb-4`}>
         {field.type !== 'checkbox' && (
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             {field.label}
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>
@@ -180,17 +273,28 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
     );
   };
 
+  if (!fields || fields.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-yellow-50 border-2 border-yellow-400 rounded-xl">
+        <h2 className="text-2xl font-bold text-yellow-900 mb-4">⚠️ No Form Fields Configured</h2>
+        <p className="text-yellow-800">
+          Please add fields to this form in the Payload admin panel.
+        </p>
+      </div>
+    )
+  }
+
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
-        {subtitle && <p className="mt-2 text-gray-600">{subtitle}</p>}
+    <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-lg">
+      <div className="mb-8">
+        <h2 className="text-4xl font-bold text-gray-900 mb-2">{title}</h2>
+        {subtitle && <p className="text-lg text-gray-600">{subtitle}</p>}
       </div>
 
       {submitStatus === 'success' ? (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
           <svg
-            className="mx-auto h-12 w-12 text-green-500 mb-4"
+            className="mx-auto h-16 w-16 text-green-500 mb-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -202,27 +306,44 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
               d="M5 13l4 4L19 7"
             />
           </svg>
-          <h3 className="text-lg font-semibold text-green-900 mb-2">Success!</h3>
-          <p className="text-green-700">{successMessage}</p>
+          <h3 className="text-2xl font-semibold text-green-900 mb-2">Success!</h3>
+          <p className="text-lg text-green-700">{successMessage}</p>
+          <button
+            onClick={() => setSubmitStatus('idle')}
+            className="mt-6 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Submit Another Response
+          </button>
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap -mx-2">
             {fields.map((field, index) => renderField(field, index))}
           </div>
 
           {submitStatus === 'error' && (
-            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-              {errorMessage}
+            <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="font-bold text-red-900 mb-2">Submission Error:</div>
+              <p className="text-red-700 text-sm whitespace-pre-wrap">{errorMessage}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="mt-6 w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
+            className="mt-8 w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 shadow-md hover:shadow-lg"
           >
-            {isSubmitting ? 'Submitting...' : submitButtonText}
+            {isSubmitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Submitting...
+              </span>
+            ) : (
+              submitButtonText
+            )}
           </button>
         </form>
       )}

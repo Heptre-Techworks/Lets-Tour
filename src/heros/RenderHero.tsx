@@ -5,6 +5,7 @@ import { DestinationHero } from './DestinationHero'
 import { PackageHero } from './PackageHero'
 import type { Page, Destination, Package, Review } from '@/payload-types'
 
+
 type RenderHeroProps = { 
   hero: Page['hero'] | null | undefined
   // Optional: Pass fetched data for server-side rendering (to avoid double fetch)
@@ -13,14 +14,24 @@ type RenderHeroProps = {
   reviewsData?: Review[]
 }
 
+
 export const RenderHero: React.FC<RenderHeroProps> = ({ 
   hero, 
   destinationData,
   packageData,
   reviewsData = []
 }) => {
-  // ✅ Return null if no hero or type is 'none'
-  if (!hero || hero.type === 'none') return null
+  // ✅ Return black background div if no hero or type is 'none'
+  if (!hero || hero.type === 'none') {
+    return (
+      <div 
+        className="w-full bg-black -mt-[10.4rem] pt-[10.4rem]" 
+        style={{ minHeight: '25vh' }}
+        aria-hidden="true" 
+      />
+    )
+  }
+
 
   switch (hero.type) {
     case 'mainHero': {
@@ -31,6 +42,7 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
           subtitle: s.subtitle || '10,348 ft',
           location: s.location || 'Mount Everest',
         })) ?? []
+
 
       // Transform destinations for search form
       const destinationOptions = hero.mainHeroFields?.destinationOptions
@@ -46,6 +58,7 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
           })
         : []
 
+
       // Transform categories for search form
       const categoryOptions = hero.mainHeroFields?.categoryOptions
         ? (Array.isArray(hero.mainHeroFields.categoryOptions)
@@ -59,6 +72,7 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
             }
           })
         : []
+
 
       return (
         <MainHero
@@ -80,6 +94,7 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
       )
     }
 
+
     case 'destinationHero': {
       return (
         <DestinationHero
@@ -88,6 +103,7 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
         />
       )
     }
+
 
     case 'packageHero': {
       return (
@@ -101,6 +117,7 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
         />
       )
     }
+
 
     default:
       return null

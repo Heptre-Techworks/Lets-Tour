@@ -24,7 +24,7 @@ export const Bookings: CollectionConfig = {
       if (user.role === 'agent') return true
       return { user: { equals: user.id } }
     },
-    create: ({ req }) => Boolean(req?.user),
+    create: () => true,  // ✅ Changed to allow public booking requests
     update: ({ req }) => req?.user?.role === 'agent',
     delete: ({ req }) => req?.user?.role === 'agent',
   },
@@ -44,9 +44,34 @@ export const Bookings: CollectionConfig = {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
-      required: true,
+      // ✅ Removed 'required: true'
       access: {
         read: canReadBookingUser,
+      },
+      admin: {
+        description: 'User account (optional for guest bookings)',
+      },
+    },
+    // ✅ ADD guest contact fields
+    {
+      name: 'guestName',
+      type: 'text',
+      admin: {
+        description: 'Full name (for guest bookings)',
+      },
+    },
+    {
+      name: 'guestEmail',
+      type: 'email',
+      admin: {
+        description: 'Email (for guest bookings)',
+      },
+    },
+    {
+      name: 'guestPhone',
+      type: 'text',
+      admin: {
+        description: 'Phone (for guest bookings)',
       },
     },
     {

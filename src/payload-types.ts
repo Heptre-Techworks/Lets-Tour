@@ -256,6 +256,7 @@ export interface Page {
     };
   };
   layout: (
+    | InfoPanelBlock
     | CallToActionBlock
     | ContentBlock
     | MediaBlock
@@ -861,6 +862,342 @@ export interface PackageCategory {
   parent?: (string | null) | PackageCategory;
   description?: string | null;
   icon?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InfoPanelBlock".
+ */
+export interface InfoPanelBlock {
+  dataSource: 'manual' | 'auto' | 'package';
+  package?: (string | null) | Package;
+  panelType?: ('goodToKnow' | 'inclusions' | 'exclusions') | null;
+  title?: string | null;
+  subheading?: string | null;
+  listType?: ('disc' | 'decimal') | null;
+  items?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'infoPanel';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "packages".
+ */
+export interface Package {
+  id: string;
+  /**
+   * Package name (e.g., "Spanish Escape")
+   */
+  name: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  /**
+   * Short tagline for the package
+   */
+  tagline?: string | null;
+  /**
+   * Brief summary for package cards (e.g., "Madrid 2N, Seville 2N, Granada 1N...")
+   */
+  summary: string;
+  /**
+   * Full package description shown on package page
+   */
+  description: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Main package image for hero and cards
+   */
+  heroImage: string | Media;
+  /**
+   * Additional package images
+   */
+  gallery?: (string | Media)[] | null;
+  /**
+   * Destinations included in this package
+   */
+  destinations: (string | Destination)[];
+  /**
+   * Cities included with nights (e.g., Madrid 2N, Seville 2N)
+   */
+  route?:
+    | {
+        city: string | City;
+        /**
+         * Number of nights in this city
+         */
+        nights?: number | null;
+        /**
+         * Sequence order
+         */
+        order: number;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * e.g., "8N/9D", "7 Days / 8 Nights"
+   */
+  duration: string;
+  /**
+   * Starting price per person
+   */
+  price: number;
+  currency?: ('INR' | 'USD' | 'EUR' | 'GBP') | null;
+  /**
+   * Discounted price (optional)
+   */
+  discountedPrice?: number | null;
+  /**
+   * Star rating (1-5 stars) shown on package hero
+   */
+  starRating?: number | null;
+  /**
+   * Complete day-by-day itinerary - used by DynamicScroller block
+   */
+  itinerary?:
+    | {
+        /**
+         * Day number (e.g., 1, 2, 3)
+         */
+        dayNumber: number;
+        /**
+         * Day label for DynamicScroller (e.g., "Day 1 - Arrival Into Paris")
+         */
+        day: string;
+        /**
+         * Activities shown in DynamicScroller itinerary cards
+         */
+        activities?:
+          | {
+              /**
+               * Small icon for this activity (e.g., plane, hotel, food)
+               */
+              icon?: (string | null) | Media;
+              /**
+               * Activity description (e.g., "Check-in at hotel", "Visit Eiffel Tower")
+               */
+              description: string;
+              /**
+               * Optional thumbnail image for this activity
+               */
+              detailsImage?: (string | null) | Media;
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Additional title (for package detail page)
+         */
+        title?: string | null;
+        /**
+         * Optional subtitle
+         */
+        subtitle?: string | null;
+        /**
+         * Full day description for package detail page
+         */
+        description?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        /**
+         * City visited on this day
+         */
+        city?: (string | null) | City;
+        /**
+         * Places/attractions visited on this day
+         */
+        places?: (string | Place)[] | null;
+        mealsIncluded?: {
+          breakfast?: boolean | null;
+          lunch?: boolean | null;
+          dinner?: boolean | null;
+        };
+        /**
+         * Hero image for this day
+         */
+        image?: (string | null) | Media;
+        /**
+         * Additional notes/tips for this day
+         */
+        notes?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Key highlights with icons (e.g., "★ Return Economy Class Airfare")
+   */
+  highlights?:
+    | {
+        icon?: ('star' | 'flight' | 'hotel' | 'meal' | 'transport' | 'ticket' | 'activity' | 'feature') | null;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * What's included in the package
+   */
+  inclusions?: (string | Inclusion)[] | null;
+  /**
+   * What's not included
+   */
+  exclusions?: (string | Exclusion)[] | null;
+  /**
+   * Important information for travelers
+   */
+  goodToKnow?:
+    | {
+        /**
+         * Info title (optional)
+         */
+        title?: string | null;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Package labels like Best Seller / Premium
+   */
+  labels?: (string | Category)[] | null;
+  /**
+   * Target audience (Couples, Family, Solo, etc.)
+   */
+  categories?: (string | PackageCategory)[] | null;
+  /**
+   * Activity types included
+   */
+  activities?: (string | Activity)[] | null;
+  amenities?: (string | Amenity)[] | null;
+  accommodationTypes?: (string | AccommodationType)[] | null;
+  /**
+   * Package vibe/mood (e.g., Outdoor, Relaxing, Glamping, Girls Day Out)
+   */
+  vibe?: (string | null) | Vibe;
+  /**
+   * Average customer rating
+   */
+  rating?: number | null;
+  /**
+   * Bookings in past 30 days (e.g., "250+ bookings")
+   */
+  bookingsCount30d?: number | null;
+  /**
+   * Show in featured sections
+   */
+  isFeatured?: boolean | null;
+  isFamilyFriendly?: boolean | null;
+  isHoneymoon?: boolean | null;
+  isPublished?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inclusions".
+ */
+export interface Inclusion {
+  id: string;
+  /**
+   * Unique code (e.g., "INC001", "BREAKFAST")
+   */
+  code: string;
+  /**
+   * Display name (e.g., "Daily Breakfast", "Airport Transfers")
+   */
+  name: string;
+  category?: ('accommodation' | 'transportation' | 'meals' | 'activities' | 'guides' | 'other') | null;
+  description?: string | null;
+  icon?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exclusions".
+ */
+export interface Exclusion {
+  id: string;
+  /**
+   * Unique code (e.g., "EXC001", "INTL_FLIGHT")
+   */
+  code: string;
+  /**
+   * Display name (e.g., "International Flights", "Travel Insurance")
+   */
+  name: string;
+  category?: ('transportation' | 'meals' | 'insurance' | 'personal' | 'documents' | 'other') | null;
+  description?: string | null;
+  icon?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activities".
+ */
+export interface Activity {
+  id: string;
+  name: string;
+  type: 'adventure' | 'leisure' | 'cultural' | 'water_sports' | 'nature' | 'dining' | 'other';
+  description?: string | null;
+  icon?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities".
+ */
+export interface Amenity {
+  id: string;
+  name: string;
+  type: 'logistic' | 'accessibility' | 'accommodation' | 'food' | 'transport' | 'other';
+  description?: string | null;
+  icon?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "accommodation-types".
+ */
+export interface AccommodationType {
+  id: string;
+  /**
+   * E.g., "5-Star Hotel", "Beach Resort", "Villa"
+   */
+  name: string;
+  type?: ('hotel' | 'resort' | 'villa' | 'apartment' | 'guesthouse' | 'other') | null;
+  description?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1692,321 +2029,6 @@ export interface ImageGridBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "packages".
- */
-export interface Package {
-  id: string;
-  /**
-   * Package name (e.g., "Spanish Escape")
-   */
-  name: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  /**
-   * Short tagline for the package
-   */
-  tagline?: string | null;
-  /**
-   * Brief summary for package cards (e.g., "Madrid 2N, Seville 2N, Granada 1N...")
-   */
-  summary: string;
-  /**
-   * Full package description shown on package page
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Main package image for hero and cards
-   */
-  heroImage: string | Media;
-  /**
-   * Additional package images
-   */
-  gallery?: (string | Media)[] | null;
-  /**
-   * Destinations included in this package
-   */
-  destinations: (string | Destination)[];
-  /**
-   * Cities included with nights (e.g., Madrid 2N, Seville 2N)
-   */
-  route?:
-    | {
-        city: string | City;
-        /**
-         * Number of nights in this city
-         */
-        nights?: number | null;
-        /**
-         * Sequence order
-         */
-        order: number;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * e.g., "8N/9D", "7 Days / 8 Nights"
-   */
-  duration: string;
-  /**
-   * Starting price per person
-   */
-  price: number;
-  currency?: ('INR' | 'USD' | 'EUR' | 'GBP') | null;
-  /**
-   * Discounted price (optional)
-   */
-  discountedPrice?: number | null;
-  /**
-   * Star rating (1-5 stars) shown on package hero
-   */
-  starRating?: number | null;
-  /**
-   * Complete day-by-day itinerary - used by DynamicScroller block
-   */
-  itinerary?:
-    | {
-        /**
-         * Day number (e.g., 1, 2, 3)
-         */
-        dayNumber: number;
-        /**
-         * Day label for DynamicScroller (e.g., "Day 1 - Arrival Into Paris")
-         */
-        day: string;
-        /**
-         * Activities shown in DynamicScroller itinerary cards
-         */
-        activities?:
-          | {
-              /**
-               * Small icon for this activity (e.g., plane, hotel, food)
-               */
-              icon?: (string | null) | Media;
-              /**
-               * Activity description (e.g., "Check-in at hotel", "Visit Eiffel Tower")
-               */
-              description: string;
-              /**
-               * Optional thumbnail image for this activity
-               */
-              detailsImage?: (string | null) | Media;
-              id?: string | null;
-            }[]
-          | null;
-        /**
-         * Additional title (for package detail page)
-         */
-        title?: string | null;
-        /**
-         * Optional subtitle
-         */
-        subtitle?: string | null;
-        /**
-         * Full day description for package detail page
-         */
-        description?: {
-          root: {
-            type: string;
-            children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        /**
-         * City visited on this day
-         */
-        city?: (string | null) | City;
-        /**
-         * Places/attractions visited on this day
-         */
-        places?: (string | Place)[] | null;
-        mealsIncluded?: {
-          breakfast?: boolean | null;
-          lunch?: boolean | null;
-          dinner?: boolean | null;
-        };
-        /**
-         * Hero image for this day
-         */
-        image?: (string | null) | Media;
-        /**
-         * Additional notes/tips for this day
-         */
-        notes?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Key highlights with icons (e.g., "★ Return Economy Class Airfare")
-   */
-  highlights?:
-    | {
-        icon?: ('star' | 'flight' | 'hotel' | 'meal' | 'transport' | 'ticket' | 'activity' | 'feature') | null;
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * What's included in the package
-   */
-  inclusions?: (string | Inclusion)[] | null;
-  /**
-   * What's not included
-   */
-  exclusions?: (string | Exclusion)[] | null;
-  /**
-   * Important information for travelers
-   */
-  goodToKnow?:
-    | {
-        /**
-         * Info title (optional)
-         */
-        title?: string | null;
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Package labels like Best Seller / Premium
-   */
-  labels?: (string | Category)[] | null;
-  /**
-   * Target audience (Couples, Family, Solo, etc.)
-   */
-  categories?: (string | PackageCategory)[] | null;
-  /**
-   * Activity types included
-   */
-  activities?: (string | Activity)[] | null;
-  amenities?: (string | Amenity)[] | null;
-  accommodationTypes?: (string | AccommodationType)[] | null;
-  /**
-   * Package vibe/mood (e.g., Outdoor, Relaxing, Glamping, Girls Day Out)
-   */
-  vibe?: (string | null) | Vibe;
-  /**
-   * Average customer rating
-   */
-  rating?: number | null;
-  /**
-   * Bookings in past 30 days (e.g., "250+ bookings")
-   */
-  bookingsCount30d?: number | null;
-  /**
-   * Show in featured sections
-   */
-  isFeatured?: boolean | null;
-  isFamilyFriendly?: boolean | null;
-  isHoneymoon?: boolean | null;
-  isPublished?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "inclusions".
- */
-export interface Inclusion {
-  id: string;
-  /**
-   * Unique code (e.g., "INC001", "BREAKFAST")
-   */
-  code: string;
-  /**
-   * Display name (e.g., "Daily Breakfast", "Airport Transfers")
-   */
-  name: string;
-  category?: ('accommodation' | 'transportation' | 'meals' | 'activities' | 'guides' | 'other') | null;
-  description?: string | null;
-  icon?: (string | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exclusions".
- */
-export interface Exclusion {
-  id: string;
-  /**
-   * Unique code (e.g., "EXC001", "INTL_FLIGHT")
-   */
-  code: string;
-  /**
-   * Display name (e.g., "International Flights", "Travel Insurance")
-   */
-  name: string;
-  category?: ('transportation' | 'meals' | 'insurance' | 'personal' | 'documents' | 'other') | null;
-  description?: string | null;
-  icon?: (string | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "activities".
- */
-export interface Activity {
-  id: string;
-  name: string;
-  type: 'adventure' | 'leisure' | 'cultural' | 'water_sports' | 'nature' | 'dining' | 'other';
-  description?: string | null;
-  icon?: (string | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "amenities".
- */
-export interface Amenity {
-  id: string;
-  name: string;
-  type: 'logistic' | 'accessibility' | 'accommodation' | 'food' | 'transport' | 'other';
-  description?: string | null;
-  icon?: (string | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "accommodation-types".
- */
-export interface AccommodationType {
-  id: string;
-  /**
-   * E.g., "5-Star Hotel", "Beach Resort", "Villa"
-   */
-  name: string;
-  type?: ('hotel' | 'resort' | 'villa' | 'apartment' | 'guesthouse' | 'other') | null;
-  description?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TravelPackageExplorerBlock".
  */
 export interface TravelPackageExplorerBlock {
@@ -2099,7 +2121,22 @@ export interface Booking {
    * Unique booking ID
    */
   bookingReference: string;
-  user: string | User;
+  /**
+   * User account (optional for guest bookings)
+   */
+  user?: (string | null) | User;
+  /**
+   * Full name (for guest bookings)
+   */
+  guestName?: string | null;
+  /**
+   * Email (for guest bookings)
+   */
+  guestEmail?: string | null;
+  /**
+   * Phone (for guest bookings)
+   */
+  guestPhone?: string | null;
   package: string | Package;
   /**
    * Trip start date
@@ -2328,9 +2365,9 @@ export interface Promotion {
 export interface Review {
   id: string;
   /**
-   * Reviewer
+   * Reviewer (leave empty for public submissions)
    */
-  user: string | User;
+  user?: (string | null) | User;
   /**
    * Package reviewed (optional)
    */
@@ -2339,6 +2376,14 @@ export interface Review {
    * Destination reviewed (optional)
    */
   destination?: (string | null) | Destination;
+  /**
+   * Name (for anonymous submissions)
+   */
+  submitterName?: string | null;
+  /**
+   * Email (for anonymous submissions)
+   */
+  submitterEmail?: string | null;
   /**
    * Star rating (1-5)
    */
@@ -2806,6 +2851,7 @@ export interface PagesSelect<T extends boolean = true> {
   layout?:
     | T
     | {
+        infoPanel?: T | InfoPanelBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
@@ -2892,6 +2938,26 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InfoPanelBlock_select".
+ */
+export interface InfoPanelBlockSelect<T extends boolean = true> {
+  dataSource?: T;
+  package?: T;
+  panelType?: T;
+  title?: T;
+  subheading?: T;
+  listType?: T;
+  items?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3706,6 +3772,9 @@ export interface AmenitiesSelect<T extends boolean = true> {
 export interface BookingsSelect<T extends boolean = true> {
   bookingReference?: T;
   user?: T;
+  guestName?: T;
+  guestEmail?: T;
+  guestPhone?: T;
   package?: T;
   startDate?: T;
   endDate?: T;
@@ -3910,6 +3979,8 @@ export interface ReviewsSelect<T extends boolean = true> {
   user?: T;
   package?: T;
   destination?: T;
+  submitterName?: T;
+  submitterEmail?: T;
   rating?: T;
   title?: T;
   body?: T;
@@ -4659,27 +4730,6 @@ export interface FeatureCarouselBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "InfoPanelBlock".
- */
-export interface InfoPanelBlock {
-  dataSource: 'manual' | 'auto' | 'package';
-  package?: (string | null) | Package;
-  panelType?: ('goodToKnow' | 'inclusions' | 'exclusions') | null;
-  title?: string | null;
-  subheading?: string | null;
-  listType?: ('disc' | 'decimal') | null;
-  items?:
-    | {
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'infoPanel';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "destinationLayout".
  */
 export interface DestinationLayout {
@@ -5166,26 +5216,6 @@ export interface FeatureCarouselBlockSelect<T extends boolean = true> {
       };
   showNavigationButtons?: T;
   scrollPercentage?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "InfoPanelBlock_select".
- */
-export interface InfoPanelBlockSelect<T extends boolean = true> {
-  dataSource?: T;
-  package?: T;
-  panelType?: T;
-  title?: T;
-  subheading?: T;
-  listType?: T;
-  items?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
   id?: T;
   blockName?: T;
 }
