@@ -8,9 +8,6 @@ import type { DynamicScrollerBlock } from '@/payload-types'
 export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock) => {
   const { sections = [] } = props
   
-  // ✅ FIX: Payload doesn't populate blocks inside blocks by default
-  // The sections array comes through but blockType isn't there
-  // We need to treat it as raw data
   const sectionsArray = Array.isArray(sections) ? sections : []
 
   console.log('🔍 DynamicScroller received props:', Object.keys(props))
@@ -18,16 +15,15 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
 
   const processedSections = await Promise.all(
     sectionsArray.map(async (section: any, idx) => {
-      // ✅ The blockType is there in DB but may not be in the type
       const blockType = section.blockType || section.blockName
       
       console.log(`📦 Section ${idx}:`, {
         blockType,
-        populateBy: section.populatePackagesBy,
+        populateBy: section.populatePackagesBy || section.populateDestinationsBy || section.vibes,
         allKeys: Object.keys(section),
       })
 
-      // ✅ Handle Package Section - check multiple possible identifiers
+      // ==================== PACKAGE SECTION ====================
       if (blockType === 'packageSection' || section.populatePackagesBy) {
         const populateBy = section.populatePackagesBy || 'manual'
         
@@ -54,7 +50,6 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
           }))
           console.log('📝 Using manual items:', sectionData.items.length)
         } else {
-          // Fetch from collection
           const payload = await getPayload({ config: configPromise })
           const limit = section.packageLimit || 6
 
@@ -69,12 +64,42 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
 
           if (populateBy === 'featured') {
             query.where.isFeatured = { equals: true }
-          } else if (populateBy === 'destination') {
-            const destId = typeof section.destination === 'object' 
-              ? section.destination?.id 
-              : section.destination
-            if (destId) {
-              query.where.destinations = { contains: destId }
+          } 
+          else if (populateBy === 'featuredDestinations') {
+            const featuredDests = await payload.find({
+              collection: 'destinations',
+              where: { 
+                isFeatured: { equals: true },
+                isPublished: { equals: true }
+              },
+              limit: 100,
+            })
+            
+            const destIds = featuredDests.docs.map(d => d.id)
+            if (destIds.length > 0) {
+              query.where.destinations = { in: destIds }
+            }
+          } 
+          else if (populateBy === 'destinations') {
+            const destArray = Array.isArray(section.destinations) ? section.destinations : []
+            const destIds = destArray.map((dest: any) => 
+              typeof dest === 'object' ? dest.id : dest
+            ).filter(Boolean)
+            
+            if (destIds.length > 0) {
+              console.log('🗺️ Fetching packages from destinations:', destIds)
+              query.where.destinations = { in: destIds }
+            }
+          } 
+          else if (populateBy === 'vibes') {
+            const vibesArray = Array.isArray(section.vibes) ? section.vibes : []
+            const vibeIds = vibesArray.map((vibe: any) => 
+              typeof vibe === 'object' ? vibe.id : vibe
+            ).filter(Boolean)
+            
+            if (vibeIds.length > 0) {
+              console.log('🎭 Fetching packages from vibes:', vibeIds)
+              query.where.vibe = { in: vibeIds }
             }
           }
 
@@ -111,7 +136,162 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
         return sectionData
       }
 
-      // ✅ Handle Itinerary Section
+      // ==================== DESTINATION SECTION ====================
+      if (blockType === 'destinationSection' || section.populateDestinationsBy) {
+        const populateBy = section.populateDestinationsBy || 'featured'
+        
+        console.log('🗺️ Processing Destination Section:', { populateBy })
+
+        const sectionData: any = {
+          type: 'destination',
+          title: section.title || 'Featured Destinations',
+          subtitle: section.subtitle,
+          theme: section.theme,
+          navigation: section.showNavigation ? {} : undefined,
+          items: [],
+        }
+
+        if (populateBy === 'manual') {
+          sectionData.items = (section.manualItems || []).map((item: any) => ({
+            blockType: 'destinationItem' as const,
+            id: item.id,
+            title: item.title,
+            price: item.price,
+            image: item.image,
+            tag: item.tag,
+            tagColor: item.tagColor,
+          }))
+          console.log('📝 Using manual destination items:', sectionData.items.length)
+        } else {
+          const payload = await getPayload({ config: configPromise })
+          const limit = section.destinationLimit || 6
+
+          console.log('🎯 Fetching destinations with:', { populateBy, limit })
+
+          const query: any = {
+            limit,
+            depth: 2,
+            where: { isPublished: { equals: true } },
+            sort: '-popularityScore',
+          }
+
+          if (populateBy === 'featured') {
+            query.where.isFeatured = { equals: true }
+          } else if (populateBy === 'popular') {
+            query.where.isPopular = { equals: true }
+          } else if (populateBy === 'inSeason') {
+            query.where.isInSeason = { equals: true }
+          }
+
+          try {
+            const result = await payload.find({
+              collection: 'destinations',
+              ...query,
+            })
+
+            console.log('✅ Fetched destinations:', result.docs.length)
+
+            const destinationItems = result.docs.map((dest: any) => {
+              const currencySymbol = dest.currency === 'USD' ? '$' : dest.currency === 'EUR' ? '€' : '₹'
+              const tag = dest.isInSeason ? 'In Season' : dest.isPopular ? 'Popular' : ''
+              const tagColor = dest.isInSeason ? 'bg-orange-400 text-white' : 'bg-red-500 text-white'
+
+              return {
+                blockType: 'destinationItem' as const,
+                id: dest.id,
+                title: dest.name,
+                price: `${currencySymbol}${dest.startingPrice?.toLocaleString() || '0'}`,
+                image: typeof dest.featuredImage === 'object' ? dest.featuredImage : null,
+                tag,
+                tagColor,
+              }
+            })
+
+            sectionData.items = destinationItems
+            console.log('🎨 Transformed destination items:', destinationItems.length)
+          } catch (error) {
+            console.error('❌ Error fetching destinations:', error)
+          }
+        }
+
+        return sectionData
+      }
+
+      // ==================== VIBE SECTION ====================
+      if (blockType === 'vibeSection' || section.vibes) {
+        console.log('🎭 Processing Vibe Section')
+
+        const payload = await getPayload({ config: configPromise })
+        const vibes = Array.isArray(section.vibes) ? section.vibes : []
+        const packagesPerVibe = section.packagesPerVibe || 4
+
+        const sectionData: any = {
+          type: 'vibe',
+          title: section.title || 'Vibe Match',
+          subtitle: section.subtitle || "Today's enemy is tomorrow's friend.*",
+          theme: section.theme,
+          navigation: section.showNavigation ? {} : undefined,
+          vibes: [],
+        }
+
+        try {
+          const vibeGroups = await Promise.all(
+            vibes.map(async (vibeRel: any) => {
+              const vibeId = typeof vibeRel === 'object' ? vibeRel.id : vibeRel
+              
+              const vibe = await payload.findByID({
+                collection: 'vibes',
+                id: vibeId,
+                depth: 0,
+              })
+
+              const packages = await payload.find({
+                collection: 'packages',
+                where: {
+                  vibe: { equals: vibeId },
+                  isPublished: { equals: true },
+                },
+                limit: packagesPerVibe,
+                depth: 2,
+              })
+
+              console.log(`🎭 Vibe "${vibe.name}": ${packages.docs.length} packages`)
+
+              const vibeItems = packages.docs.map((pkg: any) => {
+                const currencySymbol = pkg.currency === 'USD' ? '$' : pkg.currency === 'EUR' ? '€' : '₹'
+                const tag = pkg.isInSeason ? 'In Season' : pkg.isPopular ? 'Popular' : ''
+                const tagColor = pkg.isInSeason ? 'bg-orange-400 text-white' : 'bg-red-500 text-white'
+
+                return {
+                  blockType: 'packageItem' as const,
+                  id: pkg.id,
+                  title: pkg.name,
+                  price: `${currencySymbol}${(pkg.discountedPrice || pkg.price || 0).toLocaleString()}`,
+                  image: typeof pkg.heroImage === 'object' ? pkg.heroImage : null,
+                  tag,
+                  tagColor,
+                }
+              })
+
+              return {
+                vibeName: vibe.name,
+                vibeSlug: vibe.slug,
+                color: vibe.color || 'orange',
+                items: vibeItems,
+              }
+            })
+          )
+
+          sectionData.vibes = vibeGroups
+          console.log('✅ Processed vibes:', vibeGroups.map(v => v.vibeName))
+        } catch (error) {
+          console.error('❌ Error fetching vibes:', error)
+        }
+
+        return sectionData
+      }
+
+      // ==================== ITINERARY SECTION ====================
       if (blockType === 'itinerarySection' || section.itinerarySource) {
         console.log('📅 Processing Itinerary Section')
 
@@ -147,7 +327,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
 
   console.log('🎬 Final processed sections:', processedSections.map(s => ({ 
     type: s.type, 
-    itemCount: s.items?.length || 0 
+    itemCount: s.items?.length || s.vibes?.length || 0 
   })))
 
   return <DynamicScrollerClient sections={processedSections} />

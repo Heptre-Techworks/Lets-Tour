@@ -178,7 +178,7 @@ export const UpDownCardCarouselClient: React.FC<{
   };
 
   return (
-    <section className="font-sans px-4 sm:px-8">
+    <section className="font-sans pt-10 px-4 sm:px-8">
       <div className="w-full max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-4">

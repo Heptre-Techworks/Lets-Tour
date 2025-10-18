@@ -143,21 +143,21 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
     fetchReviews();
   }, [populateBy, limit, rawSlug]);
 
-// ✅ Transform reviews to card format (Final fixed version)
+  // ✅ Transform reviews to card format
   const cards = useMemo(() => {
     if (populateBy === 'manual') {
       return Array.isArray(manualCards) ? manualCards : [];
     }
 
-  return reviewsFromCollection.map(review => {
-    const user = typeof review.user === 'object' ? review.user : null;
-    return {
-      name: user?.name || 'Anonymous',
-      rating: review.rating || 5,
-      story: review.body || '', // ✅ Using 'body' field from Reviews collection
-    };
-  });
-}, [populateBy, manualCards, reviewsFromCollection]);
+    return reviewsFromCollection.map(review => {
+      const user = typeof review.user === 'object' ? review.user : null;
+      return {
+        name: user?.name || 'Anonymous',
+        rating: review.rating || 5,
+        story: review.body || '',
+      };
+    });
+  }, [populateBy, manualCards, reviewsFromCollection]);
 
   const totalSlides = useMemo(
     () => Math.max(1, Math.ceil(cards.length / cardsPerView)),
@@ -182,7 +182,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
 
   if (loading) {
     return (
-      <section className="relative w-full h-screen font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
+      <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p>Loading stories...</p>
@@ -193,14 +193,14 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
 
   if (cards.length === 0) {
     return (
-      <section className="relative w-full h-screen font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
+      <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
         <p className="text-gray-400">No client stories available yet.</p>
       </section>
     );
   }
 
   return (
-    <section className="relative w-full h-screen font-sans overflow-hidden text-white bg-gray-900">
+    <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900">
       {/* Background */}
       {bgSrc ? (
         <img
@@ -213,16 +213,16 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
         <div className="absolute inset-0 bg-gradient-to-b from-gray-800 to-gray-900" style={{ zIndex: 0 }} />
       )}
 
-      {/* Overlay visual effect */}
+      {/* Edge-to-edge Overlay visual effect */}
       {overlaySrc && (
         <div
-          className="absolute pointer-events-none pt-[54vh] "
-          style={{ zIndex: 1 }}
+          className="absolute bottom-0 left-0 right-0 w-full pointer-events-none"
+          style={{ zIndex: 1, height: '40%' }}
         >
           <img
             src={overlaySrc}
             alt={overlay?.alt || 'Decorative Overlay'}
-            className="w-full h-[40%] object-cover"
+            className="w-full h-full object-cover"
             style={{
               opacity: 0.9,
               mixBlendMode: 'overlay',
@@ -232,7 +232,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
       )}
 
       {/* Main content */}
-      <div className="relative z-10 flex flex-col justify-between h-full p-8 md:p-16">
+      <div className="relative z-10 flex flex-col justify-between min-h-[70vh] p-8 md:p-16">
         <div className="flex flex-col lg:flex-row lg:items-start w-full flex-grow relative">
           {/* Left column */}
           <div className="w-full lg:w-1/3 lg:pr-12 space-y-4 text-left mb-12 lg:mb-0">

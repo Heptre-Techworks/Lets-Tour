@@ -1,7 +1,7 @@
 // src/blocks/DynamicScroller/config.ts
 import type { Block } from 'payload'
 
-// Define section blocks
+// ==================== PACKAGE SECTION ====================
 const PackageSectionBlock: Block = {
   slug: 'packageSection',
   interfaceName: 'DynamicScroller_PackageSection',
@@ -18,15 +18,29 @@ const PackageSectionBlock: Block = {
         { label: 'Manual', value: 'manual' },
         { label: 'Auto (from URL)', value: 'auto' },
         { label: 'Featured Packages', value: 'featured' },
-        { label: 'Select Destination', value: 'destination' },
+        { label: 'Featured Destinations', value: 'featuredDestinations' },
+        { label: 'Select Destinations', value: 'destinations' },
+        { label: 'Select Vibes', value: 'vibes' },
       ],
     },
     {
-      name: 'destination',
+      name: 'destinations',
       type: 'relationship',
       relationTo: 'destinations',
+      hasMany: true,
       admin: {
-        condition: (_, siblingData) => siblingData.populatePackagesBy === 'destination',
+        condition: (_, siblingData) => siblingData.populatePackagesBy === 'destinations',
+        description: 'Select multiple destinations',
+      },
+    },
+    {
+      name: 'vibes',
+      type: 'relationship',
+      relationTo: 'vibes',
+      hasMany: true,
+      admin: {
+        condition: (_, siblingData) => siblingData.populatePackagesBy === 'vibes',
+        description: 'Select multiple vibes',
       },
     },
     {
@@ -64,6 +78,111 @@ const PackageSectionBlock: Block = {
   ],
 }
 
+// ==================== DESTINATION SECTION ====================
+const DestinationSectionBlock: Block = {
+  slug: 'destinationSection',
+  interfaceName: 'DynamicScroller_DestinationSection',
+  labels: { singular: 'Destination Section', plural: 'Destination Sections' },
+  fields: [
+    { name: 'title', type: 'text', defaultValue: 'Featured Destinations' },
+    { name: 'subtitle', type: 'text' },
+    {
+      name: 'populateDestinationsBy',
+      type: 'select',
+      defaultValue: 'featured',
+      required: true,
+      options: [
+        { label: 'Featured Destinations', value: 'featured' },
+        { label: 'Popular Destinations', value: 'popular' },
+        { label: 'In Season', value: 'inSeason' },
+        { label: 'Manual', value: 'manual' },
+      ],
+    },
+    {
+      name: 'destinationLimit',
+      type: 'number',
+      defaultValue: 6,
+      min: 1,
+      max: 20,
+      admin: {
+        condition: (_, siblingData) => siblingData.populateDestinationsBy !== 'manual',
+      },
+    },
+    {
+      name: 'manualItems',
+      type: 'array',
+      admin: {
+        condition: (_, siblingData) => siblingData.populateDestinationsBy === 'manual',
+      },
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        { name: 'price', type: 'text', required: true },
+        { name: 'image', type: 'upload', relationTo: 'media', required: true },
+        { name: 'tag', type: 'text' },
+        { name: 'tagColor', type: 'text' },
+      ],
+    },
+    {
+      name: 'theme',
+      type: 'group',
+      fields: [
+        { name: 'background', type: 'text', defaultValue: 'bg-white' },
+      ],
+    },
+    { name: 'showNavigation', type: 'checkbox', defaultValue: true },
+  ],
+}
+
+// ==================== VIBE SECTION ====================
+const VibeSectionBlock: Block = {
+  slug: 'vibeSection',
+  interfaceName: 'DynamicScroller_VibeSection',
+  labels: { singular: 'Vibe Match Section', plural: 'Vibe Match Sections' },
+  fields: [
+    { 
+      name: 'title', 
+      type: 'text', 
+      defaultValue: 'Vibe Match',
+      admin: { description: 'Section heading' }
+    },
+    { 
+      name: 'subtitle', 
+      type: 'text',
+      defaultValue: "Today's enemy is tomorrow's friend.*",
+      admin: { description: 'Optional subtitle' }
+    },
+    {
+      name: 'vibes',
+      type: 'relationship',
+      relationTo: 'vibes',
+      hasMany: true,
+      required: true,
+      admin: {
+        description: 'Select vibes to display (e.g., Outdoor, Relaxing, Glamping, Girls Day Out)',
+      },
+    },
+    {
+      name: 'packagesPerVibe',
+      type: 'number',
+      defaultValue: 4,
+      min: 1,
+      max: 10,
+      admin: {
+        description: 'How many packages to show per vibe',
+      },
+    },
+    {
+      name: 'theme',
+      type: 'group',
+      fields: [
+        { name: 'background', type: 'text', defaultValue: 'bg-[#FFD89B]' },
+      ],
+    },
+    { name: 'showNavigation', type: 'checkbox', defaultValue: true },
+  ],
+}
+
+// ==================== ITINERARY SECTION ====================
 const ItinerarySectionBlock: Block = {
   slug: 'itinerarySection',
   interfaceName: 'DynamicScroller_ItinerarySection',
@@ -111,6 +230,7 @@ const ItinerarySectionBlock: Block = {
   ],
 }
 
+// ==================== MAIN BLOCK ====================
 export const DynamicScroller: Block = {
   slug: 'dynamicScroller',
   interfaceName: 'DynamicScrollerBlock',
@@ -119,7 +239,12 @@ export const DynamicScroller: Block = {
     {
       name: 'sections',
       type: 'blocks',
-      blocks: [PackageSectionBlock, ItinerarySectionBlock],
+      blocks: [
+        PackageSectionBlock,
+        DestinationSectionBlock,
+        VibeSectionBlock,
+        ItinerarySectionBlock,
+      ],
       required: true,
       minRows: 1,
     },

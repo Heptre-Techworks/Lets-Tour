@@ -1,11 +1,24 @@
-// src/blocks/PopularNow/Component.client.tsx
 'use client';
 
 import React, { useEffect, useRef } from 'react';
 
 type MediaLike = { url?: string | null; alt?: string | null };
 
-const getImageSrc = (card: { image?: MediaLike | string | null; imageUrl?: string | null }) => {
+type CardData = {
+  name?: string;
+  price?: string;
+  image?: MediaLike | string | null;
+  imageUrl?: string | null;
+  alt?: string | null;
+}
+
+type RowData = {
+  direction: 'left' | 'right';
+  speedSeconds: number;
+  cards: CardData[];
+}
+
+const getImageSrc = (card: CardData) => {
   if (card?.image && typeof card.image === 'object' && 'url' in card.image && card.image?.url) {
     return card.image.url as string;
   }
@@ -19,10 +32,22 @@ const DestinationCard: React.FC<{ name: string; price: string; src: string; alt?
   src,
   alt,
 }) => {
-  if (!src) return null;
   return (
     <li className="relative w-[300px] sm:w-[350px] md:w-[400px] h-64 flex-shrink-0">
-      <img src={src} alt={alt || name} className="w-full h-full object-cover rounded-2xl shadow-lg" />
+      {src ? (
+        <img 
+          src={src} 
+          alt={alt || name} 
+          className="w-full h-full object-cover rounded-2xl shadow-lg"
+        />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-orange-400 to-pink-500 rounded-2xl shadow-lg flex items-center justify-center">
+          <div className="text-white text-center">
+            <div className="text-8xl mb-2">📍</div>
+            <div className="text-sm font-medium">No Image</div>
+          </div>
+        </div>
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-2xl" />
       <div className="absolute bottom-0 left-0 p-6 text-white">
         <h3 className="text-3xl md:text-4xl font-bold">{name}</h3>
@@ -35,25 +60,29 @@ const DestinationCard: React.FC<{ name: string; price: string; src: string; alt?
 };
 
 const InfiniteScroller: React.FC<{
-  direction?: 'left' | 'right';
-  speed?: number;
-  pauseOnHover?: boolean;
+  direction: 'left' | 'right';
+  speed: number;
+  pauseOnHover: boolean;
   children: React.ReactNode;
-  centerOffset?: number;
-  transformOrigin?: string;
-  alignItems?: string;
+  centerOffset: number;
+  transformOrigin: string;
+  alignItems: string;
 }> = ({
-  direction = 'left',
-  speed = 40,
-  pauseOnHover = true,
+  direction,
+  speed,
+  pauseOnHover,
   children,
-  centerOffset = 0,
-  transformOrigin = 'center',
-  alignItems = 'items-center'
+  centerOffset,
+  transformOrigin,
+  alignItems
 }) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const scrollerInnerRef = useRef<HTMLUListElement | null>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    console.log(`🎬 InfiniteScroller - Direction: ${direction}, Speed: ${speed}s`)
+  }, [direction, speed])
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -61,6 +90,8 @@ const InfiniteScroller: React.FC<{
     if (!scroller || !scrollerInner || scroller.dataset.initialized) return;
 
     const originalChildren = Array.from(scrollerInner.children);
+    if (originalChildren.length === 0) return;
+    
     originalChildren.forEach((item) => {
       const clone = item.cloneNode(true) as HTMLElement;
       clone.setAttribute('aria-hidden', 'true');
@@ -138,57 +169,79 @@ const InfiniteScroller: React.FC<{
   );
 };
 
-export const PopularNowClient: React.FC<any> = ({
+export const PopularNowClient: React.FC<{
+  heading?: string;
+  subheading?: string;
+  pauseOnHover?: boolean;
+  rows: RowData[];
+}> = ({
   heading = 'Popular now!',
   subheading = "Today's enemy is tomorrow's friend.",
-  pauseOnHover: pauseRaw,
+  pauseOnHover = true,
   rows = [],
 }) => {
-  const pauseOnHover = pauseRaw ?? true;
+  useEffect(() => {
+    console.log('🎨 CLIENT - Received rows:', rows?.length)
+    rows?.forEach((row: RowData, idx: number) => {
+      console.log(`🎨 Row ${idx + 1}: ${row.cards.length} cards, direction: ${row.direction}, speed: ${row.speedSeconds}s`)
+    })
+  }, [rows])
+  
   return (
-    <section className="min-h-screen w-full text-[#111827] font-sans flex flex-col justify-center py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto w-full">
-        <header className="mb-10">
-          <div className="flex items-center gap-6">
-            <h1 className="text-5xl md:text-6xl font-bold flex-shrink-0 pl-[5%]">{heading}</h1>
-            <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
-          </div>
-          {subheading ? <p className="text-lg text-gray-500 mt-2 pl-[5%]">{subheading}</p> : null}
-        </header>
-
-        <div className="flex flex-col gap-1">
-          {Array.isArray(rows) &&
-            rows.map((row, idx) => {
-              const direction = row?.direction === 'right' ? 'right' : 'left';
-              const speedSeconds = typeof row?.speedSeconds === 'number' ? row.speedSeconds : 40;
-              const centerOffset = idx === 0 ? -20 : 20;
-              const transformOrigin = idx === 0 ? 'bottom' : 'top';
-              const alignItems = idx === 0 ? 'items-end' : 'items-start';
-
-              return (
-                <InfiniteScroller
-                  key={idx}
-                  direction={direction}
-                  speed={speedSeconds}
-                  pauseOnHover={pauseOnHover}
-                  centerOffset={centerOffset}
-                  transformOrigin={transformOrigin}
-                  alignItems={alignItems}
-                >
-                  {Array.isArray(row?.cards) &&
-                    row.cards.map((card: any, i: number) => (
-                      <DestinationCard
-                        key={`${idx}-${i}`}
-                        name={card?.name ?? ''}
-                        price={card?.price ?? ''}
-                        src={getImageSrc(card)}
-                        alt={card?.alt ?? card?.name}
-                      />
-                    ))}
-                </InfiniteScroller>
-              );
-            })}
+    <section className="min-h-screen w-full text-[#111827] font-sans flex flex-col justify-center py-16">
+      {/* Header with constrained width */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 mb-10">
+        <div className="max-w-7xl mx-auto">
+          <header>
+            <div className="flex items-center gap-6">
+              <h1 className="text-5xl md:text-6xl font-bold flex-shrink-0">{heading}</h1>
+              <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
+            </div>
+            {subheading ? <p className="text-lg text-gray-500 mt-2">{subheading}</p> : null}
+          </header>
         </div>
+      </div>
+
+      {/* Edge-to-edge scrolling content */}
+      <div className="flex flex-col gap-1 w-full">
+        {Array.isArray(rows) && rows.length > 0 ? (
+          rows.map((row, idx) => {
+            if (!row?.cards || row.cards.length === 0) {
+              console.warn(`⚠️ Row ${idx + 1} has no cards`)
+              return null;
+            }
+
+            const centerOffset = idx === 0 ? -20 : 20;
+            const transformOrigin = idx === 0 ? 'bottom' : 'top';
+            const alignItems = idx === 0 ? 'items-end' : 'items-start';
+
+            return (
+              <InfiniteScroller
+                key={idx}
+                direction={row.direction}
+                speed={row.speedSeconds}
+                pauseOnHover={pauseOnHover}
+                centerOffset={centerOffset}
+                transformOrigin={transformOrigin}
+                alignItems={alignItems}
+              >
+                {row.cards.map((card: CardData, i: number) => (
+                  <DestinationCard
+                    key={`${idx}-${i}`}
+                    name={card?.name ?? ''}
+                    price={card?.price ?? ''}
+                    src={getImageSrc(card)}
+                    alt={card?.alt ?? card?.name}
+                  />
+                ))}
+              </InfiniteScroller>
+            );
+          }).filter(Boolean)
+        ) : (
+          <div className="text-center text-gray-500 py-20">
+            No content configured. Please add rows in the admin panel.
+          </div>
+        )}
       </div>
     </section>
   );

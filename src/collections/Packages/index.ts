@@ -453,13 +453,23 @@ export const Packages: CollectionConfig = {
       hasMany: true,
     },
 
-    // ==================== RATINGS & BOOKINGS ====================
+    // ✅ NEW: VIBE FIELD (Added here, after other categorization fields)
+    {
+      name: 'vibe',
+      type: 'relationship',
+      relationTo: 'vibes',
+      admin: {
+        description: 'Package vibe/mood (e.g., Outdoor, Relaxing, Glamping, Girls Day Out)',
+        position: 'sidebar',
+      },
+    },
+        // ==================== RATINGS & BOOKINGS ====================
     {
       type: 'row',
       fields: [
         {
           name: 'rating',
-          type: 'number',
+          type: 'number' as const,
           min: 0,
           max: 5,
           admin: {
@@ -469,7 +479,7 @@ export const Packages: CollectionConfig = {
         },
         {
           name: 'bookingsCount30d',
-          type: 'number',
+          type: 'number' as const,
           min: 0,
           defaultValue: 0,
           admin: {
@@ -479,6 +489,7 @@ export const Packages: CollectionConfig = {
         },
       ],
     },
+
 
     // ==================== STATUS FLAGS ====================
     {

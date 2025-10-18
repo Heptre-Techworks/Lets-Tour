@@ -288,6 +288,18 @@ export const Destinations: CollectionConfig = {
         description: 'Apply categories like "Family Friendly", "Adventure"',
       },
     },
+
+    // ✅ NEW: VIBES FIELD (Temporarily commented until Vibes collection is created)
+    {
+      name: 'vibes',
+      type: 'relationship',
+      relationTo: 'vibes',
+      hasMany: true,
+      admin: {
+        description: 'Destination vibes/moods (e.g., Outdoor, Relaxing, Glamping)',
+      },
+    },
+
     {
       name: 'popularityScore',
       type: 'number',

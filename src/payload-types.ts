@@ -91,6 +91,7 @@ export interface Config {
     regions: Region;
     reviews: Review;
     'social-posts': SocialPost;
+    vibes: Vibe;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -126,6 +127,7 @@ export interface Config {
     regions: RegionsSelect<false> | RegionsSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'social-posts': SocialPostsSelect<false> | SocialPostsSelect<true>;
+    vibes: VibesSelect<false> | VibesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -602,6 +604,10 @@ export interface Destination {
    */
   categories?: (string | Category)[] | null;
   /**
+   * Destination vibes/moods (e.g., Outdoor, Relaxing, Glamping)
+   */
+  vibes?: (string | Vibe)[] | null;
+  /**
    * Higher score = more prominent placement
    */
   popularityScore?: number | null;
@@ -802,6 +808,35 @@ export interface Category {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vibes".
+ */
+export interface Vibe {
+  id: string;
+  /**
+   * Vibe name (e.g., "Outdoor", "Relaxing", "Glamping")
+   */
+  name: string;
+  /**
+   * URL-friendly slug
+   */
+  slug: string;
+  /**
+   * Brief description of this vibe
+   */
+  description?: string | null;
+  /**
+   * Icon/image representing this vibe
+   */
+  icon?: (string | null) | Media;
+  /**
+   * Badge color for this vibe
+   */
+  color?: ('orange' | 'red' | 'blue' | 'green' | 'purple') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1251,7 +1286,12 @@ export interface Form {
  * via the `definition` "DynamicScrollerBlock".
  */
 export interface DynamicScrollerBlock {
-  sections: (DynamicScroller_PackageSection | DynamicScroller_ItinerarySection)[];
+  sections: (
+    | DynamicScroller_PackageSection
+    | DynamicScroller_DestinationSection
+    | DynamicScroller_VibeSection
+    | DynamicScroller_ItinerarySection
+  )[];
   id?: string | null;
   blockName?: string | null;
   blockType: 'dynamicScroller';
@@ -1266,8 +1306,15 @@ export interface DynamicScroller_PackageSection {
    */
   title?: string | null;
   subtitle?: string | null;
-  populatePackagesBy: 'manual' | 'auto' | 'featured' | 'destination';
-  destination?: (string | null) | Destination;
+  populatePackagesBy: 'manual' | 'auto' | 'featured' | 'featuredDestinations' | 'destinations' | 'vibes';
+  /**
+   * Select multiple destinations
+   */
+  destinations?: (string | Destination)[] | null;
+  /**
+   * Select multiple vibes
+   */
+  vibes?: (string | Vibe)[] | null;
   packageLimit?: number | null;
   manualItems?:
     | {
@@ -1286,6 +1333,62 @@ export interface DynamicScroller_PackageSection {
   id?: string | null;
   blockName?: string | null;
   blockType: 'packageSection';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_DestinationSection".
+ */
+export interface DynamicScroller_DestinationSection {
+  title?: string | null;
+  subtitle?: string | null;
+  populateDestinationsBy: 'featured' | 'popular' | 'inSeason' | 'manual';
+  destinationLimit?: number | null;
+  manualItems?:
+    | {
+        title: string;
+        price: string;
+        image: string | Media;
+        tag?: string | null;
+        tagColor?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  theme?: {
+    background?: string | null;
+  };
+  showNavigation?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'destinationSection';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_VibeSection".
+ */
+export interface DynamicScroller_VibeSection {
+  /**
+   * Section heading
+   */
+  title?: string | null;
+  /**
+   * Optional subtitle
+   */
+  subtitle?: string | null;
+  /**
+   * Select vibes to display (e.g., Outdoor, Relaxing, Glamping, Girls Day Out)
+   */
+  vibes: (string | Vibe)[];
+  /**
+   * How many packages to show per vibe
+   */
+  packagesPerVibe?: number | null;
+  theme?: {
+    background?: string | null;
+  };
+  showNavigation?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'vibeSection';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1329,25 +1432,35 @@ export interface PopularNowBlock {
     /**
      * Choose data source for this row
      */
-    dataSource: 'manual' | 'featured-destinations' | 'popular-destinations' | 'featured-packages' | 'recent-packages';
+    dataSource:
+      | 'manual'
+      | 'featured-destinations'
+      | 'popular-destinations'
+      | 'in-season-destinations'
+      | 'featured-packages'
+      | 'recent-packages'
+      | 'honeymoon-packages'
+      | 'family-packages';
     /**
-     * Number of items to display in this row
+     * Number of items to display
      */
     itemLimit?: number | null;
     /**
-     * Scroll direction for this row
+     * Scroll direction
      */
-    direction?: ('left' | 'right') | null;
+    direction: 'left' | 'right';
     /**
-     * How many seconds for a full loop
+     * Animation speed
      */
-    speedSeconds?: number | null;
+    speedSeconds: number;
     cards?:
       | {
           name: string;
           price: string;
-          image?: (string | null) | Media;
-          imageUrl?: string | null;
+          image: string | Media;
+          /**
+           * Alt text for accessibility
+           */
           alt?: string | null;
           id?: string | null;
         }[]
@@ -1789,6 +1902,10 @@ export interface Package {
   activities?: (string | Activity)[] | null;
   amenities?: (string | Amenity)[] | null;
   accommodationTypes?: (string | AccommodationType)[] | null;
+  /**
+   * Package vibe/mood (e.g., Outdoor, Relaxing, Glamping, Girls Day Out)
+   */
+  vibe?: (string | null) | Vibe;
   /**
    * Average customer rating
    */
@@ -2567,6 +2684,10 @@ export interface PayloadLockedDocument {
         value: string | SocialPost;
       } | null)
     | ({
+        relationTo: 'vibes';
+        value: string | Vibe;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: string | Redirect;
       } | null)
@@ -2865,6 +2986,8 @@ export interface DynamicScrollerBlockSelect<T extends boolean = true> {
     | T
     | {
         packageSection?: T | DynamicScroller_PackageSectionSelect<T>;
+        destinationSection?: T | DynamicScroller_DestinationSectionSelect<T>;
+        vibeSection?: T | DynamicScroller_VibeSectionSelect<T>;
         itinerarySection?: T | DynamicScroller_ItinerarySectionSelect<T>;
       };
   id?: T;
@@ -2878,7 +3001,8 @@ export interface DynamicScroller_PackageSectionSelect<T extends boolean = true> 
   title?: T;
   subtitle?: T;
   populatePackagesBy?: T;
-  destination?: T;
+  destinations?: T;
+  vibes?: T;
   packageLimit?: T;
   manualItems?:
     | T
@@ -2890,6 +3014,52 @@ export interface DynamicScroller_PackageSectionSelect<T extends boolean = true> 
         tagColor?: T;
         id?: T;
       };
+  theme?:
+    | T
+    | {
+        background?: T;
+      };
+  showNavigation?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_DestinationSection_select".
+ */
+export interface DynamicScroller_DestinationSectionSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  populateDestinationsBy?: T;
+  destinationLimit?: T;
+  manualItems?:
+    | T
+    | {
+        title?: T;
+        price?: T;
+        image?: T;
+        tag?: T;
+        tagColor?: T;
+        id?: T;
+      };
+  theme?:
+    | T
+    | {
+        background?: T;
+      };
+  showNavigation?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_VibeSection_select".
+ */
+export interface DynamicScroller_VibeSectionSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  vibes?: T;
+  packagesPerVibe?: T;
   theme?:
     | T
     | {
@@ -2951,7 +3121,6 @@ export interface PopularNowBlockSelect<T extends boolean = true> {
               name?: T;
               price?: T;
               image?: T;
-              imageUrl?: T;
               alt?: T;
               id?: T;
             };
@@ -3390,6 +3559,7 @@ export interface DestinationsSelect<T extends boolean = true> {
   isPopular?: T;
   isInSeason?: T;
   categories?: T;
+  vibes?: T;
   popularityScore?: T;
   displayOrder?: T;
   highlights?:
@@ -3484,6 +3654,7 @@ export interface PackagesSelect<T extends boolean = true> {
   activities?: T;
   amenities?: T;
   accommodationTypes?: T;
+  vibe?: T;
   rating?: T;
   bookingsCount30d?: T;
   isFeatured?: T;
@@ -3769,6 +3940,19 @@ export interface SocialPostsSelect<T extends boolean = true> {
   isFeatured?: T;
   displayOrder?: T;
   isPublished?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vibes_select".
+ */
+export interface VibesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  icon?: T;
+  color?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -40,6 +40,7 @@ import { Promotions } from './collections/Promotions'
 import Regions from './collections/Regions'
 import { Reviews } from './collections/Reviews'
 import { SocialPosts } from './collections/SocialPosts'
+import Vibes from './collections/Vibes'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -91,6 +92,7 @@ export default buildConfig({
     Regions,
     Reviews,
     SocialPosts,
+    Vibes
   ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, SearchFilters, PackageLayout, DestinationLayout],

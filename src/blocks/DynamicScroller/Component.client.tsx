@@ -19,13 +19,20 @@ type Media =
   | undefined
 
 type Item = {
-  blockType: 'packageItem' | 'itineraryDay'
+  blockType: 'packageItem' | 'itineraryDay' | 'destinationItem'
   [key: string]: any
+}
+
+type VibeGroup = {
+  vibeName: string
+  vibeSlug: string
+  color?: string
+  items: Item[]
 }
 
 type Section = {
   id?: string
-  type?: 'package' | 'itinerary' // ✅ Made optional
+  type?: 'package' | 'itinerary' | 'destination' | 'vibe'
   title?: string
   subtitle?: string
   theme?: {
@@ -38,6 +45,7 @@ type Section = {
     position?: string
   }
   items?: Item[]
+  vibes?: VibeGroup[]
 }
 
 // Utils
@@ -141,6 +149,54 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
   )
 }
 
+// Destination Card (same layout as PackageCard)
+const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
+  const title = item.title || ''
+  const image = item.image
+  const price = item.price || '0'
+  const src = resolveMediaUrl(image)
+  const alt = resolveMediaAlt(image, title)
+
+  return (
+    <div className="relative w-72 h-96 flex-shrink-0 snap-center rounded-2xl shadow-lg overflow-hidden group bg-black/5">
+      {src ? (
+        <img
+          src={src}
+          alt={alt}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+        />
+      ) : (
+        <div className="w-full h-full bg-gray-200" aria-hidden />
+      )}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+      {item.tag && (
+        <div className="absolute top-4 left-4">
+          <span className={`px-3 py-1 text-sm font-semibold rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'}`}>
+            {item.tag}
+          </span>
+        </div>
+      )}
+
+      <div className="absolute top-4 right-4 bg-black/30 p-2 rounded-full cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+        </svg>
+      </div>
+
+      <div className="absolute bottom-0 left-0 p-5 text-white w-full">
+        <h3 className="text-3xl font-bold font-amiri">{title}</h3>
+        <hr className="my-2 border-white/50" />
+        <p className="text-sm mt-1">
+          Packages starting at <br />
+          <span className="font-bold text-lg">{price}</span> /person
+        </p>
+      </div>
+    </div>
+  )
+}
+
 // Itinerary Card
 const ItineraryCard: React.FC<{ item: any }> = ({ item }) => {
   const activities = item.activities || []
@@ -172,6 +228,76 @@ const ItineraryCard: React.FC<{ item: any }> = ({ item }) => {
   )
 }
 
+// Vibe Section (special layout like your image)
+const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
+  const vibes = section.vibes || []
+  const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+  const scroll = (vibeSlug: string, direction: 'left' | 'right') => {
+    const el = scrollRefs.current[vibeSlug]
+    if (!el) return
+    const cardWidth = (el.children[0] as HTMLElement | undefined)?.clientWidth || 0
+    const gap = 24
+    const scrollAmount = cardWidth + gap
+    el.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' })
+  }
+
+  return (
+    <section className={`relative overflow-hidden ${section?.theme?.background || 'bg-[#FFD89B]'} py-12`}>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="mb-10 text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-2">{section.title || 'Vibe Match'}</h1>
+          {section.subtitle && <p className="text-lg text-gray-700">{section.subtitle}</p>}
+        </header>
+
+        <div className="space-y-12">
+          {vibes.map((vibe) => (
+            <div key={vibe.vibeSlug} className="relative">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-3xl font-semibold font-amiri">{vibe.vibeName}</h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => scroll(vibe.vibeSlug, 'left')}
+                    className="w-10 h-10 rounded-full flex items-center justify-center bg-black text-white shadow-md hover:scale-110 transition-transform"
+                    aria-label="Previous"
+                    type="button"
+                  >
+                    <ChevronLeft />
+                  </button>
+                  <button
+                    onClick={() => scroll(vibe.vibeSlug, 'right')}
+                    className="w-10 h-10 rounded-full flex items-center justify-center bg-black text-white shadow-md hover:scale-110 transition-transform"
+                    aria-label="Next"
+                    type="button"
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
+
+              <div
+                ref={(el) => {
+                  scrollRefs.current[vibe.vibeSlug] = el
+                }}
+                className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory"
+                style={{ scrollbarWidth: 'none' } as any}
+              >
+                {vibe.items.map((item, idx) => (
+                  <PackageCard key={item.id || idx} item={item} />
+                ))}
+              </div>
+
+              <div className="mt-2 text-right text-sm text-gray-600">
+                {vibe.items.length} packages • {vibe.items.length > 0 ? '1' : '0'}/{vibe.items.length}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // Dynamic Section Component
 const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   const pathname = usePathname()
@@ -179,7 +305,7 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   const [currentIndex, setCurrentIndex] = useState(1)
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // ✅ Slug replacement
+  // Slug replacement
   const formattedSlug = useMemo(() => {
     const segments = pathname.split('/').filter(Boolean)
     const rawSlug = segments[segments.length - 1] || ''
@@ -199,11 +325,13 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   }
 
   const items = (section.items || []) as Item[]
-  // ✅ Handle undefined type
   const isPackage = section.type === 'package'
+  const isDestination = section.type === 'destination'
   const packageItems = items.filter(item => item.blockType === 'packageItem')
+  const destinationItems = items.filter(item => item.blockType === 'destinationItem')
   const itineraryItems = items.filter(item => item.blockType === 'itineraryDay')
   const packagesCount = packageItems.length
+  const destinationsCount = destinationItems.length
   const itineraryCount = itineraryItems.length
 
   const handleScroll = () => {
@@ -226,14 +354,14 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
       if (scroller) scroller.removeEventListener('scroll', handleScroll)
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
     }
-  }, [packageItems.length, itineraryItems.length])
+  }, [packageItems.length, destinationItems.length, itineraryItems.length])
 
   const buttonClass =
     'w-12 h-12 rounded-full flex items-center justify-center bg-black text-white shadow-md transition-transform hover:scale-110'
 
   const navEnabled = Boolean(section.navigation)
 
-  // ✅ Handle undefined type or no items
+  // Handle undefined type or no items
   if (!section.type || items.length === 0) {
     return (
       <section className={`relative overflow-hidden ${section?.theme?.background || 'bg-white'} py-12`}>
@@ -246,7 +374,7 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
 
   return (
     <section className={`relative overflow-hidden ${section?.theme?.background || 'bg-white'} py-12`}>
-      <div className="px-4 absolute top-28 left-0 h-[50vh] w-2/3 bg-[rgba(251,174,61,0.9)]" aria-hidden="true" />
+      <div className="px-4 absolute top-36 left-0 h-[46vh] w-2/3 bg-[rgba(251,174,61,0.9)]" aria-hidden="true" />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <header className="mb-10">
@@ -263,6 +391,7 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
           style={{ scrollbarWidth: 'none' } as any}
         >
           {isPackage && packageItems.map((item, idx) => <PackageCard key={item.id || idx} item={item} />)}
+          {isDestination && destinationItems.map((item, idx) => <DestinationCard key={item.id || idx} item={item} />)}
           {section.type === 'itinerary' && itineraryItems.map((item, idx) => <ItineraryCard key={item.id || idx} item={item} />)}
         </div>
 
@@ -281,6 +410,27 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
               <div className="pr-2">
                 <span className="text-3xl font-semibold text-gray-900 tabular-nums">
                   {currentIndex}/{packagesCount}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isDestination && navEnabled && destinationsCount > 0 && (
+          <div className="mt-4">
+            <div className="flex items-center">
+              <div className="flex items-center gap-2">
+                <button onClick={() => scroll('left')} className={buttonClass} aria-label="Previous" type="button">
+                  <ChevronLeft />
+                </button>
+                <button onClick={() => scroll('right')} className={buttonClass} aria-label="Next" type="button">
+                  <ChevronRight />
+                </button>
+              </div>
+              <div className="mx-3 flex-1"><DashedRule /></div>
+              <div className="pr-2">
+                <span className="text-3xl font-semibold text-gray-900 tabular-nums">
+                  {currentIndex}/{destinationsCount}
                 </span>
               </div>
             </div>
@@ -315,13 +465,20 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ secti
       .font-amiri { font-family: 'Amiri', serif; }
     `}</style>
     <div className="min-h-screen font-sans">
-      {sections.map((section, idx) => (
-        // ✅ FIXED: Safe key handling
-        <DynamicSection 
-          key={typeof section?.id === 'string' ? section.id : `section-${idx}`} 
-          section={section} 
-        />
-      ))}
+      {sections.map((section, idx) => {
+        // Render special Vibe Section layout
+        if (section.type === 'vibe') {
+          return <VibeSection key={section?.id || `vibe-${idx}`} section={section} />
+        }
+        
+        // Render standard sections
+        return (
+          <DynamicSection 
+            key={typeof section?.id === 'string' ? section.id : `section-${idx}`} 
+            section={section} 
+          />
+        )
+      })}
     </div>
   </>
 )

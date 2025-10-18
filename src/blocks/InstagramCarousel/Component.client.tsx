@@ -76,7 +76,7 @@ const InstagramImageGrid: React.FC<{
     return () => window.removeEventListener('resize', onResize);
   }, [columnsDesktop, columnsTablet, columnsMobile, gutter]);
 
-  const columnHeight = Math.round(cardWidth * aspect * 3);
+  const columnHeight = Math.round(cardWidth * aspect * 2);
   const bigH = Math.round(columnHeight * 0.62);
   const smallH = columnHeight - bigH;
   const embedWidth = cardWidth + 160;
@@ -188,9 +188,9 @@ export const InstagramCarouselClient: React.FC<any> = ({
     : profile?.avatarUrl;
 
   return (
-    <div className={cn('container', className)}>
+    <div className={cn('container py-12', className)}>
       {(heading || profile?.handle) && (
-        <header className="mb-4 flex items-center">
+        <header className="mb-8 flex items-center">
           {avatarUrl && (
             <img
               src={avatarUrl}

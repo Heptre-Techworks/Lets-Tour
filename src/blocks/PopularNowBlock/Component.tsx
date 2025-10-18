@@ -1,4 +1,3 @@
-// src/blocks/PopularNow/Component.tsx
 import React from 'react'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
@@ -15,67 +14,106 @@ const getCurrencySymbol = (currency: string) => {
   return symbols[currency] || '₹'
 }
 
+const getImageUrl = (image: any): string => {
+  if (!image) return ''
+  return typeof image === 'object' ? image?.url || '' : image
+}
+
 export const PopularNow = async (props: PopularNowBlock) => {
-  const { rows, ...rest } = props as any
+  const { rows, id, ...rest } = props as any
 
-  console.log('🎯 PopularNow - Number of rows:', rows?.length)
-
-  if (!Array.isArray(rows) || rows.length === 0) {
-    console.warn('⚠️ PopularNow - No rows configured')
-    return <PopularNowClient {...rest} rows={[]} />
-  }
+  console.log('🎯 PopularNow - Block ID:', id)
 
   const payload = await getPayload({ config: configPromise })
+
+  let populatedRows = rows
+
+  // Re-query page with depth to get populated data
+  if (Array.isArray(rows) && rows.length > 0) {
+    try {
+      const pagesResult = await payload.find({
+        collection: 'pages',
+        depth: 3,
+        limit: 1,
+        where: {
+          'layout.id': { equals: id }
+        }
+      })
+
+      if (pagesResult.docs.length > 0) {
+        const page = pagesResult.docs[0]
+        const layout = (page as any).layout || []
+        const popularNowBlock = layout.find((block: any) => block.id === id && block.blockType === 'popularNow')
+        
+        if (popularNowBlock && popularNowBlock.rows) {
+          populatedRows = popularNowBlock.rows
+          console.log('✅ Got populated rows')
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error fetching populated data:', error)
+    }
+  }
+
+  if (!Array.isArray(populatedRows) || populatedRows.length === 0) {
+    console.warn('⚠️ No rows configured')
+    return <PopularNowClient {...rest} rows={[]} />
+  }
   
   const processedRows = await Promise.all(
-    rows.map(async (row: any, rowIndex: number) => {
-      // ✅ FIX: Use defaults if dataSource is missing
-      const dataSource = row.dataSource || 'featured'  // Default to 'featured'
-      const itemLimit = row.itemLimit || 10  // Default to 10
-      const cards = row.cards
+    populatedRows.map(async (row: any, rowIndex: number) => {
+      const dataSource = row?.dataSource || 'manual'
+      const itemLimit = row?.itemLimit || 10
+      const direction = row?.direction || 'left'
+      const speedSeconds = row?.speedSeconds || 40
 
-      console.log(`🔄 Row ${rowIndex + 1} - DataSource: ${dataSource}, Limit: ${itemLimit}`)
+      console.log(`\n🔄 Row ${rowIndex + 1}:`)
+      console.log(`   DataSource: "${dataSource}"`)
+      console.log(`   Direction: "${direction}"`)
+      console.log(`   Speed: ${speedSeconds}s`)
 
+      // MANUAL MODE
       if (dataSource === 'manual') {
-        console.log(`📝 Row ${rowIndex + 1} - Using manual cards:`, cards?.length || 0)
-        return { 
-          direction: row.direction || 'left',
-          speedSeconds: row.speedSeconds || 40,
-          cards: cards || [] 
+        const manualCards = row?.cards || []
+        console.log(`   Cards: ${manualCards.length}`)
+        
+        const cards = manualCards.map((card: any) => ({
+          name: card.name || '',
+          price: card.price || '',
+          image: card.image,
+          imageUrl: getImageUrl(card.image),
+          alt: card.alt || card.name,
+        }))
+        
+        return {
+          direction: direction,
+          speedSeconds: speedSeconds,
+          cards: cards,
         }
       }
 
+      // AUTO-POPULATE MODE
       let fetchedCards: any[] = []
 
       try {
-        // Destinations
-        if (['featured', 'popular', 'inSeason'].includes(dataSource)) {
+        if (['featured-destinations', 'popular-destinations', 'in-season-destinations'].includes(dataSource)) {
           const query: any = {
             limit: itemLimit,
             depth: 2,
-            where: {
-              isPublished: { equals: true },
-            },
+            where: { isPublished: { equals: true } },
             sort: '-popularityScore',
           }
 
-          if (dataSource === 'featured') {
+          if (dataSource === 'featured-destinations') {
             query.where.isFeatured = { equals: true }
-            console.log(`⭐ Row ${rowIndex + 1} - Fetching featured destinations`)
-          } else if (dataSource === 'popular') {
+          } else if (dataSource === 'popular-destinations') {
             query.where.isPopular = { equals: true }
-            console.log(`🔥 Row ${rowIndex + 1} - Fetching popular destinations`)
-          } else if (dataSource === 'inSeason') {
+          } else if (dataSource === 'in-season-destinations') {
             query.where.isInSeason = { equals: true }
-            console.log(`🌸 Row ${rowIndex + 1} - Fetching in-season destinations`)
           }
 
-          const result = await payload.find({
-            collection: 'destinations',
-            ...query,
-          })
-
-          console.log(`✅ Row ${rowIndex + 1} - Found ${result.docs.length} destinations`)
+          const result = await payload.find({ collection: 'destinations', ...query })
+          console.log(`   Found ${result.docs.length} destinations`)
 
           fetchedCards = result.docs.map((dest: any) => {
             const currencySymbol = getCurrencySymbol(dest.currency || 'INR')
@@ -85,71 +123,61 @@ export const PopularNow = async (props: PopularNowBlock) => {
                 ? `${currencySymbol}${dest.startingPrice.toLocaleString()}`
                 : 'Contact for pricing',
               image: dest.featuredImage,
+              imageUrl: getImageUrl(dest.featuredImage),
               alt: dest.name,
             }
           })
         }
-
-        // Packages
-        else if (['featuredPackages', 'recentPackages', 'honeymoonPackages', 'familyPackages'].includes(dataSource)) {
+        else if (['featured-packages', 'recent-packages', 'honeymoon-packages', 'family-packages'].includes(dataSource)) {
           const query: any = {
             limit: itemLimit,
             depth: 2,
-            where: {
-              isPublished: { equals: true },
-            },
+            where: { isPublished: { equals: true } },
           }
 
-          if (dataSource === 'featuredPackages') {
+          if (dataSource === 'featured-packages') {
             query.where.isFeatured = { equals: true }
             query.sort = '-rating'
-            console.log(`⭐ Row ${rowIndex + 1} - Fetching featured packages`)
-          } else if (dataSource === 'recentPackages') {
+          } else if (dataSource === 'recent-packages') {
             query.sort = '-createdAt'
-            console.log(`🆕 Row ${rowIndex + 1} - Fetching recent packages`)
-          } else if (dataSource === 'honeymoonPackages') {
+          } else if (dataSource === 'honeymoon-packages') {
             query.where.isHoneymoon = { equals: true }
             query.sort = '-rating'
-            console.log(`💑 Row ${rowIndex + 1} - Fetching honeymoon packages`)
-          } else if (dataSource === 'familyPackages') {
+          } else if (dataSource === 'family-packages') {
             query.where.isFamilyFriendly = { equals: true }
             query.sort = '-rating'
-            console.log(`👨‍👩‍👧‍👦 Row ${rowIndex + 1} - Fetching family packages`)
           }
 
-          const result = await payload.find({
-            collection: 'packages',
-            ...query,
-          })
-
-          console.log(`✅ Row ${rowIndex + 1} - Found ${result.docs.length} packages`)
+          const result = await payload.find({ collection: 'packages', ...query })
+          console.log(`   Found ${result.docs.length} packages`)
 
           fetchedCards = result.docs.map((pkg: any) => {
             const currencySymbol = getCurrencySymbol(pkg.currency || 'INR')
             const displayPrice = pkg.discountedPrice || pkg.price || 0
-
             return {
               name: pkg.name,
               price: `${currencySymbol}${displayPrice.toLocaleString()}`,
               image: pkg.heroImage,
+              imageUrl: getImageUrl(pkg.heroImage),
               alt: pkg.name,
             }
           })
         }
-
       } catch (error) {
-        console.error(`❌ Row ${rowIndex + 1} - Error:`, error)
+        console.error(`❌ Error:`, error)
       }
 
       return {
-        direction: row.direction || 'left',
-        speedSeconds: row.speedSeconds || 40,
+        direction: direction,
+        speedSeconds: speedSeconds,
         cards: fetchedCards,
       }
     })
   )
 
-  console.log('✅ PopularNow - All rows processed')
+  console.log('✅ Final result:', processedRows.map((r, i) => 
+    `Row ${i+1}: ${r.cards.length} cards, ${r.direction}, ${r.speedSeconds}s`
+  ).join(' | '))
 
   return <PopularNowClient {...rest} rows={processedRows} />
 }
