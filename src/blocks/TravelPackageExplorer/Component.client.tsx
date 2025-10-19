@@ -1,7 +1,7 @@
-// src/blocks/TravelPackageExplorer/Component.client.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';  // ✅ ADD
 
 type MediaLike = { url?: string | null; alt?: string | null };
 
@@ -221,6 +221,7 @@ const Filters: React.FC<{
   );
 };
 
+// ✅ UPDATED: Wrap entire card with Link
 const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
   const SuitabilityBar: React.FC<{
     label: string;
@@ -246,150 +247,156 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
   );
 
   const imageSrc = getImageSrc(pkg);
+  const href = pkg.href || `/packages/${pkg.slug}` || '#';  // ✅ ADD
 
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col md:flex-row mb-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300 font-sans">
-      {/* Image container with "card-in-card" effect */}
-      <div className="md:w-64 p-3 flex-shrink-0">
-        <img
-          className="h-[48vh] w-full object-cover rounded-xl shadow-md"
-          src={imageSrc}
-          alt={pkg.title}
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = 'https://placehold.co/600x400/cccccc/FFFFFF/png?text=Error';
-          }}
-        />
-      </div>
-
-      <div className="p-4 pt-1 md:pt-4 md:pl-0 flex flex-col flex-grow w-full">
-        <div className="flex flex-col sm:flex-row">
-          {/* Main Info */}
-          <div className="flex-grow pr-4">
-            <div className="flex items-center space-x-2">
-              <h3
-                className="text-xl font-serif text-gray-800"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                {pkg.title}
-              </h3>
-              <StarRating rating={pkg.rating} />
-            </div>
-            <p className="text-xs text-gray-600 mt-1">{pkg.location}</p>
-            <p className="text-gray-700 mt-2 text-sm leading-snug">{pkg.description}</p>
-            {pkg.inclusions && pkg.inclusions.length > 0 && (
-              <div className="mt-3">
-                <h4 className="font-semibold text-gray-800 text-sm">Inclusions:</h4>
-                <ul className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-1 text-xs text-gray-600">
-                  {pkg.inclusions.map((item: string, idx: number) => (
-                    <li key={idx} className="list-disc list-inside">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {/* Side Info */}
-          <div className="w-full sm:w-48 mt-4 sm:mt-0 flex-shrink-0">
-            <div className="text-right">
-              {pkg.originalPrice > pkg.price && (
-                <p className="text-base text-red-500 line-through">
-                  ₹{pkg.originalPrice.toLocaleString()}
-                </p>
-              )}
-              <p className="text-2xl font-bold text-yellow-500 bg-yellow-50 rounded-md p-1 inline-block">
-                ₹{pkg.price.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-600">/person</p>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              <SuitabilityBar
-                label="Couples"
-                sublabel="For Newlywed Vacations"
-                percentage={pkg.suitability.couples}
-                icon={
-                  <svg
-                    className="w-6 h-6 text-pink-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                    />
-                  </svg>
-                }
-              />
-              <SuitabilityBar
-                label="Family"
-                sublabel="For Family Vacations"
-                percentage={pkg.suitability.family}
-                icon={
-                  <svg
-                    className="w-6 h-6 text-blue-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
-                  </svg>
-                }
-              />
-            </div>
-            {pkg.recentBookings > 0 && (
-              <div className="mt-3 flex items-center justify-center">
-                <div className="flex -space-x-1">
-                  <img
-                    className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
-                    src="https://placehold.co/32x32/FFC107/FFFFFF/png?text=A"
-                    alt="User A"
-                  />
-                  <img
-                    className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
-                    src="https://placehold.co/32x32/4CAF50/FFFFFF/png?text=B"
-                    alt="User B"
-                  />
-                  <img
-                    className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
-                    src="https://placehold.co/32x32/2196F3/FFFFFF/png?text=C"
-                    alt="User C"
-                  />
-                </div>
-                <p className="text-xs text-gray-600 ml-1">
-                  {pkg.recentBookings}+ bookings in past month
-                </p>
-              </div>
-            )}
-          </div>
+    <Link 
+      href={href}
+      className="block group"  // ✅ WRAP WITH LINK
+    >
+      <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col md:flex-row mb-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300 font-sans">
+        {/* Image container with "card-in-card" effect */}
+        <div className="md:w-64 p-3 flex-shrink-0">
+          <img
+            className="h-[48vh] w-full object-cover rounded-xl shadow-md transition-transform duration-300 group-hover:scale-105"  // ✅ ADD HOVER EFFECT
+            src={imageSrc}
+            alt={pkg.title}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = 'https://placehold.co/600x400/cccccc/FFFFFF/png?text=Error';
+            }}
+          />
         </div>
 
-        {/* Sights Scroller - pushed to bottom */}
-        {pkg.sights && pkg.sights.length > 0 && (
-          <div className="mt-auto pt-3 border-t border-gray-200">
-            <div className="relative">
-              <div className="flex space-x-4 overflow-x-auto pb-1 scrollbar-hide">
-                {pkg.sights.map((sight: any, idx: number) => (
-                  <span key={idx} className="text-xs text-gray-700 font-medium flex-shrink-0">
-                    {typeof sight === 'string' ? sight : sight.name}
-                  </span>
-                ))}
+        <div className="p-4 pt-1 md:pt-4 md:pl-0 flex flex-col flex-grow w-full">
+          <div className="flex flex-col sm:flex-row">
+            {/* Main Info */}
+            <div className="flex-grow pr-4">
+              <div className="flex items-center space-x-2">
+                <h3
+                  className="text-xl font-serif text-gray-800 group-hover:text-yellow-600 transition-colors"  // ✅ ADD HOVER EFFECT
+                  style={{ fontFamily: "'Playfair Display', serif" }}
+                >
+                  {pkg.title}
+                </h3>
+                <StarRating rating={pkg.rating} />
               </div>
+              <p className="text-xs text-gray-600 mt-1">{pkg.location}</p>
+              <p className="text-gray-700 mt-2 text-sm leading-snug">{pkg.description}</p>
+              {pkg.inclusions && pkg.inclusions.length > 0 && (
+                <div className="mt-3">
+                  <h4 className="font-semibold text-gray-800 text-sm">Inclusions:</h4>
+                  <ul className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-1 text-xs text-gray-600">
+                    {pkg.inclusions.map((item: string, idx: number) => (
+                      <li key={idx} className="list-disc list-inside">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Side Info */}
+            <div className="w-full sm:w-48 mt-4 sm:mt-0 flex-shrink-0">
+              <div className="text-right">
+                {pkg.originalPrice > pkg.price && (
+                  <p className="text-base text-red-500 line-through">
+                    ₹{pkg.originalPrice.toLocaleString()}
+                  </p>
+                )}
+                <p className="text-2xl font-bold text-yellow-500 bg-yellow-50 rounded-md p-1 inline-block">
+                  ₹{pkg.price.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-600">/person</p>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                <SuitabilityBar
+                  label="Couples"
+                  sublabel="For Newlywed Vacations"
+                  percentage={pkg.suitability.couples}
+                  icon={
+                    <svg
+                      className="w-6 h-6 text-pink-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
+                    </svg>
+                  }
+                />
+                <SuitabilityBar
+                  label="Family"
+                  sublabel="For Family Vacations"
+                  percentage={pkg.suitability.family}
+                  icon={
+                    <svg
+                      className="w-6 h-6 text-blue-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                  }
+                />
+              </div>
+              {pkg.recentBookings > 0 && (
+                <div className="mt-3 flex items-center justify-center">
+                  <div className="flex -space-x-1">
+                    <img
+                      className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
+                      src="https://placehold.co/32x32/FFC107/FFFFFF/png?text=A"
+                      alt="User A"
+                    />
+                    <img
+                      className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
+                      src="https://placehold.co/32x32/4CAF50/FFFFFF/png?text=B"
+                      alt="User B"
+                    />
+                    <img
+                      className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
+                      src="https://placehold.co/32x32/2196F3/FFFFFF/png?text=C"
+                      alt="User C"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-600 ml-1">
+                    {pkg.recentBookings}+ bookings in past month
+                  </p>
+                </div>
+              )}
             </div>
           </div>
-        )}
+
+          {/* Sights Scroller - pushed to bottom */}
+          {pkg.sights && pkg.sights.length > 0 && (
+            <div className="mt-auto pt-3 border-t border-gray-200">
+              <div className="relative">
+                <div className="flex space-x-4 overflow-x-auto pb-1 scrollbar-hide">
+                  {pkg.sights.map((sight: any, idx: number) => (
+                    <span key={idx} className="text-xs text-gray-700 font-medium flex-shrink-0">
+                      {typeof sight === 'string' ? sight : sight.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Link>  // ✅ CLOSE LINK
   );
 };
 

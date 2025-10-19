@@ -129,6 +129,8 @@ export const TravelPackageExplorer = async (props: TravelPackageExplorerProps) =
 
       return {
         id: pkg.id,
+        slug: pkg.slug,  // ✅ ADD
+        href: `/packages/${pkg.slug}`,  // ✅ ADD
         title: pkg.name,
         location: firstDest?.name || pkg.summary || '',
         description: pkg.summary || '',

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import type { Media as MediaType, Package, Review } from '@/payload-types'
 import { Media } from '@/components/Media'
+import Link from 'next/link'
 
 const StarIcon = () => (
   <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -229,9 +230,13 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                       <DownloadIcon />
                     </button>
                   )}
-                  <button className="bg-white text-black font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors">
+                  <Link 
+                    href="/curate"
+                    className="bg-white text-black font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors inline-block text-center"
+                  >
                     {bookNowLabel}
-                  </button>
+                  </Link>
+
                 </div>
               </div>
             </div>

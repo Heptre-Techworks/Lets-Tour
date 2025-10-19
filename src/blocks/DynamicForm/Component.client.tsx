@@ -21,6 +21,7 @@ type DynamicFormClientProps = {
   fields?: FormField[];
   submitButtonText?: string;
   successMessage?: string;
+  packageOptions?: Array<{ label: string; value: string }>;
 };
 
 export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
@@ -30,11 +31,13 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
   fields = [],
   submitButtonText = 'Submit',
   successMessage = "Thank you! We'll get back to you soon.",
+  packageOptions = [],
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -47,16 +50,11 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
     }
   };
 
-  /**
-   * SMART DATA TRANSFORMER
-   * Automatically handles nested fields and type conversions
-   */
   const transformFormData = (data: Record<string, any>, type: string) => {
     const transformed: Record<string, any> = {};
 
-    // Process each field
+    // Handle nested fields
     Object.entries(data).forEach(([key, value]) => {
-      // Handle nested fields (e.g., "contactDetails.phone" → contactDetails: { phone: value })
       if (key.includes('.')) {
         const parts = key.split('.');
         const parentKey = parts[0];
@@ -66,7 +64,6 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
           transformed[parentKey] = {};
         }
 
-        // Handle deep nesting
         if (childKey.includes('.')) {
           const childParts = childKey.split('.');
           let current = transformed[parentKey];
@@ -85,42 +82,30 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
       }
     });
 
-    // Convert number strings to actual numbers
+    // Convert number strings to numbers
     Object.entries(transformed).forEach(([key, value]) => {
       if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
-        // Check if the field name suggests it should be a number
         if (['price', 'amount', 'rating', 'adults', 'children', 'infants', 'people', 'total'].some(keyword => key.toLowerCase().includes(keyword))) {
           transformed[key] = Number(value);
         }
       }
     });
 
-    // Type-specific defaults and validations
+    // Booking-specific defaults
     if (type === 'booking') {
-      // Set required defaults for bookings
       if (!transformed.totalPrice) transformed.totalPrice = 0;
+      if (!transformed.paidAmount) transformed.paidAmount = 0;
       if (!transformed.currency) transformed.currency = 'INR';
       if (!transformed.status) transformed.status = 'pending';
       if (!transformed.paymentStatus) transformed.paymentStatus = 'pending';
+      if (!transformed.bookingDate) transformed.bookingDate = new Date().toISOString();
       
-      // Ensure numberOfPeople has defaults
       if (transformed.numberOfPeople && typeof transformed.numberOfPeople === 'object') {
         transformed.numberOfPeople = {
           adults: Number(transformed.numberOfPeople.adults) || 1,
           children: Number(transformed.numberOfPeople.children) || 0,
           infants: Number(transformed.numberOfPeople.infants) || 0,
         };
-      }
-    }
-
-    if (type === 'review') {
-      // Ensure rating is a number
-      if (transformed.rating && typeof transformed.rating === 'string') {
-        transformed.rating = Number(transformed.rating);
-      }
-      // Default published to false for moderation
-      if (transformed.published === undefined) {
-        transformed.published = false;
       }
     }
 
@@ -169,6 +154,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
 
       setSubmitStatus('success');
       setFormData({});
+      setSearchQuery('');
     } catch (error: any) {
       console.error('❌ Form submission error:', error);
       setSubmitStatus('error');
@@ -209,6 +195,47 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
           );
 
         case 'select':
+          // Enhanced select with search for package field
+          if (field.name === 'package' && packageOptions.length > 0) {
+            const filteredOptions = packageOptions.filter(opt =>
+              opt.label.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+            return (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  placeholder="🔍 Search packages by name, duration, or price..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`${inputClasses} bg-gray-50`}
+                />
+                <select
+                  name={field.name}
+                  value={formData[field.name] || ''}
+                  onChange={handleChange}
+                  required={field.required}
+                  className={`${inputClasses} ${!formData[field.name] ? 'text-gray-400' : 'text-gray-900'}`}
+                  size={Math.min(filteredOptions.length + 1, 8)}
+                >
+                  <option value="">-- Select a package --</option>
+                  {filteredOptions.map((option, idx) => (
+                    <option key={idx} value={option.value} className="text-gray-900">
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {filteredOptions.length === 0 && searchQuery && (
+                  <p className="text-sm text-red-500">No packages found matching &quot;{searchQuery}&quot;</p>
+                )}
+                {filteredOptions.length > 0 && (
+                  <p className="text-xs text-gray-500">Showing {filteredOptions.length} of {packageOptions.length} packages</p>
+                )}
+              </div>
+            );
+          }
+
+          // Regular select
           return (
             <select
               name={field.name}
@@ -309,10 +336,13 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
           <h3 className="text-2xl font-semibold text-green-900 mb-2">Success!</h3>
           <p className="text-lg text-green-700">{successMessage}</p>
           <button
-            onClick={() => setSubmitStatus('idle')}
+            onClick={() => {
+              setSubmitStatus('idle');
+              setSearchQuery('');
+            }}
             className="mt-6 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            Submit Another Response
+            Submit Another Booking
           </button>
         </div>
       ) : (
@@ -323,8 +353,15 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
 
           {submitStatus === 'error' && (
             <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="font-bold text-red-900 mb-2">Submission Error:</div>
-              <p className="text-red-700 text-sm whitespace-pre-wrap">{errorMessage}</p>
+              <div className="flex items-start">
+                <svg className="w-5 h-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <div className="font-bold text-red-900 mb-1">Submission Error</div>
+                  <p className="text-red-700 text-sm whitespace-pre-wrap">{errorMessage}</p>
+                </div>
+              </div>
             </div>
           )}
 

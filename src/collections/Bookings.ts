@@ -4,8 +4,8 @@ import type { CollectionConfig, FieldAccess } from 'payload'
 const canReadBookingUser: FieldAccess = ({ req, doc }) => {
   const user = req?.user
   if (!user) return false
-  if (!doc) return user.role === 'agent'
-  return user.id === doc.user || user.role === 'agent'
+  if (!doc) return user.role === 'agent'||user.role === 'admin'
+  return user.id === doc.user || user.role === 'agent'||user.role === 'admin'
 }
 
 export const Bookings: CollectionConfig = {
@@ -21,12 +21,12 @@ export const Bookings: CollectionConfig = {
     read: ({ req }) => {
       const user = req?.user
       if (!user) return false
-      if (user.role === 'agent') return true
+      if (user.role === 'agent'||user.role === 'admin') return true
       return { user: { equals: user.id } }
     },
     create: () => true,  // ✅ Changed to allow public booking requests
-    update: ({ req }) => req?.user?.role === 'agent',
-    delete: ({ req }) => req?.user?.role === 'agent',
+    update: ({ req }) => req?.user?.role === 'agent'||req?.user?.role === 'admin',
+    delete: ({ req }) => req?.user?.role === 'agent'||req?.user?.role === 'admin',
   },
 
   fields: [
