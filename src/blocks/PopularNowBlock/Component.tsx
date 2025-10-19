@@ -83,6 +83,7 @@ export const PopularNow = async (props: PopularNowBlock) => {
           image: card.image,
           imageUrl: getImageUrl(card.image),
           alt: card.alt || card.name,
+          href: '#',  // ✅ Manual cards have no slug
         }))
         
         return {
@@ -125,6 +126,8 @@ export const PopularNow = async (props: PopularNowBlock) => {
               image: dest.featuredImage,
               imageUrl: getImageUrl(dest.featuredImage),
               alt: dest.name,
+              slug: dest.slug,  // ✅ ADD
+              href: `/destinations/${dest.slug}`,  // ✅ ADD
             }
           })
         }
@@ -160,6 +163,8 @@ export const PopularNow = async (props: PopularNowBlock) => {
               image: pkg.heroImage,
               imageUrl: getImageUrl(pkg.heroImage),
               alt: pkg.name,
+              slug: pkg.slug,  // ✅ ADD
+              href: `/packages/${pkg.slug}`,  // ✅ ADD
             }
           })
         }

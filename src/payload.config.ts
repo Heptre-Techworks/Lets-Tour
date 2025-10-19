@@ -41,6 +41,7 @@ import Regions from './collections/Regions'
 import { Reviews } from './collections/Reviews'
 import { SocialPosts } from './collections/SocialPosts'
 import Vibes from './collections/Vibes'
+import { autoRevalidatePlugin } from './plugins/autoValidate'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -98,6 +99,7 @@ export default buildConfig({
   globals: [Header, Footer, SearchFilters, PackageLayout, DestinationLayout],
   plugins: [
     ...plugins,
+    autoRevalidatePlugin,
 
     // S3 Storage for Payload (v3) — map collection slugs to S3
     s3Storage({

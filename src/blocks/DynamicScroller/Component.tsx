@@ -47,6 +47,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
             image: item.image,
             tag: item.tag,
             tagColor: item.tagColor,
+            href: '#',  // Manual items have no slug
           }))
           console.log('📝 Using manual items:', sectionData.items.length)
         } else {
@@ -123,6 +124,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
                 image: typeof pkg.heroImage === 'object' ? pkg.heroImage : null,
                 tag: labelObj?.name || '',
                 tagColor: labelObj?.color || 'bg-orange-400 text-white',
+                slug: pkg.slug,  // ✅ ADD
+                href: `/packages/${pkg.slug}`,  // ✅ ADD
               }
             })
 
@@ -160,6 +163,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
             image: item.image,
             tag: item.tag,
             tagColor: item.tagColor,
+            href: '#',  // Manual items have no slug
           }))
           console.log('📝 Using manual destination items:', sectionData.items.length)
         } else {
@@ -204,6 +208,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
                 image: typeof dest.featuredImage === 'object' ? dest.featuredImage : null,
                 tag,
                 tagColor,
+                slug: dest.slug,  // ✅ ADD
+                href: `/destinations/${dest.slug}`,  // ✅ ADD
               }
             })
 
@@ -270,6 +276,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
                   image: typeof pkg.heroImage === 'object' ? pkg.heroImage : null,
                   tag,
                   tagColor,
+                  slug: pkg.slug,  // ✅ ADD
+                  href: `/packages/${pkg.slug}`,  // ✅ ADD
                 }
               })
 

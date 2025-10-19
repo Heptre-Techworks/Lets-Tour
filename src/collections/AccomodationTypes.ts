@@ -46,14 +46,6 @@ export const AccommodationTypes: CollectionConfig = {
       type: 'textarea',
     },
   ],
-  hooks: {
-      afterChange: [   // Your existing specific hook
-        revalidateSite,       // ✅ Add global revalidation
-      ],
-      afterDelete: [  // Your existing hook
-        revalidateSiteOnDelete,     // ✅ Add global revalidation
-      ],
-    },
 }
 
 export default AccommodationTypes

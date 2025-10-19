@@ -3,8 +3,9 @@
 
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 
-// Types
+// Types (unchanged)
 type MediaSize = { url?: string | null; width?: number; height?: number }
 type Media =
   | {
@@ -20,6 +21,8 @@ type Media =
 
 type Item = {
   blockType: 'packageItem' | 'itineraryDay' | 'destinationItem'
+  slug?: string
+  href?: string
   [key: string]: any
 }
 
@@ -48,7 +51,7 @@ type Section = {
   vibes?: VibeGroup[]
 }
 
-// Utils
+// Utils (unchanged)
 function resolveMediaUrl(media: Media): string | undefined {
   if (media && typeof media === 'object' && 'id' in media) {
     const m = media as Exclude<Media, string | null | undefined> & { id: string }
@@ -71,7 +74,7 @@ function resolveMediaAlt(media: Media, fallback: string): string {
   return fallback
 }
 
-// Icons
+// Icons (unchanged)
 const ChevronLeft: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <polyline points="15 18 9 12 15 6" />
@@ -101,16 +104,26 @@ const DashedRule: React.FC<{ className?: string }> = ({ className }) => {
   return <div style={style} className={className} aria-hidden />
 }
 
-// Package Card
+// ✅ FIXED Package Card - proper Link structure
 const PackageCard: React.FC<{ item: any }> = ({ item }) => {
   const title = item.title || ''
   const image = item.image
   const price = item.price || '0'
+  const href = item.href || '#'
   const src = resolveMediaUrl(image)
   const alt = resolveMediaAlt(image, title)
 
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // Add to favorites logic here
+  }
+
   return (
-    <div className="relative w-72 h-96 flex-shrink-0 snap-center rounded-2xl shadow-lg overflow-hidden group bg-black/5">
+    <Link 
+      href={href}
+      className="relative w-72 h-96 flex-shrink-0 snap-center rounded-2xl shadow-lg overflow-hidden group bg-black/5 block hover:shadow-2xl transition-shadow duration-300"
+    >
       {src ? (
         <img
           src={src}
@@ -131,11 +144,15 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
         </div>
       )}
 
-      <div className="absolute top-4 right-4 bg-black/30 p-2 rounded-full cursor-pointer">
+      <button
+        onClick={handleHeartClick}
+        className="absolute top-4 right-4 bg-black/30 p-2 rounded-full cursor-pointer hover:bg-black/50 transition-colors"
+        aria-label="Add to favorites"
+      >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
         </svg>
-      </div>
+      </button>
 
       <div className="absolute bottom-0 left-0 p-5 text-white w-full">
         <h3 className="text-3xl font-bold font-amiri">{title}</h3>
@@ -145,20 +162,30 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
           <span className="font-bold text-lg">₹ {price}</span> /person
         </p>
       </div>
-    </div>
+    </Link>
   )
 }
 
-// Destination Card (same layout as PackageCard)
+// ✅ FIXED Destination Card - proper Link structure
 const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
   const title = item.title || ''
   const image = item.image
   const price = item.price || '0'
+  const href = item.href || '#'
   const src = resolveMediaUrl(image)
   const alt = resolveMediaAlt(image, title)
 
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // Add to favorites logic here
+  }
+
   return (
-    <div className="relative w-72 h-96 flex-shrink-0 snap-center rounded-2xl shadow-lg overflow-hidden group bg-black/5">
+    <Link 
+      href={href}
+      className="relative w-72 h-96 flex-shrink-0 snap-center rounded-2xl shadow-lg overflow-hidden group bg-black/5 block hover:shadow-2xl transition-shadow duration-300"
+    >
       {src ? (
         <img
           src={src}
@@ -179,11 +206,15 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
         </div>
       )}
 
-      <div className="absolute top-4 right-4 bg-black/30 p-2 rounded-full cursor-pointer">
+      <button
+        onClick={handleHeartClick}
+        className="absolute top-4 right-4 bg-black/30 p-2 rounded-full cursor-pointer hover:bg-black/50 transition-colors"
+        aria-label="Add to favorites"
+      >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
         </svg>
-      </div>
+      </button>
 
       <div className="absolute bottom-0 left-0 p-5 text-white w-full">
         <h3 className="text-3xl font-bold font-amiri">{title}</h3>
@@ -193,11 +224,11 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
           <span className="font-bold text-lg">{price}</span> /person
         </p>
       </div>
-    </div>
+    </Link>
   )
 }
 
-// Itinerary Card
+// Itinerary Card (unchanged)
 const ItineraryCard: React.FC<{ item: any }> = ({ item }) => {
   const activities = item.activities || []
   return (
@@ -228,7 +259,7 @@ const ItineraryCard: React.FC<{ item: any }> = ({ item }) => {
   )
 }
 
-// Vibe Section (special layout like your image)
+// Vibe Section (unchanged)
 const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   const vibes = section.vibes || []
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -288,7 +319,7 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
               </div>
 
               <div className="mt-2 text-right text-sm text-gray-600">
-                {vibe.items.length} packages • {vibe.items.length > 0 ? '1' : '0'}/{vibe.items.length}
+                {vibe.items.length} packages
               </div>
             </div>
           ))}
@@ -298,14 +329,13 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   )
 }
 
-// Dynamic Section Component
+// Dynamic Section Component (rest of code - unchanged except using new cards)
 const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   const pathname = usePathname()
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [currentIndex, setCurrentIndex] = useState(1)
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Slug replacement
   const formattedSlug = useMemo(() => {
     const segments = pathname.split('/').filter(Boolean)
     const rawSlug = segments[segments.length - 1] || ''
@@ -361,7 +391,6 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
 
   const navEnabled = Boolean(section.navigation)
 
-  // Handle undefined type or no items
   if (!section.type || items.length === 0) {
     return (
       <section className={`relative overflow-hidden ${section?.theme?.background || 'bg-white'} py-12`}>
@@ -466,12 +495,10 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ secti
     `}</style>
     <div className="min-h-screen font-sans">
       {sections.map((section, idx) => {
-        // Render special Vibe Section layout
         if (section.type === 'vibe') {
           return <VibeSection key={section?.id || `vibe-${idx}`} section={section} />
         }
         
-        // Render standard sections
         return (
           <DynamicSection 
             key={typeof section?.id === 'string' ? section.id : `section-${idx}`} 

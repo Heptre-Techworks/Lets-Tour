@@ -531,11 +531,11 @@ export const Packages: CollectionConfig = {
   hooks: {
     afterChange: [
       revalidatePackage,    // Your existing specific hook
-      revalidateSite,       // ✅ Add global revalidation
+             // ✅ Add global revalidation
     ],
     afterDelete: [
       revalidatePackageDelete,    // Your existing hook
-      revalidateSiteOnDelete,     // ✅ Add global revalidation
+           // ✅ Add global revalidation
     ],
   },
 }

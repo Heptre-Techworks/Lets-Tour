@@ -51,13 +51,5 @@ export const Users: CollectionConfig = {
     { name: 'marketingOptIn', type: 'checkbox', defaultValue: false },
   ],
   timestamps: true,
-  hooks: {
-    afterChange: [   // Your existing specific hook
-      revalidateSite,       // ✅ Add global revalidation
-    ],
-    afterDelete: [  // Your existing hook
-      revalidateSiteOnDelete,     // ✅ Add global revalidation
-    ],
-  },
 }
 export default Users

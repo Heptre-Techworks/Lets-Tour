@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 type MediaLike = { url?: string | null; alt?: string | null };
 
@@ -10,6 +11,8 @@ type CardData = {
   image?: MediaLike | string | null;
   imageUrl?: string | null;
   alt?: string | null;
+  slug?: string;  // ✅ ADD
+  href?: string;  // ✅ ADD
 }
 
 type RowData = {
@@ -26,19 +29,27 @@ const getImageSrc = (card: CardData) => {
   return '';
 };
 
-const DestinationCard: React.FC<{ name: string; price: string; src: string; alt?: string | null }> = ({
+// ✅ UPDATED: Wrap with Link component
+const DestinationCard: React.FC<{ 
+  name: string; 
+  price: string; 
+  src: string; 
+  alt?: string | null;
+  href?: string;  // ✅ ADD
+}> = ({
   name,
   price,
   src,
   alt,
+  href,
 }) => {
-  return (
+  const cardContent = (
     <li className="relative w-[300px] sm:w-[350px] md:w-[400px] h-64 flex-shrink-0">
       {src ? (
         <img 
           src={src} 
           alt={alt || name} 
-          className="w-full h-full object-cover rounded-2xl shadow-lg"
+          className="w-full h-full object-cover rounded-2xl shadow-lg transition-transform duration-300 group-hover:scale-110"
         />
       ) : (
         <div className="w-full h-full bg-gradient-to-br from-orange-400 to-pink-500 rounded-2xl shadow-lg flex items-center justify-center">
@@ -57,6 +68,21 @@ const DestinationCard: React.FC<{ name: string; price: string; src: string; alt?
       </div>
     </li>
   );
+
+  // ✅ If href exists, wrap with Link
+  if (href && href !== '#') {
+    return (
+      <Link 
+        href={href}
+        className="group block hover:shadow-2xl transition-shadow duration-300"
+      >
+        {cardContent}
+      </Link>
+    );
+  }
+
+  // ✅ Otherwise, return card without link (for manual entries without slug)
+  return cardContent;
 };
 
 const InfiniteScroller: React.FC<{
@@ -232,6 +258,7 @@ export const PopularNowClient: React.FC<{
                     price={card?.price ?? ''}
                     src={getImageSrc(card)}
                     alt={card?.alt ?? card?.name}
+                    href={card?.href}  // ✅ PASS HREF
                   />
                 ))}
               </InfiniteScroller>

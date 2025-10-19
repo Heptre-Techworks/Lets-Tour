@@ -392,8 +392,8 @@ export const Destinations: CollectionConfig = {
   ],
 
   hooks: {
-    afterChange: [revalidateDestination,revalidateSite],
-    afterDelete: [revalidateDestinationDelete,revalidateSiteOnDelete],
+    afterChange: [revalidateDestination,],
+    afterDelete: [revalidateDestinationDelete,],
   },
   
 }

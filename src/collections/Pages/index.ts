@@ -138,9 +138,9 @@ export const Pages: CollectionConfig<'pages'> = {
     ...slugField(),
   ],
   hooks: {
-    afterChange: [revalidatePage,revalidateSite],
+    afterChange: [revalidatePage],
     beforeChange: [populatePublishedAt],
-    afterDelete: [revalidateDelete,revalidateSiteOnDelete],
+    afterDelete: [revalidateDelete],
   },
   versions: {
     drafts: {
