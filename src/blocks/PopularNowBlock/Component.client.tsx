@@ -2,6 +2,14 @@
 
 import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { Amiri } from 'next/font/google';
+
+// Configure Amiri font for title only
+const amiri = Amiri({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+});
 
 type MediaLike = { url?: string | null; alt?: string | null };
 
@@ -11,8 +19,8 @@ type CardData = {
   image?: MediaLike | string | null;
   imageUrl?: string | null;
   alt?: string | null;
-  slug?: string;  // ✅ ADD
-  href?: string;  // ✅ ADD
+  slug?: string;
+  href?: string;
 }
 
 type RowData = {
@@ -29,13 +37,12 @@ const getImageSrc = (card: CardData) => {
   return '';
 };
 
-// ✅ UPDATED: Wrap with Link component
 const DestinationCard: React.FC<{ 
   name: string; 
   price: string; 
   src: string; 
   alt?: string | null;
-  href?: string;  // ✅ ADD
+  href?: string;
 }> = ({
   name,
   price,
@@ -49,7 +56,7 @@ const DestinationCard: React.FC<{
         <img 
           src={src} 
           alt={alt || name} 
-          className="w-full h-full object-cover rounded-2xl shadow-lg transition-transform duration-300 group-hover:scale-110"
+          className="w-full h-full object-cover rounded-2xl shadow-lg"
         />
       ) : (
         <div className="w-full h-full bg-gradient-to-br from-orange-400 to-pink-500 rounded-2xl shadow-lg flex items-center justify-center">
@@ -69,19 +76,17 @@ const DestinationCard: React.FC<{
     </li>
   );
 
-  // ✅ If href exists, wrap with Link
   if (href && href !== '#') {
     return (
       <Link 
         href={href}
-        className="group block hover:shadow-2xl transition-shadow duration-300"
+        className="block hover:shadow-2xl transition-shadow duration-300"
       >
         {cardContent}
       </Link>
     );
   }
 
-  // ✅ Otherwise, return card without link (for manual entries without slug)
   return cardContent;
 };
 
@@ -220,10 +225,18 @@ export const PopularNowClient: React.FC<{
         <div className="max-w-7xl mx-auto">
           <header>
             <div className="flex items-center gap-6">
-              <h1 className="text-5xl md:text-6xl font-bold flex-shrink-0">{heading}</h1>
+              {/* Apply Amiri font to heading only */}
+              <h1 className={`${amiri.className} text-5xl md:text-6xl font-bold flex-shrink-0`}>
+                {heading}
+              </h1>
               <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
             </div>
-            {subheading ? <p className="text-lg text-gray-500 mt-2">{subheading}</p> : null}
+            {/* Subtitle without custom font */}
+            {subheading ? (
+              <p className="text-lg text-gray-500 mt-2">
+                {subheading}
+              </p>
+            ) : null}
           </header>
         </div>
       </div>
@@ -258,7 +271,7 @@ export const PopularNowClient: React.FC<{
                     price={card?.price ?? ''}
                     src={getImageSrc(card)}
                     alt={card?.alt ?? card?.name}
-                    href={card?.href}  // ✅ PASS HREF
+                    href={card?.href}
                   />
                 ))}
               </InfiniteScroller>

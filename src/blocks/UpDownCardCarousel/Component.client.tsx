@@ -1,7 +1,7 @@
-// src/blocks/UpDownCarousel/Component.client.tsx
 'use client';
 
 import React, { useRef } from 'react';
+import Link from 'next/link';  // ✅ ADD
 
 // Narrow media shape from Payload Upload relation
 type MediaLike = { 
@@ -41,7 +41,7 @@ const getImageSrc = (img?: MediaLike | string | null, url?: string | null) => {
   return '';
 };
 
-const HeartIcon: React.FC<{ isFavorite: boolean; onClick: () => void }> = ({ isFavorite, onClick }) => (
+const HeartIcon: React.FC<{ isFavorite: boolean; onClick: (e: React.MouseEvent) => void }> = ({ isFavorite, onClick }) => (
   <svg
     onClick={onClick}
     className={`w-6 h-6 cursor-pointer transition-all duration-300 ease-in-out ${isFavorite ? 'text-red-500 fill-current' : 'text-white'}`}
@@ -95,6 +95,7 @@ const DashedRule: React.FC<{ className?: string }> = ({ className }) => {
   return <div style={style} className={className} aria-hidden />;
 };
 
+// ✅ UPDATED: Wrap with Link and handle heart click properly
 const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isEven }) => {
   const [isFavorite, setIsFavorite] = React.useState(false);
 
@@ -112,14 +113,32 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
 
   const href = card?.href || '#';
 
+  // ✅ Handle heart click - prevent navigation
+  const handleHeartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsFavorite(v => !v);
+  };
+
+  // ✅ Handle arrow click - navigate
+  const handleArrowClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Link will handle navigation
+  };
+
   return (
-    <div
-      className={`relative flex-shrink-0 w-[280px] h-[400px] rounded-2xl shadow-xl group transform transition-all duration-300 hover:scale-[1.02] ${
+    <Link
+      href={href}
+      className={`block relative flex-shrink-0 w-[280px] h-[400px] rounded-2xl shadow-xl group transform transition-all duration-300 hover:scale-[1.02] ${
         isEven ? '-translate-y-4' : 'translate-y-4'
       }`}
     >
       {imgSrc ? (
-        <img src={imgSrc} alt={alt ?? 'Image'} className="w-full h-full object-cover transition-transform duration-300 rounded-2xl" />
+        <img 
+          src={imgSrc} 
+          alt={alt ?? 'Image'} 
+          className="w-full h-full object-cover transition-transform duration-300 rounded-2xl group-hover:scale-105" 
+        />
       ) : (
         <div className="w-full h-full bg-gray-300 rounded-2xl" aria-hidden="true" />
       )}
@@ -133,11 +152,18 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
           ) : (
             <span />
           )}
-          <HeartIcon isFavorite={isFavorite} onClick={() => setIsFavorite(v => !v)} />
+          <button
+            onClick={handleHeartClick}
+            className="z-10 relative"
+            aria-label="Add to favorites"
+            type="button"
+          >
+            <HeartIcon isFavorite={isFavorite} onClick={handleHeartClick} />
+          </button>
         </div>
 
         <div className="mt-auto">
-          <h3 className="text-3xl font-bold">{card?.name ?? ''}</h3>
+          <h3 className="text-3xl font-bold group-hover:text-yellow-300 transition-colors">{card?.name ?? ''}</h3>
           {card?.details ? <p className="text-sm opacity-90">{card.details}</p> : null}
           {card?.details && <div className="w-full h-px bg-white/30 my-3" />}
           <div className="flex justify-between items-center mt-2">
@@ -149,14 +175,14 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
         </div>
       </div>
 
-      <a
-        href={href}
-        className="absolute bottom-0 right-0 transform translate-x-1/2 translate-y-1/2 bg-white text-black rounded-full w-10 h-10 flex items-center justify-center transition-all duration-300 hover:bg-gray-200 hover:scale-110 shadow-lg z-10 border-2 border-black"
+      <span
+        onClick={handleArrowClick}
+        className="absolute bottom-0 right-0 transform translate-x-1/2 translate-y-1/2 bg-white text-black rounded-full w-10 h-10 flex items-center justify-center transition-all duration-300 group-hover:bg-yellow-400 group-hover:scale-110 shadow-lg z-10 border-2 border-black"
         aria-label={`View details for ${card?.name}`}
       >
         <ArrowRightIcon />
-      </a>
-    </div>
+      </span>
+    </Link>
   );
 };
 
