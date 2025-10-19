@@ -7,11 +7,11 @@ import type { DynamicScrollerBlock } from '@/payload-types'
 
 export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock) => {
   const { sections = [] } = props
-  
-  const sectionsArray = Array.isArray(sections) ? sections : []
 
   console.log('🔍 DynamicScroller received props:', Object.keys(props))
-  console.log('📋 RAW SECTION DATA:', JSON.stringify(sectionsArray, null, 2))
+  console.log('📋 Sections count:', sections==null?0:sections.length)
+
+  const sectionsArray = Array.isArray(sections) ? sections : []
 
   const processedSections = await Promise.all(
     sectionsArray.map(async (section: any, idx) => {
@@ -19,7 +19,6 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
       
       console.log(`📦 Section ${idx}:`, {
         blockType,
-        populateBy: section.populatePackagesBy || section.populateDestinationsBy || section.vibes,
         allKeys: Object.keys(section),
       })
 
@@ -47,7 +46,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
             image: item.image,
             tag: item.tag,
             tagColor: item.tagColor,
-            href: '#',  // Manual items have no slug
+            href: '#',
           }))
           console.log('📝 Using manual items:', sectionData.items.length)
         } else {
@@ -124,8 +123,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
                 image: typeof pkg.heroImage === 'object' ? pkg.heroImage : null,
                 tag: labelObj?.name || '',
                 tagColor: labelObj?.color || 'bg-orange-400 text-white',
-                slug: pkg.slug,  // ✅ ADD
-                href: `/packages/${pkg.slug}`,  // ✅ ADD
+                slug: pkg.slug,
+                href: `/packages/${pkg.slug}`,
               }
             })
 
@@ -163,7 +162,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
             image: item.image,
             tag: item.tag,
             tagColor: item.tagColor,
-            href: '#',  // Manual items have no slug
+            href: '#',
           }))
           console.log('📝 Using manual destination items:', sectionData.items.length)
         } else {
@@ -208,8 +207,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
                 image: typeof dest.featuredImage === 'object' ? dest.featuredImage : null,
                 tag,
                 tagColor,
-                slug: dest.slug,  // ✅ ADD
-                href: `/destinations/${dest.slug}`,  // ✅ ADD
+                slug: dest.slug,
+                href: `/destinations/${dest.slug}`,
               }
             })
 
@@ -276,8 +275,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
                   image: typeof pkg.heroImage === 'object' ? pkg.heroImage : null,
                   tag,
                   tagColor,
-                  slug: pkg.slug,  // ✅ ADD
-                  href: `/packages/${pkg.slug}`,  // ✅ ADD
+                  slug: pkg.slug,
+                  href: `/packages/${pkg.slug}`,
                 }
               })
 
@@ -301,7 +300,10 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
 
       // ==================== ITINERARY SECTION ====================
       if (blockType === 'itinerarySection' || section.itinerarySource) {
-        console.log('📅 Processing Itinerary Section')
+        console.log('📅 Processing Itinerary Section:', {
+          source: section.itinerarySource,
+          hasRelation: !!section.packageRelation,
+        })
 
         const sectionData: any = {
           type: 'itinerary',
@@ -310,6 +312,9 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
           theme: section.theme,
           navigation: section.showNavigation ? {} : undefined,
           items: [],
+          // ✅ Pass these to client for auto-fetch
+          itinerarySource: section.itinerarySource,
+          packageRelation: section.packageRelation,
         }
 
         if (section.itinerarySource === 'manual') {
@@ -320,6 +325,47 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
             activities: day.activities || [],
           }))
           console.log('📝 Using manual itinerary days:', sectionData.items.length)
+        } 
+        else if (section.itinerarySource === 'package' && section.packageRelation) {
+          // Specific package selected - fetch on server
+          try {
+            const payload = await getPayload({ config: configPromise })
+            const packageId = typeof section.packageRelation === 'object' 
+              ? section.packageRelation.id 
+              : section.packageRelation
+            
+            console.log('🔍 Fetching itinerary for package ID:', packageId)
+            
+            const packageDoc = await payload.findByID({
+              collection: 'packages',
+              id: packageId,
+              depth: 2,
+            })
+
+            if (packageDoc?.itinerary) {
+              sectionData.items = (packageDoc.itinerary || []).map((day: any, idx: number) => ({
+                blockType: 'itineraryDay' as const,
+                id: day.id || `day-${idx}`,
+                day: day.dayTitle || day.day || `Day ${idx + 1}`,
+                activities: (day.activities || []).map((activity: any) => ({
+                  icon: activity.icon,
+                  description: activity.description || activity.text || '',
+                  detailsImage: activity.image || activity.detailsImage,
+                })),
+              }))
+              
+              console.log(`✅ Loaded ${sectionData.items.length} days from selected package`)
+            } else {
+              console.warn('⚠️ Package has no itinerary data')
+            }
+          } catch (error) {
+            console.error('❌ Error fetching package itinerary:', error)
+          }
+        }
+        // ✅ Auto mode - client will fetch based on URL
+        else if (section.itinerarySource === 'package') {
+          console.log('⏳ Package auto mode - client will fetch based on URL')
+          // Items will be empty, client will populate via useEffect
         }
 
         return sectionData
@@ -335,7 +381,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
 
   console.log('🎬 Final processed sections:', processedSections.map(s => ({ 
     type: s.type, 
-    itemCount: s.items?.length || s.vibes?.length || 0 
+    itemCount: s.items?.length || s.vibes?.length || 0,
+    itinerarySource: s.itinerarySource,
   })))
 
   return <DynamicScrollerClient sections={processedSections} />

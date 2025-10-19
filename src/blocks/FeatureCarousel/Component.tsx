@@ -1,138 +1,168 @@
-'use client';
+import React from 'react'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
+import { FeatureCarouselClient } from './Component.client'
+import type { FeatureCarouselBlock } from '@/payload-types'
 
-import React, { useState, useRef, useEffect } from 'react';
-import type { FeatureCarouselBlock as FeatureCarouselBlockProps } from '@/payload-types';
+type FeatureCarouselProps = FeatureCarouselBlock
 
-// Card component
-const Card: React.FC<{ title: string; description: string }> = ({ title, description }) => (
-  <div className="flex-shrink-0 w-64 h-80 bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between m-4">
-    <div>
-      <h3 className="text-xl font-bold text-gray-800 mb-2">{title}</h3>
-      <p className="text-gray-600 text-sm">{description}</p>
-    </div>
-  </div>
-);
+export const FeatureCarousel = async (props: FeatureCarouselProps) => {
+  const { dataSource, package: pkgProp, featureSource, ...manualData } = props as any
 
-// Main component
-export const FeatureCarousel: React.FC<FeatureCarouselBlockProps> = ({
-  heading = 'Discover Our Features',
-  subheading = 'Explore the powerful tools that make our platform the best choice for you.',
-  cards = [],
-  showNavigationButtons = true,
-  scrollPercentage = 80,
-}) => {
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [maxScroll, setMaxScroll] = useState(0);
+  console.log('🎠 FeatureCarousel server props:', {
+    dataSource,
+    featureSource,
+    hasPackage: !!pkgProp,
+    packageType: typeof pkgProp,
+  })
 
-  useEffect(() => {
-    const calculateWidths = () => {
-      if (containerRef.current) {
-        const container = containerRef.current;
-        const scrollWidth = container.scrollWidth;
-        const clientWidth = container.clientWidth;
-        setContainerWidth(clientWidth);
-        setMaxScroll(scrollWidth - clientWidth);
-      }
-    };
-
-    calculateWidths();
-    window.addEventListener('resize', calculateWidths);
-
-    return () => {
-      window.removeEventListener('resize', calculateWidths);
-    };
-  }, [cards]);
-
-  const handleScroll = (direction: 'left' | 'right') => {
-    const scrollAmount = containerWidth * ((scrollPercentage || 80) / 100);
-    let newScrollPosition =
-      direction === 'left' ? scrollPosition - scrollAmount : scrollPosition + scrollAmount;
-
-    newScrollPosition = Math.max(0, Math.min(newScrollPosition, maxScroll));
-    setScrollPosition(newScrollPosition);
-  };
-
-  if (!Array.isArray(cards) || cards.length === 0) {
-    return null;
+  // Manual mode - return as-is
+  if (dataSource === 'manual') {
+    console.log('📝 Using manual mode')
+    return (
+      <FeatureCarouselClient 
+        {...manualData} 
+        dataSource="manual"
+      />
+    )
   }
 
+  // Auto mode - pass to client for URL-based fetching
+  if (dataSource === 'auto') {
+    console.log('🔄 Auto mode - client will fetch from URL')
+    return (
+      <FeatureCarouselClient 
+        dataSource="auto"
+        featureSource={featureSource || 'highlights'}
+        heading=""
+        subheading=""
+        cards={[]}
+        showNavigationButtons={manualData.showNavigationButtons ?? true}
+        scrollPercentage={manualData.scrollPercentage ?? 80}
+      />
+    )
+  }
+
+  // Package selection mode - fetch on server
+  if (dataSource === 'package' && pkgProp) {
+    const payload = await getPayload({ config: configPromise })
+    
+    try {
+      let pkgData: any = null
+
+      // Check if already populated
+      if (typeof pkgProp === 'object' && pkgProp.id) {
+        pkgData = pkgProp
+        console.log('✅ Using populated package:', pkgData.name)
+      } else {
+        // Need to fetch
+        const pkgId = typeof pkgProp === 'string' ? pkgProp : pkgProp
+        pkgData = await payload.findByID({
+          collection: 'packages',
+          id: pkgId,
+          depth: 2,
+        })
+        console.log('✅ Fetched package:', pkgData.name)
+      }
+
+      if (pkgData) {
+        const cards = transformPackageToCards(pkgData, featureSource || 'highlights')
+        const heading = getHeadingForSource(pkgData.name, featureSource)
+        const subheading = getSubheadingForSource(pkgData, featureSource)
+
+        console.log(`✅ Server loaded ${cards.length} feature cards from ${featureSource}`)
+
+        return (
+          <FeatureCarouselClient
+            dataSource="package"
+            heading={heading}
+            subheading={subheading}
+            cards={cards}
+            showNavigationButtons={manualData.showNavigationButtons ?? true}
+            scrollPercentage={manualData.scrollPercentage ?? 80}
+          />
+        )
+      }
+    } catch (error) {
+      console.error('❌ FeatureCarousel server error:', error)
+    }
+  }
+
+  // Fallback - empty state
+  console.warn('⚠️ No valid data source, rendering empty')
   return (
-    <div className="w-full min-h-screen flex flex-col justify-center font-sans py-12">
-      {/* ✅ Full width container with padding only on sides */}
-      <div className="w-full px-8 md:px-16">
-        {/* Header section */}
-        <div className="text-left mb-8">
-          <div className="flex items-center">
-            <h1 className="text-4xl font-bold text-gray-800 whitespace-nowrap pr-6">{heading}</h1>
-            <div className="w-full border-t border-dashed border-gray-400"></div>
-          </div>
-          {subheading && <p className="text-gray-600 mt-2">{subheading}</p>}
-        </div>
+    <FeatureCarouselClient
+      dataSource="manual"
+      heading="Discover Our Features"
+      subheading="No data available"
+      cards={[]}
+      showNavigationButtons={manualData.showNavigationButtons ?? true}
+      scrollPercentage={manualData.scrollPercentage ?? 80}
+    />
+  )
+}
 
-        {/* ✅ Carousel section - full width */}
-        <div className="relative">
-          {/* Background accent */}
-          <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#08121E] -z-10"></div>
-          
-          {/* Scrollable container */}
-          <div className="overflow-hidden py-4">
-            <div
-              ref={containerRef}
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${scrollPosition}px)` }}
-            >
-              {cards.map((item: any, index: number) => (
-                <Card key={item?.id || index} title={item?.title || ''} description={item?.description || ''} />
-              ))}
-            </div>
-          </div>
+// Helper function to transform package data into feature cards
+function transformPackageToCards(pkg: any, source: string): Array<{ title: string; description: string }> {
+  switch (source) {
+    case 'highlights':
+      return (pkg.highlights || []).map((h: any) => ({
+        title: h.text || '',
+        description: h.text || '',
+      }))
+    
+    case 'inclusions':
+      return (pkg.inclusions || []).map((inc: any) => {
+        const inclusion = typeof inc === 'object' ? inc : null
+        return {
+          title: inclusion?.name || inclusion?.title || 'Inclusion',
+          description: inclusion?.description || inclusion?.summary || '',
+        }
+      })
+    
+    case 'activities':
+      return (pkg.activities || []).map((act: any) => {
+        const activity = typeof act === 'object' ? act : null
+        return {
+          title: activity?.name || activity?.title || 'Activity',
+          description: activity?.description || activity?.summary || '',
+        }
+      })
+    
+    case 'amenities':
+      return (pkg.amenities || []).map((am: any) => {
+        const amenity = typeof am === 'object' ? am : null
+        return {
+          title: amenity?.name || amenity?.title || 'Amenity',
+          description: amenity?.description || amenity?.summary || '',
+        }
+      })
+    
+    default:
+      return []
+  }
+}
 
-          {/* ✅ Navigation buttons - positioned relative to container */}
-          {showNavigationButtons && (
-            <div className="flex items-center mt-8">
-              <div className="flex-grow border-t border-dashed border-gray-400 mr-6"></div>
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => handleScroll('left')}
-                  disabled={scrollPosition === 0}
-                  className="w-12 h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
-                  aria-label="Scroll left"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => handleScroll('right')}
-                  disabled={scrollPosition >= maxScroll - 1}
-                  className="w-12 h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
-                  aria-label="Scroll right"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+// Helper function to generate heading based on source
+function getHeadingForSource(packageName: string, source: string): string {
+  const headings: Record<string, string> = {
+    highlights: `${packageName} Highlights`,
+    inclusions: `What's Included in ${packageName}`,
+    activities: `Activities in ${packageName}`,
+    amenities: `Amenities & Features`,
+  }
+  return headings[source] || `${packageName} Features`
+}
 
-export default FeatureCarousel;
+// Helper function to generate subheading based on source
+function getSubheadingForSource(pkg: any, source: string): string {
+  const subheadings: Record<string, string> = {
+    highlights: pkg.tagline || 'Discover what makes this package special',
+    inclusions: 'Everything you need for an amazing experience',
+    activities: 'Exciting experiences waiting for you',
+    amenities: 'Comfort and convenience throughout your journey',
+  }
+  return subheadings[source] || pkg.summary || ''
+}
+
+export default FeatureCarousel

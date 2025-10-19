@@ -5,7 +5,7 @@ import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
-// Types (unchanged)
+// Types
 type MediaSize = { url?: string | null; width?: number; height?: number }
 type Media =
   | {
@@ -49,9 +49,11 @@ type Section = {
   }
   items?: Item[]
   vibes?: VibeGroup[]
+  itinerarySource?: 'manual' | 'package'
+  packageRelation?: any
 }
 
-// Utils (unchanged)
+// Utils
 function resolveMediaUrl(media: Media): string | undefined {
   if (media && typeof media === 'object' && 'id' in media) {
     const m = media as Exclude<Media, string | null | undefined> & { id: string }
@@ -74,7 +76,7 @@ function resolveMediaAlt(media: Media, fallback: string): string {
   return fallback
 }
 
-// Icons (unchanged)
+// Icons
 const ChevronLeft: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <polyline points="15 18 9 12 15 6" />
@@ -104,7 +106,7 @@ const DashedRule: React.FC<{ className?: string }> = ({ className }) => {
   return <div style={style} className={className} aria-hidden />
 }
 
-// ✅ FIXED Package Card - proper Link structure
+// Package Card
 const PackageCard: React.FC<{ item: any }> = ({ item }) => {
   const title = item.title || ''
   const image = item.image
@@ -166,7 +168,7 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
   )
 }
 
-// ✅ FIXED Destination Card - proper Link structure
+// Destination Card
 const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
   const title = item.title || ''
   const image = item.image
@@ -228,7 +230,7 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
   )
 }
 
-// Itinerary Card (unchanged)
+// Itinerary Card
 const ItineraryCard: React.FC<{ item: any }> = ({ item }) => {
   const activities = item.activities || []
   return (
@@ -259,7 +261,7 @@ const ItineraryCard: React.FC<{ item: any }> = ({ item }) => {
   )
 }
 
-// Vibe Section (unchanged)
+// Vibe Section
 const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   const vibes = section.vibes || []
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -329,7 +331,7 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   )
 }
 
-// Dynamic Section Component (rest of code - unchanged except using new cards)
+// Dynamic Section Component
 const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   const pathname = usePathname()
   const scrollRef = useRef<HTMLDivElement | null>(null)
@@ -486,28 +488,88 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   )
 }
 
-// Main Client Component
-export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ sections = [] }) => (
-  <>
-    <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
-      .font-amiri { font-family: 'Amiri', serif; }
-    `}</style>
-    <div className="min-h-screen font-sans">
-      {sections.map((section, idx) => {
-        if (section.type === 'vibe') {
-          return <VibeSection key={section?.id || `vibe-${idx}`} section={section} />
-        }
+// ✅ Main Client Component with auto-fetch itinerary
+export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ sections: initialSections = [] }) => {
+  const pathname = usePathname()
+  const [sections, setSections] = useState(initialSections)
+
+  // ✅ Auto-fetch itinerary when in package auto mode (same pattern as DestinationHeroCarousel)
+  useEffect(() => {
+    const fetchPackageItinerary = async () => {
+      const itinerarySection = sections.find(s => s.type === 'itinerary')
+      
+      if (!itinerarySection) return
+      if (itinerarySection.itinerarySource !== 'package') return
+      if (itinerarySection.items && itinerarySection.items.length > 0) return // Already loaded
+      if (itinerarySection.packageRelation) return // Specific package was selected
+
+      // ✅ Extract package slug from URL
+      const segments = pathname.split('/').filter(Boolean)
+      if (segments[0] !== 'packages') return
+      
+      const packageSlug = segments[1]
+      if (!packageSlug) return
+
+      console.log(`🔍 Client fetching itinerary for package: ${packageSlug}`)
+
+      try {
+        const response = await fetch(`/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`)
+        const data = await response.json()
         
-        return (
-          <DynamicSection 
-            key={typeof section?.id === 'string' ? section.id : `section-${idx}`} 
-            section={section} 
-          />
-        )
-      })}
-    </div>
-  </>
-)
+        if (data.docs[0]?.itinerary) {
+          const itinerary = data.docs[0].itinerary
+          
+          const itineraryItems = (itinerary || []).map((day: any, idx: number) => ({
+            blockType: 'itineraryDay' as const,
+            id: day.id || `day-${idx}`,
+            day: day.dayTitle || day.day || `Day ${idx + 1}`,
+            activities: (day.activities || []).map((activity: any) => ({
+              icon: activity.icon,
+              description: activity.description || activity.text || '',
+              detailsImage: activity.image || activity.detailsImage,
+            })),
+          }))
+
+          console.log(`✅ Client loaded ${itineraryItems.length} itinerary days`)
+
+          setSections(prevSections => 
+            prevSections.map(section => 
+              section.type === 'itinerary' 
+                ? { ...section, items: itineraryItems }
+                : section
+            )
+          )
+        }
+      } catch (error) {
+        console.error('❌ Error fetching package itinerary on client:', error)
+      }
+    }
+
+    fetchPackageItinerary()
+  }, [pathname, sections])
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+        .font-amiri { font-family: 'Amiri', serif; }
+      `}</style>
+      <div className="min-h-screen font-sans">
+        {sections.map((section, idx) => {
+          if (section.type === 'vibe') {
+            return <VibeSection key={section?.id || `vibe-${idx}`} section={section} />
+          }
+          
+          return (
+            <DynamicSection 
+              key={typeof section?.id === 'string' ? section.id : `section-${idx}`} 
+              section={section} 
+            />
+          )
+        })}
+      </div>
+    </>
+  )
+}
 
 export default DynamicScrollerClient

@@ -1,4 +1,3 @@
-// src/blocks/PackageHighlights/config.ts
 import type { Block } from 'payload';
 
 export const PackageHighlights: Block = {
@@ -17,7 +16,7 @@ export const PackageHighlights: Block = {
       required: true,
       options: [
         { label: 'Manual Entry', value: 'manual' },
-        { label: 'From Package (URL)', value: 'auto' },
+        { label: 'Auto (from URL)', value: 'auto' },
         { label: 'Select Package', value: 'package' },
       ],
       admin: {

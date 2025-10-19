@@ -4,6 +4,7 @@ import { useHeaderTheme } from '@/providers/HeaderTheme'
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import type { Media } from '@/payload-types'
 import { Media as MediaComponent } from '@/components/Media'
+import { useRouter } from 'next/navigation'
 
 // Icon Components
 const AirplaneIcon: React.FC<{ className?: string; style?: React.CSSProperties }> = ({
@@ -46,6 +47,7 @@ type Slide = {
 type Option = {
   label: string
   value: string
+  id?: string
 }
 
 type MainHeroProps = {
@@ -71,13 +73,24 @@ export const MainHero: React.FC<MainHeroProps> = ({
   enableAirplaneAnimation = true,
   autoplayDuration = 8000,
   transitionDuration = 1000,
+  destinationOptions = [],
+  categoryOptions = [],
   buttonLabel = 'Apply',
   placeholders = {},
 }) => {
   const { setHeaderTheme } = useHeaderTheme()
+  const router = useRouter()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isChanging, setIsChanging] = useState(false)
-  const [slideDirection, setSlideDirection] = useState(0) // 0 = initial, 1 = next, -1 = prev
+  const [slideDirection, setSlideDirection] = useState(0)
+
+  // Form state
+  const [formData, setFormData] = useState({
+    destination: '',
+    date: '',
+    people: '',
+    category: '',
+  })
 
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -125,6 +138,32 @@ export const MainHero: React.FC<MainHeroProps> = ({
   const goToNext = () => {
     const nextSlide = (currentSlide + 1) % slides.length
     setSlide(nextSlide, 1)
+  }
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    // Build query params from form data
+    const params = new URLSearchParams()
+    
+    if (formData.destination) params.append('destination', formData.destination)
+    if (formData.date) params.append('date', formData.date)
+    if (formData.people) params.append('people', formData.people)
+    if (formData.category) params.append('category', formData.category)
+
+    // Redirect to search/packages page with query params
+    const queryString = params.toString()
+     router.push(`/destinations/${formData.destination}`)
   }
 
   if (!slides || slides.length === 0) return null
@@ -439,33 +478,65 @@ export const MainHero: React.FC<MainHeroProps> = ({
             <div className="relative z-10 flex flex-col items-center justify-center h-full">
               {/* Search Form */}
               <form
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={handleSubmit}
                 className="w-full max-w-6xl relative px-4 pointer-events-auto h-50"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 bg-[#f0b95a] rounded-lg shadow-2xl overflow-hidden text-black/70">
+              <select
+                name="destination"
+                value={formData.destination}
+                onChange={handleInputChange}
+                className="p-4 bg-transparent border-b sm:border-b-0 sm:border-r border-black/10 focus:outline-none placeholder:text-black/70"
+                aria-label="Destination"
+              >
+                <option value="" disabled>
+                  {placeholders?.destination || 'Destination'}
+                </option>
+                {destinationOptions.map((option) => (
+                  <option key={option.value || option.id} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+
+
                   <input
-                    placeholder={placeholders?.destination || 'Destination'}
-                    className="p-4 bg-transparent border-b sm:border-b-0 sm:border-r border-black/10 focus:outline-none placeholder:text-black/70"
-                    aria-label="Destination"
-                  />
-                  <input
-                    type="text"
-                    onFocus={(e) => ((e.currentTarget as HTMLInputElement).type = 'date')}
-                    onBlur={(e) => ((e.currentTarget as HTMLInputElement).type = 'text')}
+                    type="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleInputChange}
                     placeholder={placeholders?.date || 'Date'}
                     className="p-4 bg-transparent border-b sm:border-b-0 lg:border-r border-black/10 focus:outline-none placeholder:text-black/70"
                     aria-label="Date"
                   />
+
                   <input
+                    type="number"
+                    name="people"
+                    value={formData.people}
+                    onChange={handleInputChange}
+                    min="1"
                     placeholder={placeholders?.people || 'No of people'}
                     className="p-4 bg-transparent border-b sm:border-b-0 sm:border-r border-black/10 focus:outline-none placeholder:text-black/70"
                     aria-label="People"
                   />
-                  <input
-                    placeholder={placeholders?.category || 'Category'}
+
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
                     className="p-4 bg-transparent focus:outline-none placeholder:text-black/70"
                     aria-label="Category"
-                  />
+                  >
+                    <option value="" disabled>
+                      {placeholders?.category || 'Category'}
+                    </option>
+                    {categoryOptions.map((option) => (
+                      <option key={option.value || option.id} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="text-center mt-8">

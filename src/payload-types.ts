@@ -870,11 +870,23 @@ export interface PackageCategory {
  * via the `definition` "InfoPanelBlock".
  */
 export interface InfoPanelBlock {
+  /**
+   * Choose where to load panel data from
+   */
   dataSource: 'manual' | 'auto' | 'package';
+  /**
+   * Select a specific package
+   */
   package?: (string | null) | Package;
+  /**
+   * Choose which package data to display
+   */
   panelType?: ('goodToKnow' | 'inclusions' | 'exclusions') | null;
   title?: string | null;
   subheading?: string | null;
+  /**
+   * Choose list style for displaying items
+   */
   listType?: ('disc' | 'decimal') | null;
   items?:
     | {
@@ -1623,6 +1635,9 @@ export interface Form {
  * via the `definition` "DynamicScrollerBlock".
  */
 export interface DynamicScrollerBlock {
+  /**
+   * Add different types of scrollable sections to your page
+   */
   sections: (
     | DynamicScroller_PackageSection
     | DynamicScroller_DestinationSection
@@ -1732,16 +1747,38 @@ export interface DynamicScroller_VibeSection {
  * via the `definition` "DynamicScroller_ItinerarySection".
  */
 export interface DynamicScroller_ItinerarySection {
+  /**
+   * Section heading (e.g., "Day by Day Itinerary")
+   */
   title?: string | null;
+  /**
+   * Optional subtitle
+   */
   subtitle?: string | null;
-  itinerarySource: 'manual' | 'package';
+  /**
+   * Auto mode detects package from URL. Use manual for custom itineraries.
+   */
+  itinerarySource: 'package' | 'manual';
+  /**
+   * Optional: Select a specific package. Leave empty to auto-detect from URL.
+   */
+  packageRelation?: (string | null) | Package;
+  /**
+   * Create custom itinerary days
+   */
   manualDays?:
     | {
         day: string;
         activities?:
           | {
+              /**
+               * Activity icon (optional)
+               */
               icon?: (string | null) | Media;
               description: string;
+              /**
+               * Additional image for this activity (optional)
+               */
               detailsImage?: (string | null) | Media;
               id?: string | null;
             }[]
@@ -3143,6 +3180,7 @@ export interface DynamicScroller_ItinerarySectionSelect<T extends boolean = true
   title?: T;
   subtitle?: T;
   itinerarySource?: T;
+  packageRelation?: T;
   manualDays?:
     | T
     | {
@@ -4701,9 +4739,21 @@ export interface PackageHighlightsBlock {
  */
 export interface FeatureCarouselBlock {
   /**
-   * Main heading displayed at the top of the carousel.
+   * Choose where to load feature cards from
    */
-  heading: string;
+  dataSource: 'manual' | 'auto' | 'package';
+  /**
+   * Select a specific package to display features from
+   */
+  package?: (string | null) | Package;
+  /**
+   * Choose which package data to display as feature cards
+   */
+  featureSource?: ('highlights' | 'inclusions' | 'activities' | 'amenities') | null;
+  /**
+   * Main heading displayed at the top of the carousel. Use {name} for package name replacement.
+   */
+  heading?: string | null;
   /**
    * Optional subheading displayed below the main heading.
    */
@@ -4711,11 +4761,13 @@ export interface FeatureCarouselBlock {
   /**
    * Add feature cards to display in the scrollable carousel.
    */
-  cards: {
-    title: string;
-    description: string;
-    id?: string | null;
-  }[];
+  cards?:
+    | {
+        title: string;
+        description: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Display left/right navigation buttons for manual scrolling.
    */
@@ -5205,6 +5257,9 @@ export interface PackageHighlightsBlockSelect<T extends boolean = true> {
  * via the `definition` "FeatureCarouselBlock_select".
  */
 export interface FeatureCarouselBlockSelect<T extends boolean = true> {
+  dataSource?: T;
+  package?: T;
+  featureSource?: T;
   heading?: T;
   subheading?: T;
   cards?:

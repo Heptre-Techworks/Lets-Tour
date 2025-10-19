@@ -1,7 +1,7 @@
-// src/blocks/PackageHighlights/Component.client.tsx
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 type MediaLike = { url?: string | null; alt?: string | null };
 
@@ -36,6 +36,7 @@ const imagePositions = [
 ];
 
 type PackageHighlightsClientProps = {
+  dataSource?: string
   heading?: string
   subheading?: string
   highlights?: Array<{ highlightText?: string }>
@@ -43,11 +44,93 @@ type PackageHighlightsClientProps = {
 }
 
 export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = ({
-  heading = 'Package highlights',
-  subheading = "Today's enemy is tomorrow's friend.",
-  highlights = [],
-  galleryImages = [],
+  dataSource = 'manual',
+  heading: initialHeading = 'Package highlights',
+  subheading: initialSubheading = "Today's enemy is tomorrow's friend.",
+  highlights: initialHighlights = [],
+  galleryImages: initialGalleryImages = [],
 }) => {
+  const pathname = usePathname()
+  const [heading, setHeading] = useState(initialHeading)
+  const [subheading, setSubheading] = useState(initialSubheading)
+  const [highlights, setHighlights] = useState(initialHighlights)
+  const [galleryImages, setGalleryImages] = useState(initialGalleryImages)
+  const [loading, setLoading] = useState(dataSource === 'auto')
+
+  // ✅ Auto-fetch package data from URL (same pattern as DynamicScroller)
+  useEffect(() => {
+    const fetchPackageData = async () => {
+      if (dataSource !== 'auto') return
+      
+      // Extract package slug from URL
+      const segments = pathname.split('/').filter(Boolean)
+      if (segments[0] !== 'packages') {
+        console.warn('⚠️ Not on a package page, cannot auto-fetch')
+        setLoading(false)
+        return
+      }
+      
+      const packageSlug = segments[1]
+      if (!packageSlug) {
+        console.warn('⚠️ No package slug in URL')
+        setLoading(false)
+        return
+      }
+
+      console.log(`🔍 Client auto-fetching package highlights for: ${packageSlug}`)
+
+      try {
+        const response = await fetch(`/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`)
+        const data = await response.json()
+        
+        if (data.docs[0]) {
+          const pkg = data.docs[0]
+          
+          // Transform highlights
+          const transformedHighlights = (pkg.highlights || []).map((h: any) => ({
+            highlightText: h.text || ''
+          }))
+
+          // Get gallery images
+          const galleryArray = Array.isArray(pkg.gallery) ? pkg.gallery : []
+          const transformedGallery = galleryArray.slice(0, 7).map((img: any) => ({
+            image: img
+          }))
+
+          // Fill remaining slots
+          while (transformedGallery.length < 7 && pkg.heroImage) {
+            transformedGallery.push({ image: pkg.heroImage })
+          }
+
+          console.log(`✅ Client loaded ${transformedHighlights.length} highlights, ${transformedGallery.length} images`)
+
+          setHeading(`${pkg.name} Highlights`)
+          setSubheading(pkg.tagline || pkg.summary || 'Discover what makes this package special')
+          setHighlights(transformedHighlights)
+          setGalleryImages(transformedGallery)
+        } else {
+          console.warn('⚠️ Package not found')
+        }
+      } catch (error) {
+        console.error('❌ Error fetching package data on client:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPackageData()
+  }, [pathname, dataSource])
+
+  if (loading) {
+    return (
+      <div className="font-sans p-4 sm:p-6 md:p-8">
+        <div className="max-w-7xl mx-auto text-center text-gray-500">
+          Loading package highlights...
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="font-sans p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-start">

@@ -1,4 +1,3 @@
-// src/blocks/InfoPanel/config.ts
 import type { Block } from 'payload';
 
 export const InfoPanel: Block = {
@@ -17,9 +16,12 @@ export const InfoPanel: Block = {
       required: true,
       options: [
         { label: 'Manual Entry', value: 'manual' },
-        { label: 'From Package (URL)', value: 'auto' },
+        { label: 'Auto (from URL)', value: 'auto' },
         { label: 'Select Package', value: 'package' },
       ],
+      admin: {
+        description: 'Choose where to load panel data from',
+      },
     },
     {
       name: 'package',
@@ -27,6 +29,7 @@ export const InfoPanel: Block = {
       relationTo: 'packages',
       admin: {
         condition: (_, siblingData) => siblingData.dataSource === 'package',
+        description: 'Select a specific package',
       },
     },
     {
@@ -41,10 +44,11 @@ export const InfoPanel: Block = {
       ],
       admin: {
         condition: (_, siblingData) => siblingData.dataSource !== 'manual',
+        description: 'Choose which package data to display',
       },
     },
 
-    // Manual fields (same as before)
+    // Manual fields
     {
       name: 'title',
       type: 'text',
@@ -72,6 +76,9 @@ export const InfoPanel: Block = {
         { label: 'Bullet Points', value: 'disc' },
         { label: 'Numbered (1, 2, 3...)', value: 'decimal' },
       ],
+      admin: {
+        description: 'Choose list style for displaying items',
+      },
     },
     {
       name: 'items',

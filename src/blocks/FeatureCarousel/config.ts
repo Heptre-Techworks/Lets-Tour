@@ -9,13 +9,53 @@ export const FeatureCarousel: Block = {
   },
   fields: [
     {
+      name: 'dataSource',
+      type: 'select',
+      label: 'Data Source',
+      defaultValue: 'manual',
+      required: true,
+      options: [
+        { label: 'Manual Entry', value: 'manual' },
+        { label: 'Auto (from URL)', value: 'auto' },
+        { label: 'Select Package', value: 'package' },
+      ],
+      admin: {
+        description: 'Choose where to load feature cards from',
+      },
+    },
+    {
+      name: 'package',
+      type: 'relationship',
+      relationTo: 'packages',
+      admin: {
+        condition: (_, siblingData) => siblingData.dataSource === 'package',
+        description: 'Select a specific package to display features from',
+      },
+    },
+    {
+      name: 'featureSource',
+      type: 'select',
+      label: 'Feature Source',
+      defaultValue: 'highlights',
+      options: [
+        { label: 'Package Highlights', value: 'highlights' },
+        { label: 'Inclusions', value: 'inclusions' },
+        { label: 'Activities', value: 'activities' },
+        { label: 'Amenities', value: 'amenities' },
+      ],
+      admin: {
+        condition: (_, siblingData) => siblingData.dataSource !== 'manual',
+        description: 'Choose which package data to display as feature cards',
+      },
+    },
+    {
       name: 'heading',
       type: 'text',
       label: 'Heading',
       defaultValue: 'Discover Our Features',
-      required: true,
       admin: {
-        description: 'Main heading displayed at the top of the carousel.',
+        description: 'Main heading displayed at the top of the carousel. Use {name} for package name replacement.',
+        condition: (_, siblingData) => siblingData.dataSource === 'manual',
       },
     },
     {
@@ -25,13 +65,13 @@ export const FeatureCarousel: Block = {
       defaultValue: 'Explore the powerful tools that make our platform the best choice for you.',
       admin: {
         description: 'Optional subheading displayed below the main heading.',
+        condition: (_, siblingData) => siblingData.dataSource === 'manual',
       },
     },
     {
       name: 'cards',
       type: 'array',
       label: 'Feature Cards',
-      required: true,
       minRows: 1,
       maxRows: 20,
       labels: {
@@ -41,6 +81,7 @@ export const FeatureCarousel: Block = {
       admin: {
         description: 'Add feature cards to display in the scrollable carousel.',
         initCollapsed: false,
+        condition: (_, siblingData) => siblingData.dataSource === 'manual',
       },
       fields: [
         {

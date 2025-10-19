@@ -188,33 +188,85 @@ const ItinerarySectionBlock: Block = {
   interfaceName: 'DynamicScroller_ItinerarySection',
   labels: { singular: 'Itinerary Section', plural: 'Itinerary Sections' },
   fields: [
-    { name: 'title', type: 'text' },
-    { name: 'subtitle', type: 'text' },
+    { 
+      name: 'title', 
+      type: 'text',
+      admin: { description: 'Section heading (e.g., "Day by Day Itinerary")' }
+    },
+    { 
+      name: 'subtitle', 
+      type: 'text',
+      admin: { description: 'Optional subtitle' }
+    },
     {
       name: 'itinerarySource',
       type: 'select',
       defaultValue: 'manual',
       required: true,
       options: [
-        { label: 'Manual', value: 'manual' },
-        { label: 'From Current Package (URL)', value: 'package' },
+        { label: 'Auto (from URL)', value: 'package' },
+        { label: 'Manual Days', value: 'manual' },
       ],
+      admin: {
+        description: 'Auto mode detects package from URL. Use manual for custom itineraries.',
+      },
+    },
+    // ✅ ADDED: Package relation field for specific package selection
+    {
+      name: 'packageRelation',
+      type: 'relationship',
+      relationTo: 'packages',
+      admin: {
+        condition: (_, siblingData) => siblingData.itinerarySource === 'package',
+        description: 'Optional: Select a specific package. Leave empty to auto-detect from URL.',
+      },
     },
     {
       name: 'manualDays',
       type: 'array',
+      minRows: 1,
       admin: {
         condition: (_, siblingData) => siblingData.itinerarySource === 'manual',
+        description: 'Create custom itinerary days',
       },
       fields: [
-        { name: 'day', type: 'text', required: true },
+        { 
+          name: 'day', 
+          type: 'text', 
+          required: true,
+          admin: {
+            placeholder: 'Day 1: Arrival in Bali',
+          }
+        },
         {
           name: 'activities',
           type: 'array',
+          minRows: 1,
           fields: [
-            { name: 'icon', type: 'upload', relationTo: 'media' },
-            { name: 'description', type: 'textarea', required: true },
-            { name: 'detailsImage', type: 'upload', relationTo: 'media' },
+            { 
+              name: 'icon', 
+              type: 'upload', 
+              relationTo: 'media',
+              admin: {
+                description: 'Activity icon (optional)',
+              }
+            },
+            { 
+              name: 'description', 
+              type: 'textarea', 
+              required: true,
+              admin: {
+                placeholder: 'Describe the activity...',
+              }
+            },
+            { 
+              name: 'detailsImage', 
+              type: 'upload', 
+              relationTo: 'media',
+              admin: {
+                description: 'Additional image for this activity (optional)',
+              }
+            },
           ],
         },
       ],
@@ -226,7 +278,12 @@ const ItinerarySectionBlock: Block = {
         { name: 'background', type: 'text', defaultValue: 'bg-white' },
       ],
     },
-    { name: 'showNavigation', type: 'checkbox', defaultValue: true },
+    { 
+      name: 'showNavigation', 
+      type: 'checkbox', 
+      defaultValue: true,
+      label: 'Show Navigation Arrows',
+    },
   ],
 }
 
@@ -247,6 +304,9 @@ export const DynamicScroller: Block = {
       ],
       required: true,
       minRows: 1,
+      admin: {
+        description: 'Add different types of scrollable sections to your page',
+      },
     },
   ],
 }
