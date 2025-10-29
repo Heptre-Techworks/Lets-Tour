@@ -28,7 +28,7 @@ export const generateMeta = async (args: {
 
   const title = doc?.meta?.title
     ? doc?.meta?.title 
-    : 'Website Template'
+    : "Let's Tour"
 
   return {
     description: doc?.meta?.description,
