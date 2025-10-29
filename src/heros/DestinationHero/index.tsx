@@ -61,13 +61,10 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
 
       try {
         const response = await fetch(`/api/destinations?where[slug][equals]=${slug}&depth=2`)
-        
         if (!response.ok) {
           throw new Error(`API returned ${response.status}`)
         }
-
         const data = await response.json()
-        
         if (data.docs && data.docs[0]) {
           setDestination(data.docs[0])
           setError(null)
@@ -212,6 +209,13 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
 
   return (
     <section className="relative -mt-[10.4rem] w-full h-screen bg-gray-900 font-sans antialiased overflow-hidden" data-theme="dark">
+      {/* Fonts only: Amiri + NATS classes */}
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;1,400;1,700&display=swap');
+        .font-amiri { font-family: 'Amiri', serif; }
+        .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+      `}</style>
+
       <div
         key={activeCityIndex}
         style={{ backgroundImage: `url(${getImageUrl(cities[activeCityIndex].image)})` }}
@@ -221,14 +225,18 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
 
       <div className="relative w-full h-full flex flex-col justify-end text-white p-6 sm:p-8 md:p-12">
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
-          <h1 className="text-7xl lg:text-9xl font-serif capitalize" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}>
+          {/* Title font updated per CSS: Amiri italic, 96px, 88% line-height, -0.011em */}
+          <h1
+            className="font-amiri italic text-[96px] leading-[0.88] tracking-[-0.011em] capitalize"
+            style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}
+          >
             {destinationName}
           </h1>
 
           <nav className="flex items-center justify-end gap-3 sm:gap-4 text-gray-200 w-full md:w-auto">
             <button
               onClick={() => handleUserInteraction(displayIndex - 1)}
-              className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200 hidden sm:block"
+              className="p-2 rounded-full hover:bg:white/10 transition-colors duration-200 hidden sm:block"
               aria-label="Previous city"
             >
               <ArrowIcon className="w-5 h-5" />
@@ -248,13 +256,14 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
               >
                 {extendedCities.map((city, index) => (
                   <li key={`${city.name}-${index}`}>
+                    {/* City tabs font updated per CSS: NATS 24px, 88% line-height, -0.011em */}
                     <a
                       href={`#${city.name.toLowerCase()}`}
                       onClick={(e) => {
                         e.preventDefault()
                         handleUserInteraction(index)
                       }}
-                      className={`py-1 transition-all duration-300 text-lg ${
+                      className={`font-nats text-[24px] leading-[0.88] tracking-[-0.011em] py-1 transition-all duration-300 ${
                         displayIndex === index
                           ? 'text-white scale-110 border-b-2 border-white font-semibold'
                           : 'text-gray-300 hover:text-white border-b-2 border-transparent'

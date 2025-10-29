@@ -185,7 +185,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
       <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Loading stories...</p>
+          <p style={{ fontFamily: "'NATS', sans-serif" }}>Loading stories...</p>
         </div>
       </section>
     );
@@ -194,157 +194,235 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
   if (cards.length === 0) {
     return (
       <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
-        <p className="text-gray-400">No client stories available yet.</p>
+        <p className="text-gray-400" style={{ fontFamily: "'NATS', sans-serif" }}>No client stories available yet.</p>
       </section>
     );
   }
 
   return (
-    <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900">
-      {/* Background */}
-      {bgSrc ? (
-        <img
-          src={bgSrc}
-          alt={(background as any)?.alt || 'Background'}
-          className="absolute inset-0 w-full h-full object-cover opacity-40"
-          style={{ zIndex: 0, pointerEvents: 'none' }}
-        />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-800 to-gray-900" style={{ zIndex: 0 }} />
-      )}
-
-      {/* Edge-to-edge Overlay visual effect */}
-      {overlaySrc && (
-        <div
-          className="absolute bottom-0 left-0 right-0 w-full pointer-events-none"
-          style={{ zIndex: 1, height: '40%' }}
-        >
+    <>
+      {/* Load custom fonts */}
+      <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+      <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />
+      
+      <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900">
+        {/* Background */}
+        {bgSrc ? (
           <img
-            src={overlaySrc}
-            alt={overlay?.alt || 'Decorative Overlay'}
-            className="w-full h-full object-cover"
-            style={{
-              opacity: 0.9,
-              mixBlendMode: 'overlay',
-            }}
+            src={bgSrc}
+            alt={(background as any)?.alt || 'Background'}
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            style={{ zIndex: 0, pointerEvents: 'none' }}
           />
-        </div>
-      )}
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-800 to-gray-900" style={{ zIndex: 0 }} />
+        )}
 
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col justify-between min-h-[70vh] p-8 md:p-16">
-        <div className="flex flex-col lg:flex-row lg:items-start w-full flex-grow relative">
-          {/* Left column */}
-          <div className="w-full lg:w-1/3 lg:pr-12 space-y-4 text-left mb-12 lg:mb-0">
-            <h1 className="text-5xl md:text-6xl font-serif italic">{displayHeading}</h1>
-            {displaySubheading ? <p className="text-base text-gray-200">{displaySubheading}</p> : null}
-            {buttonText ? (
-              <button
-                type="button"
-                className="bg-yellow-500 text-gray-900 font-bold py-3 px-8 rounded-lg hover:bg-yellow-400 transition-colors duration-300"
-              >
-                {buttonText}
-              </button>
-            ) : null}
-          </div>
-
-          {/* Right column */}
-          <div className="p-4 pt-10 w-full lg:w-2/3 h-full overflow-hidden">
-            <div
-              className="flex transition-transform duration-500 ease-in-out"
+        {/* Edge-to-edge Overlay visual effect */}
+        {overlaySrc && (
+          <div
+            className="absolute bottom-0 left-0 right-0 w-full pointer-events-none"
+            style={{ zIndex: 1, height: '40%' }}
+          >
+            <img
+              src={overlaySrc}
+              alt={overlay?.alt || 'Decorative Overlay'}
+              className="w-full h-full object-cover"
               style={{
-                gap: `${gapPx}px`,
-                transform: `translateX(-${translatePct}%)`,
+                opacity: 0.9,
+                mixBlendMode: 'overlay',
               }}
-              aria-live="polite"
-            >
-              {cards.map((card, idx) => {
-                const currentCardIndex = Math.round((translatePct / 100) * (cards.length / cardsPerView));
-                const isLeftmost = idx === currentCardIndex;
-                
-                return (
-                  <div
-                    key={`${card?.name ?? 'card'}-${idx}`}
-                    className={`flex-shrink-0 transition-transform duration-500 ease-in-out ${
-                      isLeftmost ? 'scale-110 z-10' : 'scale-100'
-                    }`}
-                    style={{ 
-                      width: `calc(${cardWidthPct}% - ${gapPx - gapPx / cardsPerView}px)`,
-                    }}
-                  >
-                    <div className={`h-[320px] p-6 backdrop-blur-md rounded-2xl text-left transition-all duration-500 ${
-                      isLeftmost 
-                        ? 'bg-white/20 shadow-2xl' 
-                        : 'bg-white/10 shadow-lg'
-                    }`}>
-                      <div className="flex flex-col h-full">
-                        <div className="mb-4 shrink-0">
-                          <h3 className="text-xl font-bold">{card?.name ?? ''}</h3>
-                          <StarRating rating={card?.rating as number} />
-                        </div>
-                        <div className="flex-1 overflow-y-auto overscroll-contain pr-2">
-                          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-                            {card?.story ? `"${card.story}"` : ''}
-                          </p>
+            />
+          </div>
+        )}
+
+        {/* Main content */}
+        <div className="relative z-10 flex flex-col justify-between min-h-[70vh] p-8 md:p-16">
+          <div className="flex flex-col lg:flex-row lg:items-start w-full flex-grow relative">
+            {/* Left column */}
+            <div className="w-full lg:w-1/3 lg:pr-12 space-y-4 text-left mb-12 lg:mb-0">
+              <h1 
+                className="text-white flex items-center"
+                style={{
+                  fontFamily: "'Amiri', serif",
+                  fontStyle: 'italic',
+                  fontWeight: 700,
+                  fontSize: '80px',
+                  lineHeight: '88%',
+                  letterSpacing: '-0.011em'
+                }}
+              >
+                {displayHeading}
+              </h1>
+              {displaySubheading ? (
+                <p 
+                  className="text-white flex items-center"
+                  style={{
+                    fontFamily: "'NATS', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '26px',
+                    lineHeight: '88%',
+                    letterSpacing: '-0.011em'
+                  }}
+                >
+                  {displaySubheading}
+                </p>
+              ) : null}
+              {buttonText ? (
+                <button
+                  type="button"
+                  className="flex items-center justify-center text-center text-white rounded-2xl shadow-md hover:opacity-90 transition-opacity duration-300"
+                  style={{
+                    width: '200px',
+                    height: '50px',
+                    background: '#FBAE3D',
+                    fontFamily: "'NATS', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '24px',
+                    letterSpacing: '-0.011em',
+                    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
+                    borderRadius: '16px'
+                  }}
+                >
+                  {buttonText}
+                </button>
+              ) : null}
+            </div>
+
+            {/* Right column */}
+            <div className="p-4 pt-10 w-full lg:w-2/3 h-full overflow-hidden">
+              <div
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{
+                  gap: `${gapPx}px`,
+                  transform: `translateX(-${translatePct}%)`,
+                }}
+                aria-live="polite"
+              >
+                {cards.map((card, idx) => {
+                  const currentCardIndex = Math.round((translatePct / 100) * (cards.length / cardsPerView));
+                  const isLeftmost = idx === currentCardIndex;
+                  
+                  return (
+                    <div
+                      key={`${card?.name ?? 'card'}-${idx}`}
+                      className={`flex-shrink-0 transition-transform duration-500 ease-in-out ${
+                        isLeftmost ? 'scale-110 z-10' : 'scale-100'
+                      }`}
+                      style={{ 
+                        width: `calc(${cardWidthPct}% - ${gapPx - gapPx / cardsPerView}px)`,
+                      }}
+                    >
+                      <div 
+                        className={`h-[320px] p-6 backdrop-blur-md text-left transition-all duration-500 ${
+                          isLeftmost 
+                            ? 'bg-white/20 shadow-2xl' 
+                            : 'bg-white/10 shadow-lg'
+                        }`}
+                        style={{ borderRadius: '20px' }}
+                      >
+                        <div className="flex flex-col h-full">
+                          <div className="mb-4 shrink-0">
+                            <h3 
+                              className="font-bold"
+                              style={{
+                                fontFamily: "'NATS', sans-serif",
+                                fontSize: '20px'
+                              }}
+                            >
+                              {card?.name ?? ''}
+                            </h3>
+                            <StarRating rating={card?.rating as number} />
+                          </div>
+                          <div className="flex-1 overflow-y-auto overscroll-contain pr-2">
+                            <p 
+                              className="text-gray-300 leading-relaxed whitespace-pre-line"
+                              style={{
+                                fontFamily: "'NATS', sans-serif",
+                                fontSize: '14px'
+                              }}
+                            >
+                              {card?.story ? `"${card.story}"` : ''}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Bottom navigation */}
-        <div className="relative mt-auto pt-10">
-          <div
-            className="absolute top-0 left-0 w-full h-8"
-            style={{
-              background:
-                "url(\"data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='white' stroke-width='4' stroke-dasharray='50 30' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e\")",
-              maskImage:
-                'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDQwIDMyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIxIiBkPSJNMCAyMjRsMTIwLTIxLjNDMjQwIDIwMyA0ODAgMTYwIDcyMCAxNjBzNDgwIDQzIDcyMCA2NC4xTDk2MCAyMjRsLTgwIDQyLjdjLTgwIDQyLjYtMjQwIDEyOC00MDAgMTQ5LjMtMTYwIDIxLjQtMzIwLTIxLjQtNDgwLTMxLjlDMCwyNDUgMCwyMzQgMCwyMjR6Ij48L3BhdGg+PC9zdmc+")',
-              maskSize: 'cover',
-              maskRepeat: 'no-repeat',
-              zIndex: 10,
-            }}
-          />
-          <div className="flex items-center justify-between mt-6">
-            <div className="flex-1" />
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handlePrev}
-                aria-label="Previous"
-                className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-500/40 hover:bg-gray-500/60 transition-opacity"
-                type="button"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                onClick={handleNext}
-                aria-label="Next"
-                className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-500/40 hover:bg-gray-500/60 transition-opacity"
-                type="button"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-            <div className="flex-1 flex justify-end items-center">
-              <div className="text-2xl font-semibold tracking-wider">
-                {currentSlide}
-                <span className="text-gray-400 mx-3">/</span>
-                {totalSlides}
+          {/* Bottom navigation */}
+          <div className="relative mt-auto pt-10">
+            <div
+              className="absolute top-0 left-0 w-full h-8"
+              style={{
+                background:
+                  "url(\"data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='white' stroke-width='4' stroke-dasharray='50 30' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e\")",
+                maskImage:
+                  'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDQwIDMyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIxIiBkPSJNMCAyMjRsMTIwLTIxLjNDMjQwIDIwMyA0ODAgMTYwIDcyMCAxNjBzNDgwIDQzIDcyMCA2NC4xTDk2MCAyMjRsLTgwIDQyLjdjLTgwIDQyLjYtMjQwIDEyOC00MDAgMTQ5LjMtMTYwIDIxLjQtMzIwLTIxLjQtNDgwLTMxLjlDMCwyNDUgMCwyMzQgMCwyMjR6Ij48L3BhdGg+PC9zdmc+")',
+                maskSize: 'cover',
+                maskRepeat: 'no-repeat',
+                zIndex: 10,
+              }}
+            />
+            <div className="flex items-center justify-between mt-6">
+              <div className="flex-1" />
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handlePrev}
+                  aria-label="Previous"
+                  className="w-12 h-12 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+                  type="button"
+                  style={{
+                    background: 'rgba(237, 237, 237, 0.75)',
+                    opacity: 0.5,
+                    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleNext}
+                  aria-label="Next"
+                  className="w-12 h-12 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+                  type="button"
+                  style={{
+                    background: 'rgba(237, 237, 237, 0.75)',
+                    opacity: 0.5,
+                    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex-1 flex justify-end items-center">
+                <div 
+                  className="text-white flex items-center tracking-wider"
+                  style={{
+                    fontFamily: "'NATS', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '56px',
+                    lineHeight: '88%',
+                    letterSpacing: '-0.011em'
+                  }}
+                >
+                  {currentSlide}
+                  <span className="text-gray-400 mx-3">/</span>
+                  {totalSlides}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 

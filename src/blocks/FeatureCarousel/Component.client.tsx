@@ -7,8 +7,14 @@ import { usePathname } from 'next/navigation';
 const Card: React.FC<{ title: string; description: string }> = ({ title, description }) => (
   <div className="flex-shrink-0 w-64 h-80 bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between m-4">
     <div>
-      <h3 className="text-xl font-bold text-gray-800 mb-2">{title}</h3>
-      <p className="text-gray-600 text-sm">{description}</p>
+      {/* Card title: NATS 24px, 24px line-height, -0.011em */}
+      <h3 className="font-nats text-[24px] leading-[24px] tracking-[-0.011em] text-gray-800 mb-2">
+        {title}
+      </h3>
+      {/* Card body: NATS 24px, 24px line-height, -0.011em */}
+      <p className="font-nats text-[24px] leading-[24px] tracking-[-0.011em] text-gray-600">
+        {description}
+      </p>
     </div>
   </div>
 );
@@ -46,47 +52,37 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
   const [cards, setCards] = useState(initialCards)
   const [loading, setLoading] = useState(dataSource === 'auto')
 
+  // Local font helpers
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.innerHTML = `
+      .font-amiri { font-family: 'Amiri', serif; }
+      .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+    `
+    document.head.appendChild(style)
+    return () => { document.head.removeChild(style) }
+  }, [])
+
   // ✅ Auto-fetch package data from URL
   useEffect(() => {
     const fetchPackageData = async () => {
       if (dataSource !== 'auto') return
-      
-      // Extract package slug from URL
       const segments = pathname.split('/').filter(Boolean)
-      if (segments[0] !== 'packages') {
-        console.warn('⚠️ Not on a package page, cannot auto-fetch')
-        setLoading(false)
-        return
-      }
-      
+      if (segments[0] !== 'packages') { setLoading(false); return }
       const packageSlug = segments[1]
-      if (!packageSlug) {
-        console.warn('⚠️ No package slug in URL')
-        setLoading(false)
-        return
-      }
-
-      console.log(`🔍 Client auto-fetching feature cards for: ${packageSlug} (source: ${featureSource})`)
+      if (!packageSlug) { setLoading(false); return }
 
       try {
         const response = await fetch(`/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`)
         const data = await response.json()
-        
         if (data.docs[0]) {
           const pkg = data.docs[0]
-          
-          // Transform based on feature source
           const transformedCards = transformPackageToCards(pkg, featureSource)
           const newHeading = getHeadingForSource(pkg.name, featureSource)
           const newSubheading = getSubheadingForSource(pkg, featureSource)
-
-          console.log(`✅ Client loaded ${transformedCards.length} feature cards from ${featureSource}`)
-
           setHeading(newHeading)
           setSubheading(newSubheading)
           setCards(transformedCards)
-        } else {
-          console.warn('⚠️ Package not found')
         }
       } catch (error) {
         console.error('❌ Error fetching package data on client:', error)
@@ -94,7 +90,6 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
         setLoading(false)
       }
     }
-
     fetchPackageData()
   }, [pathname, dataSource, featureSource])
 
@@ -109,10 +104,8 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
         setMaxScroll(scrollWidth - clientWidth);
       }
     };
-
     calculateWidths();
     window.addEventListener('resize', calculateWidths);
-
     return () => {
       window.removeEventListener('resize', calculateWidths);
     };
@@ -122,7 +115,6 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
     const scrollAmount = containerWidth * ((scrollPercentage || 80) / 100);
     let newScrollPosition =
       direction === 'left' ? scrollPosition - scrollAmount : scrollPosition + scrollAmount;
-
     newScrollPosition = Math.max(0, Math.min(newScrollPosition, maxScroll));
     setScrollPosition(newScrollPosition);
   };
@@ -147,10 +139,18 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
         {/* Header section */}
         <div className="text-left mb-8">
           <div className="flex items-center">
-            <h1 className="text-4xl font-bold text-gray-800 whitespace-nowrap pr-6">{heading}</h1>
+            {/* Heading: Amiri italic 64px, 88%, -0.011em */}
+            <h1 className="font-amiri italic font-bold text-[64px] leading-[0.88] tracking-[-0.011em] text-gray-900 whitespace-nowrap pr-6">
+              {heading}
+            </h1>
             <div className="w-full border-t border-dashed border-gray-400"></div>
           </div>
-          {subheading && <p className="text-gray-600 mt-2">{subheading}</p>}
+          {/* Subheading: NATS 26px, 88%, -0.011em */}
+          {subheading && (
+            <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-gray-900 mt-2">
+              {subheading}
+            </p>
+          )}
         </div>
 
         {/* Carousel section */}

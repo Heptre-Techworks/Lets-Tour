@@ -57,67 +57,38 @@ export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = (
   const [galleryImages, setGalleryImages] = useState(initialGalleryImages)
   const [loading, setLoading] = useState(dataSource === 'auto')
 
-  // ✅ Auto-fetch package data from URL (same pattern as DynamicScroller)
   useEffect(() => {
     const fetchPackageData = async () => {
       if (dataSource !== 'auto') return
-      
-      // Extract package slug from URL
       const segments = pathname.split('/').filter(Boolean)
-      if (segments[0] !== 'packages') {
-        console.warn('⚠️ Not on a package page, cannot auto-fetch')
-        setLoading(false)
-        return
-      }
-      
+      if (segments[0] !== 'packages') { setLoading(false); return }
       const packageSlug = segments[1]
-      if (!packageSlug) {
-        console.warn('⚠️ No package slug in URL')
-        setLoading(false)
-        return
-      }
-
-      console.log(`🔍 Client auto-fetching package highlights for: ${packageSlug}`)
+      if (!packageSlug) { setLoading(false); return }
 
       try {
         const response = await fetch(`/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`)
         const data = await response.json()
-        
         if (data.docs[0]) {
           const pkg = data.docs[0]
-          
-          // Transform highlights
           const transformedHighlights = (pkg.highlights || []).map((h: any) => ({
             highlightText: h.text || ''
           }))
-
-          // Get gallery images
           const galleryArray = Array.isArray(pkg.gallery) ? pkg.gallery : []
-          const transformedGallery = galleryArray.slice(0, 7).map((img: any) => ({
-            image: img
-          }))
-
-          // Fill remaining slots
+          const transformedGallery = galleryArray.slice(0, 7).map((img: any) => ({ image: img }))
           while (transformedGallery.length < 7 && pkg.heroImage) {
             transformedGallery.push({ image: pkg.heroImage })
           }
-
-          console.log(`✅ Client loaded ${transformedHighlights.length} highlights, ${transformedGallery.length} images`)
-
           setHeading(`${pkg.name} Highlights`)
           setSubheading(pkg.tagline || pkg.summary || 'Discover what makes this package special')
           setHighlights(transformedHighlights)
           setGalleryImages(transformedGallery)
-        } else {
-          console.warn('⚠️ Package not found')
         }
       } catch (error) {
-        console.error('❌ Error fetching package data on client:', error)
+        console.error('Error fetching package data on client:', error)
       } finally {
         setLoading(false)
       }
     }
-
     fetchPackageData()
   }, [pathname, dataSource])
 
@@ -133,22 +104,33 @@ export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = (
 
   return (
     <div className="font-sans p-4 sm:p-6 md:p-8">
+      {/* Local font helpers */}
+      <style jsx global>{`
+        .font-amiri { font-family: 'Amiri', serif; }
+        .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+      `}</style>
+
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
         
         {/* Left Column: Text Content */}
         <div className="text-[#3C2A21]">
-          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold mb-4 italic">
+          {/* Heading: Amiri italic 64px, 88%, -0.011em */}
+          <h1 className="font-amiri italic font-bold text-[64px] leading-[0.88] tracking-[-0.011em] mb-4">
             {heading}
           </h1>
-          <p className="text-lg md:text-xl text-gray-600 mb-8">
+          {/* Subheading: NATS 26px, 88%, -0.011em */}
+          <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-black mb-8">
             {subheading}
           </p>
+          {/* Bullets: NATS 24px, line-height 24px, -0.011em */}
           <ul className="space-y-3">
             {Array.isArray(highlights) &&
               highlights.map((item, index) => (
                 <li key={index} className="flex items-start">
                   <StarIcon />
-                  <span className="text-base md:text-lg">{item?.highlightText || ''}</span>
+                  <span className="font-nats text-[24px] leading-[24px] tracking-[-0.011em] text-black">
+                    {item?.highlightText || ''}
+                  </span>
                 </li>
               ))}
           </ul>

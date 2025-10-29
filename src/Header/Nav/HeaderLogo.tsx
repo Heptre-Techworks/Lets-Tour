@@ -1,40 +1,30 @@
+// src/components/site/Header/Nav/HeaderLogo.tsx
 'use client'
-import React from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import type { Header, Media } from '@/payload-types'
+import type { Header } from '@/payload-types'
+import React from 'react'
 
-interface HeaderLogoProps {
-  data: Header
-  className?: string
-}
-
-export const HeaderLogo: React.FC<HeaderLogoProps> = ({ 
-  data, 
-  className = "h-8 w-[181px]" 
-}) => {
-  const logo = data?.logo as Media
-
-  if (!logo?.url) {
-    return (
-      <Link href="/" className={`flex items-center ${className}`}>
-        <div className="text-2xl font-bold text-white tracking-wide">
-          TOUR
-        </div>
-      </Link>
-    )
-  }
+export const HeaderLogo: React.FC<{ data: Header }> = ({ data }) => {
+  const logo: any = data?.logo
+  const src =
+    typeof logo === 'string'
+      ? logo
+      : logo?.url || logo?.src || (logo?.sizes?.thumbnail?.url ?? null)
 
   return (
-    <Link href="/" className={`flex items-center ${className}`}>
-      <Image
-        src={logo.url}
-        alt={logo.alt || 'Logo'}
-        width={logo.width || 181}
-        height={logo.height || 32}
-        className="object-contain"
-        priority
-      />
-    </Link>
+    <div className="shrink-0">
+      {src ? (
+        <Image
+          src={src}
+          alt="Logo"
+          width={181}
+          height={32}
+          className="h-[32px] w-auto"
+          priority
+        />
+      ) : (
+        <div className="h-[32px] w-[181px] bg-white/20 rounded" />
+      )}
+    </div>
   )
 }

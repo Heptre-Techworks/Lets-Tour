@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef } from 'react';
-import Link from 'next/link';  // ✅ ADD
+import Link from 'next/link';
 
 // Narrow media shape from Payload Upload relation
 type MediaLike = { 
@@ -44,7 +44,7 @@ const getImageSrc = (img?: MediaLike | string | null, url?: string | null) => {
 const HeartIcon: React.FC<{ isFavorite: boolean; onClick: (e: React.MouseEvent) => void }> = ({ isFavorite, onClick }) => (
   <svg
     onClick={onClick}
-    className={`w-6 h-6 cursor-pointer transition-all duration-300 ease-in-out ${isFavorite ? 'text-red-500 fill-current' : 'text-white'}`}
+    className={`w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 cursor-pointer transition-all duration-300 ease-in-out ${isFavorite ? 'text-red-500 fill-current' : 'text-white'}`}
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
@@ -61,41 +61,31 @@ const HeartIcon: React.FC<{ isFavorite: boolean; onClick: (e: React.MouseEvent) 
 );
 
 const ArrowRightIcon = () => (
-  <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+  <svg className="w-4 h-4 sm:w-5 sm:h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
   </svg>
 );
 
 const ChevronLeftIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
   </svg>
 );
 
 const ChevronRightIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
   </svg>
 );
 
-const DashedRule: React.FC<{ className?: string }> = ({ className }) => {
-  const style: React.CSSProperties = {
-    ['--dash' as any]: '10px',
-    ['--gap' as any]: '10px',
-    ['--offset' as any]: '50px',
-    backgroundImage:
-      'repeating-linear-gradient(to right, currentColor 0 var(--dash), transparent 0 calc(var(--dash) + var(--gap)))',
-    backgroundRepeat: 'repeat-x',
-    backgroundSize: 'calc(var(--dash) + var(--gap)) 1px',
-    backgroundPosition: 'var(--offset) 0',
-    height: '1px',
-    width: '100%',
-    opacity: 0.65,
-  };
-  return <div style={style} className={className} aria-hidden />;
-};
+const DashedRule: React.FC<{ className?: string }> = ({ className }) => (
+  <div 
+    className={`h-px w-full ${className}`}
+    style={{ borderTop: '1px dashed #353535' }}
+    aria-hidden 
+  />
+);
 
-// ✅ UPDATED: Wrap with Link and handle heart click properly
 const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isEven }) => {
   const [isFavorite, setIsFavorite] = React.useState(false);
 
@@ -113,74 +103,176 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
 
   const href = card?.href || '#';
 
-  // ✅ Handle heart click - prevent navigation
   const handleHeartClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsFavorite(v => !v);
   };
 
-  // ✅ Handle arrow click - navigate
   const handleArrowClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Link will handle navigation
   };
 
   return (
     <Link
       href={href}
-      className={`block relative flex-shrink-0 w-[280px] h-[400px] rounded-2xl shadow-xl group transform transition-all duration-300 hover:scale-[1.02] ${
-        isEven ? '-translate-y-4' : 'translate-y-4'
-      }`}
+      className={`block relative flex-shrink-0 group
+        ${isEven ? 'translate-y-0' : 'translate-y-10 sm:translate-y-12 md:translate-y-14 lg:translate-y-16'}
+      `}
+      style={{
+        width: '320px',
+        height: '420px'
+      }}
     >
-      {imgSrc ? (
-        <img 
-          src={imgSrc} 
-          alt={alt ?? 'Image'} 
-          className="w-full h-full object-cover transition-transform duration-300 rounded-2xl group-hover:scale-105" 
+      {/* Card wrapper that scales on hover */}
+      <div 
+        className="relative w-full h-full rounded-xl transform transition-all duration-300 group-hover:scale-105"
+        style={{
+          borderRadius: '12px'
+        }}
+      >
+        {/* Image */}
+        {imgSrc ? (
+          <img 
+            src={imgSrc} 
+            alt={alt ?? 'Image'} 
+            className="w-full h-full object-cover rounded-xl" 
+            style={{
+              borderRadius: '12px',
+              filter: 'drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))'
+            }}
+          />
+        ) : (
+          <div 
+            className="w-full h-full bg-gray-300" 
+            style={{ borderRadius: '12px' }}
+            aria-hidden="true" 
+          />
+        )}
+
+        {/* Gradient overlay - moves with card */}
+        <div 
+          className="absolute inset-0 rounded-xl" 
+          style={{
+            background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.75) 25.8%, rgba(120, 119, 120, 0) 65.07%)',
+            borderRadius: '12px'
+          }}
         />
-      ) : (
-        <div className="w-full h-full bg-gray-300 rounded-2xl" aria-hidden="true" />
-      )}
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent rounded-2xl" />
+        {/* Content overlay - moves with card */}
+        <div className="absolute inset-0 p-5 sm:p-6 lg:p-7 flex flex-col text-white">
+          <div className="flex justify-between items-start">
+            {card?.discount ? (
+              <span 
+                className="text-white font-bold px-4 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center justify-center text-center text-sm sm:text-base lg:text-base"
+                style={{
+                  background: '#FBAE3D',
+                  lineHeight: '88%',
+                  letterSpacing: '-0.011em',
+                  fontFamily: "'NATS', sans-serif",
+                  borderRadius: '8px'
+                }}
+              >
+                {card.discount}
+              </span>
+            ) : (
+              <span />
+            )}
+            <button
+              onClick={handleHeartClick}
+              className="z-10 relative"
+              aria-label="Add to favorites"
+              type="button"
+            >
+              <HeartIcon isFavorite={isFavorite} onClick={handleHeartClick} />
+            </button>
+          </div>
 
-      <div className="absolute inset-0 p-5 flex flex-col text-white">
-        <div className="flex justify-between items-start">
-          {card?.discount ? (
-            <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">{card.discount}</span>
-          ) : (
-            <span />
-          )}
-          <button
-            onClick={handleHeartClick}
-            className="z-10 relative"
-            aria-label="Add to favorites"
-            type="button"
-          >
-            <HeartIcon isFavorite={isFavorite} onClick={handleHeartClick} />
-          </button>
-        </div>
-
-        <div className="mt-auto">
-          <h3 className="text-3xl font-bold group-hover:text-yellow-300 transition-colors">{card?.name ?? ''}</h3>
-          {card?.details ? <p className="text-sm opacity-90">{card.details}</p> : null}
-          {card?.details && <div className="w-full h-px bg-white/30 my-3" />}
-          <div className="flex justify-between items-center mt-2">
-            <div>
-              <span className="text-2xl font-bold">₹ {formattedPrice}</span>
-              <span className="text-sm opacity-80 ml-1">(per person)</span>
+          <div className="mt-auto">
+            <h3 
+              className="font-bold group-hover:text-yellow-300 transition-colors flex items-center text-3xl sm:text-4xl md:text-[44px] lg:text-5xl"
+              style={{
+                fontFamily: "'Amiri', serif",
+                fontStyle: 'italic',
+                lineHeight: '88%',
+                letterSpacing: '-0.011em'
+              }}
+            >
+              {card?.name ?? ''}
+            </h3>
+            {card?.details ? (
+              <p 
+                className="flex items-center mt-2 sm:mt-3 text-sm sm:text-base lg:text-lg"
+                style={{
+                  fontFamily: "'NATS', sans-serif",
+                  lineHeight: '88%',
+                  letterSpacing: '-0.011em'
+                }}
+              >
+                {card.details}
+              </p>
+            ) : null}
+            
+            {card?.details && (
+              <div 
+                className="my-3 sm:my-3.5" 
+                style={{ 
+                  border: '0.5px solid rgba(255, 255, 255, 0.5)',
+                  width: '100%'
+                }} 
+              />
+            )}
+            
+            <div className="flex justify-between items-center mt-2.5">
+              <div className="flex items-center flex-wrap">
+                <span 
+                  className="font-bold text-2xl sm:text-3xl lg:text-4xl"
+                  style={{
+                    fontFamily: "'NATS', sans-serif",
+                    lineHeight: '88%',
+                    letterSpacing: '-0.011em'
+                  }}
+                >
+                  ₹ {formattedPrice}
+                </span>
+                <span 
+                  className="ml-2 text-xs sm:text-sm lg:text-base"
+                  style={{
+                    fontFamily: "'NATS', sans-serif",
+                    opacity: 0.8
+                  }}
+                >
+                  (per person)
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Arrow button - positioned outside scaled container */}
       <span
         onClick={handleArrowClick}
-        className="absolute bottom-0 right-0 transform translate-x-1/2 translate-y-1/2 bg-white text-black rounded-full w-10 h-10 flex items-center justify-center transition-all duration-300 group-hover:bg-yellow-400 group-hover:scale-110 shadow-lg z-10 border-2 border-black"
+        className="absolute bottom-0 right-0 transform translate-x-1/2 translate-y-1/2 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-lg z-10"
+        style={{
+          width: '50px',
+          height: '50px',
+          background: '#1E1E1E'
+        }}
         aria-label={`View details for ${card?.name}`}
       >
-        <ArrowRightIcon />
+        <div 
+          className="flex items-center justify-center rounded-full"
+          style={{
+            width: '38px',
+            height: '38px',
+            background: '#FFFFFF'
+          }}
+        >
+          <span style={{ color: '#1E1E1E' }}>
+            <ArrowRightIcon />
+          </span>
+        </div>
       </span>
     </Link>
   );
@@ -199,43 +291,97 @@ export const UpDownCardCarouselClient: React.FC<{
 
   const scroll = (direction: 'left' | 'right') => {
     if (!scrollContainerRef.current) return;
-    const amount = direction === 'left' ? -300 : 300;
+    const amount = direction === 'left' ? -370 : 370;
     scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' });
   };
 
   return (
-    <section className="font-sans pt-10 px-4 sm:px-8">
-      <div className="w-full max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-4">
-          <div className="flex items-center gap-4">
-            <h1 className="text-5xl font-bold text-gray-800" style={{ fontFamily: 'serif' }}>
-              {heading}
-            </h1>
-            <div className="flex-1 text-gray-400">
-              <DashedRule />
+    <>
+      {/* Load custom fonts */}
+      <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+      <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />
+      
+      <section 
+        className="w-screen relative pb-12 sm:pb-16 md:pb-20"
+        style={{ 
+          maxWidth: '100vw',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Header Container - NEGATIVE MARGIN TO REDUCE GAP */}
+        <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20" style={{ marginBottom: '-20px' }}>
+          <div className="pt-8 sm:pt-10 lg:pt-12">
+            <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
+              <h1 
+                className="font-bold text-black whitespace-nowrap text-4xl sm:text-5xl md:text-6xl lg:text-[64px] xl:text-[72px]"
+                style={{
+                  fontFamily: "'Amiri', serif",
+                  fontStyle: 'italic',
+                  lineHeight: '88%',
+                  letterSpacing: '-0.011em'
+                }}
+              >
+                {heading}
+              </h1>
+              <div className="flex-1 hidden sm:block">
+                <DashedRule />
+              </div>
             </div>
+            {subheading ? (
+              <p 
+                className="text-black mt-4 sm:mt-5 flex items-center text-base sm:text-lg md:text-xl lg:text-2xl"
+                style={{
+                  fontFamily: "'NATS', sans-serif",
+                  lineHeight: '88%',
+                  letterSpacing: '-0.011em'
+                }}
+              >
+                {subheading}
+              </p>
+            ) : null}
           </div>
-          {subheading ? <p className="text-gray-600 mt-2 text-lg">{subheading}</p> : null}
         </div>
 
         {/* Carousel */}
-        <div className="relative py-12">
+        <div 
+          className="relative flex items-center"
+          style={{ 
+            height: '600px',
+            width: '100vw',
+            overflow: 'visible'
+          }}
+        >
           {/* Left button */}
           <button
             onClick={() => scroll('left')}
             aria-label="Scroll left"
-            className="absolute -left-5 top-1/2 -translate-y-1/2 z-20 bg-white rounded-full p-2 shadow-md hover:bg-gray-200 transition-all hidden md:flex items-center justify-center w-12 h-12"
+            className="absolute left-4 sm:left-6 md:left-8 lg:left-12 xl:left-16 top-1/2 -translate-y-1/2 z-20 rounded-full hover:bg-gray-300 transition-all hidden md:flex items-center justify-center"
             type="button"
+            style={{
+              width: '52px',
+              height: '52px',
+              background: 'rgba(237, 237, 237, 0.75)',
+              opacity: 0.5,
+              boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
+            }}
           >
             <ChevronLeftIcon />
           </button>
 
-          {/* Cards */}
+          {/* Cards Container */}
           <div
             ref={scrollContainerRef}
-            className="flex items-center space-x-8 py-12 px-4 -mx-4 overflow-x-auto"
-            style={{ scrollbarWidth: 'none' } as any}
+            className="flex items-center overflow-x-auto scrollbar-hide"
+            style={{ 
+              gap: '28px',
+              height: '600px',
+              paddingLeft: '24px',
+              paddingRight: '24px',
+              width: '100%',
+              WebkitOverflowScrolling: 'touch',
+              overflowY: 'hidden',
+              touchAction: 'pan-x'
+            }}
           >
             {Array.isArray(cards) &&
               cards.map((card, index) => (
@@ -251,14 +397,32 @@ export const UpDownCardCarouselClient: React.FC<{
           <button
             onClick={() => scroll('right')}
             aria-label="Scroll right"
-            className="absolute -right-5 top-1/2 -translate-y-1/2 z-20 bg-white rounded-full p-2 shadow-md hover:bg-gray-200 transition-all hidden md:flex items-center justify-center w-12 h-12"
+            className="absolute right-4 sm:right-6 md:right-8 lg:right-12 xl:right-16 top-1/2 -translate-y-1/2 z-20 rounded-full hover:bg-gray-300 transition-all hidden md:flex items-center justify-center"
             type="button"
+            style={{
+              width: '52px',
+              height: '52px',
+              background: 'rgba(237, 237, 237, 0.75)',
+              opacity: 0.5,
+              boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
+            }}
           >
             <ChevronRightIcon />
           </button>
         </div>
-      </div>
-    </section>
+      </section>
+      
+      {/* Custom scrollbar hide */}
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+    </>
   );
 };
 

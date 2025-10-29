@@ -2,7 +2,7 @@
 
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import React, { useEffect, useState, useRef, useCallback } from 'react'
-import type { Media } from '@/payload-types'
+import type { Media as PayloadMedia } from '@/payload-types'
 import { Media as MediaComponent } from '@/components/Media'
 import { useRouter } from 'next/navigation'
 
@@ -37,7 +37,7 @@ const ChevronRightIcon: React.FC = () => (
 
 // Types
 type Slide = {
-  backgroundImage: Media | string
+  backgroundImage: PayloadMedia | string
   headline?: string
   subtitle?: string
   location?: string
@@ -52,7 +52,7 @@ type Option = {
 
 type MainHeroProps = {
   slides: Slide[]
-  cloudImage: Media | string | null | undefined
+  cloudImage: PayloadMedia | string | null | undefined
   enableAirplaneAnimation?: boolean
   autoplayDuration?: number
   transitionDuration?: number
@@ -66,6 +66,14 @@ type MainHeroProps = {
     category?: string
   }
 }
+
+// Font utils (Kaushan Script + Neuton)
+const fontsStyle = `
+  @import url('https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Neuton:wght@400;700&family=Roboto:wght@300;400;500&display=swap');
+  .font-kaushan { font-family: 'Kaushan Script', cursive; }
+  .font-neuton { font-family: 'Neuton', serif; }
+  .font-roboto { font-family: 'Roboto', sans-serif; }
+`
 
 export const MainHero: React.FC<MainHeroProps> = ({
   slides = [],
@@ -118,13 +126,11 @@ export const MainHero: React.FC<MainHeroProps> = ({
 
   useEffect(() => {
     if (slides.length <= 1) return
-
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
       const nextSlide = (currentSlide + 1) % slides.length
       setSlide(nextSlide, 1)
     }, autoplayDuration)
-
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
@@ -143,34 +149,26 @@ export const MainHero: React.FC<MainHeroProps> = ({
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-
-    // Build query params from form data
     const params = new URLSearchParams()
-    
     if (formData.destination) params.append('destination', formData.destination)
     if (formData.date) params.append('date', formData.date)
     if (formData.people) params.append('people', formData.people)
     if (formData.category) params.append('category', formData.category)
-
-    // Redirect to search/packages page with query params
     const queryString = params.toString()
-     router.push(`/destinations/${formData.destination}`)
+    router.push(`/destinations/${formData.destination}`)
   }
 
   if (!slides || slides.length === 0) return null
 
   const activeSlide = slides[currentSlide]
 
-  const textAnimation = {
+  const textAnimation: React.CSSProperties = {
     opacity: isChanging ? 0 : 1,
     transform: `translateX(${isChanging ? slideDirection * -50 : 0}px)`,
     transition: 'transform 0.5s ease-out, opacity 0.5s ease-out',
@@ -184,91 +182,22 @@ export const MainHero: React.FC<MainHeroProps> = ({
 
   return (
     <>
-      {/* Inline Styles for Animations */}
+      {/* Fonts + animations */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:wght@300;400;500&display=swap');
-
-        .font-playfair {
-          font-family: 'Playfair Display', serif;
-        }
-
-        .font-roboto {
-          font-family: 'Roboto', sans-serif;
-        }
-
-        @keyframes plane-fly {
-          from {
-            left: 100%;
-          }
-          to {
-            left: 0;
-          }
-        }
-
-        .animate-plane-fly {
-          animation-name: plane-fly;
-          animation-timing-function: linear;
-          animation-iteration-count: 1;
-        }
-
-        @keyframes draw-dashed-line {
-          from {
-            clip-path: inset(0 0 0 100%);
-          }
-          to {
-            clip-path: inset(0 0 0 0);
-          }
-        }
-
-        .animate-draw-dashed-line {
-          animation-name: draw-dashed-line;
-          animation-timing-function: linear;
-          animation-iteration-count: 1;
-        }
-
-        @keyframes plane-fly-right {
-          from {
-            left: 0;
-          }
-          to {
-            left: 100%;
-          }
-        }
-
-        .animate-plane-fly-right {
-          animation-name: plane-fly-right;
-          animation-timing-function: linear;
-          animation-iteration-count: 1;
-        }
-
-        @keyframes draw-dashed-line-right {
-          from {
-            clip-path: inset(0 100% 0 0);
-          }
-          to {
-            clip-path: inset(0 0 0 0);
-          }
-        }
-
-        .animate-draw-dashed-line-right {
-          animation-name: draw-dashed-line-right;
-          animation-timing-function: linear;
-          animation-iteration-count: 1;
-        }
-
-        @keyframes fade-out-at-80 {
-          0%,
-          80% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-          }
-        }
+        ${fontsStyle}
+        @keyframes plane-fly { from { left: 100%; } to { left: 0; } }
+        .animate-plane-fly { animation-name: plane-fly; animation-timing-function: linear; animation-iteration-count: 1; }
+        @keyframes draw-dashed-line { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0 0 0 0); } }
+        .animate-draw-dashed-line { animation-name: draw-dashed-line; animation-timing-function: linear; animation-iteration-count: 1; }
+        @keyframes plane-fly-right { from { left: 0; } to { left: 100%; } }
+        .animate-plane-fly-right { animation-name: plane-fly-right; animation-timing-function: linear; animation-iteration-count: 1; }
+        @keyframes draw-dashed-line-right { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+        .animate-draw-dashed-line-right { animation-name: draw-dashed-line-right; animation-timing-function: linear; animation-iteration-count: 1; }
+        @keyframes fade-out-at-80 { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
       `}</style>
 
       <section
-        className="relative -mt-[10.4rem] w-full h-[170vh] overflow-hidden font-roboto text-white"
+        className="relative -mt-14 sm:-mt-20 md:-mt-[10.4rem] w-full h-[100vh] sm:h-[110vh] md:h-[125vh] overflow-hidden font-roboto text-white"
         data-theme="dark"
       >
         {/* Background Image Slider */}
@@ -287,23 +216,19 @@ export const MainHero: React.FC<MainHeroProps> = ({
           ))}
         </div>
 
-        {/* Enhanced gradient fade for the bottom */}
-        <div className="absolute bottom-0 left-0 w-full h-2/5 bg-gradient-to-t from-white via-white/80 to-transparent z-[5] pointer-events-none"></div>
+        {/* Bottom gradient */}
+        <div className="absolute bottom-0 left-0 w-full h-2/5 bg-gradient-to-t from-white via-white/80 to-transparent z-[5] pointer-events-none" />
 
         <div className="relative z-10 w-full h-full bg-black/20 flex flex-col">
           {/* Top Section */}
-          <div className="relative pt-32">
-            {/* Top Airplane Path Animation */}
+          <div className="relative pt-16 sm:pt-24 md:pt-32">
             {enableAirplaneAnimation && (
-              <div className="absolute top-0 left-0 w-full pointer-events-none mt-40">
+              <div className="absolute top-0 left-0 w-full pointer-events-none mt-16 sm:mt-28 md:mt-40">
                 <div className="relative w-full">
                   <div
                     key={`top-animation-${currentSlide}`}
-                    className="absolute top-1/2 left-0 -translate-y-1/2 w-full px-8 sm:px-16"
-                    style={{
-                      ...animationStyle,
-                      animationName: 'fade-out-at-80',
-                    }}
+                    className="absolute top-1/2 left-0 -translate-y-1/2 w-full px-4 sm:px-8 md:px-16"
+                    style={{ ...animationStyle, animationName: 'fade-out-at-80' }}
                   >
                     <div className="absolute top-0 left-0 w-full h-0.5" style={{ zIndex: 2 }}>
                       <svg className="w-full h-full overflow-visible">
@@ -322,13 +247,8 @@ export const MainHero: React.FC<MainHeroProps> = ({
                     </div>
 
                     <AirplaneIcon
-                      className="absolute text-white text-4xl animate-plane-fly"
-                      style={{
-                        top: '0',
-                        transform: 'translateX(-50%) translateY(-50%) rotate(-90deg)',
-                        ...animationStyle,
-                        zIndex: 3,
-                      }}
+                      className="absolute text-white text-3xl sm:text-4xl animate-plane-fly"
+                      style={{ top: '0', transform: 'translateX(-50%) translateY(-50%) rotate(-90deg)', ...animationStyle, zIndex: 3 }}
                     />
                   </div>
                 </div>
@@ -337,78 +257,61 @@ export const MainHero: React.FC<MainHeroProps> = ({
           </div>
 
           {/* Middle Content */}
-          <div className="relative z-10 flex-grow flex flex-col justify-center items-center space-y-20 ">
-            {/* Main Title */}
-            <div className="text-center w-full max-w-[50%]">
-              <h1 className="font-playfair italic text-6xl md:text-8xl font-bold drop-shadow-lg pb-10">
+          <div className="relative z-10 flex-grow flex flex-col justify-center items-center space-y-10 sm:space-y-16 md:space-y-20">
+            {/* Main Title (Kaushan Script 96px, 88% line-height, -0.011em) */}
+            <div className="text-center w-full max-w-[90%] sm:max-w-[70%] md:max-w-[50%] pt-24 sm:pt-16 md:pt-24">
+              <h1 className="font-kaushan text-[96px] leading-[0.88] tracking-[-0.011em] font-normal drop-shadow-lg pb-6 md:pb-10">
                 {activeSlide.headline || 'To travel is to live!'}
               </h1>
             </div>
 
             {/* Location Info & Progress */}
-            <div className="w-full max-w-6xl h-8 relative ">
-              {/* Left Aligned Text */}
-              <div
-                className="absolute left-0 top-1/2 -translate-y-1/2 text-left"
-                style={textAnimation}
-              >
-                <p className="text-md font-light">{activeSlide.subtitle}</p>
-                <h2 className="text-4xl font-light">{activeSlide.location}</h2>
+            <div className="w-full max-w-6xl h-8 relative">
+              {/* Left text (Neuton 24px/48px, 88%, -0.011em, 60% opacity) */}
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 text-left px-4 sm:px-0" style={textAnimation}>
+                <p className="font-neuton text-[24px] leading-[0.88] tracking-[-0.011em] text-white/60">
+                  {activeSlide.subtitle}
+                </p>
+                <h2 className="font-neuton text-[48px] leading-[0.88] tracking-[-0.011em] text-white/60">
+                  {activeSlide.location}
+                </h2>
               </div>
 
-              {/* Centered Progress Bar */}
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/4 h-full w-28">
-                {/* Static SVG dashed line on the left */}
-                <div className="absolute top-1/2 right-full -translate-y-1/2 w-48 h-0.5 mr-4">
+              {/* Center progress */}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/4 h-full w-20 sm:w-24 md:w-28">
+                <div className="absolute top-1/2 right-full -translate-y-1/2 w-32 sm:w-40 md:w-48 h-0.5 mr-4">
                   <svg className="w-full h-full">
-                    <line
-                      x1="0"
-                      y1="50%"
-                      x2="100%"
-                      y2="50%"
-                      stroke="rgba(255, 255, 255, 0.6)"
-                      strokeWidth="2"
-                      strokeDasharray="6 5"
-                    />
+                    <line x1="0" y1="50%" x2="100%" y2="50%" stroke="rgba(255, 255, 255, 0.6)" strokeWidth="2" strokeDasharray="6 5" />
                   </svg>
                 </div>
 
-                {/* 3-Dot Animated Carousel */}
                 <div className="w-full h-full relative flex items-center justify-center">
                   {slides.map((_, index) => {
                     const slideCount = slides.length
                     let distance = index - currentSlide
-
                     if (Math.abs(distance) > slideCount / 2) {
                       distance = distance > 0 ? distance - slideCount : distance + slideCount
                     }
-
                     const style: React.CSSProperties = {
                       transition: 'transform 0.5s ease-out, opacity 0.5s ease-out',
                       position: 'absolute',
                       opacity: 1,
                     }
                     let dotClass = 'w-3 h-3 rounded-full'
-
                     if (distance === 0) {
-                      // Center dot
                       style.transform = 'translateX(0) scale(1.6)'
                       dotClass += ' bg-white'
                     } else if (distance === -1) {
-                      // Left dot
                       style.transform = 'translateX(-40px) scale(1)'
                       dotClass += ' bg-white/40'
                     } else if (distance === 1) {
-                      // Right dot
                       style.transform = 'translateX(40px) scale(1)'
                       dotClass += ' bg-white/40'
                     } else {
-                      // Hidden dots
                       style.transform = `translateX(${Math.sign(distance) * 88}px) scale(0)`
                       style.opacity = 0
                       dotClass += ' bg-white/40'
                     }
-
                     return (
                       <button
                         key={index}
@@ -416,24 +319,17 @@ export const MainHero: React.FC<MainHeroProps> = ({
                         className={dotClass}
                         style={style}
                         aria-label={`Go to slide ${index + 1}`}
-                      ></button>
+                      />
                     )
                   })}
                 </div>
 
-                {/* Animated plane and line on the right */}
                 <div
                   key={`bottom-animation-${currentSlide}`}
-                  className="absolute top-1/2 left-full -translate-y-1/2 w-[50vw] h-4 ml-4"
-                  style={{
-                    ...animationStyle,
-                    animationName: 'fade-out-at-80',
-                  }}
+                  className="absolute top-1/2 left-full -translate-y-1/2 w-[40vw] sm:w-[45vw] md:w-[50vw] h-4 ml-4"
+                  style={{ ...animationStyle, animationName: 'fade-out-at-80' }}
                 >
-                  <div
-                    className="absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2"
-                    style={{ zIndex: 2 }}
-                  >
+                  <div className="absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2" style={{ zIndex: 2 }}>
                     <svg className="w-full h-full overflow-visible">
                       <line
                         x1="0"
@@ -449,121 +345,109 @@ export const MainHero: React.FC<MainHeroProps> = ({
                     </svg>
                   </div>
                   <AirplaneIcon
-                    className="absolute text-white text-2xl animate-plane-fly-right"
-                    style={{
-                      top: '50%',
-                      transform: 'translateY(-50%) translateX(-50%) rotate(90deg)',
-                      ...animationStyle,
-                      zIndex: 3,
-                    }}
+                    className="absolute text-white text-xl sm:text-2xl animate-plane-fly-right"
+                    style={{ top: '50%', transform: 'translateY(-50%) translateX(-50%) rotate(90deg)', ...animationStyle, zIndex: 3 }}
                   />
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Bottom Section */}
-          <div className="relative w-full h-48">
-            {cloudImage && (
-              <div className="absolute inset-0 z-0 pointer-events-none">
-                <MediaComponent
-                  resource={cloudImage}
-                  imgClassName="absolute top-0 left-0 w-full h-full object-cover opacity-90 object-top"
-                />
-                {/* Gradient for cloud image fade */}
-                <div className="absolute inset-x-0 bottom-0 h-full bg-gradient-to-t from-white via-white/60 to-transparent"></div>
-              </div>
-            )}
-
-            <div className="relative z-10 flex flex-col items-center justify-center h-full">
-              {/* Search Form */}
-              <form
-                onSubmit={handleSubmit}
-                className="w-full max-w-6xl relative px-4 pointer-events-auto h-50"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 bg-[#f0b95a] rounded-lg shadow-2xl overflow-hidden text-black/70">
-              <select
-                name="destination"
-                value={formData.destination}
-                onChange={handleInputChange}
-                className="p-4 bg-transparent border-b sm:border-b-0 sm:border-r border-black/10 focus:outline-none placeholder:text-black/70"
-                aria-label="Destination"
-              >
-                <option value="" disabled>
-                  {placeholders?.destination || 'Destination'}
-                </option>
-                {destinationOptions.map((option) => (
-                  <option key={option.value || option.id} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-
-
-                  <input
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    placeholder={placeholders?.date || 'Date'}
-                    className="p-4 bg-transparent border-b sm:border-b-0 lg:border-r border-black/10 focus:outline-none placeholder:text-black/70"
-                    aria-label="Date"
+            {/* Bottom Section */}
+            <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[60vh] pt-24 sm:pt-36 md:pt-48">
+              {cloudImage && (
+                <div className="absolute inset-0 z-0 pointer-events-none">
+                  <MediaComponent
+                    resource={cloudImage}
+                    imgClassName="absolute top-0 left-0 w-full h-full object-cover opacity-95 object-top pt-8"
                   />
+                  <div className="absolute inset-x-0 bottom-[5vh] h-[20vh] bg-gradient-to-t from-white via-white/60 to-transparent" />
+                </div>
+              )}
 
-                  <input
-                    type="number"
-                    name="people"
-                    value={formData.people}
-                    onChange={handleInputChange}
-                    min="1"
-                    placeholder={placeholders?.people || 'No of people'}
-                    className="p-4 bg-transparent border-b sm:border-b-0 sm:border-r border-black/10 focus:outline-none placeholder:text-black/70"
-                    aria-label="People"
-                  />
-
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="p-4 bg-transparent focus:outline-none placeholder:text-black/70"
-                    aria-label="Category"
-                  >
-                    <option value="" disabled>
-                      {placeholders?.category || 'Category'}
-                    </option>
-                    {categoryOptions.map((option) => (
-                      <option key={option.value || option.id} value={option.value}>
-                        {option.label}
+              <div className="relative z-10 flex flex-col items-center justify-center h-full">
+                <form onSubmit={handleSubmit} className="w-full max-w-6xl relative px-4 pointer-events-auto h-auto sm:h-96">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 bg-[#f0b95a] rounded-lg shadow-2xl overflow-hidden text-black/70">
+                    <select
+                      name="destination"
+                      value={formData.destination}
+                      onChange={handleInputChange}
+                      className="p-4 bg-transparent border-b sm:border-b-0 sm:border-r border-black/10 focus:outline-none placeholder:text-black/70"
+                      aria-label="Destination"
+                    >
+                      <option value="" disabled>
+                        {placeholders?.destination || 'Destination'}
                       </option>
-                    ))}
-                  </select>
-                </div>
+                      {destinationOptions.map((option) => (
+                        <option key={option.value || option.id} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
 
-                <div className="text-center mt-8">
-                  <button
-                    type="submit"
-                    className="px-10 py-3 bg-white text-black font-medium rounded-full shadow-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
-                  >
-                    {buttonLabel}
-                  </button>
-                </div>
-              </form>
+                    <input
+                      type="date"
+                      name="date"
+                      value={formData.date}
+                      onChange={handleInputChange}
+                      placeholder={placeholders?.date || 'Date'}
+                      className="p-4 bg-transparent border-b sm:border-b-0 lg:border-r border-black/10 focus:outline-none placeholder:text-black/70"
+                      aria-label="Date"
+                    />
+
+                    <input
+                      type="number"
+                      name="people"
+                      value={formData.people}
+                      onChange={handleInputChange}
+                      min="1"
+                      placeholder={placeholders?.people || 'No of people'}
+                      className="p-4 bg-transparent border-b sm:border-b-0 sm:border-r border-black/10 focus:outline-none placeholder:text-black/70"
+                      aria-label="People"
+                    />
+
+                    <select
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      className="p-4 bg-transparent focus:outline-none placeholder:text-black/70"
+                      aria-label="Category"
+                    >
+                      <option value="" disabled>
+                        {placeholders?.category || 'Category'}
+                      </option>
+                      {categoryOptions.map((option) => (
+                        <option key={option.value || option.id} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="text-center mt-8">
+                    <button
+                      type="submit"
+                      className="px-10 py-3 bg-white text-black font-medium rounded-full shadow-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                    >
+                      {buttonLabel}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
 
-          {/* Standalone Navigation Arrows */}
           {slides.length > 1 && (
             <>
               <button
                 onClick={goToPrev}
-                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/30 transition-colors z-20"
+                className="absolute left-4 md:left-8 top-1/3 -translate-y-1/2 w-12 h-12 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/30 transition-colors z-20"
                 aria-label="Previous slide"
               >
                 <ChevronLeftIcon />
               </button>
               <button
                 onClick={goToNext}
-                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/30 transition-colors z-20"
+                className="absolute right-4 md:right-8 top-1/3 -translate-y-1/2 w-12 h-12 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/30 transition-colors z-20"
                 aria-label="Next slide"
               >
                 <ChevronRightIcon />

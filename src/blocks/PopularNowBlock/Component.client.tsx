@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Amiri } from 'next/font/google';
 
-// Configure Amiri font for title only
+// Amiri for headings (normal + italic)
 const amiri = Amiri({
   subsets: ['latin'],
   weight: ['400', '700'],
+  style: ['normal', 'italic'],
   display: 'swap',
 });
 
@@ -21,13 +22,13 @@ type CardData = {
   alt?: string | null;
   slug?: string;
   href?: string;
-}
+};
 
 type RowData = {
   direction: 'left' | 'right';
   speedSeconds: number;
   cards: CardData[];
-}
+};
 
 const getImageSrc = (card: CardData) => {
   if (card?.image && typeof card.image === 'object' && 'url' in card.image && card.image?.url) {
@@ -37,40 +38,74 @@ const getImageSrc = (card: CardData) => {
   return '';
 };
 
-const DestinationCard: React.FC<{ 
-  name: string; 
-  price: string; 
-  src: string; 
+// Bumped sizes aligned to shared CSS:
+// xs: 300×194, sm: 350×194, md: 400×222, lg: 450×250, xl: 475×264
+const DestinationCard: React.FC<{
+  name: string;
+  price: string;
+  src: string;
   alt?: string | null;
   href?: string;
-}> = ({
-  name,
-  price,
-  src,
-  alt,
-  href,
-}) => {
+}> = ({ name, price, src, alt, href }) => {
   const cardContent = (
-    <li className="relative w-[300px] sm:w-[350px] md:w-[400px] h-64 flex-shrink-0">
+    <li
+      className="
+        relative
+        w-[300px] sm:w-[350px] md:w-[400px] lg:w-[450px] xl:w-[475px]
+        h-[194px] sm:h-[194px] md:h-[222px] lg:h-[250px] xl:h-[264px]
+        flex-shrink-0
+      "
+    >
       {src ? (
-        <img 
-          src={src} 
-          alt={alt || name} 
+        <img
+          src={src}
+          alt={alt || name}
           className="w-full h-full object-cover rounded-2xl shadow-lg"
         />
       ) : (
         <div className="w-full h-full bg-gradient-to-br from-orange-400 to-pink-500 rounded-2xl shadow-lg flex items-center justify-center">
           <div className="text-white text-center">
-            <div className="text-8xl mb-2">📍</div>
-            <div className="text-sm font-medium">No Image</div>
+            <div className="text-6xl sm:text-7xl md:text-8xl mb-2">📍</div>
+            <div className="text-xs sm:text-sm font-medium">No Image</div>
           </div>
         </div>
       )}
+
+      {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-2xl" />
-      <div className="absolute bottom-0 left-0 p-6 text-white">
-        <h3 className="text-3xl md:text-4xl font-bold">{name}</h3>
-        <p className="text-lg mt-1">
-          Starting from <span className="font-semibold">{price}</span>
+
+      {/* Text overlay: Amiri (title) + NATS (price), keep typographic spec */}
+      <div className="absolute bottom-0 left-0 p-4 sm:p-5 md:p-6 text-white">
+        <h3
+          className="font-bold"
+          style={{
+            fontFamily: "'Amiri', serif",
+            fontStyle: 'italic',
+            fontWeight: 700,
+            letterSpacing: '-0.011em',
+            lineHeight: '88%',
+            fontSize: '28px',
+          }}
+        >
+          <span className="hidden md:inline" style={{ fontSize: '32px' }}>{name}</span>
+          <span className="inline md:hidden">{name}</span>
+        </h3>
+        <p
+          className="mt-1"
+          style={{
+            fontFamily: "'NATS', sans-serif",
+            fontWeight: 400,
+            letterSpacing: '-0.011em',
+            lineHeight: '88%',
+            fontSize: '12px',
+          }}
+        >
+          <span className="hidden md:inline" style={{ fontSize: '16px' }}>
+            Starting from <span className="font-semibold">{price}</span>
+          </span>
+          <span className="inline md:hidden">
+            Starting from <span className="font-semibold">{price}</span>
+          </span>
         </p>
       </div>
     </li>
@@ -78,15 +113,11 @@ const DestinationCard: React.FC<{
 
   if (href && href !== '#') {
     return (
-      <Link 
-        href={href}
-        className="block hover:shadow-2xl transition-shadow duration-300"
-      >
+      <Link href={href} className="block hover:shadow-2xl transition-shadow duration-300">
         {cardContent}
       </Link>
     );
   }
-
   return cardContent;
 };
 
@@ -98,22 +129,10 @@ const InfiniteScroller: React.FC<{
   centerOffset: number;
   transformOrigin: string;
   alignItems: string;
-}> = ({
-  direction,
-  speed,
-  pauseOnHover,
-  children,
-  centerOffset,
-  transformOrigin,
-  alignItems
-}) => {
+}> = ({ direction, speed, pauseOnHover, children, centerOffset, transformOrigin, alignItems }) => {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const scrollerInnerRef = useRef<HTMLUListElement | null>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
-
-  useEffect(() => {
-    console.log(`🎬 InfiniteScroller - Direction: ${direction}, Speed: ${speed}s`)
-  }, [direction, speed])
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -122,7 +141,7 @@ const InfiniteScroller: React.FC<{
 
     const originalChildren = Array.from(scrollerInner.children);
     if (originalChildren.length === 0) return;
-    
+
     originalChildren.forEach((item) => {
       const clone = item.cloneNode(true) as HTMLElement;
       clone.setAttribute('aria-hidden', 'true');
@@ -141,18 +160,21 @@ const InfiniteScroller: React.FC<{
 
       const scrollerWidth = scrollerRef.current.offsetWidth;
       const offsetPixels = scrollerWidth * (centerOffset / 100);
-      const scrollerCenterX = (scrollerWidth / 2) + offsetPixels;
+      const scrollerCenterX = scrollerWidth / 2 + offsetPixels;
       const scrollerRect = scrollerRef.current.getBoundingClientRect();
 
-      const children = Array.from(scrollerInnerRef.current.children) as HTMLLIElement[];
-      children.forEach(child => {
+      const childrenEls = Array.from(scrollerInnerRef.current.children) as HTMLLIElement[];
+      const isNarrow = window.matchMedia('(max-width: 640px)').matches;
+      const minScale = isNarrow ? 0.92 : 0.85;
+
+      childrenEls.forEach((child) => {
         const childRect = child.getBoundingClientRect();
         const childCenterX = childRect.left - scrollerRect.left + childRect.width / 2;
         const distanceFromCenter = Math.abs(scrollerCenterX - childCenterX);
-        const scale = Math.max(0.8, 1 - (distanceFromCenter / scrollerWidth));
-        child.style.transformOrigin = transformOrigin;
-        child.style.transform = `scale(${scale})`;
-        child.style.transition = 'transform 150ms linear';
+        const scale = Math.max(minScale, 1 - distanceFromCenter / scrollerWidth);
+        (child as HTMLElement).style.transformOrigin = transformOrigin;
+        (child as HTMLElement).style.transform = `scale(${scale})`;
+        (child as HTMLElement).style.transition = 'transform 150ms linear';
       });
     };
 
@@ -173,7 +195,7 @@ const InfiniteScroller: React.FC<{
   const directionClass = direction === 'left' ? 'scroll-left' : 'scroll-right';
 
   return (
-    <div ref={scrollerRef} className="scroller overflow-hidden">
+    <div ref={scrollerRef} className="scroller overflow-hidden px-3 sm:px-4 md:px-6">
       <ul
         ref={scrollerInnerRef}
         className={`flex w-max ${alignItems} py-2 scroller-inner ${directionClass}`}
@@ -211,29 +233,61 @@ export const PopularNowClient: React.FC<{
   pauseOnHover = true,
   rows = [],
 }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
-    console.log('🎨 CLIENT - Received rows:', rows?.length)
-    rows?.forEach((row: RowData, idx: number) => {
-      console.log(`🎨 Row ${idx + 1}: ${row.cards.length} cards, direction: ${row.direction}, speed: ${row.speedSeconds}s`)
-    })
-  }, [rows])
-  
+    const mqMobile = window.matchMedia('(max-width: 640px)');
+    const update = () => setIsMobile(mqMobile.matches);
+    update();
+    mqMobile.addEventListener('change', update);
+    return () => mqMobile.removeEventListener('change', update);
+  }, []);
+
   return (
-    <section className="min-h-screen w-full text-[#111827] font-sans flex flex-col justify-center py-16">
-      {/* Header with constrained width */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 mb-10">
+    <section
+      className="
+        w-full text-[#111827] font-sans flex flex-col
+        py-10 sm:py-12 md:py-14 lg:py-16
+        min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-screen
+      "
+    >
+      {/* NATS for subheading/prices */}
+      <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />
+
+      {/* Header */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8 md:mb-10">
         <div className="max-w-7xl mx-auto">
           <header>
-            <div className="flex items-center gap-6">
-              {/* Apply Amiri font to heading only */}
-              <h1 className={`${amiri.className} text-5xl md:text-6xl font-bold flex-shrink-0`}>
+            <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
+              <h1
+                className={`${amiri.className} italic font-bold flex-shrink-0`}
+                style={{
+                  fontSize: isMobile ? '36px' : '64px',
+                  lineHeight: '88%',
+                  letterSpacing: '-0.011em',
+                  color: '#000000',
+                }}
+              >
                 {heading}
               </h1>
-              <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
+              <div
+                className="hidden sm:block flex-grow w-full border-t border-dashed"
+                style={{ borderColor: '#353535' }}
+              />
             </div>
-            {/* Subtitle without custom font */}
+
             {subheading ? (
-              <p className="text-lg text-gray-500 mt-2">
+              <p
+                className="mt-2"
+                style={{
+                  fontFamily: "'NATS', sans-serif",
+                  fontWeight: 400,
+                  fontSize: isMobile ? '18px' : '26px',
+                  lineHeight: '88%',
+                  letterSpacing: '-0.011em',
+                  color: '#000000',
+                }}
+              >
                 {subheading}
               </p>
             ) : null}
@@ -241,44 +295,43 @@ export const PopularNowClient: React.FC<{
         </div>
       </div>
 
-      {/* Edge-to-edge scrolling content */}
-      <div className="flex flex-col gap-1 w-full">
+      {/* Scrollers (layout/animations unchanged) */}
+      <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 w-full">
         {Array.isArray(rows) && rows.length > 0 ? (
-          rows.map((row, idx) => {
-            if (!row?.cards || row.cards.length === 0) {
-              console.warn(`⚠️ Row ${idx + 1} has no cards`)
-              return null;
-            }
+          rows
+            .map((row, idx) => {
+              if (!row?.cards || row.cards.length === 0) return null;
 
-            const centerOffset = idx === 0 ? -20 : 20;
-            const transformOrigin = idx === 0 ? 'bottom' : 'top';
-            const alignItems = idx === 0 ? 'items-end' : 'items-start';
+              const centerOffset = isMobile ? 0 : idx === 0 ? -20 : 20;
+              const transformOrigin = isMobile ? 'center' : idx === 0 ? 'bottom' : 'top';
+              const alignItems = isMobile ? 'items-center' : idx === 0 ? 'items-end' : 'items-start';
 
-            return (
-              <InfiniteScroller
-                key={idx}
-                direction={row.direction}
-                speed={row.speedSeconds}
-                pauseOnHover={pauseOnHover}
-                centerOffset={centerOffset}
-                transformOrigin={transformOrigin}
-                alignItems={alignItems}
-              >
-                {row.cards.map((card: CardData, i: number) => (
-                  <DestinationCard
-                    key={`${idx}-${i}`}
-                    name={card?.name ?? ''}
-                    price={card?.price ?? ''}
-                    src={getImageSrc(card)}
-                    alt={card?.alt ?? card?.name}
-                    href={card?.href}
-                  />
-                ))}
-              </InfiniteScroller>
-            );
-          }).filter(Boolean)
+              return (
+                <InfiniteScroller
+                  key={idx}
+                  direction={row.direction}
+                  speed={row.speedSeconds}
+                  pauseOnHover={pauseOnHover}
+                  centerOffset={centerOffset}
+                  transformOrigin={transformOrigin}
+                  alignItems={alignItems}
+                >
+                  {row.cards.map((card: CardData, i: number) => (
+                    <DestinationCard
+                      key={`${idx}-${i}`}
+                      name={card?.name ?? ''}
+                      price={card?.price ?? ''}
+                      src={getImageSrc(card)}
+                      alt={card?.alt ?? card?.name}
+                      href={card?.href}
+                    />
+                  ))}
+                </InfiniteScroller>
+              );
+            })
+            .filter(Boolean)
         ) : (
-          <div className="text-center text-gray-500 py-20">
+          <div className="text-center text-gray-500 py-16 sm:py-20 md:py-24">
             No content configured. Please add rows in the admin panel.
           </div>
         )}

@@ -26,16 +26,15 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   }, [headerTheme, theme])
 
   return (
-    <header 
-      className="w-full py-6"
+    <header
+      className="w-full py-6 relative"
       {...(theme ? { 'data-theme': theme } : {})}
     >
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between gap-4">
           <HeaderLogo data={data} />
-          <div className="flex items-center gap-4">
+          <div className="flex-1 min-w-0">
             <Navigation data={data} />
-            
           </div>
           <UserProfile />
         </div>

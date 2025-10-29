@@ -43,30 +43,17 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
 
   useEffect(() => {
     if (packageProp) return
-
     const fetchPackage = async () => {
       const slug = pathname.split('/packages/')[1]?.split('/')[0]
-      
-      if (!slug) {
-        console.error('No package slug found in URL')
-        setLoading(false)
-        return
-      }
-
+      if (!slug) { setLoading(false); return }
       try {
         const response = await fetch(`/api/packages?where[slug][equals]=${slug}&depth=2`)
         const data = await response.json()
-        
         if (data.docs && data.docs[0]) {
           setPackage(data.docs[0])
-
           const reviewsResponse = await fetch(`/api/reviews?where[package][equals]=${data.docs[0].id}&where[published][equals]=true&limit=10&depth=2`)
           const reviewsData = await reviewsResponse.json()
-          if (reviewsData.docs) {
-            setRecentReviews(reviewsData.docs)
-          }
-        } else {
-          console.error('Package not found:', slug)
+          if (reviewsData.docs) setRecentReviews(reviewsData.docs)
         }
       } catch (error) {
         console.error('Error fetching package:', error)
@@ -74,7 +61,6 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
         setLoading(false)
       }
     }
-
     fetchPackage()
   }, [pathname, packageProp])
 
@@ -139,6 +125,12 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
 
   return (
     <section className="relative -mt-[10.4rem] w-screen min-h-screen bg-gray-900 font-sans" data-theme="dark">
+      {/* Font classes (Amiri + NATS) */}
+      <style jsx>{`
+        .font-amiri { font-family: 'Amiri', serif; }
+        .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+      `}</style>
+
       {/* ✅ Background image - full screen */}
       <div className="absolute inset-0 w-full h-full opacity-30 z-0">
         <Media resource={backgroundImage} imgClassName="object-cover w-full h-full" />
@@ -155,7 +147,10 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
 
             {/* Content */}
             <div className="flex flex-col space-y-4">
-              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white">{title}</h1>
+              {/* Title: Amiri italic, 56px, 88%, -0.011em */}
+              <h1 className="font-amiri italic text-[56px] leading-[0.88] tracking-[-0.011em] text-white">
+                {title}
+              </h1>
 
               <div className="flex items-center gap-2">
                 <div className="flex">
@@ -163,10 +158,14 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                     <StarIcon key={i} />
                   ))}
                 </div>
-                <span className="text-sm text-gray-300 tracking-wide">{location}</span>
+                {/* Meta line: NATS 20px 88% */}
+                <span className="font-nats text-[20px] leading-[0.88] tracking-[-0.011em] text-gray-200">{location}</span>
               </div>
 
-              <p className="text-gray-300 text-base leading-relaxed">{description}</p>
+              {/* Description: NATS 20px 100% */}
+              <p className="font-nats text-[20px] leading-[1] tracking-[-0.011em] text-gray-200">
+                {description}
+              </p>
 
               {vacationTypes.length > 0 && (
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -176,11 +175,12 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                         <div className="flex items-center">
                           <span className="text-2xl mr-3">{vType.icon}</span>
                           <div>
-                            <p className="font-semibold text-white">{vType.type}</p>
-                            <p className="text-xs text-gray-300">{vType.label}</p>
+                            {/* Card labels: NATS 20px 88% and 16px 88% */}
+                            <p className="font-nats text-[20px] leading-[0.88] tracking-[-0.011em] text-white">{vType.type}</p>
+                            <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-300">{vType.label}</p>
                           </div>
                         </div>
-                        <span className="font-semibold text-white">{vType.percentage}%</span>
+                        <span className="font-nats text-[20px] leading-[0.88] tracking-[-0.011em] text-white">{vType.percentage}%</span>
                       </div>
                       <div className="mt-2 w-full bg-white/20 rounded-full h-1.5">
                         <div className="bg-yellow-400 h-1.5 rounded-full" style={{ width: `${vType.percentage}%` }} />
@@ -191,16 +191,18 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
               )}
 
               <div className="flex items-end gap-4 pt-4">
+                {/* Strikethrough price: NATS 36px 88%, red */}
                 {pkg.discountedPrice && pkg.discountedPrice < pkg.price && (
-                  <p className="text-xl text-red-400 line-through">
+                  <p className="font-nats text-[36px] leading-[0.88] tracking-[-0.011em] text-red-500 line-through">
                     {pricing.currency}{pricing.originalPrice}
                   </p>
                 )}
+                {/* Main price chip: NATS 45px 88% white text on orange */}
                 <div className="bg-orange-400 text-black px-6 py-3 rounded-lg text-center">
-                  <p className="text-2xl font-bold">
+                  <p className="font-nats text-[45px] leading-[0.88] tracking-[-0.011em] font-normal text-white">
                     {pricing.currency}{pricing.discountedPrice}
                   </p>
-                  <p className="text-sm font-medium">/person</p>
+                  <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-white">/person</p>
                 </div>
               </div>
 
@@ -216,8 +218,9 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                     </div>
                   )}
                   <div className="ml-4">
-                    <p className="font-bold">{bookingCount}+</p>
-                    <p className="text-xs text-gray-300">bookings in the past month</p>
+                    {/* Booking count: NATS 20px 90% */}
+                    <p className="font-nats text-[20px] leading-[0.9] tracking-[-0.011em] text-white">{bookingCount}+</p>
+                    <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-300">bookings in the past month</p>
                   </div>
                 </div>
 
@@ -230,13 +233,15 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                       <DownloadIcon />
                     </button>
                   )}
+                  {/* Button label: NATS 24px line-height 0% style */}
                   <Link 
                     href="/curate"
-                    className="bg-white text-black font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors inline-block text-center"
+                    className="bg-white text-black py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors inline-block text-center"
                   >
-                    {bookNowLabel}
+                    <span className="font-nats text-[24px] leading-[0] tracking-[-0.011em] text-[#FBAE3D]">
+                      {bookNowLabel}
+                    </span>
                   </Link>
-
                 </div>
               </div>
             </div>

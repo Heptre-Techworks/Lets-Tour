@@ -201,9 +201,9 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
                 <foreignObject x="0" y="0" width="100%" height="100%" style={{ overflow: 'visible' }}>
                   <div style={{ offsetPath: `path('${arcPath}')`, offsetRotate: '0deg', offsetDistance: `${targetPosition * 100}%`, transition: planeTransitionStyle, position: 'absolute', opacity: opacity }}>
                     <div className={`flex flex-col items-center text-center transition-all duration-500 ${isCenter ? 'scale-105' : 'scale-90'} ${isOuter ? 'scale-90' : ''}`} style={{ transform: 'translateY(40px)' }}>
-                      <div className="px-3 py-1.5 rounded-full bg-white border">
+                      {/* Chip under plane: removed border and city line */}
+                      <div className="px-3 py-1.5 rounded-full bg-white">
                         <span className="font-semibold text-sm block">{stop.name}</span>
-                        <span className="text-xs -mt-1 block">{stop.city}</span>
                       </div>
                     </div>
                   </div>

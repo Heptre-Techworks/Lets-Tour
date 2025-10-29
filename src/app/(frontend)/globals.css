@@ -135,3 +135,9 @@ header {
 footer {
   margin-top: 0 !important;
 }
+
+/* globals.css (utility for hidden scrollbar on the nav strip) */
+@layer utilities {
+  .scrollbar-hidden::-webkit-scrollbar { display: none; }
+  .scrollbar-hidden { scrollbar-width: none; -ms-overflow-style: none; }
+}

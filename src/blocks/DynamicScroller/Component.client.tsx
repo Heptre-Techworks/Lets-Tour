@@ -118,7 +118,6 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
   const handleHeartClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    // Add to favorites logic here
   }
 
   return (
@@ -140,7 +139,7 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
 
       {item.tag && (
         <div className="absolute top-4 left-4">
-          <span className={`px-3 py-1 text-sm font-semibold rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'}`}>
+          <span className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} font-nats text-[18px] leading-[0.88] tracking-[-0.011em]`}>
             {item.tag}
           </span>
         </div>
@@ -157,11 +156,13 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
       </button>
 
       <div className="absolute bottom-0 left-0 p-5 text-white w-full">
-        <h3 className="text-3xl font-bold font-amiri">{title}</h3>
+        <h3 className="font-amiri italic font-normal text-[40px] leading-[0.88] tracking-[-0.011em]">{title}</h3>
         <hr className="my-2 border-white/50" />
-        <p className="text-sm mt-1">
-          Packages starting at <br />
-          <span className="font-bold text-lg">₹ {price}</span> /person
+        <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] mt-1">
+          Packages starting at
+          <br />
+          <span className="font-nats font-normal text-[32px] leading-[0.88] tracking-[-0.011em]">₹ {price}</span>
+          <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]"> /person</span>
         </p>
       </div>
     </Link>
@@ -180,7 +181,6 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
   const handleHeartClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    // Add to favorites logic here
   }
 
   return (
@@ -202,7 +202,7 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
 
       {item.tag && (
         <div className="absolute top-4 left-4">
-          <span className={`px-3 py-1 text-sm font-semibold rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'}`}>
+          <span className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} font-nats text-[18px] leading-[0.88] tracking-[-0.011em]`}>
             {item.tag}
           </span>
         </div>
@@ -219,11 +219,13 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
       </button>
 
       <div className="absolute bottom-0 left-0 p-5 text-white w-full">
-        <h3 className="text-3xl font-bold font-amiri">{title}</h3>
+        <h3 className="font-amiri italic font-normal text-[40px] leading-[0.88] tracking-[-0.011em]">{title}</h3>
         <hr className="my-2 border-white/50" />
-        <p className="text-sm mt-1">
-          Packages starting at <br />
-          <span className="font-bold text-lg">{price}</span> /person
+        <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] mt-1">
+          Packages starting at
+          <br />
+          <span className="font-nats font-normal text-[32px] leading-[0.88] tracking-[-0.011em]">₹ {price}</span>
+          <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]"> /person</span>
         </p>
       </div>
     </Link>
@@ -279,8 +281,14 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
     <section className={`relative overflow-hidden ${section?.theme?.background || 'bg-[#FFD89B]'} py-12`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <header className="mb-10 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">{section.title || 'Vibe Match'}</h1>
-          {section.subtitle && <p className="text-lg text-gray-700">{section.subtitle}</p>}
+          <h1 className="font-amiri italic font-bold text-[64px] leading-[0.88] tracking-[-0.011em] text-black">
+            {section.title || 'Vibe Match'}
+          </h1>
+          {section.subtitle && (
+            <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-black">
+              {section.subtitle}
+            </p>
+          )}
         </header>
 
         <div className="space-y-12">
@@ -320,7 +328,7 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
                 ))}
               </div>
 
-              <div className="mt-2 text-right text-sm text-gray-600">
+              <div className="mt-2 text-right font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600">
                 {vibe.items.length} packages
               </div>
             </div>
@@ -410,10 +418,16 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <header className="mb-10">
           <div className="flex items-center gap-6">
-            <h1 className="text-5xl md:text-6xl font-bold flex-shrink-0 pl-[5%]">{displayTitle}</h1>
+            <h1 className="font-amiri italic font-bold text-[64px] leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 pl-[5%]">
+              {displayTitle}
+            </h1>
             <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
           </div>
-          {displaySubtitle ? <p className="text-lg text-gray-500 mt-2 pl-[5%]">{displaySubtitle}</p> : null}
+          {displaySubtitle ? (
+            <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-black mt-2 pl-[5%]">
+              {displaySubtitle}
+            </p>
+          ) : null}
         </header>
 
         <div
@@ -439,7 +453,7 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
               </div>
               <div className="mx-3 flex-1"><DashedRule /></div>
               <div className="pr-2">
-                <span className="text-3xl font-semibold text-gray-900 tabular-nums">
+                <span className="font-nats text-[56px] leading-[0.88] tracking-[-0.011em] text-black">
                   {currentIndex}/{packagesCount}
                 </span>
               </div>
@@ -460,7 +474,7 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
               </div>
               <div className="mx-3 flex-1"><DashedRule /></div>
               <div className="pr-2">
-                <span className="text-3xl font-semibold text-gray-900 tabular-nums">
+                <span className="font-nats text-[56px] leading-[0.88] tracking-[-0.011em] text-black">
                   {currentIndex}/{destinationsCount}
                 </span>
               </div>
@@ -500,17 +514,14 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ secti
       
       if (!itinerarySection) return
       if (itinerarySection.itinerarySource !== 'package') return
-      if (itinerarySection.items && itinerarySection.items.length > 0) return // Already loaded
-      if (itinerarySection.packageRelation) return // Specific package was selected
+      if (itinerarySection.items && itinerarySection.items.length > 0) return
+      if (itinerarySection.packageRelation) return
 
-      // ✅ Extract package slug from URL
       const segments = pathname.split('/').filter(Boolean)
       if (segments[0] !== 'packages') return
       
       const packageSlug = segments[1]
       if (!packageSlug) return
-
-      console.log(`🔍 Client fetching itinerary for package: ${packageSlug}`)
 
       try {
         const response = await fetch(`/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`)
@@ -530,8 +541,6 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ secti
             })),
           }))
 
-          console.log(`✅ Client loaded ${itineraryItems.length} itinerary days`)
-
           setSections(prevSections => 
             prevSections.map(section => 
               section.type === 'itinerary' 
@@ -541,7 +550,7 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ secti
           )
         }
       } catch (error) {
-        console.error('❌ Error fetching package itinerary on client:', error)
+        console.error('Error fetching package itinerary on client:', error)
       }
     }
 
@@ -551,8 +560,10 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ secti
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
         .font-amiri { font-family: 'Amiri', serif; }
+        /* NATS fallbacks if the font is not loaded globally */
+        .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
       `}</style>
       <div className="min-h-screen font-sans">
         {sections.map((section, idx) => {

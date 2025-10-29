@@ -5,6 +5,14 @@ import Link from 'next/link';  // ✅ ADD
 
 type MediaLike = { url?: string | null; alt?: string | null };
 
+// Local font classes (no external imports here)
+const FontClasses = () => (
+  <style jsx global>{`
+    .font-amiri { font-family: 'Amiri', serif; }
+    .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+  `}</style>
+);
+
 // Helper to get image source
 const getImageSrc = (pkg: any) => {
   if (pkg?.image && typeof pkg.image === 'object' && 'url' in pkg.image && pkg.image?.url) {
@@ -38,7 +46,7 @@ const FilterSection: React.FC<{ title: string; children: React.ReactNode }> = ({
   children,
 }) => (
   <div className="py-3 border-b border-gray-700">
-    <h3 className="font-semibold text-white text-base">{title}</h3>
+    <h3 className="font-nats tracking-[-0.011em] leading-[0.88] text-white text-base">{title}</h3>
     <div className="mt-2 space-y-1">{children}</div>
   </div>
 );
@@ -57,9 +65,9 @@ const Checkbox: React.FC<{
         checked={checked}
         onChange={onChange}
       />
-      <span className="ml-2">{label}</span>
+      <span className="ml-2 font-nats text-[16px] leading-[0.88] tracking-[-0.011em]">{label}</span>
     </span>
-    {count !== undefined && <span>{count}</span>}
+    {count !== undefined && <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]">{count}</span>}
   </label>
 );
 
@@ -105,7 +113,7 @@ const Filters: React.FC<{
 
   return (
     <div className="w-full bg-[#1e293b] text-white p-4 rounded-lg shadow-lg h-full overflow-y-auto">
-      <h2 className="text-xl font-bold mb-3">Filters</h2>
+      <h2 className="font-nats text-[20px] leading-[0.88] tracking-[-0.011em] mb-3">Filters</h2>
 
       <FilterSection title="Budget">
         {['0-90000', '90001-120000', '120001-150000', '150001-200000'].map((range) => {
@@ -122,7 +130,7 @@ const Filters: React.FC<{
                 onChange={() => handlePriceChange(range)}
                 className="h-3 w-3 rounded bg-gray-700 border-gray-600 text-yellow-500 focus:ring-yellow-600"
               />
-              <span className="ml-2">
+              <span className="ml-2 font-nats text-[16px] leading-[0.88] tracking-[-0.011em]">
                 ₹{Number(min).toLocaleString()} - ₹{Number(max).toLocaleString()}
               </span>
             </label>
@@ -136,7 +144,7 @@ const Filters: React.FC<{
             <button
               key={r}
               onClick={() => handleRatingChange(r)}
-              className={`px-2 py-0.5 border rounded-md text-xs ${
+              className={`px-2 py-0.5 border rounded-md text-xs font-nats tracking-[-0.011em] leading-[0.88] ${
                 filters.rating === r
                   ? 'bg-yellow-500 border-yellow-500 text-black'
                   : 'border-gray-500 text-gray-300'
@@ -233,8 +241,8 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
       <div className="flex items-center">
         {icon}
         <div className="ml-2">
-          <p className="font-semibold text-sm text-gray-800">{label}</p>
-          <p className="text-xs text-gray-500">{sublabel}</p>
+          <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-800">{label}</p>
+          <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-500">{sublabel}</p>
         </div>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
@@ -273,22 +281,29 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
             {/* Main Info */}
             <div className="flex-grow pr-4">
               <div className="flex items-center space-x-2">
+                {/* Title: Amiri italic 40px, 88% line-height, -0.011em */}
                 <h3
-                  className="text-xl font-serif text-gray-800 group-hover:text-yellow-600 transition-colors"  // ✅ ADD HOVER EFFECT
-                  style={{ fontFamily: "'Playfair Display', serif" }}
+                  className="font-amiri italic text-[40px] leading-[0.88] tracking-[-0.011em] text-gray-800 group-hover:text-yellow-600 transition-colors"
                 >
                   {pkg.title}
                 </h3>
                 <StarRating rating={pkg.rating} />
               </div>
-              <p className="text-xs text-gray-600 mt-1">{pkg.location}</p>
-              <p className="text-gray-700 mt-2 text-sm leading-snug">{pkg.description}</p>
+              {/* Location: NATS 16px, 88%, -0.011em */}
+              <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 mt-1">
+                {pkg.location}
+              </p>
+              {/* Description: NATS 16px, 88%, -0.011em */}
+              <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-700 mt-2">
+                {pkg.description}
+              </p>
+
               {pkg.inclusions && pkg.inclusions.length > 0 && (
                 <div className="mt-3">
-                  <h4 className="font-semibold text-gray-800 text-sm">Inclusions:</h4>
-                  <ul className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-1 text-xs text-gray-600">
+                  <h4 className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-800">Inclusions:</h4>
+                  <ul className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-1">
                     {pkg.inclusions.map((item: string, idx: number) => (
-                      <li key={idx} className="list-disc list-inside">
+                      <li key={idx} className="list-disc list-inside font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600">
                         {item}
                       </li>
                     ))}
@@ -301,14 +316,15 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
             <div className="w-full sm:w-48 mt-4 sm:mt-0 flex-shrink-0">
               <div className="text-right">
                 {pkg.originalPrice > pkg.price && (
-                  <p className="text-base text-red-500 line-through">
+                  <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-red-500 line-through">
                     ₹{pkg.originalPrice.toLocaleString()}
                   </p>
                 )}
-                <p className="text-2xl font-bold text-yellow-500 bg-yellow-50 rounded-md p-1 inline-block">
+                {/* Price: NATS 32px, 88%, -0.011em */}
+                <p className="font-nats text-[32px] leading-[0.88] tracking-[-0.011em] font-normal text-yellow-500 bg-yellow-50 rounded-md p-1 inline-block">
                   ₹{pkg.price.toLocaleString()}
                 </p>
-                <p className="text-xs text-gray-600">/person</p>
+                <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600">/person</p>
               </div>
 
               <div className="mt-4 space-y-3">
@@ -353,6 +369,7 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
                   }
                 />
               </div>
+
               {pkg.recentBookings > 0 && (
                 <div className="mt-3 flex items-center justify-center">
                   <div className="flex -space-x-1">
@@ -372,7 +389,7 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
                       alt="User C"
                     />
                   </div>
-                  <p className="text-xs text-gray-600 ml-1">
+                  <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 ml-1">
                     {pkg.recentBookings}+ bookings in past month
                   </p>
                 </div>
@@ -386,7 +403,7 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
               <div className="relative">
                 <div className="flex space-x-4 overflow-x-auto pb-1 scrollbar-hide">
                   {pkg.sights.map((sight: any, idx: number) => (
-                    <span key={idx} className="text-xs text-gray-700 font-medium flex-shrink-0">
+                    <span key={idx} className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-700 font-medium flex-shrink-0">
                       {typeof sight === 'string' ? sight : sight.name}
                     </span>
                   ))}
@@ -465,6 +482,7 @@ export const TravelPackageExplorerClient: React.FC<{ packages: any[] }> = ({
 
   return (
     <div className="bg-slate-100 min-h-screen font-sans">
+      <FontClasses />
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row gap-6">
           <aside className="w-full md:w-64 flex-shrink-0">
@@ -477,8 +495,10 @@ export const TravelPackageExplorerClient: React.FC<{ packages: any[] }> = ({
               ))
             ) : (
               <div className="bg-white rounded-xl shadow-md p-6 text-center">
-                <h3 className="text-xl font-bold text-gray-800">No Packages Found</h3>
-                <p className="text-gray-600 mt-2 text-sm">
+                <h3 className="font-nats text-[20px] leading-[0.88] tracking-[-0.011em] text-gray-800">
+                  No Packages Found
+                </h3>
+                <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 mt-2">
                   Try adjusting your filters to find the perfect trip!
                 </p>
               </div>

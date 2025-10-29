@@ -27,27 +27,26 @@ export const InfoPanelClient: React.FC<InfoPanelClientProps> = ({
   const [items, setItems] = useState(initialItems)
   const [loading, setLoading] = useState(dataSource === 'auto')
 
+  // local font helpers
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.innerHTML = `
+      .font-amiri { font-family: 'Amiri', serif; }
+      .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+    `
+    document.head.appendChild(style)
+    return () => { document.head.removeChild(style) }
+  }, [])
+
   // ✅ Auto-fetch package data from URL
   useEffect(() => {
     const fetchPackageData = async () => {
       if (dataSource !== 'auto') return
       
-      // Extract package slug from URL
       const segments = pathname.split('/').filter(Boolean)
-      if (segments[0] !== 'packages') {
-        console.warn('⚠️ Not on a package page, cannot auto-fetch')
-        setLoading(false)
-        return
-      }
-      
+      if (segments[0] !== 'packages') { setLoading(false); return }
       const packageSlug = segments[1]
-      if (!packageSlug) {
-        console.warn('⚠️ No package slug in URL')
-        setLoading(false)
-        return
-      }
-
-      console.log(`🔍 Client auto-fetching info panel for: ${packageSlug} (type: ${panelType})`)
+      if (!packageSlug) { setLoading(false); return }
 
       try {
         const response = await fetch(`/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`)
@@ -55,18 +54,11 @@ export const InfoPanelClient: React.FC<InfoPanelClientProps> = ({
         
         if (data.docs[0]) {
           const pkg = data.docs[0]
-          
-          // Transform based on panel type
           const panelData = await transformPackageToPanelData(pkg, panelType)
-
-          console.log(`✅ Client loaded ${panelType} with ${panelData.items?.length || 0} items`)
-
           setTitle(panelData.title)
           setSubheading(panelData.subheading)
           setListType(panelData.listType)
           setItems(panelData.items)
-        } else {
-          console.warn('⚠️ Package not found')
         }
       } catch (error) {
         console.error('❌ Error fetching package data on client:', error)
@@ -99,32 +91,28 @@ export const InfoPanelClient: React.FC<InfoPanelClientProps> = ({
 
   return (
     <section className="relative overflow-hidden bg-white py-12 font-sans">
-      {/* Background accent - matching DynamicScroller style */}
-      
       <div className="relative px-8 md:px-16">
-        {/* Header section - matching ClientStories style */}
         <header className="mb-12 space-y-4">
-          {/* Title with serif italic font like ClientStories */}
-          <h1 className="text-5xl md:text-6xl font-serif italic text-gray-900">
+          {/* Title: Amiri italic 64px, 88%, -0.011em */}
+          <h1 className="font-amiri italic font-bold text-[64px] leading-[0.88] tracking-[-0.011em] text-gray-900">
             {title}
           </h1>
           
-          {/* Subheading with base text size */}
+          {/* Subheading: NATS 26px, 88%, -0.011em */}
           {subheading && (
-            <p className="text-base text-gray-600">
+            <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-gray-900">
               {subheading}
             </p>
           )}
           
-          {/* Divider line */}
           <div className="w-full border-t-4 border-dotted border-gray-300 pt-4" />
         </header>
 
-        {/* Content section */}
         <div className="max-w-4xl">
-          <ListComponent className={`${listStyleClass} list-outside pl-6 space-y-4 text-gray-700 text-base leading-relaxed`}>
+          {/* List items: NATS 24px, 24px line-height, -0.011em */}
+          <ListComponent className={`${listStyleClass} list-outside pl-6 space-y-4 text-gray-700`}>
             {items.map((item: any, index: number) => (
-              <li key={index} className="leading-relaxed">
+              <li key={index} className="font-nats text-[24px] leading-[24px] tracking-[-0.011em]">
                 {item?.text || item}
               </li>
             ))}
@@ -149,7 +137,6 @@ async function transformPackageToPanelData(pkg: any, type: string) {
       }
 
     case 'inclusions':
-      // For client-side, we need to fetch inclusions separately
       const inclusionIds = Array.isArray(pkg.inclusions) 
         ? pkg.inclusions.map((inc: any) => typeof inc === 'object' ? inc.id : inc).filter(Boolean)
         : []
@@ -159,9 +146,7 @@ async function transformPackageToPanelData(pkg: any, type: string) {
           try {
             const response = await fetch(`/api/inclusions/${id}`)
             const inc = await response.json()
-            return { 
-              text: inc.description || inc.name
-            }
+            return { text: inc.description || inc.name }
           } catch (err) {
             console.error('Error fetching inclusion:', err)
             return null
@@ -177,7 +162,6 @@ async function transformPackageToPanelData(pkg: any, type: string) {
       }
 
     case 'exclusions':
-      // For client-side, we need to fetch exclusions separately
       const exclusionIds = Array.isArray(pkg.exclusions) 
         ? pkg.exclusions.map((exc: any) => typeof exc === 'object' ? exc.id : exc).filter(Boolean)
         : []
@@ -187,9 +171,7 @@ async function transformPackageToPanelData(pkg: any, type: string) {
           try {
             const response = await fetch(`/api/exclusions/${id}`)
             const exc = await response.json()
-            return { 
-              text: exc.description || exc.name
-            }
+            return { text: exc.description || exc.name }
           } catch (err) {
             console.error('Error fetching exclusion:', err)
             return null
