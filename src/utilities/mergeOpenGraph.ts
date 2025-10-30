@@ -9,14 +9,20 @@ const defaultOpenGraph: Metadata['openGraph'] = {
       url: `${getServerSideURL()}/website-template-OG.webp`,
     },
   ],
-  siteName: 'Payload Website Template',
-  title: 'Payload Website Template',
+  siteName: '',
+  title: '',
 }
 
 export const mergeOpenGraph = (og?: Metadata['openGraph']): Metadata['openGraph'] => {
-  return {
+  const merged = {
     ...defaultOpenGraph,
     ...og,
-    images: og?.images ? og.images : defaultOpenGraph.images,
   }
+
+  // Only fall back to default images if caller didn’t provide images (undefined)
+  if (og?.images === undefined) {
+    merged.images = defaultOpenGraph.images
+  }
+
+  return merged
 }
