@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import React, { useState, useRef, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import React, { useState, useRef, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
-// Card component
+// Card component explore our features section not included in the main component
 const Card: React.FC<{ title: string; description: string }> = ({ title, description }) => (
   <div className="flex-shrink-0 w-64 h-80 bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between m-4">
     <div>
@@ -17,7 +17,7 @@ const Card: React.FC<{ title: string; description: string }> = ({ title, descrip
       </p>
     </div>
   </div>
-);
+)
 
 // ✅ Define client props separately (without blockType requirement)
 type FeatureCarouselClientProps = {
@@ -35,17 +35,18 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
   dataSource = 'manual',
   featureSource = 'highlights',
   heading: initialHeading = 'Discover Our Features',
-  subheading: initialSubheading = 'Explore the powerful tools that make our platform the best choice for you.',
+  subheading:
+    initialSubheading = 'Explore the powerful tools that make our platform the best choice for you.',
   cards: initialCards = [],
   showNavigationButtons = true,
   scrollPercentage = 80,
 }) => {
   const pathname = usePathname()
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [maxScroll, setMaxScroll] = useState(0);
-  
+  const [scrollPosition, setScrollPosition] = useState(0)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [containerWidth, setContainerWidth] = useState(0)
+  const [maxScroll, setMaxScroll] = useState(0)
+
   // Dynamic data state
   const [heading, setHeading] = useState(initialHeading)
   const [subheading, setSubheading] = useState(initialSubheading)
@@ -60,7 +61,9 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
       .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
     `
     document.head.appendChild(style)
-    return () => { document.head.removeChild(style) }
+    return () => {
+      document.head.removeChild(style)
+    }
   }, [])
 
   // ✅ Auto-fetch package data from URL
@@ -68,12 +71,20 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
     const fetchPackageData = async () => {
       if (dataSource !== 'auto') return
       const segments = pathname.split('/').filter(Boolean)
-      if (segments[0] !== 'packages') { setLoading(false); return }
+      if (segments[0] !== 'packages') {
+        setLoading(false)
+        return
+      }
       const packageSlug = segments[1]
-      if (!packageSlug) { setLoading(false); return }
+      if (!packageSlug) {
+        setLoading(false)
+        return
+      }
 
       try {
-        const response = await fetch(`/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`)
+        const response = await fetch(
+          `/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`,
+        )
         const data = await response.json()
         if (data.docs[0]) {
           const pkg = data.docs[0]
@@ -97,40 +108,38 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
   useEffect(() => {
     const calculateWidths = () => {
       if (containerRef.current) {
-        const container = containerRef.current;
-        const scrollWidth = container.scrollWidth;
-        const clientWidth = container.clientWidth;
-        setContainerWidth(clientWidth);
-        setMaxScroll(scrollWidth - clientWidth);
+        const container = containerRef.current
+        const scrollWidth = container.scrollWidth
+        const clientWidth = container.clientWidth
+        setContainerWidth(clientWidth)
+        setMaxScroll(scrollWidth - clientWidth)
       }
-    };
-    calculateWidths();
-    window.addEventListener('resize', calculateWidths);
+    }
+    calculateWidths()
+    window.addEventListener('resize', calculateWidths)
     return () => {
-      window.removeEventListener('resize', calculateWidths);
-    };
-  }, [cards]);
+      window.removeEventListener('resize', calculateWidths)
+    }
+  }, [cards])
 
   const handleScroll = (direction: 'left' | 'right') => {
-    const scrollAmount = containerWidth * ((scrollPercentage || 80) / 100);
+    const scrollAmount = containerWidth * ((scrollPercentage || 80) / 100)
     let newScrollPosition =
-      direction === 'left' ? scrollPosition - scrollAmount : scrollPosition + scrollAmount;
-    newScrollPosition = Math.max(0, Math.min(newScrollPosition, maxScroll));
-    setScrollPosition(newScrollPosition);
-  };
+      direction === 'left' ? scrollPosition - scrollAmount : scrollPosition + scrollAmount
+    newScrollPosition = Math.max(0, Math.min(newScrollPosition, maxScroll))
+    setScrollPosition(newScrollPosition)
+  }
 
   if (loading) {
     return (
       <div className="w-full min-h-screen flex flex-col justify-center items-center font-sans py-12">
-        <div className="text-center text-gray-500">
-          Loading features...
-        </div>
+        <div className="text-center text-gray-500">Loading features...</div>
       </div>
     )
   }
 
   if (!Array.isArray(cards) || cards.length === 0) {
-    return null;
+    return null
   }
 
   return (
@@ -156,7 +165,7 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
         {/* Carousel section */}
         <div className="relative">
           <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#08121E] -z-10"></div>
-          
+
           <div className="overflow-hidden py-4">
             <div
               ref={containerRef}
@@ -164,7 +173,11 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
               style={{ transform: `translateX(-${scrollPosition}px)` }}
             >
               {cards.map((item: any, index: number) => (
-                <Card key={item?.id || index} title={item?.title || ''} description={item?.description || ''} />
+                <Card
+                  key={item?.id || index}
+                  title={item?.title || ''}
+                  description={item?.description || ''}
+                />
               ))}
             </div>
           </div>
@@ -187,7 +200,12 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
                   </svg>
                 </button>
                 <button
@@ -203,7 +221,12 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </button>
               </div>
@@ -212,18 +235,21 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Helper functions (same as server-side)
-function transformPackageToCards(pkg: any, source: string): Array<{ title: string; description: string }> {
+function transformPackageToCards(
+  pkg: any,
+  source: string,
+): Array<{ title: string; description: string }> {
   switch (source) {
     case 'highlights':
       return (pkg.highlights || []).map((h: any) => ({
         title: h.text || '',
         description: h.text || '',
       }))
-    
+
     case 'inclusions':
       return (pkg.inclusions || []).map((inc: any) => {
         const inclusion = typeof inc === 'object' ? inc : null
@@ -232,7 +258,7 @@ function transformPackageToCards(pkg: any, source: string): Array<{ title: strin
           description: inclusion?.description || inclusion?.summary || '',
         }
       })
-    
+
     case 'activities':
       return (pkg.activities || []).map((act: any) => {
         const activity = typeof act === 'object' ? act : null
@@ -241,7 +267,7 @@ function transformPackageToCards(pkg: any, source: string): Array<{ title: strin
           description: activity?.description || activity?.summary || '',
         }
       })
-    
+
     case 'amenities':
       return (pkg.amenities || []).map((am: any) => {
         const amenity = typeof am === 'object' ? am : null
@@ -250,7 +276,7 @@ function transformPackageToCards(pkg: any, source: string): Array<{ title: strin
           description: amenity?.description || amenity?.summary || '',
         }
       })
-    
+
     default:
       return []
   }
@@ -276,4 +302,4 @@ function getSubheadingForSource(pkg: any, source: string): string {
   return subheadings[source] || pkg.summary || ''
 }
 
-export default FeatureCarouselClient;
+export default FeatureCarouselClient

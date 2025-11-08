@@ -1,66 +1,66 @@
 // src/blocks/ClientStories/Component.tsx
-'use client';
+'use client'
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import type { Review } from '@/payload-types';
+import React, { useEffect, useMemo, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import type { Review } from '@/payload-types'
 
 // ✅ Slug replacement hook
 const useSlugReplacement = () => {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   const slugInfo = useMemo(() => {
-    const segments = pathname.split('/').filter(Boolean);
-    const rawSlug = segments[segments.length - 1] || '';
+    const segments = pathname.split('/').filter(Boolean)
+    const rawSlug = segments[segments.length - 1] || ''
     const formattedSlug = rawSlug
       .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
-    
-    return { raw: rawSlug, formatted: formattedSlug };
-  }, [pathname]);
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+
+    return { raw: rawSlug, formatted: formattedSlug }
+  }, [pathname])
 
   const replaceSlug = (text: string | undefined | null): string => {
-    if (!text) return '';
-    return text.replace(/{slug}/gi, slugInfo.formatted);
-  };
+    if (!text) return ''
+    return text.replace(/{slug}/gi, slugInfo.formatted)
+  }
 
-  return { slug: slugInfo.formatted, rawSlug: slugInfo.raw, replaceSlug };
-};
+  return { slug: slugInfo.formatted, rawSlug: slugInfo.raw, replaceSlug }
+}
 
-type MediaLike = { url?: string | null; alt?: string | null };
+type MediaLike = { url?: string | null; alt?: string | null }
 
 type ClientStoriesBlockProps = {
-  heading?: string;
-  subheading?: string;
-  buttonText?: string;
-  background?: MediaLike | string | null;
-  backgroundUrl?: string | null;
-  overlay?: MediaLike | null;
-  cardsPerView?: number | null;
-  gapPx?: number | null;
-  populateBy?: 'manual' | 'collection' | 'featured';
-  limit?: number;
+  heading?: string
+  subheading?: string
+  buttonText?: string
+  background?: MediaLike | string | null
+  backgroundUrl?: string | null
+  overlay?: MediaLike | null
+  cardsPerView?: number | null
+  gapPx?: number | null
+  populateBy?: 'manual' | 'collection' | 'featured'
+  limit?: number
   cards?: Array<{
-    name?: string | null;
-    rating?: number | null;
-    story?: string | null;
-  }> | null;
-};
+    name?: string | null
+    rating?: number | null
+    story?: string | null
+  }> | null
+}
 
 const getImageSrc = (img?: MediaLike | string | null, url?: string | null) => {
-  if (img && typeof img === 'object' && 'url' in img && img?.url) return img.url as string;
-  if (typeof img === 'string') return img;
-  if (url) return url;
-  return '';
-};
+  if (img && typeof img === 'object' && 'url' in img && img?.url) return img.url as string
+  if (typeof img === 'string') return img
+  if (url) return url
+  return ''
+}
 
 const StarRating: React.FC<{ rating?: number | null }> = ({ rating = 0 }) => {
-  const safe = Math.max(0, Math.min(5, Number(rating) || 0));
+  const safe = Math.max(0, Math.min(5, Number(rating) || 0))
   return (
     <div className="flex items-center" aria-label={`Rating ${safe} of 5`}>
       {Array.from({ length: 5 }).map((_, i) => {
-        const on = i < safe;
+        const on = i < safe
         return (
           <svg
             key={i}
@@ -71,11 +71,11 @@ const StarRating: React.FC<{ rating?: number | null }> = ({ rating = 0 }) => {
           >
             <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
           </svg>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}
 
 export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
   heading = 'Our client stories from {slug}!',
@@ -91,94 +91,94 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
   cards: manualCards = [],
 }) => {
   // ✅ Slug replacement
-  const { replaceSlug, rawSlug } = useSlugReplacement();
-  const displayHeading = replaceSlug(heading);
-  const displaySubheading = replaceSlug(subheading);
+  const { replaceSlug, rawSlug } = useSlugReplacement()
+  const displayHeading = replaceSlug(heading)
+  const displaySubheading = replaceSlug(subheading)
 
-  const cardsPerView = Math.max(1, Number(cardsPerViewRaw) || 2);
-  const gapPx = Math.max(0, Number(gapPxRaw) || 24);
+  const cardsPerView = Math.max(1, Number(cardsPerViewRaw) || 2)
+  const gapPx = Math.max(0, Number(gapPxRaw) || 24)
 
   // ✅ Fetch reviews from collection if needed
-  const [reviewsFromCollection, setReviewsFromCollection] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(populateBy !== 'manual');
+  const [reviewsFromCollection, setReviewsFromCollection] = useState<Review[]>([])
+  const [loading, setLoading] = useState(populateBy !== 'manual')
 
   useEffect(() => {
-    if (populateBy === 'manual') return;
+    if (populateBy === 'manual') return
 
     const fetchReviews = async () => {
       try {
-        let url = `/api/reviews?limit=${limit}&depth=2&sort=-createdAt`;
-        
+        let url = `/api/reviews?limit=${limit}&depth=2&sort=-createdAt`
+
         if (populateBy === 'featured') {
-          url += '&where[featured][equals]=true';
+          url += '&where[featured][equals]=true'
         }
-        
+
         // Auto-filter by current destination/package from URL
-        const pathname = window.location.pathname;
+        const pathname = window.location.pathname
         if (pathname.includes('/destinations/')) {
-          const destSlug = pathname.split('/destinations/')[1]?.split('/')[0];
+          const destSlug = pathname.split('/destinations/')[1]?.split('/')[0]
           if (destSlug) {
-            url += `&where[destination.slug][equals]=${destSlug}`;
+            url += `&where[destination.slug][equals]=${destSlug}`
           }
         } else if (pathname.includes('/packages/')) {
-          const pkgSlug = pathname.split('/packages/')[1]?.split('/')[0];
+          const pkgSlug = pathname.split('/packages/')[1]?.split('/')[0]
           if (pkgSlug) {
-            url += `&where[package.slug][equals]=${pkgSlug}`;
+            url += `&where[package.slug][equals]=${pkgSlug}`
           }
         }
 
-        const response = await fetch(url);
-        const data = await response.json();
-        
+        const response = await fetch(url)
+        const data = await response.json()
+
         if (data.docs) {
-          setReviewsFromCollection(data.docs);
+          setReviewsFromCollection(data.docs)
         }
       } catch (error) {
-        console.error('Error fetching reviews:', error);
+        console.error('Error fetching reviews:', error)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchReviews();
-  }, [populateBy, limit, rawSlug]);
+    fetchReviews()
+  }, [populateBy, limit, rawSlug])
 
   // ✅ Transform reviews to card format
   const cards = useMemo(() => {
     if (populateBy === 'manual') {
-      return Array.isArray(manualCards) ? manualCards : [];
+      return Array.isArray(manualCards) ? manualCards : []
     }
 
-    return reviewsFromCollection.map(review => {
-      const user = typeof review.user === 'object' ? review.user : null;
+    return reviewsFromCollection.map((review) => {
+      const user = typeof review.user === 'object' ? review.user : null
       return {
         name: user?.name || 'Anonymous',
         rating: review.rating || 5,
         story: review.body || '',
-      };
-    });
-  }, [populateBy, manualCards, reviewsFromCollection]);
+      }
+    })
+  }, [populateBy, manualCards, reviewsFromCollection])
 
   const totalSlides = useMemo(
     () => Math.max(1, Math.ceil(cards.length / cardsPerView)),
     [cards, cardsPerView],
-  );
-  const [currentSlide, setCurrentSlide] = useState(1);
+  )
+  const [currentSlide, setCurrentSlide] = useState(1)
 
   useEffect(() => {
-    setCurrentSlide((s) => Math.min(Math.max(1, s), totalSlides));
-  }, [totalSlides]);
+    setCurrentSlide((s) => Math.min(Math.max(1, s), totalSlides))
+  }, [totalSlides])
 
-  const handlePrev = () => setCurrentSlide((prev) => (prev === 1 ? totalSlides : prev - 1));
-  const handleNext = () => setCurrentSlide((prev) => (prev === totalSlides ? 1 : prev + 1));
+  const handlePrev = () => setCurrentSlide((prev) => (prev === 1 ? totalSlides : prev - 1))
+  const handleNext = () => setCurrentSlide((prev) => (prev === totalSlides ? 1 : prev + 1))
 
-  const cardWidthPct = 100 / cardsPerView;
-  const translatePct = (currentSlide - 1) * (cardWidthPct * cardsPerView);
+  const cardWidthPct = 100 / cardsPerView
+  const translatePct = (currentSlide - 1) * (cardWidthPct * cardsPerView)
 
-  const bgSrc = getImageSrc(background as any, backgroundUrl as any);
+  const bgSrc = getImageSrc(background as any, backgroundUrl as any)
   const overlaySrc =
     getImageSrc(overlay) ||
-    'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png';
+    'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png'
 
   if (loading) {
     return (
@@ -188,23 +188,28 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
           <p style={{ fontFamily: "'NATS', sans-serif" }}>Loading stories...</p>
         </div>
       </section>
-    );
+    )
   }
 
   if (cards.length === 0) {
     return (
       <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
-        <p className="text-gray-400" style={{ fontFamily: "'NATS', sans-serif" }}>No client stories available yet.</p>
+        <p className="text-gray-400" style={{ fontFamily: "'NATS', sans-serif" }}>
+          No client stories available yet.
+        </p>
       </section>
-    );
+    )
   }
 
   return (
     <>
       {/* Load custom fonts */}
-      <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet"
+      />
       <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />
-      
+
       <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900">
         {/* Background */}
         {bgSrc ? (
@@ -215,7 +220,10 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
             style={{ zIndex: 0, pointerEvents: 'none' }}
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-800 to-gray-900" style={{ zIndex: 0 }} />
+          <div
+            className="absolute inset-0 bg-gradient-to-b from-gray-800 to-gray-900"
+            style={{ zIndex: 0 }}
+          />
         )}
 
         {/* Edge-to-edge Overlay visual effect */}
@@ -237,32 +245,32 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
         )}
 
         {/* Main content */}
-        <div className="relative z-10 flex flex-col justify-between min-h-[70vh] p-8 md:p-16">
+        <div className="relative z-10 flex flex-col justify-between min-h-[65vh] p-4 md:p-15">
           <div className="flex flex-col lg:flex-row lg:items-start w-full flex-grow relative">
             {/* Left column */}
             <div className="w-full lg:w-1/3 lg:pr-12 space-y-4 text-left mb-12 lg:mb-0">
-              <h1 
-                className="text-white flex items-center"
-                style={{
-                  fontFamily: "'Amiri', serif",
-                  fontStyle: 'italic',
-                  fontWeight: 700,
-                  fontSize: '80px',
-                  lineHeight: '88%',
-                  letterSpacing: '-0.011em'
-                }}
+              <h1
+                className="
+    text-white 
+    flex items-center 
+    font-[700] italic
+    text-[36px] sm:text-[48px] md:text-[64px] lg:text-[80px]
+    leading-[88%] tracking-[-0.011em]
+  "
+                style={{ fontFamily: "'Amiri', serif" }}
               >
                 {displayHeading}
               </h1>
+
               {displaySubheading ? (
-                <p 
+                <p
                   className="text-white flex items-center"
                   style={{
                     fontFamily: "'NATS', sans-serif",
                     fontWeight: 400,
                     fontSize: '26px',
                     lineHeight: '88%',
-                    letterSpacing: '-0.011em'
+                    letterSpacing: '-0.011em',
                   }}
                 >
                   {displaySubheading}
@@ -271,17 +279,21 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
               {buttonText ? (
                 <button
                   type="button"
-                  className="flex items-center justify-center text-center text-white rounded-2xl shadow-md hover:opacity-90 transition-opacity duration-300"
+                  className={`
+    flex items-center justify-center text-center text-white
+    rounded-2xl shadow-md hover:opacity-90 transition-opacity duration-300
+    w-[140px] h-[40px] text-base
+    sm:w-[180px] sm:h-[45px] sm:text-2xl
+    md:w-[200px] md:h-[50px] md:text-2xl
+  `}
                   style={{
-                    width: '200px',
-                    height: '50px',
                     background: '#FBAE3D',
+                    fontSize: '18px',
                     fontFamily: "'NATS', sans-serif",
                     fontWeight: 400,
-                    fontSize: '24px',
                     letterSpacing: '-0.011em',
                     boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-                    borderRadius: '16px'
+                    borderRadius: '16px',
                   }}
                 >
                   {buttonText}
@@ -300,46 +312,55 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 aria-live="polite"
               >
                 {cards.map((card, idx) => {
-                  const currentCardIndex = Math.round((translatePct / 100) * (cards.length / cardsPerView));
-                  const isLeftmost = idx === currentCardIndex;
-                  
+                  const currentCardIndex = Math.round(
+                    (translatePct / 100) * (cards.length / cardsPerView),
+                  )
+                  const isLeftmost = idx === currentCardIndex
+
                   return (
                     <div
                       key={`${card?.name ?? 'card'}-${idx}`}
-                      className={`flex-shrink-0 transition-transform duration-500 ease-in-out ${
-                        isLeftmost ? 'scale-110 z-10' : 'scale-100'
-                      }`}
-                      style={{ 
+                      className={`
+    flex-shrink-0 
+    transition-transform duration-500 ease-in-out 
+    ${isLeftmost ? 'scale-105 sm:scale-110 z-10' : 'scale-100'}
+  `}
+                      style={{
                         width: `calc(${cardWidthPct}% - ${gapPx - gapPx / cardsPerView}px)`,
                       }}
                     >
-                      <div 
-                        className={`h-[320px] p-6 backdrop-blur-md text-left transition-all duration-500 ${
-                          isLeftmost 
-                            ? 'bg-white/20 shadow-2xl' 
-                            : 'bg-white/10 shadow-lg'
-                        }`}
-                        style={{ borderRadius: '20px' }}
+                      <div
+                        className={`
+                          w-[110px] sm:w-[150px] md:w-[220px]
+      h-[200px] sm:h-[280px] md:h-[320px] 
+      p-2 sm:p-4 md:p-5 
+      backdrop-blur-md text-left transition-all duration-500
+      ${isLeftmost ? 'bg-white/20 shadow-xl sm:shadow-2xl' : 'bg-white/10 shadow-md sm:shadow-lg'}
+      rounded-2xl
+    `}
                       >
-                        <div className="flex flex-col h-full">
-                          <div className="mb-4 shrink-0">
-                            <h3 
-                              className="font-bold"
+                        <div className="flex flex-col  h-full">
+                          {/* Header Section */}
+                          <div className="mb-4  md:mb-4 shrink-0">
+                            <h3
+                              className="
+    font-bold "
                               style={{
                                 fontFamily: "'NATS', sans-serif",
-                                fontSize: '20px'
                               }}
                             >
                               {card?.name ?? ''}
                             </h3>
+
                             <StarRating rating={card?.rating as number} />
                           </div>
-                          <div className="flex-1 overflow-y-auto overscroll-contain pr-2">
-                            <p 
-                              className="text-gray-300 leading-relaxed whitespace-pre-line"
+
+                          {/* Story Text Section */}
+                          <div className="flex-1 overflow-y-auto overscroll-contain pr-1 sm:pr-2">
+                            <p
+                              className="text-gray-300 leading-relaxed whitespace-pre-line text-xs sm:text-sm md:text-base"
                               style={{
                                 fontFamily: "'NATS', sans-serif",
-                                fontSize: '14px'
                               }}
                             >
                               {card?.story ? `"${card.story}"` : ''}
@@ -348,7 +369,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                         </div>
                       </div>
                     </div>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -379,11 +400,22 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                   style={{
                     background: 'rgba(237, 237, 237, 0.75)',
                     opacity: 0.5,
-                    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
+                    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
                   }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
                   </svg>
                 </button>
                 <button
@@ -394,23 +426,34 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                   style={{
                     background: 'rgba(237, 237, 237, 0.75)',
                     opacity: 0.5,
-                    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)'
+                    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
                   }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </button>
               </div>
               <div className="flex-1 flex justify-end items-center">
-                <div 
+                <div
                   className="text-white flex items-center tracking-wider"
                   style={{
                     fontFamily: "'NATS', sans-serif",
                     fontWeight: 400,
                     fontSize: '56px',
                     lineHeight: '88%',
-                    letterSpacing: '-0.011em'
+                    letterSpacing: '-0.011em',
                   }}
                 >
                   {currentSlide}
@@ -423,7 +466,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
         </div>
       </section>
     </>
-  );
-};
+  )
+}
 
-export default ClientStories;
+export default ClientStories

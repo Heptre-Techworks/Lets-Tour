@@ -37,14 +37,14 @@ export const TravelPackageExplorer = async (props: TravelPackageExplorerProps) =
     // Get destination ID
     if (dataSource === 'auto' && slug) {
       console.log('🎯 Auto-detecting destination from slug:', slug)
-      
+
       const dest = await payload.find({
         collection: 'destinations',
         where: { slug: { equals: slug } },
         limit: 1,
         depth: 0,
       })
-      
+
       if (dest.docs[0]) {
         destId = dest.docs[0].id
         console.log('✅ Found destination:', dest.docs[0].name)
@@ -77,30 +77,27 @@ export const TravelPackageExplorer = async (props: TravelPackageExplorerProps) =
     packages = result.docs.map((pkg: any) => {
       // Get accommodation types names
       const accommodationTypes = Array.isArray(pkg.accommodationTypes)
-        ? pkg.accommodationTypes.map((a: any) => 
-            typeof a === 'object' ? a.name : ''
-          ).filter(Boolean)
+        ? pkg.accommodationTypes
+            .map((a: any) => (typeof a === 'object' ? a.name : ''))
+            .filter(Boolean)
         : []
 
       // Get amenities names
       const amenities = Array.isArray(pkg.amenities)
-        ? pkg.amenities.map((a: any) => 
-            typeof a === 'object' ? a.name : ''
-          ).filter(Boolean)
+        ? pkg.amenities.map((a: any) => (typeof a === 'object' ? a.name : '')).filter(Boolean)
         : []
 
       // Get experiences (categories)
       const experiences = Array.isArray(pkg.categories)
-        ? pkg.categories.map((c: any) => 
-            typeof c === 'object' ? c.name : ''
-          ).filter(Boolean)
+        ? pkg.categories.map((c: any) => (typeof c === 'object' ? c.name : '')).filter(Boolean)
         : []
 
       // Get inclusions
       const inclusions = Array.isArray(pkg.inclusions)
-        ? pkg.inclusions.map((inc: any) => 
-            typeof inc === 'object' ? (inc.name || inc.description) : ''
-          ).filter(Boolean).slice(0, 6) // Limit to 6 for UI
+        ? pkg.inclusions
+            .map((inc: any) => (typeof inc === 'object' ? inc.name || inc.description : ''))
+            .filter(Boolean)
+            .slice(0, 6) // Limit to 6 for UI
         : []
 
       // Get places/sights from itinerary
@@ -119,18 +116,19 @@ export const TravelPackageExplorer = async (props: TravelPackageExplorerProps) =
       }
 
       // Get destination for province/location
-      const firstDest = Array.isArray(pkg.destinations) && pkg.destinations[0]
-        ? typeof pkg.destinations[0] === 'object' 
-          ? pkg.destinations[0] 
+      const firstDest =
+        Array.isArray(pkg.destinations) && pkg.destinations[0]
+          ? typeof pkg.destinations[0] === 'object'
+            ? pkg.destinations[0]
+            : null
           : null
-        : null
 
       const currencySymbol = getCurrencySymbol(pkg.currency || 'INR')
 
       return {
         id: pkg.id,
-        slug: pkg.slug,  // ✅ ADD
-        href: `/packages/${pkg.slug}`,  // ✅ ADD
+        slug: pkg.slug, // ✅ ADD
+        href: `/packages/${pkg.slug}`, // ✅ ADD
         title: pkg.name,
         location: firstDest?.name || pkg.summary || '',
         description: pkg.summary || '',
@@ -152,7 +150,6 @@ export const TravelPackageExplorer = async (props: TravelPackageExplorerProps) =
         },
       }
     })
-
   } catch (error) {
     console.error('❌ TravelPackageExplorer error:', error)
   }

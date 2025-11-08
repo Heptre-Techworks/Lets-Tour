@@ -60,7 +60,7 @@ export const UpDownCardCarousel = async (props: UpDownCardCarouselProps) => {
 
         cards = result.docs.map((dest: any) => {
           const currencySymbol = getCurrencySymbol(dest.currency || 'INR')
-          
+
           let discountLabel = ''
           if (dest.discount?.hasDiscount && dest.discount?.percentage) {
             discountLabel = dest.discount.label || `${dest.discount.percentage}% Off`
@@ -79,7 +79,11 @@ export const UpDownCardCarousel = async (props: UpDownCardCarouselProps) => {
       }
 
       // Packages
-      else if (['featuredPackages', 'recentPackages', 'honeymoonPackages', 'familyPackages'].includes(dataSource)) {
+      else if (
+        ['featuredPackages', 'recentPackages', 'honeymoonPackages', 'familyPackages'].includes(
+          dataSource,
+        )
+      ) {
         const query: any = {
           limit: itemLimit || 10,
           depth: 2,
@@ -114,11 +118,13 @@ export const UpDownCardCarousel = async (props: UpDownCardCarouselProps) => {
 
         cards = result.docs.map((pkg: any) => {
           const currencySymbol = getCurrencySymbol(pkg.currency || 'INR')
-          
+
           // Calculate discount if exists
           let discountLabel = ''
           if (pkg.discountedPrice && pkg.price && pkg.discountedPrice < pkg.price) {
-            const discountPercent = Math.round(((pkg.price - pkg.discountedPrice) / pkg.price) * 100)
+            const discountPercent = Math.round(
+              ((pkg.price - pkg.discountedPrice) / pkg.price) * 100,
+            )
             discountLabel = `${discountPercent}% Off`
           }
 
@@ -136,7 +142,6 @@ export const UpDownCardCarousel = async (props: UpDownCardCarouselProps) => {
           }
         })
       }
-
     } catch (error) {
       console.error('❌ UpDownCardCarousel error:', error)
     }

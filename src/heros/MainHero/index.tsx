@@ -248,7 +248,12 @@ export const MainHero: React.FC<MainHeroProps> = ({
 
                     <AirplaneIcon
                       className="absolute text-white text-3xl sm:text-4xl animate-plane-fly"
-                      style={{ top: '0', transform: 'translateX(-50%) translateY(-50%) rotate(-90deg)', ...animationStyle, zIndex: 3 }}
+                      style={{
+                        top: '0',
+                        transform: 'translateX(-50%) translateY(-50%) rotate(-90deg)',
+                        ...animationStyle,
+                        zIndex: 3,
+                      }}
                     />
                   </div>
                 </div>
@@ -268,7 +273,10 @@ export const MainHero: React.FC<MainHeroProps> = ({
             {/* Location Info & Progress */}
             <div className="w-full max-w-6xl h-8 relative">
               {/* Left text (Neuton 24px/48px, 88%, -0.011em, 60% opacity) */}
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 text-left px-4 sm:px-0" style={textAnimation}>
+              <div
+                className="absolute left-0 top-1/2 -translate-y-1/2 text-left px-4 sm:px-0"
+                style={textAnimation}
+              >
                 <p className="font-neuton text-[24px] leading-[0.88] tracking-[-0.011em] text-white/60">
                   {activeSlide.subtitle}
                 </p>
@@ -281,7 +289,15 @@ export const MainHero: React.FC<MainHeroProps> = ({
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/4 h-full w-20 sm:w-24 md:w-28">
                 <div className="absolute top-1/2 right-full -translate-y-1/2 w-32 sm:w-40 md:w-48 h-0.5 mr-4">
                   <svg className="w-full h-full">
-                    <line x1="0" y1="50%" x2="100%" y2="50%" stroke="rgba(255, 255, 255, 0.6)" strokeWidth="2" strokeDasharray="6 5" />
+                    <line
+                      x1="0"
+                      y1="50%"
+                      x2="100%"
+                      y2="50%"
+                      stroke="rgba(255, 255, 255, 0.6)"
+                      strokeWidth="2"
+                      strokeDasharray="6 5"
+                    />
                   </svg>
                 </div>
 
@@ -329,7 +345,10 @@ export const MainHero: React.FC<MainHeroProps> = ({
                   className="absolute top-1/2 left-full -translate-y-1/2 w-[40vw] sm:w-[45vw] md:w-[50vw] h-4 ml-4"
                   style={{ ...animationStyle, animationName: 'fade-out-at-80' }}
                 >
-                  <div className="absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2" style={{ zIndex: 2 }}>
+                  <div
+                    className="absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2"
+                    style={{ zIndex: 2 }}
+                  >
                     <svg className="w-full h-full overflow-visible">
                       <line
                         x1="0"
@@ -346,7 +365,12 @@ export const MainHero: React.FC<MainHeroProps> = ({
                   </div>
                   <AirplaneIcon
                     className="absolute text-white text-xl sm:text-2xl animate-plane-fly-right"
-                    style={{ top: '50%', transform: 'translateY(-50%) translateX(-50%) rotate(90deg)', ...animationStyle, zIndex: 3 }}
+                    style={{
+                      top: '50%',
+                      transform: 'translateY(-50%) translateX(-50%) rotate(90deg)',
+                      ...animationStyle,
+                      zIndex: 3,
+                    }}
                   />
                 </div>
               </div>
@@ -365,7 +389,10 @@ export const MainHero: React.FC<MainHeroProps> = ({
               )}
 
               <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                <form onSubmit={handleSubmit} className="w-full max-w-6xl relative px-4 pointer-events-auto h-auto sm:h-96">
+                <form
+                  onSubmit={handleSubmit}
+                  className="w-full max-w-6xl relative px-4 pointer-events-auto h-auto sm:h-96"
+                >
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 bg-[#f0b95a] rounded-lg shadow-2xl overflow-hidden text-black/70">
                     <select
                       name="destination"

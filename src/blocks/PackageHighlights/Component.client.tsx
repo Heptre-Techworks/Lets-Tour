@@ -1,18 +1,17 @@
-'use client';
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import React, { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 
-type MediaLike = { url?: string | null; alt?: string | null };
+type MediaLike = { url?: string | null; alt?: string | null }
 
 const getImageSrc = (image: MediaLike | string | null | undefined): string => {
   if (image && typeof image === 'object' && 'url' in image && image?.url) {
-    return image.url as string;
+    return image.url as string
   }
-  return '';
-};
+  return ''
+}
 
-// Star Icon Component
 const StarIcon = () => (
   <svg
     className="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0"
@@ -22,18 +21,7 @@ const StarIcon = () => (
   >
     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
   </svg>
-);
-
-// Positional styles for the gallery images
-const imagePositions = [
-  { width: '40.4%', height: '36.7%', left: '0%', top: '9.3%' },
-  { width: '47.6%', height: '35.8%', left: '41.8%', top: '0%' },
-  { width: '34.6%', height: '62.7%', left: '41.8%', top: '37.3%' },
-  { width: '34.6%', height: '25.3%', left: '5.8%', top: '47.6%' },
-  { width: '22.2%', height: '17.2%', left: '18.2%', top: '74.5%' },
-  { width: '22.2%', height: '17.2%', left: '77.8%', top: '37.3%' },
-  { width: '22.2%', height: '28%', left: '77.8%', top: '56.1%' },
-];
+)
 
 type PackageHighlightsClientProps = {
   dataSource?: string
@@ -61,17 +49,25 @@ export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = (
     const fetchPackageData = async () => {
       if (dataSource !== 'auto') return
       const segments = pathname.split('/').filter(Boolean)
-      if (segments[0] !== 'packages') { setLoading(false); return }
+      if (segments[0] !== 'packages') {
+        setLoading(false)
+        return
+      }
       const packageSlug = segments[1]
-      if (!packageSlug) { setLoading(false); return }
+      if (!packageSlug) {
+        setLoading(false)
+        return
+      }
 
       try {
-        const response = await fetch(`/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`)
+        const response = await fetch(
+          `/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`,
+        )
         const data = await response.json()
         if (data.docs[0]) {
           const pkg = data.docs[0]
           const transformedHighlights = (pkg.highlights || []).map((h: any) => ({
-            highlightText: h.text || ''
+            highlightText: h.text || '',
           }))
           const galleryArray = Array.isArray(pkg.gallery) ? pkg.gallery : []
           const transformedGallery = galleryArray.slice(0, 7).map((img: any) => ({ image: img }))
@@ -104,31 +100,31 @@ export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = (
 
   return (
     <div className="font-sans p-4 sm:p-6 md:p-8">
-      {/* Local font helpers */}
+      {/* Font setup */}
       <style jsx global>{`
-        .font-amiri { font-family: 'Amiri', serif; }
-        .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+        .font-amiri {
+          font-family: 'Amiri', serif;
+        }
+        .font-nats {
+          font-family: 'NATS', ui-sans-serif, system-ui;
+        }
       `}</style>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        
-        {/* Left Column: Text Content */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {/* Left Column */}
         <div className="text-[#3C2A21]">
-          {/* Heading: Amiri italic 64px, 88%, -0.011em */}
-          <h1 className="font-amiri italic font-bold text-[64px] leading-[0.88] tracking-[-0.011em] mb-4">
+          <h1 className="font-amiri italic font-bold text-[36px] sm:text-[48px] md:text-[56px] lg:text-[64px] leading-tight mb-4">
             {heading}
           </h1>
-          {/* Subheading: NATS 26px, 88%, -0.011em */}
-          <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-black mb-8">
+          <p className="font-nats text-[18px] sm:text-[20px] md:text-[24px] text-black mb-6">
             {subheading}
           </p>
-          {/* Bullets: NATS 24px, line-height 24px, -0.011em */}
           <ul className="space-y-3">
             {Array.isArray(highlights) &&
               highlights.map((item, index) => (
                 <li key={index} className="flex items-start">
                   <StarIcon />
-                  <span className="font-nats text-[24px] leading-[24px] tracking-[-0.011em] text-black">
+                  <span className="font-nats text-[16px] sm:text-[18px] md:text-[20px] text-black">
                     {item?.highlightText || ''}
                   </span>
                 </li>
@@ -136,39 +132,37 @@ export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = (
           </ul>
         </div>
 
-        {/* Right Column: Absolutely Positioned Image Gallery */}
-        <div className="w-full relative" style={{ paddingBottom: '91.18%' }}>
-          {Array.isArray(galleryImages) &&
-            galleryImages.slice(0, 7).map((imageItem, index) => {
-              const imageSrc = getImageSrc(imageItem?.image);
-              if (!imageSrc) return null;
+        {/* Right Column - Responsive Gallery */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 w-full">
+          {galleryImages?.slice(0, 7).map((imageItem, index) => {
+            const imageSrc = getImageSrc(imageItem?.image)
+            if (!imageSrc) return null
 
-              return (
-                <div
-                  key={index}
-                  className="absolute overflow-hidden rounded-lg shadow-xl transition-transform duration-300 ease-in-out hover:shadow-2xl hover:scale-105"
-                  style={imagePositions[index]}
-                >
-                  <img
-                    src={imageSrc}
-                    alt={
-                      imageItem?.image && typeof imageItem.image === 'object'
-                        ? imageItem.image.alt || `Gallery image ${index + 1}`
-                        : `Gallery image ${index + 1}`
-                    }
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = 'https://placehold.co/400/CCCCCC/FFFFFF?text=Image+Error';
-                    }}
-                  />
-                </div>
-              );
-            })}
+            return (
+              <div
+                key={index}
+                className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-300 hover:scale-[1.03]"
+              >
+                <img
+                  src={imageSrc}
+                  alt={
+                    imageItem?.image && typeof imageItem.image === 'object'
+                      ? imageItem.image.alt || `Gallery image ${index + 1}`
+                      : `Gallery image ${index + 1}`
+                  }
+                  className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-cover"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null
+                    e.currentTarget.src = 'https://placehold.co/400/CCCCCC/FFFFFF?text=Image+Error'
+                  }}
+                />
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PackageHighlightsClient;
+export default PackageHighlightsClient

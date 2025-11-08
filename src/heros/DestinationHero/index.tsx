@@ -1,4 +1,3 @@
-// src/heroes/DestinationHero/Component.tsx
 'use client'
 
 import { useHeaderTheme } from '@/providers/HeaderTheme'
@@ -52,7 +51,7 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
       const pathSegments = pathname.split('/')
       const destIndex = pathSegments.indexOf('destinations')
       const slug = destIndex !== -1 ? pathSegments[destIndex + 1] : null
-      
+
       if (!slug) {
         setError('No destination slug found in URL')
         setLoading(false)
@@ -61,13 +60,10 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
 
       try {
         const response = await fetch(`/api/destinations?where[slug][equals]=${slug}&depth=2`)
-        if (!response.ok) {
-          throw new Error(`API returned ${response.status}`)
-        }
+        if (!response.ok) throw new Error(`API returned ${response.status}`)
         const data = await response.json()
         if (data.docs && data.docs[0]) {
           setDestination(data.docs[0])
-          setError(null)
         } else {
           setError(`Destination not found: ${slug}`)
         }
@@ -83,7 +79,6 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
 
   const cities: City[] = React.useMemo(() => {
     if (!destination?.cities || !Array.isArray(destination.cities)) return []
-    
     return destination.cities
       .filter((city): city is CityType => typeof city === 'object')
       .map((city) => ({
@@ -95,23 +90,18 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
   }, [destination?.cities])
 
   const destinationName = destination?.name || ''
-
   const extendedCities = [...cities, ...cities, ...cities]
   const initialDisplayIndex = cities.length
   const [displayIndex, setDisplayIndex] = useState(initialDisplayIndex)
   const activeCityIndex = displayIndex % cities.length
 
-  const getImageUrl = (image: Media | string): string => {
-    if (typeof image === 'string') return image
-    return image?.url || ''
-  }
+  const getImageUrl = (image: Media | string): string =>
+    typeof image === 'string' ? image : image?.url || ''
 
   const resetAutoplay = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-    }
+    if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(() => {
-      setDisplayIndex((prevIndex) => prevIndex + 1)
+      setDisplayIndex((prev) => prev + 1)
     }, autoplayInterval)
   }
 
@@ -121,18 +111,12 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
     resetAutoplay()
   }
 
-  useEffect(() => {
-    setHeaderTheme('dark')
-  }, [setHeaderTheme])
+  useEffect(() => setHeaderTheme('dark'), [setHeaderTheme])
 
   useEffect(() => {
-    if (cities.length > 0) {
-      resetAutoplay()
-    }
+    if (cities.length > 0) resetAutoplay()
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-      }
+      if (timerRef.current) clearInterval(timerRef.current)
     }
   }, [autoplayInterval, cities.length])
 
@@ -146,7 +130,10 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
       const elementCenter = elementRect.left - containerRect.left + elementRect.width / 2
       const containerCenter = containerRect.width / 2
       const targetScrollLeft = scrollLeft + elementCenter - containerCenter
-      scrollContainer.scrollTo({ left: targetScrollLeft, behavior: isJumpingRef.current ? 'auto' : 'smooth' })
+      scrollContainer.scrollTo({
+        left: targetScrollLeft,
+        behavior: isJumpingRef.current ? 'auto' : 'smooth',
+      })
       isJumpingRef.current = false
     }
   }, [displayIndex])
@@ -166,7 +153,7 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
     return () => clearTimeout(jumpTimeout)
   }, [displayIndex, cities.length])
 
-  if (loading) {
+  if (loading)
     return (
       <div className="w-full h-screen bg-gray-900 flex items-center justify-center text-white">
         <div className="text-center">
@@ -175,9 +162,8 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
         </div>
       </div>
     )
-  }
 
-  if (error) {
+  if (error)
     return (
       <div className="w-full h-screen bg-gray-900 flex items-center justify-center text-white">
         <div className="text-center max-w-md">
@@ -185,35 +171,47 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
         </div>
       </div>
     )
-  }
 
-  if (!destination) {
+  if (!destination)
     return (
       <div className="w-full h-screen bg-gray-900 flex items-center justify-center text-white">
         <p>No destination data available</p>
       </div>
     )
-  }
 
-  if (cities.length === 0) {
+  if (cities.length === 0)
     return (
       <div className="w-full h-screen bg-gray-900 flex items-center justify-center text-white">
         <div className="text-center max-w-md">
           <h1 className="text-4xl font-bold mb-4">{destinationName}</h1>
           <p className="text-gray-400">No cities available for this destination.</p>
-          <p className="text-sm text-gray-500 mt-2">Add cities in CMS with hero images.</p>
         </div>
       </div>
     )
-  }
 
   return (
-    <section className="relative -mt-[10.4rem] w-full h-screen bg-gray-900 font-sans antialiased overflow-hidden" data-theme="dark">
-      {/* Fonts only: Amiri + NATS classes */}
+    <section
+      className="relative -mt-[10.4rem] w-full h-screen bg-gray-900 font-sans antialiased overflow-hidden"
+      data-theme="dark"
+    >
+      {/* Fonts */}
       <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;1,400;1,700&display=swap');
-        .font-amiri { font-family: 'Amiri', serif; }
-        .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;1,700&display=swap');
+        .font-amiri {
+          font-family: 'Amiri', serif;
+        }
+        .font-nats {
+          font-family:
+            'NATS',
+            ui-sans-serif,
+            system-ui,
+            -apple-system,
+            'Segoe UI',
+            Roboto,
+            'Helvetica Neue',
+            Arial,
+            'Noto Sans';
+        }
       `}</style>
 
       <div
@@ -221,49 +219,46 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
         style={{ backgroundImage: `url(${getImageUrl(cities[activeCityIndex].image)})` }}
         className="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 ease-in-out"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
 
-      <div className="relative w-full h-full flex flex-col justify-end text-white p-6 sm:p-8 md:p-12">
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
-          {/* Title font updated per CSS: Amiri italic, 96px, 88% line-height, -0.011em */}
+      <div className="relative w-full h-full flex flex-col justify-end text-white px-4 sm:px-6 md:px-12 pb-8 sm:pb-12">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 w-full">
           <h1
-            className="font-amiri italic text-[96px] leading-[0.88] tracking-[-0.011em] capitalize"
-            style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}
+            className="font-amiri italic text-[2.2rem] sm:text-[3.5rem] md:text-[6rem] leading-tight tracking-[-0.011em] capitalize text-center md:text-left w-full"
+            style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.6)' }}
           >
             {destinationName}
           </h1>
 
-          <nav className="flex items-center justify-end gap-3 sm:gap-4 text-gray-200 w-full md:w-auto">
+          {/* Navigation Bar */}
+          <nav className="flex flex-col sm:flex-row items-center justify-center md:justify-end gap-2 sm:gap-4 text-gray-200 w-full md:w-auto">
+            {/* Prev Button */}
             <button
               onClick={() => handleUserInteraction(displayIndex - 1)}
-              className="p-2 rounded-full hover:bg:white/10 transition-colors duration-200 hidden sm:block"
+              className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200 hidden sm:block"
               aria-label="Previous city"
             >
               <ArrowIcon className="w-5 h-5" />
             </button>
 
+            {/* City Scroll */}
             <div
               ref={containerRef}
-              className="overflow-x-auto whitespace-nowrap scrollbar-hide max-w-[60vw] md:max-w-lg"
-              style={{
-                maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-                WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-              }}
+              className="overflow-x-auto scrollbar-hide max-w-full sm:max-w-[70vw] md:max-w-lg mx-auto sm:mx-0"
             >
               <ul
                 ref={cityListRef}
-                className="flex items-center justify-start gap-4 sm:gap-6 text-sm sm:text-base tracking-wider px-28 sm:px-48 md:px-64"
+                className="flex items-center justify-center gap-4 sm:gap-6 text-sm sm:text-base md:text-lg px-6 sm:px-12 md:px-16"
               >
                 {extendedCities.map((city, index) => (
                   <li key={`${city.name}-${index}`}>
-                    {/* City tabs font updated per CSS: NATS 24px, 88% line-height, -0.011em */}
                     <a
                       href={`#${city.name.toLowerCase()}`}
                       onClick={(e) => {
                         e.preventDefault()
                         handleUserInteraction(index)
                       }}
-                      className={`font-nats text-[24px] leading-[0.88] tracking-[-0.011em] py-1 transition-all duration-300 ${
+                      className={`font-nats text-[18px] sm:text-[22px] md:text-[24px] py-1 transition-all duration-300 ${
                         displayIndex === index
                           ? 'text-white scale-110 border-b-2 border-white font-semibold'
                           : 'text-gray-300 hover:text-white border-b-2 border-transparent'
@@ -276,6 +271,7 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
               </ul>
             </div>
 
+            {/* Next Button */}
             <button
               onClick={() => handleUserInteraction(displayIndex + 1)}
               className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200 hidden sm:block"

@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import React, { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 type InfoPanelClientProps = {
   dataSource?: string
@@ -35,23 +35,33 @@ export const InfoPanelClient: React.FC<InfoPanelClientProps> = ({
       .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
     `
     document.head.appendChild(style)
-    return () => { document.head.removeChild(style) }
+    return () => {
+      document.head.removeChild(style)
+    }
   }, [])
 
   // ✅ Auto-fetch package data from URL
   useEffect(() => {
     const fetchPackageData = async () => {
       if (dataSource !== 'auto') return
-      
+
       const segments = pathname.split('/').filter(Boolean)
-      if (segments[0] !== 'packages') { setLoading(false); return }
+      if (segments[0] !== 'packages') {
+        setLoading(false)
+        return
+      }
       const packageSlug = segments[1]
-      if (!packageSlug) { setLoading(false); return }
+      if (!packageSlug) {
+        setLoading(false)
+        return
+      }
 
       try {
-        const response = await fetch(`/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`)
+        const response = await fetch(
+          `/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`,
+        )
         const data = await response.json()
-        
+
         if (data.docs[0]) {
           const pkg = data.docs[0]
           const panelData = await transformPackageToPanelData(pkg, panelType)
@@ -74,20 +84,18 @@ export const InfoPanelClient: React.FC<InfoPanelClientProps> = ({
     return (
       <section className="relative overflow-hidden bg-white py-12">
         <div className="container mx-auto px-8 md:px-16">
-          <div className="text-center text-gray-500">
-            Loading information...
-          </div>
+          <div className="text-center text-gray-500">Loading information...</div>
         </div>
       </section>
     )
   }
 
   if (!Array.isArray(items) || items.length === 0) {
-    return null;
+    return null
   }
 
-  const ListComponent = listType === 'decimal' ? 'ol' : 'ul';
-  const listStyleClass = listType === 'disc' ? 'list-disc' : 'list-decimal';
+  const ListComponent = listType === 'decimal' ? 'ol' : 'ul'
+  const listStyleClass = listType === 'disc' ? 'list-disc' : 'list-decimal'
 
   return (
     <section className="relative overflow-hidden bg-white py-12 font-sans">
@@ -97,14 +105,14 @@ export const InfoPanelClient: React.FC<InfoPanelClientProps> = ({
           <h1 className="font-amiri italic font-bold text-[64px] leading-[0.88] tracking-[-0.011em] text-gray-900">
             {title}
           </h1>
-          
+
           {/* Subheading: NATS 26px, 88%, -0.011em */}
           {subheading && (
             <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-gray-900">
               {subheading}
             </p>
           )}
-          
+
           <div className="w-full border-t-4 border-dotted border-gray-300 pt-4" />
         </header>
 
@@ -120,8 +128,8 @@ export const InfoPanelClient: React.FC<InfoPanelClientProps> = ({
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
 // Helper function to transform package data (client-side)
 async function transformPackageToPanelData(pkg: any, type: string) {
@@ -132,15 +140,15 @@ async function transformPackageToPanelData(pkg: any, type: string) {
         subheading: `Important information about ${pkg.name}`,
         listType: 'disc' as const,
         items: (pkg.goodToKnow || []).map((item: any) => ({
-          text: item.title ? `${item.title}: ${item.text}` : item.text
+          text: item.title ? `${item.title}: ${item.text}` : item.text,
         })),
       }
 
     case 'inclusions':
-      const inclusionIds = Array.isArray(pkg.inclusions) 
-        ? pkg.inclusions.map((inc: any) => typeof inc === 'object' ? inc.id : inc).filter(Boolean)
+      const inclusionIds = Array.isArray(pkg.inclusions)
+        ? pkg.inclusions.map((inc: any) => (typeof inc === 'object' ? inc.id : inc)).filter(Boolean)
         : []
-      
+
       const inclusions = await Promise.all(
         inclusionIds.map(async (id: string) => {
           try {
@@ -151,9 +159,9 @@ async function transformPackageToPanelData(pkg: any, type: string) {
             console.error('Error fetching inclusion:', err)
             return null
           }
-        })
+        }),
       )
-      
+
       return {
         title: 'Inclusions',
         subheading: `What's included in ${pkg.name}`,
@@ -162,10 +170,10 @@ async function transformPackageToPanelData(pkg: any, type: string) {
       }
 
     case 'exclusions':
-      const exclusionIds = Array.isArray(pkg.exclusions) 
-        ? pkg.exclusions.map((exc: any) => typeof exc === 'object' ? exc.id : exc).filter(Boolean)
+      const exclusionIds = Array.isArray(pkg.exclusions)
+        ? pkg.exclusions.map((exc: any) => (typeof exc === 'object' ? exc.id : exc)).filter(Boolean)
         : []
-      
+
       const exclusions = await Promise.all(
         exclusionIds.map(async (id: string) => {
           try {
@@ -176,9 +184,9 @@ async function transformPackageToPanelData(pkg: any, type: string) {
             console.error('Error fetching exclusion:', err)
             return null
           }
-        })
+        }),
       )
-      
+
       return {
         title: 'Exclusions',
         subheading: `What's not included in ${pkg.name}`,
@@ -195,4 +203,4 @@ async function transformPackageToPanelData(pkg: any, type: string) {
   }
 }
 
-export default InfoPanelClient;
+export default InfoPanelClient

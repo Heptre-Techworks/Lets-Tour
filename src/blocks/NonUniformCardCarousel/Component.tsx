@@ -60,8 +60,8 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
             patternIndex === 0
               ? 'large'
               : patternIndex === 1 || patternIndex === 3
-              ? 'medium'
-              : 'small'
+                ? 'medium'
+                : 'small'
           break
         }
         case 'random': {
@@ -162,9 +162,7 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-5xl md:text-6xl font-serif font-bold text-gray-900 mb-3">
-            {title}
-          </h1>
+          <h1 className="text-5xl md:text-6xl font-serif font-bold text-gray-900 mb-3">{title}</h1>
           {subtitle && <p className="text-gray-700 text-lg">&quot;{subtitle}&quot;</p>}
         </div>
 
@@ -181,8 +179,18 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
             aria-label="Previous destinations"
           >
-            <svg className="w-7 h-7 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-7 h-7 text-gray-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
 
@@ -228,7 +236,8 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
                         {showDiscountBadge && destination.discount && (
                           <div className="absolute top-4 left-4">
                             <span className="bg-orange-400 text-white px-3 py-2 text-sm font-semibold rounded-lg shadow-md">
-                              {destination.discount.label || `${destination.discount.percentage}% Off`}
+                              {destination.discount.label ||
+                                `${destination.discount.percentage}% Off`}
                             </span>
                           </div>
                         )}
@@ -243,8 +252,18 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
                             }}
                             aria-label="Add to favorites"
                           >
-                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            <svg
+                              className="w-6 h-6 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                              />
                             </svg>
                           </button>
                         </div>
@@ -256,10 +275,10 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
                               destination.size === 'xl'
                                 ? 'text-3xl'
                                 : destination.size === 'large'
-                                ? 'text-2xl'
-                                : destination.size === 'medium'
-                                ? 'text-xl'
-                                : 'text-lg'
+                                  ? 'text-2xl'
+                                  : destination.size === 'medium'
+                                    ? 'text-xl'
+                                    : 'text-lg'
                             }`}
                           >
                             {destination.name}
@@ -285,8 +304,8 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
                                     destination.size === 'xl'
                                       ? 'text-2xl'
                                       : destination.size === 'large'
-                                      ? 'text-xl'
-                                      : 'text-lg'
+                                        ? 'text-xl'
+                                        : 'text-lg'
                                   }`}
                                 >
                                   ₹{destination.startingPrice.toLocaleString()}
@@ -298,8 +317,18 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
 
                               {/* Action Arrow */}
                               <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110">
-                                <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                <svg
+                                  className="w-6 h-6 text-gray-800"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                  />
                                 </svg>
                               </div>
                             </div>
@@ -320,7 +349,12 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
             aria-label="Next destinations"
           >
-            <svg className="w-7 h-7 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-7 h-7 text-gray-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>

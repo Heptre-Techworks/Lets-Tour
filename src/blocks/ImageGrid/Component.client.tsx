@@ -1,22 +1,57 @@
-// src/blocks/ImageGrid/Component.client.tsx
-'use client';
+'use client'
 
-import * as React from 'react';
-import { cn } from '@/utilities/ui';
+import * as React from 'react'
+import { cn } from '@/utilities/ui'
 
-type MaybeImage =
-  | { url?: string | null; alt?: string | null }
-  | string
-  | null
-  | undefined;
+type MaybeImage = { url?: string | null; alt?: string | null } | string | null | undefined
 
 const getSrc = (img: MaybeImage): string | undefined =>
-  typeof img === 'string' ? img : img?.url ?? undefined;
+  typeof img === 'string' ? img : (img?.url ?? undefined)
 
 const getAlt = (img: MaybeImage, fallback?: string | null): string => {
-  const candidate = typeof img === 'string' ? fallback : img?.alt ?? fallback;
-  return candidate ?? '';
-};
+  const candidate = typeof img === 'string' ? fallback : (img?.alt ?? fallback)
+  return candidate ?? ''
+}
+
+const HoverImage: React.FC<{
+  src?: string
+  alt?: string
+  className?: string
+  overlay?: boolean
+  children?: React.ReactNode
+}> = ({ src, alt = '', className, overlay = true, children }) => {
+  const [transform, setTransform] = React.useState('translate(0px, 0px) scale(1)')
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = (e.clientX - rect.left - rect.width / 2) / 20
+    const y = (e.clientY - rect.top - rect.height / 2) / 20
+    setTransform(`translate(${x}px, ${y}px) scale(1.05)`)
+  }
+
+  function handleMouseLeave() {
+    setTransform('translate(0px, 0px) scale(1)')
+  }
+
+  return (
+    <div
+      className={cn('relative overflow-hidden group rounded-lg', className)}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {src && (
+        <img
+          src={src}
+          alt={alt}
+          className="w-full h-full object-cover transition-transform duration-300 ease-out"
+          style={{ transform }}
+        />
+      )}
+      {overlay && <div className="absolute inset-0 bg-black/40 pointer-events-none" />}
+      {children}
+    </div>
+  )
+}
 
 export const ImageGridClient: React.FC<any> = ({
   leftHero,
@@ -27,22 +62,22 @@ export const ImageGridClient: React.FC<any> = ({
   theme,
   className,
 }) => {
-  const wrap = !!theme?.container;
-  const dark = !!theme?.dark;
+  const wrap = !!theme?.container
+  const dark = !!theme?.dark
 
-  const leftHeroSrc = getSrc((leftHero?.image as any) ?? leftHero?.imageUrl);
+  const leftHeroSrc = getSrc((leftHero?.image as any) ?? leftHero?.imageUrl)
   const leftHeroAlt = getAlt(
     (leftHero?.image as any) ?? leftHero?.imageUrl,
-    (leftHero?.alt ?? leftHero?.title) ?? ''
-  );
+    leftHero?.alt ?? leftHero?.title ?? '',
+  )
 
-  const activitiesSrc = getSrc((activities?.image as any) ?? activities?.imageUrl);
+  const activitiesSrc = getSrc((activities?.image as any) ?? activities?.imageUrl)
   const activitiesAlt = getAlt(
     (activities?.image as any) ?? activities?.imageUrl,
-    (activities?.alt ?? activities?.title) ?? ''
-  );
+    activities?.alt ?? activities?.title ?? '',
+  )
 
-  const spotsSafe = spots ?? [];
+  const spotsSafe = spots ?? []
 
   return (
     <section
@@ -50,272 +85,126 @@ export const ImageGridClient: React.FC<any> = ({
         dark ? 'text-white bg-[#111111]' : 'text-black',
         wrap ? 'container mx-auto' : 'w-full',
         'pb-0',
-        className
+        className,
       )}
     >
       <main className="grid grid-cols-1 lg:grid-cols-5 gap-0">
-        {/* Left Hero */}
-        <div className="relative col-span-1 lg:col-span-2 h-[400px] md:h-[600px] lg:h-auto rounded-lg overflow-hidden group">
-          {leftHeroSrc && (
-            <>
-              <img
-                src={leftHeroSrc}
-                alt={leftHeroAlt}
-                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 ease-in-out"
-              />
-              <div className="absolute inset-0 bg-black/40" />
-              <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/70 to-transparent" />
-            </>
-          )}
-          {(leftHero?.title || leftHero?.rating !== undefined || leftHero?.trail) && (
-            <div className="absolute bottom-0 left-0 p-6 pl-16 w-full z-10">
-              <div className="relative flex items-baseline space-x-2 drop-shadow">
-                {leftHero?.title && <h2 className="text-2xl md:text-3xl font-bold">{leftHero.title}</h2>}
-                {typeof leftHero?.rating === 'number' && (
-                  <span className="text-lg font-semibold text-gray-300">
-                    {(labels?.ratingPrefix ?? '')}
-                    {leftHero.rating.toFixed(1)}
-                  </span>
-                )}
-              </div>
-              {leftHero?.trail && (
-                <p className="relative text-sm font-semibold tracking-widest text-gray-400 mt-1">
-                  {leftHero.trail}
+        {/* LEFT HERO IMAGE */}
+        <HoverImage
+          src={leftHeroSrc}
+          alt={leftHeroAlt}
+          className="col-span-1 lg:col-span-2 h-[300px] sm:h-[400px] md:h-[500px] lg:h-auto"
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+          <div className="absolute bottom-0 left-0 p-4 sm:p-6 z-10 text-white">
+            {leftHero?.title && (
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">{leftHero.title}</h2>
+            )}
+            {typeof leftHero?.rating === 'number' && (
+              <p className="text-sm sm:text-md text-gray-300">
+                {labels?.ratingPrefix ?? ''} {leftHero.rating.toFixed(1)}
+              </p>
+            )}
+            {leftHero?.trail && (
+              <p className="text-xs sm:text-sm text-gray-400 mt-1">{leftHero.trail}</p>
+            )}
+          </div>
+        </HoverImage>
+
+        {/* RIGHT GRID */}
+        <div className="col-span-1 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-0">
+          {/* Explore Card */}
+          {(explore?.title || explore?.description) && (
+            <div className="flex flex-col justify-center p-6 sm:p-8 md:p-10 bg-[#1a1a1a] text-white rounded-lg min-h-[250px] sm:min-h-[300px]">
+              {explore?.subtitle && (
+                <p className="text-xs sm:text-sm tracking-widest text-gray-400">
+                  {explore.subtitle}
                 </p>
+              )}
+              {explore?.title && (
+                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2">{explore.title}</h3>
+              )}
+              {explore?.description && (
+                <p className="text-gray-300 mt-3 text-sm sm:text-base">{explore.description}</p>
+              )}
+              {explore?.button?.label && (
+                <a
+                  href={explore?.button?.href || '#'}
+                  className="mt-6 px-6 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-colors self-start"
+                >
+                  {explore.button.label}
+                </a>
               )}
             </div>
           )}
-        </div>
 
-        {/* Right Grid */}
-        <div className="col-span-1 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-0">
-          {/* Column 1 */}
-          <div className="flex flex-col gap-0">
-            {/* Explore card */}
-            {(explore?.subtitle ||
-              explore?.title ||
-              explore?.description ||
-              explore?.button?.label) && (
-              <div className="flex flex-col justify-center p-8 md:p-10 rounded-lg bg-[#1a1a1a] min-h-[300px]">
-                {explore?.subtitle && (
-                  <p className="text-sm font-semibold tracking-widest text-gray-400">{explore.subtitle}</p>
+          {/* Image Spots */}
+          {[1, 0, 2].map((i) =>
+            spotsSafe[i] ? (
+              <HoverImage
+                key={i}
+                src={getSrc((spotsSafe[i].image as any) ?? spotsSafe[i].imageUrl)}
+                alt={getAlt(
+                  (spotsSafe[i].image as any) ?? spotsSafe[i].imageUrl,
+                  spotsSafe[i].alt ?? spotsSafe[i].name ?? '',
                 )}
-                {explore?.title && <h3 className="text-3xl md:text-4xl font-bold mt-4">{explore.title}</h3>}
-                {explore?.description && <p className="text-gray-300 mt-4 leading-relaxed">{explore.description}</p>}
-                {explore?.button?.label && (
-                  <a
-                    href={explore?.button?.href || '#'}
-                    className="mt-8 px-6 py-3 bg-white text-black font-semibold rounded-lg self-start hover:bg-gray-200 transition-colors"
-                  >
-                    {explore.button.label}
-                  </a>
-                )}
-              </div>
-            )}
-
-            {/* Spot index 1 */}
-            {spotsSafe[1] && (
-              <div className="relative rounded-lg overflow-hidden group min-h-[300px]">
-                {getSrc((spotsSafe[1].image as any) ?? spotsSafe[1].imageUrl) && (
-                  <>
-                    <img
-                      src={getSrc((spotsSafe[1].image as any) ?? spotsSafe[1].imageUrl)!}
-                      alt={getAlt(
-                        (spotsSafe[1].image as any) ?? spotsSafe[1].imageUrl,
-                        (spotsSafe[1].alt ?? spotsSafe[1].name) ?? ''
-                      )}
-                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 ease-in-out"
-                    />
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/70 to-transparent" />
-                  </>
-                )}
-                {(spotsSafe[1].name ||
-                  spotsSafe[1].rating !== undefined ||
-                  spotsSafe[1].location) && (
-                  <div className="absolute bottom-0 left-0 p-4 w-full z-10">
-                    <div className="relative flex items-baseline space-x-2 drop-shadow">
-                      {spotsSafe[1].name && <h4 className="text-lg font-bold">{spotsSafe[1].name}</h4>}
-                      {typeof spotsSafe[1].rating === 'number' && (
-                        <span className="text-md font-semibold text-gray-300">
-                          {(labels?.ratingPrefix ?? '')}
-                          {spotsSafe[1].rating.toFixed(1)}
-                        </span>
-                      )}
-                    </div>
-                    {spotsSafe[1].location && (
-                      <p className="relative text-xs font-semibold tracking-widest text-gray-400">
-                        {spotsSafe[1].location}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Column 2 */}
-          <div className="flex flex-col gap-0">
-            {/* Spot index 0 */}
-            {spotsSafe[0] && (
-              <div className="relative rounded-lg overflow-hidden group min-h-[300px]">
-                {getSrc((spotsSafe[0].image as any) ?? spotsSafe[0].imageUrl) && (
-                  <>
-                    <img
-                      src={getSrc((spotsSafe[0].image as any) ?? spotsSafe[0].imageUrl)!}
-                      alt={getAlt(
-                        (spotsSafe[0].image as any) ?? spotsSafe[0].imageUrl,
-                        (spotsSafe[0].alt ?? spotsSafe[0].name) ?? ''
-                      )}
-                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 ease-in-out"
-                    />
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/70 to-transparent" />
-                  </>
-                )}
-                {(spotsSafe[0].name ||
-                  spotsSafe[0].rating !== undefined ||
-                  spotsSafe[0].location) && (
-                  <div className="absolute bottom-0 left-0 p-4 w-full z-10">
-                    <div className="relative flex items-baseline space-x-2 drop-shadow">
-                      {spotsSafe[0].name && <h4 className="text-lg font-bold">{spotsSafe[0].name}</h4>}
-                      {typeof spotsSafe[0].rating === 'number' && (
-                        <span className="text-md font-semibold text-gray-300">
-                          {(labels?.ratingPrefix ?? '')}
-                          {spotsSafe[0].rating.toFixed(1)}
-                        </span>
-                      )}
-                    </div>
-                    {spotsSafe[0].location && (
-                      <p className="relative text-xs font-semibold tracking-widest text-gray-400">
-                        {spotsSafe[0].location}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Spot index 2 */}
-            {spotsSafe[2] && (
-              <div className="relative rounded-lg overflow-hidden group min-h-[300px]">
-                {getSrc((spotsSafe[2].image as any) ?? spotsSafe[2].imageUrl) && (
-                  <>
-                    <img
-                      src={getSrc((spotsSafe[2].image as any) ?? spotsSafe[2].imageUrl)!}
-                      alt={getAlt(
-                        (spotsSafe[2].image as any) ?? spotsSafe[2].imageUrl,
-                        (spotsSafe[2].alt ?? spotsSafe[2].name) ?? ''
-                      )}
-                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 ease-in-out"
-                    />
-                    <div className="absolute inset-0 bg-black/40" />
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/70 to-transparent" />
-                  </>
-                )}
-                {(spotsSafe[2].name ||
-                  spotsSafe[2].rating !== undefined ||
-                  spotsSafe[2].location) && (
-                  <div className="absolute bottom-0 left-0 p-4 w-full z-10">
-                    <div className="relative flex items-baseline space-x-2 drop-shadow">
-                      {spotsSafe[2].name && <h4 className="text-lg font-bold">{spotsSafe[2].name}</h4>}
-                      {typeof spotsSafe[2].rating === 'number' && (
-                        <span className="text-md font-semibold text-gray-300">
-                          {(labels?.ratingPrefix ?? '')}
-                          {spotsSafe[2].rating.toFixed(1)}
-                        </span>
-                      )}
-                    </div>
-                    {spotsSafe[2].location && (
-                      <p className="relative text-xs font-semibold tracking-widest text-gray-400">
-                        {spotsSafe[2].location}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+                className="min-h-[250px] sm:min-h-[300px]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                <div className="absolute bottom-0 left-0 p-3 sm:p-4 text-white z-10">
+                  {spotsSafe[i].name && (
+                    <h4 className="text-base sm:text-lg font-bold">{spotsSafe[i].name}</h4>
+                  )}
+                  {typeof spotsSafe[i].rating === 'number' && (
+                    <p className="text-xs sm:text-sm text-gray-300">
+                      {labels?.ratingPrefix ?? ''} {spotsSafe[i].rating.toFixed(1)}
+                    </p>
+                  )}
+                  {spotsSafe[i].location && (
+                    <p className="text-[10px] sm:text-xs text-gray-400">{spotsSafe[i].location}</p>
+                  )}
+                </div>
+              </HoverImage>
+            ) : null,
+          )}
         </div>
       </main>
 
-      {/* Bottom Activities Banner */}
-      {(activitiesSrc ||
-        activities?.subtitle ||
-        activities?.title ||
-        activities?.description ||
-        activities?.button?.label ||
-        activities?.tag) && (
-        <section className="relative h-[500px] md:h-[600px] rounded-lg overflow-hidden flex items-center group mt-0">
-          {activitiesSrc && (
-            <img
-              src={activitiesSrc}
-              alt={activitiesAlt}
-              className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 ease-in-out"
-            />
-          )}
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 pointer-events-none bg-gradient-to-r from-black/70 via-black/0 to-transparent" />
-          <div className="relative z-10 p-6 md:p-12 max-w-lg">
+      {/* BOTTOM BANNER */}
+      {(activitiesSrc || activities?.title) && (
+        <HoverImage
+          src={activitiesSrc}
+          alt={activitiesAlt}
+          className="relative h-[400px] sm:h-[500px] md:h-[600px] mt-6 sm:mt-8"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent" />
+          <div className="relative z-10 p-6 sm:p-8 md:p-12 max-w-lg text-white">
             {activities?.subtitle && (
-              <p className="text-sm font-semibold tracking-widest text-gray-300">{activities.subtitle}</p>
+              <p className="text-xs sm:text-sm tracking-widest text-gray-300">
+                {activities.subtitle}
+              </p>
             )}
             {activities?.title && (
-              <h2 className="text-4xl md:text-5xl font-bold mt-4 leading-tight drop-shadow">{activities.title}</h2>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-3">
+                {activities.title}
+              </h2>
             )}
             {activities?.description && (
-              <p className="text-gray-200 mt-4 leading-relaxed">{activities.description}</p>
+              <p className="text-gray-200 mt-3 text-sm sm:text-base">{activities.description}</p>
             )}
             {activities?.button?.label && (
               <a
                 href={activities?.button?.href || '#'}
-                className="mt-8 inline-block px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+                className="mt-6 inline-block px-6 py-3 bg-white text-black font-semibold rounded-lg hover:bg-gray-200 transition-colors"
               >
                 {activities.button.label}
               </a>
             )}
           </div>
-
-          <div className="absolute bottom-6 right-6 flex items-center space-x-2 z-10">
-            <button
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors backdrop-blur-sm"
-              aria-label="Previous"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors backdrop-blur-sm"
-              aria-label="Next"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-
-          {activities?.tag && (
-            <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-sm font-semibold tracking-widest text-gray-300 z-10 drop-shadow">
-              {activities.tag}
-            </p>
-          )}
-        </section>
+        </HoverImage>
       )}
     </section>
-  );
-};
+  )
+}
 
-export default ImageGridClient;
+export default ImageGridClient

@@ -25,7 +25,7 @@ export const PackageHighlights = async (props: PackageHighlightsProps) => {
   if (dataSource === 'auto') {
     console.log('🔄 Auto mode - client will fetch from URL')
     return (
-      <PackageHighlightsClient 
+      <PackageHighlightsClient
         dataSource="auto"
         heading=""
         subheading=""
@@ -38,7 +38,7 @@ export const PackageHighlights = async (props: PackageHighlightsProps) => {
   // Package selection mode - fetch on server
   if (dataSource === 'package' && pkgProp) {
     const payload = await getPayload({ config: configPromise })
-    
+
     try {
       let pkgData: any = null
 
@@ -60,13 +60,13 @@ export const PackageHighlights = async (props: PackageHighlightsProps) => {
       if (pkgData) {
         // Transform highlights from Package schema
         const transformedHighlights = (pkgData.highlights || []).map((h: any) => ({
-          highlightText: h.text || ''
+          highlightText: h.text || '',
         }))
 
         // Get gallery images from package gallery (first 7)
         const galleryArray = Array.isArray(pkgData.gallery) ? pkgData.gallery : []
         const transformedGallery = galleryArray.slice(0, 7).map((img: any) => ({
-          image: img
+          image: img,
         }))
 
         // Fill remaining slots if less than 7 images
@@ -77,12 +77,15 @@ export const PackageHighlights = async (props: PackageHighlightsProps) => {
         const highlightsData = {
           dataSource: 'package',
           heading: `${pkgData.name} Highlights`,
-          subheading: pkgData.tagline || pkgData.summary || 'Discover what makes this package special',
+          subheading:
+            pkgData.tagline || pkgData.summary || 'Discover what makes this package special',
           highlights: transformedHighlights,
           galleryImages: transformedGallery,
         }
 
-        console.log(`✅ Server loaded ${transformedHighlights.length} highlights, ${transformedGallery.length} images`)
+        console.log(
+          `✅ Server loaded ${transformedHighlights.length} highlights, ${transformedGallery.length} images`,
+        )
 
         return <PackageHighlightsClient {...highlightsData} />
       }

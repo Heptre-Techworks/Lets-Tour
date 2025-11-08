@@ -5,8 +5,7 @@ import { DestinationHero } from './DestinationHero'
 import { PackageHero } from './PackageHero'
 import type { Page, Destination, Package, Review } from '@/payload-types'
 
-
-type RenderHeroProps = { 
+type RenderHeroProps = {
   hero: Page['hero'] | null | undefined
   // Optional: Pass fetched data for server-side rendering (to avoid double fetch)
   destinationData?: Destination
@@ -14,40 +13,37 @@ type RenderHeroProps = {
   reviewsData?: Review[]
 }
 
-
-export const RenderHero: React.FC<RenderHeroProps> = ({ 
-  hero, 
+export const RenderHero: React.FC<RenderHeroProps> = ({
+  hero,
   destinationData,
   packageData,
-  reviewsData = []
+  reviewsData = [],
 }) => {
   // ✅ Return black background div if no hero or type is 'none'
   if (!hero || hero.type === 'none') {
     return (
-      <div 
-        className="w-full bg-black -mt-[10.4rem] pt-[10.4rem]" 
+      <div
+        className="w-full bg-black -mt-[10.4rem] pt-[10.4rem]"
         style={{ minHeight: '25vh' }}
-        aria-hidden="true" 
+        aria-hidden="true"
       />
     )
   }
 
-
   switch (hero.type) {
     case 'mainHero': {
       const slides =
-        hero.mainHeroFields?.slides?.map(s => ({
+        hero.mainHeroFields?.slides?.map((s) => ({
           backgroundImage: s.backgroundImage,
           headline: s.headline || 'To travel is to live!',
           subtitle: s.subtitle || '10,348 ft',
           location: s.location || 'Mount Everest',
         })) ?? []
 
-
       // Transform destinations for search form
       const destinationOptions = hero.mainHeroFields?.destinationOptions
-        ? (Array.isArray(hero.mainHeroFields.destinationOptions) 
-            ? hero.mainHeroFields.destinationOptions 
+        ? (Array.isArray(hero.mainHeroFields.destinationOptions)
+            ? hero.mainHeroFields.destinationOptions
             : []
           ).map((dest) => {
             const destination = typeof dest === 'object' ? dest : null
@@ -57,7 +53,6 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
             }
           })
         : []
-
 
       // Transform categories for search form
       const categoryOptions = hero.mainHeroFields?.categoryOptions
@@ -72,7 +67,6 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
             }
           })
         : []
-
 
       return (
         <MainHero
@@ -94,7 +88,6 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
       )
     }
 
-
     case 'destinationHero': {
       return (
         <DestinationHero
@@ -103,7 +96,6 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
         />
       )
     }
-
 
     case 'packageHero': {
       return (
@@ -117,7 +109,6 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
         />
       )
     }
-
 
     default:
       return null

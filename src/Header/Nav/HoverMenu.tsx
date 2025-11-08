@@ -7,8 +7,8 @@ type Item = { id: string; name: string; slug: string }
 
 interface HoverMenuProps {
   label: string
-  endpoint: string   // e.g. "/api/destinations?where[isPublished][equals]=true&limit=50&sort=name&depth=0"
-  hrefBase: string   // e.g. "/destinations"
+  endpoint: string
+  hrefBase: string
 }
 
 export const HoverMenu: React.FC<HoverMenuProps> = ({ label, endpoint, hrefBase }) => {
@@ -21,6 +21,7 @@ export const HoverMenu: React.FC<HoverMenuProps> = ({ label, endpoint, hrefBase 
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current)
     setOpen(true)
   }
+
   const handleLeave = () => {
     timeoutRef.current = window.setTimeout(() => setOpen(false), 220)
   }
@@ -40,13 +41,21 @@ export const HoverMenu: React.FC<HoverMenuProps> = ({ label, endpoint, hrefBase 
 
   return (
     <div className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+      {/* Label color: white on desktop, black on mobile */}
       <button
         type="button"
-        className="cursor-pointer font-sans leading-[0.88] text-[24px] text-white tracking-[-0.011em] hover:text-gray-200 transition-colors"
+        className="
+          cursor-pointer font-sans leading-[0.88] text-[24px]
+          text-black md:text-white
+          tracking-[-0.011em] 
+          hover:text-gray-700 md:hover:text-gray-200 
+          transition-colors
+        "
       >
         <span className="align-middle">{label}</span>
       </button>
 
+      {/* Dropdown menu (desktop only) */}
       <div
         className={[
           'absolute left-1/2 -translate-x-1/2 top-full mt-3 z-50',
@@ -72,9 +81,7 @@ export const HoverMenu: React.FC<HoverMenuProps> = ({ label, endpoint, hrefBase 
                 </Link>
               </li>
             ))}
-            {items.length === 0 && (
-              <li className="px-3 py-2 text-sm text-gray-500">No items</li>
-            )}
+            {items.length === 0 && <li className="px-3 py-2 text-sm text-gray-500">No items</li>}
           </ul>
         )}
       </div>

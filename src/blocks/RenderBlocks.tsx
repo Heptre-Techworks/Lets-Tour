@@ -50,21 +50,21 @@ const blockComponents = {
 function serializeBlockData(block: any) {
   // Remove non-serializable fields
   const { blockType, ...rest } = block
-  
+
   // Convert any complex objects to plain data
   const serialized: any = { blockType }
-  
+
   for (const key in rest) {
     const value = rest[key]
-    
+
     // Skip functions
     if (typeof value === 'function') continue
-    
+
     // ✅ Special handling for blocks fields (sections, items, etc.)
     if (key === 'sections' || key === 'items') {
       if (Array.isArray(value)) {
         // Keep the full block object structure for nested blocks
-        serialized[key] = value.map(item => {
+        serialized[key] = value.map((item) => {
           if (typeof item === 'object' && item !== null) {
             // Recursively serialize nested blocks
             return serializeBlockData(item)
@@ -74,11 +74,11 @@ function serializeBlockData(block: any) {
         continue
       }
     }
-    
+
     // Handle relationships - only keep id and basic fields
     if (value && typeof value === 'object') {
       if (Array.isArray(value)) {
-        serialized[key] = value.map(item => {
+        serialized[key] = value.map((item) => {
           if (typeof item === 'object' && item !== null) {
             // ✅ Check if it's a block (has blockType)
             if (item.blockType) {
@@ -121,7 +121,7 @@ function serializeBlockData(block: any) {
       serialized[key] = value
     }
   }
-  
+
   return serialized
 }
 
@@ -144,7 +144,7 @@ export const RenderBlocks: React.FC<{
             if (Block) {
               // ✅ Serialize block data before passing to client component
               const serializedBlock = serializeBlockData(block)
-              
+
               return (
                 <div key={index}>
                   <Block {...serializedBlock} disableInnerContainer />

@@ -6,7 +6,14 @@ import { ImageGridClient } from './Component.client'
 import type { ImageGridBlock } from '@/payload-types'
 
 export const ImageGrid = async (props: ImageGridBlock) => {
-  const { dataSource, destination: destProp, package: pkgProp, featuredLimit, manualData, ...rest } = props as any
+  const {
+    dataSource,
+    destination: destProp,
+    package: pkgProp,
+    featuredLimit,
+    manualData,
+    ...rest
+  } = props as any
 
   // Manual mode - return as-is
   if (dataSource === 'manual' && manualData) {
@@ -132,9 +139,10 @@ export const ImageGrid = async (props: ImageGridBlock) => {
         activities: {
           subtitle: 'ACTIVITIES',
           title: `Things to do in ${dest.name}`,
-          description: activities.docs.length > 0 
-            ? `${activities.docs.length}+ curated activities`
-            : 'Discover unique experiences',
+          description:
+            activities.docs.length > 0
+              ? `${activities.docs.length}+ curated activities`
+              : 'Discover unique experiences',
           button: {
             label: 'Explore',
             href: `/destinations/${dest.slug}#activities`,
@@ -144,7 +152,6 @@ export const ImageGrid = async (props: ImageGridBlock) => {
         },
       }
     }
-
   } catch (error) {
     console.error('❌ ImageGrid error:', error)
   }

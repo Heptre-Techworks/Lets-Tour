@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
-import { Amiri } from 'next/font/google';
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
+import { Amiri } from 'next/font/google'
 
 // Amiri for headings (normal + italic)
 const amiri = Amiri({
@@ -10,42 +10,42 @@ const amiri = Amiri({
   weight: ['400', '700'],
   style: ['normal', 'italic'],
   display: 'swap',
-});
+})
 
-type MediaLike = { url?: string | null; alt?: string | null };
+type MediaLike = { url?: string | null; alt?: string | null }
 
 type CardData = {
-  name?: string;
-  price?: string;
-  image?: MediaLike | string | null;
-  imageUrl?: string | null;
-  alt?: string | null;
-  slug?: string;
-  href?: string;
-};
+  name?: string
+  price?: string
+  image?: MediaLike | string | null
+  imageUrl?: string | null
+  alt?: string | null
+  slug?: string
+  href?: string
+}
 
 type RowData = {
-  direction: 'left' | 'right';
-  speedSeconds: number;
-  cards: CardData[];
-};
+  direction: 'left' | 'right'
+  speedSeconds: number
+  cards: CardData[]
+}
 
 const getImageSrc = (card: CardData) => {
   if (card?.image && typeof card.image === 'object' && 'url' in card.image && card.image?.url) {
-    return card.image.url as string;
+    return card.image.url as string
   }
-  if (card?.imageUrl) return card.imageUrl;
-  return '';
-};
+  if (card?.imageUrl) return card.imageUrl
+  return ''
+}
 
 // Bumped sizes aligned to shared CSS:
 // xs: 300×194, sm: 350×194, md: 400×222, lg: 450×250, xl: 475×264
 const DestinationCard: React.FC<{
-  name: string;
-  price: string;
-  src: string;
-  alt?: string | null;
-  href?: string;
+  name: string
+  price: string
+  src: string
+  alt?: string | null
+  href?: string
 }> = ({ name, price, src, alt, href }) => {
   const cardContent = (
     <li
@@ -87,7 +87,9 @@ const DestinationCard: React.FC<{
             fontSize: '28px',
           }}
         >
-          <span className="hidden md:inline" style={{ fontSize: '32px' }}>{name}</span>
+          <span className="hidden md:inline" style={{ fontSize: '32px' }}>
+            {name}
+          </span>
           <span className="inline md:hidden">{name}</span>
         </h3>
         <p
@@ -109,90 +111,90 @@ const DestinationCard: React.FC<{
         </p>
       </div>
     </li>
-  );
+  )
 
   if (href && href !== '#') {
     return (
       <Link href={href} className="block hover:shadow-2xl transition-shadow duration-300">
         {cardContent}
       </Link>
-    );
+    )
   }
-  return cardContent;
-};
+  return cardContent
+}
 
 const InfiniteScroller: React.FC<{
-  direction: 'left' | 'right';
-  speed: number;
-  pauseOnHover: boolean;
-  children: React.ReactNode;
-  centerOffset: number;
-  transformOrigin: string;
-  alignItems: string;
+  direction: 'left' | 'right'
+  speed: number
+  pauseOnHover: boolean
+  children: React.ReactNode
+  centerOffset: number
+  transformOrigin: string
+  alignItems: string
 }> = ({ direction, speed, pauseOnHover, children, centerOffset, transformOrigin, alignItems }) => {
-  const scrollerRef = useRef<HTMLDivElement | null>(null);
-  const scrollerInnerRef = useRef<HTMLUListElement | null>(null);
-  const animationFrameRef = useRef<number | undefined>(undefined);
+  const scrollerRef = useRef<HTMLDivElement | null>(null)
+  const scrollerInnerRef = useRef<HTMLUListElement | null>(null)
+  const animationFrameRef = useRef<number | undefined>(undefined)
 
   useEffect(() => {
-    const scroller = scrollerRef.current;
-    const scrollerInner = scrollerInnerRef.current;
-    if (!scroller || !scrollerInner || scroller.dataset.initialized) return;
+    const scroller = scrollerRef.current
+    const scrollerInner = scrollerInnerRef.current
+    if (!scroller || !scrollerInner || scroller.dataset.initialized) return
 
-    const originalChildren = Array.from(scrollerInner.children);
-    if (originalChildren.length === 0) return;
+    const originalChildren = Array.from(scrollerInner.children)
+    if (originalChildren.length === 0) return
 
     originalChildren.forEach((item) => {
-      const clone = item.cloneNode(true) as HTMLElement;
-      clone.setAttribute('aria-hidden', 'true');
-      scrollerInner.appendChild(clone);
-    });
-    scroller.dataset.initialized = 'true';
-  }, [children]);
+      const clone = item.cloneNode(true) as HTMLElement
+      clone.setAttribute('aria-hidden', 'true')
+      scrollerInner.appendChild(clone)
+    })
+    scroller.dataset.initialized = 'true'
+  }, [children])
 
   useEffect(() => {
-    const scroller = scrollerRef.current;
-    const scrollerInner = scrollerInnerRef.current;
-    if (!scroller || !scrollerInner) return;
+    const scroller = scrollerRef.current
+    const scrollerInner = scrollerInnerRef.current
+    if (!scroller || !scrollerInner) return
 
     const applyScaling = () => {
-      if (!scrollerRef.current || !scrollerInnerRef.current) return;
+      if (!scrollerRef.current || !scrollerInnerRef.current) return
 
-      const scrollerWidth = scrollerRef.current.offsetWidth;
-      const offsetPixels = scrollerWidth * (centerOffset / 100);
-      const scrollerCenterX = scrollerWidth / 2 + offsetPixels;
-      const scrollerRect = scrollerRef.current.getBoundingClientRect();
+      const scrollerWidth = scrollerRef.current.offsetWidth
+      const offsetPixels = scrollerWidth * (centerOffset / 100)
+      const scrollerCenterX = scrollerWidth / 2 + offsetPixels
+      const scrollerRect = scrollerRef.current.getBoundingClientRect()
 
-      const childrenEls = Array.from(scrollerInnerRef.current.children) as HTMLLIElement[];
-      const isNarrow = window.matchMedia('(max-width: 640px)').matches;
-      const minScale = isNarrow ? 0.92 : 0.85;
+      const childrenEls = Array.from(scrollerInnerRef.current.children) as HTMLLIElement[]
+      const isNarrow = window.matchMedia('(max-width: 640px)').matches
+      const minScale = isNarrow ? 0.92 : 0.85
 
       childrenEls.forEach((child) => {
-        const childRect = child.getBoundingClientRect();
-        const childCenterX = childRect.left - scrollerRect.left + childRect.width / 2;
-        const distanceFromCenter = Math.abs(scrollerCenterX - childCenterX);
-        const scale = Math.max(minScale, 1 - distanceFromCenter / scrollerWidth);
-        (child as HTMLElement).style.transformOrigin = transformOrigin;
-        (child as HTMLElement).style.transform = `scale(${scale})`;
-        (child as HTMLElement).style.transition = 'transform 150ms linear';
-      });
-    };
+        const childRect = child.getBoundingClientRect()
+        const childCenterX = childRect.left - scrollerRect.left + childRect.width / 2
+        const distanceFromCenter = Math.abs(scrollerCenterX - childCenterX)
+        const scale = Math.max(minScale, 1 - distanceFromCenter / scrollerWidth)
+        ;(child as HTMLElement).style.transformOrigin = transformOrigin
+        ;(child as HTMLElement).style.transform = `scale(${scale})`
+        ;(child as HTMLElement).style.transition = 'transform 150ms linear'
+      })
+    }
 
     const updateLoop = () => {
-      applyScaling();
-      animationFrameRef.current = requestAnimationFrame(updateLoop);
-    };
+      applyScaling()
+      animationFrameRef.current = requestAnimationFrame(updateLoop)
+    }
 
-    animationFrameRef.current = requestAnimationFrame(updateLoop);
+    animationFrameRef.current = requestAnimationFrame(updateLoop)
 
     return () => {
       if (animationFrameRef.current !== undefined) {
-        cancelAnimationFrame(animationFrameRef.current);
+        cancelAnimationFrame(animationFrameRef.current)
       }
-    };
-  }, [centerOffset, transformOrigin]);
+    }
+  }, [centerOffset, transformOrigin])
 
-  const directionClass = direction === 'left' ? 'scroll-left' : 'scroll-right';
+  const directionClass = direction === 'left' ? 'scroll-left' : 'scroll-right'
 
   return (
     <div ref={scrollerRef} className="scroller overflow-hidden px-3 sm:px-4 md:px-6">
@@ -219,29 +221,29 @@ const InfiniteScroller: React.FC<{
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 
 export const PopularNowClient: React.FC<{
-  heading?: string;
-  subheading?: string;
-  pauseOnHover?: boolean;
-  rows: RowData[];
+  heading?: string
+  subheading?: string
+  pauseOnHover?: boolean
+  rows: RowData[]
 }> = ({
   heading = 'Popular now!',
   subheading = "Today's enemy is tomorrow's friend.",
   pauseOnHover = true,
   rows = [],
 }) => {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const mqMobile = window.matchMedia('(max-width: 640px)');
-    const update = () => setIsMobile(mqMobile.matches);
-    update();
-    mqMobile.addEventListener('change', update);
-    return () => mqMobile.removeEventListener('change', update);
-  }, []);
+    const mqMobile = window.matchMedia('(max-width: 640px)')
+    const update = () => setIsMobile(mqMobile.matches)
+    update()
+    mqMobile.addEventListener('change', update)
+    return () => mqMobile.removeEventListener('change', update)
+  }, [])
 
   return (
     <section
@@ -300,11 +302,11 @@ export const PopularNowClient: React.FC<{
         {Array.isArray(rows) && rows.length > 0 ? (
           rows
             .map((row, idx) => {
-              if (!row?.cards || row.cards.length === 0) return null;
+              if (!row?.cards || row.cards.length === 0) return null
 
-              const centerOffset = isMobile ? 0 : idx === 0 ? -20 : 20;
-              const transformOrigin = isMobile ? 'center' : idx === 0 ? 'bottom' : 'top';
-              const alignItems = isMobile ? 'items-center' : idx === 0 ? 'items-end' : 'items-start';
+              const centerOffset = isMobile ? 0 : idx === 0 ? -20 : 20
+              const transformOrigin = isMobile ? 'center' : idx === 0 ? 'bottom' : 'top'
+              const alignItems = isMobile ? 'items-center' : idx === 0 ? 'items-end' : 'items-start'
 
               return (
                 <InfiniteScroller
@@ -327,7 +329,7 @@ export const PopularNowClient: React.FC<{
                     />
                   ))}
                 </InfiniteScroller>
-              );
+              )
             })
             .filter(Boolean)
         ) : (
@@ -337,7 +339,7 @@ export const PopularNowClient: React.FC<{
         )}
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default PopularNowClient;
+export default PopularNowClient

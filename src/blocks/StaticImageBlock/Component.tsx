@@ -1,51 +1,49 @@
-import React from 'react';
+import React from 'react'
 
 interface Media {
-  url: string;
-  alt?: string;
+  url: string
+  alt?: string
 }
 
 interface Props {
-  image: Media;
-  overlay?: boolean;
-  overlayOpacity?: number;
+  image: Media
+  overlay?: boolean
+  overlayOpacity?: number
 }
 
-const StaticImageBlock: React.FC<Props> = ({
-  image,
-  overlay = true,
-  overlayOpacity = 0.5,
-}) => {
+const StaticImageBlock: React.FC<Props> = ({ image, overlay = true, overlayOpacity = 0.5 }) => {
   if (!image?.url) {
-    return null;
+    return null
   }
 
   return (
-    <section 
-      className="w-screen relative pb-12 sm:pb-16 md:pb-20"
-      style={{ 
-        maxWidth: '100vw',
-        overflow: 'hidden'
-      }}
-    >
-      <div 
-        className="relative w-full overflow-hidden"
-        style={{ height: '750px' }}
+    <section className="relative w-full max-w-full overflow-hidden">
+      <div
+        className="
+          relative w-full 
+          h-[300px] sm:h-[450px] md:h-[600px] lg:h-[750px]
+          overflow-hidden
+        "
       >
+        {/* ✅ Responsive Image */}
         <img
           src={image.url}
           alt={image.alt || ''}
-          className="w-full h-full object-cover"
+          className="
+            absolute top-0 left-0 w-full h-full object-cover
+          "
         />
+
+        {/* ✅ Optional Overlay */}
         {overlay && (
           <div
-            className="absolute inset-0 bg-black pointer-events-none"
+            className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-300"
             style={{ opacity: overlayOpacity }}
           />
         )}
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default StaticImageBlock;
+export default StaticImageBlock

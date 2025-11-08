@@ -67,8 +67,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
     alt = alt || altFromResource || ''
 
     // Normalize cache tag to a string | null | undefined to satisfy the util signature
-    const cacheTag: string | null | undefined =
-      updatedAt == null ? undefined : String(updatedAt) // Avoids passing number to a string parameter. [web:156]
+    const cacheTag: string | null | undefined = updatedAt == null ? undefined : String(updatedAt) // Avoids passing number to a string parameter. [web:156]
 
     const withCache = getMediaUrl(url ?? undefined, cacheTag)
 

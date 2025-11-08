@@ -78,13 +78,33 @@ function resolveMediaAlt(media: Media, fallback: string): string {
 
 // Icons
 const ChevronLeft: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
     <polyline points="15 18 9 12 15 6" />
   </svg>
 )
 
 const ChevronRight: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
     <polyline points="9 18 15 12 9 6" />
   </svg>
 )
@@ -121,7 +141,7 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
   }
 
   return (
-    <Link 
+    <Link
       href={href}
       className="relative w-72 h-96 flex-shrink-0 snap-center rounded-2xl shadow-lg overflow-hidden group bg-black/5 block hover:shadow-2xl transition-shadow duration-300"
     >
@@ -139,7 +159,9 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
 
       {item.tag && (
         <div className="absolute top-4 left-4">
-          <span className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} font-nats text-[18px] leading-[0.88] tracking-[-0.011em]`}>
+          <span
+            className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} font-nats text-[18px] leading-[0.88] tracking-[-0.011em]`}
+          >
             {item.tag}
           </span>
         </div>
@@ -150,18 +172,32 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
         className="absolute top-4 right-4 bg-black/30 p-2 rounded-full cursor-pointer hover:bg-black/50 transition-colors"
         aria-label="Add to favorites"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
         </svg>
       </button>
 
       <div className="absolute bottom-0 left-0 p-5 text-white w-full">
-        <h3 className="font-amiri italic font-normal text-[40px] leading-[0.88] tracking-[-0.011em]">{title}</h3>
+        <h3 className="font-amiri italic font-normal text-[40px] leading-[0.88] tracking-[-0.011em]">
+          {title}
+        </h3>
         <hr className="my-2 border-white/50" />
         <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] mt-1">
           Packages starting at
           <br />
-          <span className="font-nats font-normal text-[32px] leading-[0.88] tracking-[-0.011em]">₹ {price}</span>
+          <span className="font-nats font-normal text-[32px] leading-[0.88] tracking-[-0.011em]">
+            ₹ {price}
+          </span>
           <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]"> /person</span>
         </p>
       </div>
@@ -184,7 +220,7 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
   }
 
   return (
-    <Link 
+    <Link
       href={href}
       className="relative w-72 h-96 flex-shrink-0 snap-center rounded-2xl shadow-lg overflow-hidden group bg-black/5 block hover:shadow-2xl transition-shadow duration-300"
     >
@@ -202,7 +238,9 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
 
       {item.tag && (
         <div className="absolute top-4 left-4">
-          <span className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} font-nats text-[18px] leading-[0.88] tracking-[-0.011em]`}>
+          <span
+            className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} font-nats text-[18px] leading-[0.88] tracking-[-0.011em]`}
+          >
             {item.tag}
           </span>
         </div>
@@ -213,18 +251,32 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
         className="absolute top-4 right-4 bg-black/30 p-2 rounded-full cursor-pointer hover:bg-black/50 transition-colors"
         aria-label="Add to favorites"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
         </svg>
       </button>
 
       <div className="absolute bottom-0 left-0 p-5 text-white w-full">
-        <h3 className="font-amiri italic font-normal text-[40px] leading-[0.88] tracking-[-0.011em]">{title}</h3>
+        <h3 className="font-amiri italic font-normal text-[40px] leading-[0.88] tracking-[-0.011em]">
+          {title}
+        </h3>
         <hr className="my-2 border-white/50" />
         <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] mt-1">
           Packages starting at
           <br />
-          <span className="font-nats font-normal text-[32px] leading-[0.88] tracking-[-0.011em]">₹ {price}</span>
+          <span className="font-nats font-normal text-[32px] leading-[0.88] tracking-[-0.011em]">
+            ₹ {price}
+          </span>
           <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]"> /person</span>
         </p>
       </div>
@@ -238,20 +290,34 @@ const ItineraryCard: React.FC<{ item: any }> = ({ item }) => {
   return (
     <div className="w-96 flex-shrink-0 snap-start bg-white rounded-2xl p-6 shadow-md">
       <h3 className="text-3xl font-bold mb-6 font-amiri">{item.day || 'Day'}</h3>
+      <div>{item.Title}</div>
       <div className="space-y-4">
         {activities.map((activity: any, idx: number) => {
           const iconSrc = activity.icon ? resolveMediaUrl(activity.icon) : undefined
-          const detailsSrc = activity.detailsImage ? resolveMediaUrl(activity.detailsImage) : undefined
+          const detailsSrc = activity.detailsImage
+            ? resolveMediaUrl(activity.detailsImage)
+            : undefined
           return (
-            <div key={idx} className="flex items-start space-x-4 pb-4 border-b border-gray-200 last:border-b-0">
+            <div
+              key={idx}
+              className="flex items-start space-x-4 pb-4 border-b border-gray-200 last:border-b-0"
+            >
               <div className="flex-shrink-0 bg-gray-100 p-2 rounded-full">
-                {iconSrc ? <img src={iconSrc} alt="" className="w-6 h-6" /> : <div className="w-6 h-6" />}
+                {iconSrc ? (
+                  <img src={iconSrc} alt="" className="w-6 h-6" />
+                ) : (
+                  <div className="w-6 h-6" />
+                )}
               </div>
               <div className="flex-grow">
                 <p className="text-gray-700">{activity.description}</p>
                 {detailsSrc && (
                   <div className="mt-2 flex items-center">
-                    <img src={detailsSrc} alt="Details" className="w-24 h-14 object-cover rounded-lg mr-4" />
+                    <img
+                      src={detailsSrc}
+                      alt="Details"
+                      className="w-24 h-14 object-cover rounded-lg mr-4"
+                    />
                   </div>
                 )}
               </div>
@@ -278,14 +344,14 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   }
 
   return (
-    <section className={`relative overflow-hidden ${section?.theme?.background || 'bg-[#FFD89B]'} py-12`}>
+    <section className={`relative overflow-hidden  py-5`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="mb-10 text-center">
-          <h1 className="font-amiri italic font-bold text-[64px] leading-[0.88] tracking-[-0.011em] text-black">
+        <header className="mb-5 text-center">
+          <h1 className="font-amiri italic font-bold text-[36px]  sm:text-[48px] md:text-[56px]  mb-4 leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 text-left pl-[5%] ">
             {section.title || 'Vibe Match'}
           </h1>
           {section.subtitle && (
-            <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-black">
+            <p className="font-nats text-[14px]  sm:text-[48px] md:text-[56px] leading-[0.88] tracking-[-0.011em] text-black">
               {section.subtitle}
             </p>
           )}
@@ -349,7 +415,10 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   const formattedSlug = useMemo(() => {
     const segments = pathname.split('/').filter(Boolean)
     const rawSlug = segments[segments.length - 1] || ''
-    return rawSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    return rawSlug
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ')
   }, [pathname])
 
   const displayTitle = section.title?.replace(/{slug}/gi, formattedSlug) || ''
@@ -367,9 +436,9 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   const items = (section.items || []) as Item[]
   const isPackage = section.type === 'package'
   const isDestination = section.type === 'destination'
-  const packageItems = items.filter(item => item.blockType === 'packageItem')
-  const destinationItems = items.filter(item => item.blockType === 'destinationItem')
-  const itineraryItems = items.filter(item => item.blockType === 'itineraryDay')
+  const packageItems = items.filter((item) => item.blockType === 'packageItem')
+  const destinationItems = items.filter((item) => item.blockType === 'destinationItem')
+  const itineraryItems = items.filter((item) => item.blockType === 'itineraryDay')
   const packagesCount = packageItems.length
   const destinationsCount = destinationItems.length
   const itineraryCount = itineraryItems.length
@@ -403,7 +472,9 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
 
   if (!section.type || items.length === 0) {
     return (
-      <section className={`relative overflow-hidden ${section?.theme?.background || 'bg-white'} py-12`}>
+      <section
+        className={`relative overflow-hidden ${section?.theme?.background || 'bg-white'} py-12`}
+      >
         <div className="container mx-auto px-4 text-center text-gray-500">
           {!section.type ? 'Section type not configured' : 'No items available'}
         </div>
@@ -412,13 +483,23 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   }
 
   return (
-    <section className={`relative overflow-hidden ${section?.theme?.background || 'bg-white'} py-12`}>
-      <div className="px-4 absolute top-36 left-0 h-[46vh] w-2/3 bg-[rgba(251,174,61,0.9)]" aria-hidden="true" />
-      
+    <section className={`relative overflow-hidden py-12`}>
+      <div
+        className="
+    absolute left-0 top-[6rem] 
+    h-[40vh] xs:h-[42vh] sm:h-[44vh] md:h-[46vh] lg:h-[48vh]
+    w-[80%] xs:w-[70%] sm:w-[65%] md:w-[60%] lg:w-[55%]
+    bg-[rgba(251,174,61,0.9)]
+    px-3 sm:px-4 md:px-6
+    transition-all duration-300 ease-in-out
+  "
+        aria-hidden="true"
+      ></div>
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <header className="mb-10">
           <div className="flex items-center gap-6">
-            <h1 className="font-amiri italic font-bold text-[64px] leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 pl-[5%]">
+            <h1 className="font-amiri italic font-bold text-[36px]  sm:text-[48px] md:text-[56px]  mb-4 leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 text-left pl-[5%] ">
               {displayTitle}
             </h1>
             <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
@@ -435,23 +516,40 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
           className="flex gap-6 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory"
           style={{ scrollbarWidth: 'none' } as any}
         >
-          {isPackage && packageItems.map((item, idx) => <PackageCard key={item.id || idx} item={item} />)}
-          {isDestination && destinationItems.map((item, idx) => <DestinationCard key={item.id || idx} item={item} />)}
-          {section.type === 'itinerary' && itineraryItems.map((item, idx) => <ItineraryCard key={item.id || idx} item={item} />)}
+          {isPackage &&
+            packageItems.map((item, idx) => <PackageCard key={item.id || idx} item={item} />)}
+          {isDestination &&
+            destinationItems.map((item, idx) => (
+              <DestinationCard key={item.id || idx} item={item} />
+            ))}
+          {section.type === 'itinerary' &&
+            itineraryItems.map((item, idx) => <ItineraryCard key={item.id || idx} item={item} />)}
         </div>
 
         {isPackage && navEnabled && packagesCount > 0 && (
           <div className="mt-4">
             <div className="flex items-center">
               <div className="flex items-center gap-2">
-                <button onClick={() => scroll('left')} className={buttonClass} aria-label="Previous" type="button">
+                <button
+                  onClick={() => scroll('left')}
+                  className={buttonClass}
+                  aria-label="Previous"
+                  type="button"
+                >
                   <ChevronLeft />
                 </button>
-                <button onClick={() => scroll('right')} className={buttonClass} aria-label="Next" type="button">
+                <button
+                  onClick={() => scroll('right')}
+                  className={buttonClass}
+                  aria-label="Next"
+                  type="button"
+                >
                   <ChevronRight />
                 </button>
               </div>
-              <div className="mx-3 flex-1"><DashedRule /></div>
+              <div className="mx-3 flex-1">
+                <DashedRule />
+              </div>
               <div className="pr-2">
                 <span className="font-nats text-[56px] leading-[0.88] tracking-[-0.011em] text-black">
                   {currentIndex}/{packagesCount}
@@ -465,14 +563,26 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
           <div className="mt-4">
             <div className="flex items-center">
               <div className="flex items-center gap-2">
-                <button onClick={() => scroll('left')} className={buttonClass} aria-label="Previous" type="button">
+                <button
+                  onClick={() => scroll('left')}
+                  className={buttonClass}
+                  aria-label="Previous"
+                  type="button"
+                >
                   <ChevronLeft />
                 </button>
-                <button onClick={() => scroll('right')} className={buttonClass} aria-label="Next" type="button">
+                <button
+                  onClick={() => scroll('right')}
+                  className={buttonClass}
+                  aria-label="Next"
+                  type="button"
+                >
                   <ChevronRight />
                 </button>
               </div>
-              <div className="mx-3 flex-1"><DashedRule /></div>
+              <div className="mx-3 flex-1">
+                <DashedRule />
+              </div>
               <div className="pr-2">
                 <span className="font-nats text-[56px] leading-[0.88] tracking-[-0.011em] text-black">
                   {currentIndex}/{destinationsCount}
@@ -485,12 +595,24 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
         {section.type === 'itinerary' && navEnabled && itineraryCount > 0 && (
           <div className="mt-4">
             <div className="flex items-center">
-              <div className="flex-1 mr-3"><DashedRule /></div>
+              <div className="flex-1 mr-3">
+                <DashedRule />
+              </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => scroll('left')} className={buttonClass} aria-label="Previous" type="button">
+                <button
+                  onClick={() => scroll('left')}
+                  className={buttonClass}
+                  aria-label="Previous"
+                  type="button"
+                >
                   <ChevronLeft />
                 </button>
-                <button onClick={() => scroll('right')} className={buttonClass} aria-label="Next" type="button">
+                <button
+                  onClick={() => scroll('right')}
+                  className={buttonClass}
+                  aria-label="Next"
+                  type="button"
+                >
                   <ChevronRight />
                 </button>
               </div>
@@ -503,15 +625,17 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
 }
 
 // ✅ Main Client Component with auto-fetch itinerary
-export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ sections: initialSections = [] }) => {
+export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({
+  sections: initialSections = [],
+}) => {
   const pathname = usePathname()
   const [sections, setSections] = useState(initialSections)
 
   // ✅ Auto-fetch itinerary when in package auto mode (same pattern as DestinationHeroCarousel)
   useEffect(() => {
     const fetchPackageItinerary = async () => {
-      const itinerarySection = sections.find(s => s.type === 'itinerary')
-      
+      const itinerarySection = sections.find((s) => s.type === 'itinerary')
+
       if (!itinerarySection) return
       if (itinerarySection.itinerarySource !== 'package') return
       if (itinerarySection.items && itinerarySection.items.length > 0) return
@@ -519,17 +643,19 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ secti
 
       const segments = pathname.split('/').filter(Boolean)
       if (segments[0] !== 'packages') return
-      
+
       const packageSlug = segments[1]
       if (!packageSlug) return
 
       try {
-        const response = await fetch(`/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`)
+        const response = await fetch(
+          `/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`,
+        )
         const data = await response.json()
-        
+
         if (data.docs[0]?.itinerary) {
           const itinerary = data.docs[0].itinerary
-          
+
           const itineraryItems = (itinerary || []).map((day: any, idx: number) => ({
             blockType: 'itineraryDay' as const,
             id: day.id || `day-${idx}`,
@@ -541,12 +667,10 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ secti
             })),
           }))
 
-          setSections(prevSections => 
-            prevSections.map(section => 
-              section.type === 'itinerary' 
-                ? { ...section, items: itineraryItems }
-                : section
-            )
+          setSections((prevSections) =>
+            prevSections.map((section) =>
+              section.type === 'itinerary' ? { ...section, items: itineraryItems } : section,
+            ),
           )
         }
       } catch (error) {
@@ -565,16 +689,16 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({ secti
         /* NATS fallbacks if the font is not loaded globally */
         .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
       `}</style>
-      <div className="min-h-screen font-sans">
+      <div className="min-h-[70vh] font-sans">
         {sections.map((section, idx) => {
           if (section.type === 'vibe') {
             return <VibeSection key={section?.id || `vibe-${idx}`} section={section} />
           }
-          
+
           return (
-            <DynamicSection 
-              key={typeof section?.id === 'string' ? section.id : `section-${idx}`} 
-              section={section} 
+            <DynamicSection
+              key={typeof section?.id === 'string' ? section.id : `section-${idx}`}
+              section={section}
             />
           )
         })}

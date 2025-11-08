@@ -1,13 +1,14 @@
 'use client'
-import type { FormFieldBlock, Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
-import { useRouter } from 'next/navigation'
 import React, { useCallback, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm, FormProvider } from 'react-hook-form'
-import RichText from '@/components/RichText'
-import { Button } from '@/components/ui/button'
+
+import type { FormFieldBlock, Form as FormType } from '@payloadcms/plugin-form-builder/types'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
+import RichText from '@/components/RichText'
+import { Button } from '@/components/ui/button'
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
 
@@ -34,6 +35,7 @@ export const FormBlock: React.FC<
   const formMethods = useForm({
     defaultValues: formFromProps.fields,
   })
+
   const {
     control,
     formState: { errors },
@@ -49,18 +51,16 @@ export const FormBlock: React.FC<
   const onSubmit = useCallback(
     (data: FormFieldBlock[]) => {
       let loadingTimerID: ReturnType<typeof setTimeout>
+
       const submitForm = async () => {
         setError(undefined)
-
         const dataToSend = Object.entries(data).map(([name, value]) => ({
           field: name,
           value,
         }))
 
-        // delay loading indicator by 1s
-        loadingTimerID = setTimeout(() => {
-          setIsLoading(true)
-        }, 1000)
+        // Show loader after 1 second delay
+        loadingTimerID = setTimeout(() => setIsLoading(true), 1000)
 
         try {
           const req = await fetch(`${getClientSideURL()}/api/form-submissions`, {
@@ -68,43 +68,32 @@ export const FormBlock: React.FC<
               form: formID,
               submissionData: dataToSend,
             }),
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             method: 'POST',
           })
 
           const res = await req.json()
-
           clearTimeout(loadingTimerID)
 
           if (req.status >= 400) {
             setIsLoading(false)
-
             setError({
               message: res.errors?.[0]?.message || 'Internal Server Error',
               status: res.status,
             })
-
             return
           }
 
           setIsLoading(false)
           setHasSubmitted(true)
 
-          if (confirmationType === 'redirect' && redirect) {
-            const { url } = redirect
-
-            const redirectUrl = url
-
-            if (redirectUrl) router.push(redirectUrl)
+          if (confirmationType === 'redirect' && redirect?.url) {
+            router.push(redirect.url)
           }
         } catch (err) {
           console.warn(err)
           setIsLoading(false)
-          setError({
-            message: 'Something went wrong.',
-          })
+          setError({ message: 'Something went wrong.' })
         }
       }
 
@@ -114,46 +103,98 @@ export const FormBlock: React.FC<
   )
 
   return (
-    <div className="container lg:max-w-[48rem]">
+    <div
+      className="
+        container 
+        mx-auto 
+        px-4 sm:px-6 
+        lg:max-w-[48rem]
+        py-6 sm:py-10
+      "
+    >
+      {/* Intro Section */}
       {enableIntro && introContent && !hasSubmitted && (
-        <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
+        <RichText
+          className="mb-6 sm:mb-10 text-center text-gray-700"
+          data={introContent}
+          enableGutter={false}
+        />
       )}
-      <div className="p-4 lg:p-6 border border-border rounded-[0.8rem]">
+
+      {/* Form Container */}
+      <div
+        className="
+          p-4 sm:p-6 
+          border border-border 
+          rounded-xl 
+          shadow-sm 
+          bg-white
+        "
+      >
         <FormProvider {...formMethods}>
+          {/* Confirmation Message */}
           {!isLoading && hasSubmitted && confirmationType === 'message' && (
-            <RichText data={confirmationMessage} />
+            <RichText data={confirmationMessage} className="text-center text-green-600" />
           )}
-          {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
-          {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
+
+          {/* Loading State */}
+          {isLoading && !hasSubmitted && (
+            <p className="text-center text-gray-600 animate-pulse">Submitting, please wait...</p>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="text-center text-red-500 font-medium my-3">
+              {`${error.status || '500'}: ${error.message || ''}`}
+            </div>
+          )}
+
+          {/* Actual Form */}
           {!hasSubmitted && (
-            <form id={formID} onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-4 last:mb-0">
-                {formFromProps &&
-                  formFromProps.fields &&
-                  formFromProps.fields?.map((field, index) => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
-                    if (Field) {
-                      return (
-                        <div className="mb-6 last:mb-0" key={index}>
-                          <Field
-                            form={formFromProps}
-                            {...field}
-                            {...formMethods}
-                            control={control}
-                            errors={errors}
-                            register={register}
-                          />
-                        </div>
-                      )
-                    }
-                    return null
-                  })}
+            <form id={formID} onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
+              <div className="space-y-5 sm:space-y-6">
+                {formFromProps?.fields?.map((field, index) => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
+                  if (Field) {
+                    return (
+                      <div key={index}>
+                        <Field
+                          form={formFromProps}
+                          {...field}
+                          {...formMethods}
+                          control={control}
+                          errors={errors}
+                          register={register}
+                        />
+                      </div>
+                    )
+                  }
+                  return null
+                })}
               </div>
 
-              <Button form={formID} type="submit" variant="default">
-                {submitButtonLabel}
-              </Button>
+              {/* Submit Button */}
+              <div className="pt-4 flex justify-center">
+                <Button
+                  form={formID}
+                  type="submit"
+                  variant="default"
+                  className="
+                    w-full sm:w-auto 
+                    px-6 py-3 
+                    text-base sm:text-lg 
+                    font-medium
+                    bg-yellow-500 hover:bg-yellow-600
+                    text-white
+                    rounded-lg 
+                    transition-all
+                    duration-200
+                  "
+                >
+                  {isLoading ? 'Submitting...' : submitButtonLabel}
+                </Button>
+              </div>
             </form>
           )}
         </FormProvider>
