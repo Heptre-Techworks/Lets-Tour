@@ -196,7 +196,7 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
           Packages starting at
           <br />
           <span className="font-nats font-normal text-[32px] leading-[0.88] tracking-[-0.011em]">
-            ₹ {price}
+          {price}
           </span>
           <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]"> /person</span>
         </p>
