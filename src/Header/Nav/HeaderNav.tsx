@@ -9,7 +9,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
       className="
         w-full 
         flex items-center justify-between 
-        px-3 sm:px-4 md:px-6 lg:px-8 
+        px-3 sm:px-2 md:px-3 lg:px-6 
         py-2 sm:py-3 md:py-4 
         bg-transparent 
         backdrop-blur-md 

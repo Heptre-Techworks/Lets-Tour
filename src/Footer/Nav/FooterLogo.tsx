@@ -9,18 +9,13 @@ interface FooterLogoProps {
   className?: string
 }
 
-export const FooterLogo: React.FC<FooterLogoProps> = ({
-  data,
-  className = '',
-}) => {
+export const FooterLogo: React.FC<FooterLogoProps> = ({ data, className = '' }) => {
   const logo = data?.logo as Media
 
   if (!logo?.url) {
     return (
       <Link href="/" className={`flex items-center ${className}`}>
-        <div className="text-3xl font-bold text-white tracking-wide">
-          TOUR
-        </div>
+        <div className="text-3xl font-bold text-white tracking-wide">TOUR</div>
       </Link>
     )
   }
@@ -32,7 +27,8 @@ export const FooterLogo: React.FC<FooterLogoProps> = ({
         alt={logo.alt || 'Logo'}
         width={logo.width || 180}
         height={logo.height || 45}
-        className="object-contain"
+        className="object-contain h-auto w-[120px] sm:w-[150px] md:w-[180px] lg:w-[200px]"
+        priority
       />
     </Link>
   )

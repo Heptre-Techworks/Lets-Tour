@@ -143,20 +143,21 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
   }
 
   return (
-    <div className="w-full min-h-screen flex flex-col justify-center font-sans py-12">
-      <div className="w-full px-8 md:px-16">
+    <div className="w-full min-h-screen flex flex-col justify-center font-sans py-8 md:py-12">
+      <div className="w-full px-4 sm:px-6 md:px-12 lg:px-16">
         {/* Header section */}
-        <div className="text-left mb-8">
-          <div className="flex items-center">
-            {/* Heading: Amiri italic 64px, 88%, -0.011em */}
-            <h1 className="font-amiri italic font-bold text-[64px] leading-[0.88] tracking-[-0.011em] text-gray-900 whitespace-nowrap pr-6">
+        <div className="text-left mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+            {/* Heading */}
+            <h1 className="font-amiri italic font-bold text-[36px] sm:text-[48px] md:text-[64px] leading-[1.1] tracking-[-0.011em] text-gray-900 whitespace-nowrap mb-2 sm:mb-0">
               {heading}
             </h1>
             <div className="w-full border-t border-dashed border-gray-400"></div>
           </div>
-          {/* Subheading: NATS 26px, 88%, -0.011em */}
+
+          {/* Subheading */}
           {subheading && (
-            <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-gray-900 mt-2">
+            <p className="font-nats text-[18px] sm:text-[22px] md:text-[26px] leading-[1.1] tracking-[-0.011em] text-gray-900 mt-2">
               {subheading}
             </p>
           )}
@@ -164,38 +165,39 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
 
         {/* Carousel section */}
         <div className="relative">
-          <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-[#08121E] -z-10"></div>
+          <div className="absolute top-0 right-0 w-2/3 sm:w-1/2 h-1/2 bg-[#08121E] -z-10"></div>
 
           <div className="overflow-hidden py-4">
             <div
               ref={containerRef}
-              className="flex transition-transform duration-500 ease-in-out"
+              className="flex transition-transform duration-500 ease-in-out space-x-4 sm:space-x-6"
               style={{ transform: `translateX(-${scrollPosition}px)` }}
             >
               {cards.map((item: any, index: number) => (
-                <Card
+                <div
                   key={item?.id || index}
-                  title={item?.title || ''}
-                  description={item?.description || ''}
-                />
+                  className="min-w-[250px] sm:min-w-[300px] md:min-w-[350px] lg:min-w-[400px] flex-shrink-0"
+                >
+                  <Card title={item?.title || ''} description={item?.description || ''} />
+                </div>
               ))}
             </div>
           </div>
 
           {/* Navigation buttons */}
           {showNavigationButtons && (
-            <div className="flex items-center mt-8">
-              <div className="flex-grow border-t border-dashed border-gray-400 mr-6"></div>
-              <div className="flex space-x-3">
+            <div className="flex items-center mt-6 sm:mt-8">
+              <div className="flex-grow border-t border-dashed border-gray-400 mr-4 sm:mr-6"></div>
+              <div className="flex space-x-2 sm:space-x-3">
                 <button
                   onClick={() => handleScroll('left')}
                   disabled={scrollPosition === 0}
-                  className="w-12 h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
                   aria-label="Scroll left"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
+                    className="h-5 w-5 sm:h-6 sm:w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -211,12 +213,12 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
                 <button
                   onClick={() => handleScroll('right')}
                   disabled={scrollPosition >= maxScroll - 1}
-                  className="w-12 h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
                   aria-label="Scroll right"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
+                    className="h-5 w-5 sm:h-6 sm:w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

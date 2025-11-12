@@ -45,7 +45,8 @@ export const HoverMenu: React.FC<HoverMenuProps> = ({ label, endpoint, hrefBase 
       <button
         type="button"
         className="
-          cursor-pointer font-sans leading-[0.88] text-[24px]
+          cursor-pointer font-sans leading-[0.88] text-[14px] sm:text-[20px] md:text-[20px] lg:text-[24px]
+          font-medium
           text-black md:text-white
           tracking-[-0.011em] 
           hover:text-gray-700 md:hover:text-gray-200 

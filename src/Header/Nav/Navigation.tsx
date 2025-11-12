@@ -27,13 +27,17 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
 
   const stripLinks = useMemo(() => navItems.filter((i) => !isCenterLabel(i.label)), [navItems])
 
+  if (!data) {
+    return null
+  }
+
   return (
     <div className={`relative w-full bg-transparent transition-all ${poppins.className}`}>
       {/* 🔹 Top Strip - scrollable on mobile */}
-      <div className="flex items-center justify-start w-full px-3 sm:px-5 py-2 sm:py-3 md:py-4 overflow-hidden">
+      <div className="flex items-center justify-start w-full overflow-hidden">
         <nav
           className="
-            flex items-center gap-3 sm:gap-5 md:gap-8
+            flex items-center 
             overflow-x-auto md:overflow-visible whitespace-nowrap flex-1
             scrollbar-hidden scroll-smooth
           "
@@ -55,7 +59,7 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
         </nav>
 
         {/* 🔹 Mobile Menu Toggle */}
-        <div className="md:hidden ml-3 flex-shrink-0">
+        <div className="lg:hidden md:hidden ml-3 flex-shrink-0">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle Menu"
@@ -70,16 +74,19 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
       <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
         <div className="pointer-events-auto flex items-center justify-center gap-6 lg:gap-8 xl:gap-10 whitespace-nowrap">
           <HoverMenu
+            key="destinations-desktop"
             label="Destinations"
             hrefBase="/destinations"
             endpoint="/api/destinations?where[isPublished][equals]=true&limit=50&sort=name&depth=0"
           />
           <HoverMenu
+            key="packages-desktop"
             label="Packages"
             hrefBase="/packages"
             endpoint="/api/packages?where[isPublished][equals]=true&limit=50&sort=name&depth=0"
           />
           <HoverMenu
+            key="bulk-bookings-desktop"
             label="Bulk Bookings"
             hrefBase="/bulk-bookings"
             endpoint="/api/bulk-bookings?where[isPublished][equals]=true&limit=50&sort=name&depth=0"
@@ -89,32 +96,61 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
       </div>
 
       {/* 🔹 Mobile Dropdown Menu */}
+      {/* Popup Overlay */}
       <div
-        className={`
-          md:hidden absolute left-1/2 top-full -translate-x-1/2 mt-2
-          w-[95%] sm:w-[80%] bg-white border border-black/10 rounded-2xl shadow-xl
-          flex flex-col items-center justify-center gap-4 sm:gap-5 py-6 px-4
-          text-xs sm:text-sm text-black
-          transition-all duration-500 ease-in-out z-40 font-medium
-          ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-5 pointer-events-none'}
-        `}
+        className={`fixed inset-0 z-40 flex items-center justify-center 
+              bg-black/50 backdrop-blur-sm transition-opacity duration-500 ease-in-out
+              ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}
+        onClick={() => setIsMenuOpen(false)} // close when clicking outside
       >
-        <HoverMenu
-          label="Destinations"
-          hrefBase="/destinations"
-          endpoint="/api/destinations?where[isPublished][equals]=true&limit=50&sort=name&depth=0"
-        />
-        <HoverMenu
-          label="Packages"
-          hrefBase="/packages"
-          endpoint="/api/packages?where[isPublished][equals]=true&limit=50&sort=name&depth=0"
-        />
-        <HoverMenu
-          label="Bulk Bookings"
-          hrefBase="/bulk-bookings"
-          endpoint="/api/bulk-bookings?where[isPublished][equals]=true&limit=50&sort=name&depth=0"
-        />
-        <CurateButton data={data} />
+        {/* Popup Card */}
+        <div
+          onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+          className={`w-[90%] sm:w-[80%] md:w-[60%] max-w-md 
+                bg-white border border-black/10 rounded-2xl shadow-2xl
+                flex flex-col items-center justify-center gap-4 sm:gap-6 
+                py-8 px-6
+                text-sm sm:text-base text-black font-medium
+                transform transition-all duration-500 ease-in-out
+                ${isMenuOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}
+                animate-fadeInUp relative`}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setIsMenuOpen(false)}
+            className="absolute top-4 right-4 text-gray-500 hover:text-black transition"
+            aria-label="Close Menu"
+          >
+            ✕
+          </button>
+
+          {/* Menu Items */}
+          <div className="w-full flex flex-col items-center justify-center gap-4 sm:gap-5 mt-2">
+            <HoverMenu
+              key="destinations-mobile"
+              label="Destinations"
+              hrefBase="/destinations"
+              endpoint="/api/destinations?where[isPublished][equals]=true&limit=50&sort=name&depth=0"
+            />
+            <HoverMenu
+              key="packages-mobile"
+              label="Packages"
+              hrefBase="/packages"
+              endpoint="/api/packages?where[isPublished][equals]=true&limit=50&sort=name&depth=0"
+            />
+            <HoverMenu
+              key="bulk-bookings-mobile"
+              label="Bulk Bookings"
+              hrefBase="/bulk-bookings"
+              endpoint="/api/bulk-bookings?where[isPublished][equals]=true&limit=50&sort=name&depth=0"
+            />
+          </div>
+
+          {/* Curate Button */}
+          <div className="mt-6">
+            <CurateButton data={data} />
+          </div>
+        </div>
       </div>
     </div>
   )
