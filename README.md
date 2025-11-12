@@ -13,7 +13,7 @@ Core features:
 - [Jobs and Scheduled Publishing](#jobs-and-scheduled-publish)
 - [Website](#website)
 
-## Quick Start
+## Start
 
 To spin up this example locally, follow these steps:
 
