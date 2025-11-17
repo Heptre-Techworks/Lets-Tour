@@ -28,6 +28,33 @@ const useSlugReplacement = () => {
   return { slug: slugInfo.formatted, rawSlug: slugInfo.raw, replaceSlug }
 }
 
+// ✅ useWindowSize hook
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState<{
+    width: number | undefined
+    height: number | undefined
+  }>({
+    width: undefined,
+    height: undefined,
+  })
+
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+
+    window.addEventListener('resize', handleResize)
+    handleResize()
+
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  return windowSize
+}
+
 type MediaLike = { url?: string | null; alt?: string | null }
 
 type ClientStoriesBlockProps = {
@@ -95,7 +122,15 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
   const displayHeading = replaceSlug(heading)
   const displaySubheading = replaceSlug(subheading)
 
-  const cardsPerView = Math.max(1, Number(cardsPerViewRaw) || 2)
+  const { width: windowWidth } = useWindowSize()
+
+  const cardsPerView = useMemo(() => {
+    if (windowWidth === undefined) return Math.max(1, Number(cardsPerViewRaw) || 2)
+    if (windowWidth < 768) return 1.2 // Mobile
+    if (windowWidth < 1024) return 2 // Tablet
+    return Math.max(1, Number(cardsPerViewRaw) || 3) // Desktop
+  }, [windowWidth, cardsPerViewRaw])
+
   const gapPx = Math.max(0, Number(gapPxRaw) || 24)
 
   // ✅ Fetch reviews from collection if needed
@@ -245,7 +280,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
         )}
 
         {/* Main content */}
-        <div className="relative z-10 flex flex-col justify-between min-h-[65vh] p-4 md:p-15">
+        <div className="relative z-10 flex flex-col justify-between min-h-[65vh] p-4 md:p-8 lg:p-16">
           <div className="flex flex-col lg:flex-row lg:items-start w-full flex-grow relative">
             {/* Left column */}
             <div className="w-full lg:w-1/3 lg:pr-12 space-y-4 text-left mb-12 lg:mb-0">
@@ -264,12 +299,11 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
 
               {displaySubheading ? (
                 <p
-                  className="text-white flex items-center"
+                  className="text-white flex items-center text-lg sm:text-xl md:text-2xl"
                   style={{
                     fontFamily: "'NATS', sans-serif",
                     fontWeight: 400,
-                    fontSize: '26px',
-                    lineHeight: '88%',
+                    lineHeight: '1.2',
                     letterSpacing: '-0.011em',
                   }}
                 >
@@ -283,12 +317,11 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
     flex items-center justify-center text-center text-white
     rounded-2xl shadow-md hover:opacity-90 transition-opacity duration-300
     w-[140px] h-[40px] text-base
-    sm:w-[180px] sm:h-[45px] sm:text-2xl
-    md:w-[200px] md:h-[50px] md:text-2xl
+    sm:w-[180px] sm:h-[45px] sm:text-lg
+    md:w-[200px] md:h-[50px] md:text-xl
   `}
                   style={{
                     background: '#FBAE3D',
-                    fontSize: '18px',
                     fontFamily: "'NATS', sans-serif",
                     fontWeight: 400,
                     letterSpacing: '-0.011em',
@@ -331,20 +364,16 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                     >
                       <div
                         className={`
-                          w-[110px] sm:w-[150px] md:w-[220px]
-      h-[200px] sm:h-[280px] md:h-[320px] 
-      p-2 sm:p-4 md:p-5 
-      backdrop-blur-md text-left transition-all duration-500
+                          w-full h-[200px] sm:h-[280px] md:h-[320px] p-4 sm:p-5 backdrop-blur-md text-left transition-all duration-500
       ${isLeftmost ? 'bg-white/20 shadow-xl sm:shadow-2xl' : 'bg-white/10 shadow-md sm:shadow-lg'}
       rounded-2xl
     `}
                       >
-                        <div className="flex flex-col  h-full">
+                        <div className="flex flex-col h-full">
                           {/* Header Section */}
-                          <div className="mb-4  md:mb-4 shrink-0">
+                          <div className="mb-2 md:mb-4 shrink-0">
                             <h3
-                              className="
-    font-bold "
+                              className="font-bold text-base sm:text-lg"
                               style={{
                                 fontFamily: "'NATS', sans-serif",
                               }}
@@ -395,7 +424,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 <button
                   onClick={handlePrev}
                   aria-label="Previous"
-                  className="w-12 h-12 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+                  className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
                   type="button"
                   style={{
                     background: 'rgba(237, 237, 237, 0.75)',
@@ -405,7 +434,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
+                    className="h-5 w-5 sm:h-6 sm:w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -421,7 +450,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 <button
                   onClick={handleNext}
                   aria-label="Next"
-                  className="w-12 h-12 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+                  className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
                   type="button"
                   style={{
                     background: 'rgba(237, 237, 237, 0.75)',
@@ -431,7 +460,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
+                    className="h-5 w-5 sm:h-6 sm:w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -447,17 +476,16 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
               </div>
               <div className="flex-1 flex justify-end items-center">
                 <div
-                  className="text-white flex items-center tracking-wider"
+                  className="text-white flex items-center tracking-wider text-4xl sm:text-5xl"
                   style={{
                     fontFamily: "'NATS', sans-serif",
                     fontWeight: 400,
-                    fontSize: '56px',
-                    lineHeight: '88%',
+                    lineHeight: '1',
                     letterSpacing: '-0.011em',
                   }}
                 >
                   {currentSlide}
-                  <span className="text-gray-400 mx-3">/</span>
+                  <span className="text-gray-400 mx-2 sm:mx-3">/</span>
                   {totalSlides}
                 </div>
               </div>

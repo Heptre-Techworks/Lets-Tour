@@ -65,12 +65,10 @@ export const FooterClient: React.FC<FooterClientProps> = ({ data }) => {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-6 text-center sm:text-left">
-                <div>
-                  <h3 className="text-white font-semibold text-sm uppercase mb-3 tracking-wider">
-                    Quick Links
-                  </h3>
-                  <FooterNav data={data} />
-                </div>
+                <h3 className="text-white font-semibold text-sm uppercase mb-3 tracking-wider">
+                  Quick Links
+                </h3>
+                <FooterNav data={data} />
               </div>
             )}
           </div>

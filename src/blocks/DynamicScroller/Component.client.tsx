@@ -275,7 +275,7 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
           Packages starting at
           <br />
           <span className="font-nats font-normal text-[32px] leading-[0.88] tracking-[-0.011em]">
-            ₹ {price}
+            {price}
           </span>
           <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]"> /person</span>
         </p>
@@ -344,10 +344,10 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   }
 
   return (
-    <section className={`relative overflow-hidden  py-5`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="mb-5 text-center">
-          <h1 className="font-amiri italic font-bold text-[36px]  sm:text-[48px] md:text-[56px]  mb-4 leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 text-left pl-[5%] ">
+    <section className={`relative overflow-hidden  `}>
+      <div className="flex items-center gap-6">
+        <header className=" mb-10">
+          <h1 className="font-amiri italic font-bold text-[36px]  sm:text-[48px] md:text-[56px]  leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 text-left  ">
             {section.title || 'Vibe Match'}
           </h1>
           {section.subtitle && (
@@ -483,7 +483,7 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   }
 
   return (
-    <section className={`relative overflow-hidden py-12`}>
+    <section className={`relative overflow-hidden `}>
       <div
         className="
     absolute left-0 top-[6rem] 
@@ -499,7 +499,7 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <header className="mb-10">
           <div className="flex items-center gap-6">
-            <h1 className="font-amiri italic font-bold text-[36px]  sm:text-[48px] md:text-[56px]  mb-4 leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 text-left pl-[5%] ">
+            <h1 className="font-amiri italic font-bold text-[36px]  sm:text-[48px] md:text-[56px]   leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 text-left  ">
               {displayTitle}
             </h1>
             <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />

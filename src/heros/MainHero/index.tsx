@@ -262,9 +262,9 @@ export const MainHero: React.FC<MainHeroProps> = ({
           </div>
 
           {/* Middle Content */}
-          <div className="relative z-10 flex-grow flex flex-col justify-center items-center space-y-10 sm:space-y-16 md:space-y-20">
+          <div className="relative z-10 flex-grow flex flex-col justify-center items-center space-y-5  ">
             {/* Main Title (Kaushan Script 96px, 88% line-height, -0.011em) */}
-            <div className="text-center w-full max-w-[90%] sm:max-w-[70%] md:max-w-[50%] pt-24 sm:pt-16 md:pt-24">
+            <div className="text-center w-full max-w-[90%] sm:max-w-[70%] md:max-w-[50%] pt-18 sm:pt-16 md:pt-20">
               <h1 className="font-kaushan text-[96px] leading-[0.88] tracking-[-0.011em] font-normal drop-shadow-lg pb-6 md:pb-10">
                 {activeSlide.headline || 'To travel is to live!'}
               </h1>
@@ -377,28 +377,37 @@ export const MainHero: React.FC<MainHeroProps> = ({
             </div>
 
             {/* Bottom Section */}
-            <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[60vh] pt-24 sm:pt-36 md:pt-48">
+            <div className="relative w-full min-h-[30vh] sm:min-h-[30vh] md:min-h-[60vh] pt-10 sm:pt-15 md:pt-24 overflow-hidden">
+              {/* Background Image */}
               {cloudImage && (
                 <div className="absolute inset-0 z-0 pointer-events-none">
                   <MediaComponent
                     resource={cloudImage}
-                    imgClassName="absolute top-0 left-0 w-full h-full object-cover opacity-95 object-top pt-8"
+                    imgClassName="absolute top-0 left-0 w-full h-full object-cover object-top opacity-95"
                   />
-                  <div className="absolute inset-x-0 bottom-[5vh] h-[20vh] bg-gradient-to-t from-white via-white/60 to-transparent" />
+                  {/* White gradient overlay for readability */}
+                  <div className="absolute inset-x-0 bottom-0 h-[20vh] bg-gradient-to-t from-white via-white/70 to-transparent" />
                 </div>
               )}
 
-              <div className="relative z-10 flex flex-col items-center justify-center h-full">
+              {/* Centered Form Section */}
+              <div className="relative z-10 flex flex-col items-center justify-center h-50 px-4 sm:px-6 md:px-8">
                 <form
                   onSubmit={handleSubmit}
-                  className="w-full max-w-6xl relative px-4 pointer-events-auto h-auto sm:h-96"
+                  className="w-full max-w-6xl bg-transparent pointer-events-auto"
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 bg-[#f0b95a] rounded-lg shadow-2xl overflow-hidden text-black/70">
+                  {/* Responsive Grid */}
+                  <div
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 
+                      bg-[#f0b95a] rounded-xl shadow-2xl overflow-hidden 
+                      text-black/80 divide-y sm:divide-y-0 sm:divide-x divide-black/10"
+                  >
+                    {/* Destination */}
                     <select
                       name="destination"
                       value={formData.destination}
                       onChange={handleInputChange}
-                      className="p-4 bg-transparent border-b sm:border-b-0 sm:border-r border-black/10 focus:outline-none placeholder:text-black/70"
+                      className="p-4 sm:p-5 bg-transparent focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-black/70 text-base sm:text-lg"
                       aria-label="Destination"
                     >
                       <option value="" disabled>
@@ -411,16 +420,18 @@ export const MainHero: React.FC<MainHeroProps> = ({
                       ))}
                     </select>
 
+                    {/* Date */}
                     <input
                       type="date"
                       name="date"
                       value={formData.date}
                       onChange={handleInputChange}
                       placeholder={placeholders?.date || 'Date'}
-                      className="p-4 bg-transparent border-b sm:border-b-0 lg:border-r border-black/10 focus:outline-none placeholder:text-black/70"
+                      className="p-4 sm:p-5 bg-transparent focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-black/70 text-base sm:text-lg"
                       aria-label="Date"
                     />
 
+                    {/* People */}
                     <input
                       type="number"
                       name="people"
@@ -428,15 +439,16 @@ export const MainHero: React.FC<MainHeroProps> = ({
                       onChange={handleInputChange}
                       min="1"
                       placeholder={placeholders?.people || 'No of people'}
-                      className="p-4 bg-transparent border-b sm:border-b-0 sm:border-r border-black/10 focus:outline-none placeholder:text-black/70"
+                      className="p-4 sm:p-5 bg-transparent focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-black/70 text-base sm:text-lg"
                       aria-label="People"
                     />
 
+                    {/* Category */}
                     <select
                       name="category"
                       value={formData.category}
                       onChange={handleInputChange}
-                      className="p-4 bg-transparent focus:outline-none placeholder:text-black/70"
+                      className="p-4 sm:p-5 bg-transparent focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-black/70 text-base sm:text-lg"
                       aria-label="Category"
                     >
                       <option value="" disabled>
@@ -450,10 +462,19 @@ export const MainHero: React.FC<MainHeroProps> = ({
                     </select>
                   </div>
 
-                  <div className="text-center mt-8">
+                  {/* Submit Button */}
+                  <div className="text-center mt-5 sm:mt-6 pb-4">
                     <button
                       type="submit"
-                      className="px-10 py-3 bg-white text-black font-medium rounded-full shadow-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105"
+                      className="w-full sm:w-[175px] h-[45px] rounded-[24px]
+             px-6 sm:px-8  
+             bg-white text-[#FBAE3D] font-nats font-medium 
+             shadow-md sm:shadow-lg 
+             hover:bg-gray-200 active:bg-gray-300 
+             transition-all duration-300 transform 
+             hover:scale-105 active:scale-95 
+             focus:outline-none focus:ring-2 focus:ring-gray-300 
+             disabled:opacity-60 disabled:cursor-not-allowed  text-center"
                     >
                       {buttonLabel}
                     </button>

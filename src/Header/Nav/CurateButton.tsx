@@ -1,7 +1,5 @@
 'use client'
-// The 'next/link' import was removed to resolve the compilation error.
-// We are using a standard <a> tag instead.
-
+import Link from 'next/link'
 import type { Header } from '@/payload-types'
 import React from 'react'
 
@@ -12,8 +10,7 @@ export const CurateButton: React.FC<{ data: Header }> = ({ data }) => {
   if (!show) return null
 
   return (
-    // Using a standard <a> tag to ensure compatibility and resolve the "next/link" error.
-    <a
+    <Link
       href={href}
       // Mobile-first: smaller padding (px-6, py-1), then scales up for large screens (lg:px-8, lg:py-1.5)
       className="inline-flex items-center justify-center rounded-full bg-[#FBAE3D] px-6 py-1 lg:px-8 lg:py-1.5 transition-all duration-200"
@@ -25,6 +22,6 @@ export const CurateButton: React.FC<{ data: Header }> = ({ data }) => {
       >
         {text}
       </span>
-    </a>
+    </Link>
   )
 }
