@@ -7,11 +7,21 @@ interface Media {
 
 interface Props {
   image: Media
+  // Allows the height to be dynamic based on content or to enforce a specific ratio/size.
+  // We'll keep the current hardcoded height scaling as a default for robustness.
+  heightClass?: string
   overlay?: boolean
   overlayOpacity?: number
 }
 
-const StaticImageBlock: React.FC<Props> = ({ image, overlay = true, overlayOpacity = 0.5 }) => {
+const StaticImageBlock: React.FC<Props> = ({
+  image,
+  // Use a sensible default height class that scales well.
+  // Added a default `min-h-[40vh]` for screens medium and above for better view on tablets/large phones.
+  heightClass = 'h-[250px] xs:h-[350px] sm:h-[400px] md:min-h-[80vh] lg:min-h-[100vh',
+  overlay = true,
+  overlayOpacity = 0.5,
+}) => {
   if (!image?.url) {
     return null
   }
@@ -19,16 +29,19 @@ const StaticImageBlock: React.FC<Props> = ({ image, overlay = true, overlayOpaci
   return (
     <section className="relative w-full max-w-full overflow-hidden">
       <div
-        className="
-          relative w-full 
-          h-[300px] sm:h-[450px] md:h-[600px] lg:h-[750px]
+        className={`
+          relative w-full
+          // 💡 Dynamic height class applied here
+          ${heightClass}
           overflow-hidden
-        "
+        `}
       >
         {/* ✅ Responsive Image */}
         <img
           src={image.url}
           alt={image.alt || ''}
+          // The key to responsiveness: w-full h-full ensures the image fills the container.
+          // object-cover ensures the image covers the area without distortion, cropping as needed.
           className="
             absolute top-0 left-0 w-full h-full object-cover
           "

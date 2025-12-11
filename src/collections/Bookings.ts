@@ -4,13 +4,13 @@ import type { CollectionConfig, FieldAccess } from 'payload'
 const canReadBookingUser: FieldAccess = ({ req, doc }) => {
   const user = req?.user
   if (!user) return false
-  if (!doc) return user.role === 'agent'||user.role === 'admin'
-  return user.id === doc.user || user.role === 'agent'||user.role === 'admin'
+  if (!doc) return user.role === 'agent' || user.role === 'admin'
+  return user.id === doc.user || user.role === 'agent' || user.role === 'admin'
 }
 
 export const Bookings: CollectionConfig = {
   slug: 'bookings',
-  
+
   admin: {
     useAsTitle: 'bookingReference',
     defaultColumns: ['bookingReference', 'user', 'package', 'startDate', 'status'],
@@ -21,12 +21,12 @@ export const Bookings: CollectionConfig = {
     read: ({ req }) => {
       const user = req?.user
       if (!user) return false
-      if (user.role === 'agent'||user.role === 'admin') return true
+      if (user.role === 'agent' || user.role === 'admin') return true
       return { user: { equals: user.id } }
     },
-    create: () => true,  // ✅ Changed to allow public booking requests
-    update: ({ req }) => req?.user?.role === 'agent'||req?.user?.role === 'admin',
-    delete: ({ req }) => req?.user?.role === 'agent'||req?.user?.role === 'admin',
+    create: () => true, // ✅ Changed to allow public booking requests
+    update: ({ req }) => req?.user?.role === 'agent' || req?.user?.role === 'admin',
+    delete: ({ req }) => req?.user?.role === 'agent' || req?.user?.role === 'admin',
   },
 
   fields: [

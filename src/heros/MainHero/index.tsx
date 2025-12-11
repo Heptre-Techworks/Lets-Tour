@@ -196,10 +196,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
         @keyframes fade-out-at-80 { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
       `}</style>
 
-      <section
-        className="relative -mt-14 sm:-mt-20 md:-mt-[10.4rem] w-full h-[100vh] sm:h-[110vh] md:h-[125vh] overflow-hidden font-roboto text-white"
-        data-theme="dark"
-      >
+      <section className="relative -mt-14 sm:-mt-20 md:-mt-[10.4rem] w-full h-full sm:h-[110vh] md:h-[125vh] overflow-hidden font-roboto text-white">
         {/* Background Image Slider */}
         <div className="absolute inset-0">
           {slides.map((slide, index) => (
@@ -217,11 +214,11 @@ export const MainHero: React.FC<MainHeroProps> = ({
         </div>
 
         {/* Bottom gradient */}
-        <div className="absolute bottom-0 left-0 w-full h-2/5 bg-gradient-to-t from-white via-white/80 to-transparent z-[5] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-white via-white/80 to-transparent z-[10] pointer-events-none " />
 
         <div className="relative z-10 w-full h-full bg-black/20 flex flex-col">
           {/* Top Section */}
-          <div className="relative pt-16 sm:pt-24 md:pt-32">
+          <div className="relative pt-16 sm:pt-16 md:pt-32">
             {enableAirplaneAnimation && (
               <div className="absolute top-0 left-0 w-full pointer-events-none mt-16 sm:mt-28 md:mt-40">
                 <div className="relative w-full">
@@ -260,9 +257,10 @@ export const MainHero: React.FC<MainHeroProps> = ({
               </div>
             )}
           </div>
-
           {/* Middle Content */}
-          <div className="relative z-10 flex-grow flex flex-col justify-center items-center space-y-5  ">
+          <div // Original (Layout Only):
+            className="relative z-10 h-full flex-grow flex flex-col justify-center items-center "
+          >
             {/* Main Title (Kaushan Script 96px, 88% line-height, -0.011em) */}
             <div className="text-center w-full max-w-[90%] sm:max-w-[70%] md:max-w-[50%] pt-18 sm:pt-16 md:pt-20">
               <h1 className="font-kaushan text-[96px] leading-[0.88] tracking-[-0.011em] font-normal drop-shadow-lg pb-6 md:pb-10">
@@ -377,7 +375,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
             </div>
 
             {/* Bottom Section */}
-            <div className="relative w-full min-h-[30vh] sm:min-h-[30vh] md:min-h-[60vh] pt-10 sm:pt-15 md:pt-24 overflow-hidden">
+            <div className="relative w-full h-full pt-20 sm:pt-15 md:pt-28 overflow-hidden">
               {/* Background Image */}
               {cloudImage && (
                 <div className="absolute inset-0 z-0 pointer-events-none">
@@ -391,14 +389,14 @@ export const MainHero: React.FC<MainHeroProps> = ({
               )}
 
               {/* Centered Form Section */}
-              <div className="relative z-10 flex flex-col items-center justify-center h-50 px-4 sm:px-6 md:px-8">
+              <div className="relative z-10 flex flex-col items-center justify-center h-50 px-3 sm:px-5 md:px-8">
                 <form
                   onSubmit={handleSubmit}
                   className="w-full max-w-6xl bg-transparent pointer-events-auto"
                 >
                   {/* Responsive Grid */}
                   <div
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 px-2
                       bg-[#f0b95a] rounded-xl shadow-2xl overflow-hidden 
                       text-black/80 divide-y sm:divide-y-0 sm:divide-x divide-black/10"
                   >
@@ -407,7 +405,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
                       name="destination"
                       value={formData.destination}
                       onChange={handleInputChange}
-                      className="p-4 sm:p-5 bg-transparent focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-black/70 text-base sm:text-lg"
+                      className="p-4 sm:p-5  bg-transparent focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-black/70 text-base sm:text-lg "
                       aria-label="Destination"
                     >
                       <option value="" disabled>
@@ -448,7 +446,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
                       name="category"
                       value={formData.category}
                       onChange={handleInputChange}
-                      className="p-4 sm:p-5 bg-transparent focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-black/70 text-base sm:text-lg"
+                      className="p-4 sm:p-5 bg-transparent  placeholder:text-black/70 text-base sm:text-lg"
                       aria-label="Category"
                     >
                       <option value="" disabled>
@@ -483,7 +481,6 @@ export const MainHero: React.FC<MainHeroProps> = ({
               </div>
             </div>
           </div>
-
           {slides.length > 1 && (
             <>
               <button

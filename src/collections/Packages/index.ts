@@ -8,7 +8,7 @@ import { revalidateSite, revalidateSiteOnDelete } from '@/hooks/revalidateSite'
 
 export const Packages: CollectionConfig = {
   slug: 'packages',
-  
+
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'destinations', 'price', 'duration', 'isFeatured'],
@@ -21,7 +21,7 @@ export const Packages: CollectionConfig = {
     update: authenticated,
     delete: authenticated,
   },
-  
+
   fields: [
     // ==================== BASIC INFO ====================
     {
@@ -33,7 +33,7 @@ export const Packages: CollectionConfig = {
       },
     },
     ...slugField(),
-    
+
     {
       name: 'tagline',
       type: 'text',
@@ -47,7 +47,8 @@ export const Packages: CollectionConfig = {
       required: true,
       maxLength: 300,
       admin: {
-        description: 'Brief summary for package cards (e.g., "Madrid 2N, Seville 2N, Granada 1N...")',
+        description:
+          'Brief summary for package cards (e.g., "Madrid 2N, Seville 2N, Granada 1N...")',
       },
     },
     {
@@ -214,7 +215,7 @@ export const Packages: CollectionConfig = {
             description: 'Day label for DynamicScroller (e.g., "Day 1 - Arrival Into Paris")',
           },
         },
-        
+
         // ✅ ADDED: Activities array for DynamicScroller itinerary cards
         {
           name: 'activities',
@@ -238,7 +239,8 @@ export const Packages: CollectionConfig = {
               type: 'text',
               required: true,
               admin: {
-                description: 'Activity description (e.g., "Check-in at hotel", "Visit Eiffel Tower")',
+                description:
+                  'Activity description (e.g., "Check-in at hotel", "Visit Eiffel Tower")',
               },
             },
             {
@@ -251,7 +253,7 @@ export const Packages: CollectionConfig = {
             },
           ],
         },
-        
+
         // Existing fields for detail page
         {
           name: 'title',
@@ -296,21 +298,21 @@ export const Packages: CollectionConfig = {
           type: 'group',
           label: 'Meals Included',
           fields: [
-            { 
-              name: 'breakfast', 
-              type: 'checkbox', 
+            {
+              name: 'breakfast',
+              type: 'checkbox',
               defaultValue: false,
               label: 'Breakfast',
             },
-            { 
-              name: 'lunch', 
-              type: 'checkbox', 
+            {
+              name: 'lunch',
+              type: 'checkbox',
               defaultValue: false,
               label: 'Lunch',
             },
-            { 
-              name: 'dinner', 
-              type: 'checkbox', 
+            {
+              name: 'dinner',
+              type: 'checkbox',
               defaultValue: false,
               label: 'Dinner',
             },
@@ -373,7 +375,7 @@ export const Packages: CollectionConfig = {
       relationTo: 'inclusions',
       hasMany: true,
       admin: {
-        description: 'What\'s included in the package',
+        description: "What's included in the package",
       },
     },
     {
@@ -382,7 +384,7 @@ export const Packages: CollectionConfig = {
       relationTo: 'exclusions',
       hasMany: true,
       admin: {
-        description: 'What\'s not included',
+        description: "What's not included",
       },
     },
 
@@ -464,7 +466,7 @@ export const Packages: CollectionConfig = {
         position: 'sidebar',
       },
     },
-        // ==================== RATINGS & BOOKINGS ====================
+    // ==================== RATINGS & BOOKINGS ====================
     {
       type: 'row',
       fields: [
@@ -490,7 +492,6 @@ export const Packages: CollectionConfig = {
         },
       ],
     },
-
 
     // ==================== STATUS FLAGS ====================
     {
@@ -527,15 +528,15 @@ export const Packages: CollectionConfig = {
       },
     },
   ],
-  
+
   hooks: {
     afterChange: [
-      revalidatePackage,    // Your existing specific hook
-             // ✅ Add global revalidation
+      revalidatePackage, // Your existing specific hook
+      // ✅ Add global revalidation
     ],
     afterDelete: [
-      revalidatePackageDelete,    // Your existing hook
-           // ✅ Add global revalidation
+      revalidatePackageDelete, // Your existing hook
+      // ✅ Add global revalidation
     ],
   },
 }

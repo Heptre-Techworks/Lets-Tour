@@ -203,7 +203,7 @@ export const PopularNow = async (props: PopularNowBlock) => {
   )
 
   // ✅ Pass lightweight props to client-side renderer
-  return <PopularNowClient {...rest} rows={processedRows} />
+  return <PopularNowClient {...rest} rows={processedRows.slice(0, 1)} />
 }
 
 export default PopularNow

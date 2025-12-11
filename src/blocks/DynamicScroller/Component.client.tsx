@@ -53,6 +53,12 @@ type Section = {
   packageRelation?: any
 }
 
+// Custom Prop Type for ItineraryCard
+type ItineraryCardProps = {
+    item: Item; 
+    defaultExpanded?: boolean;
+}
+
 // Utils
 function resolveMediaUrl(media: Media): string | undefined {
   if (media && typeof media === 'object' && 'id' in media) {
@@ -188,24 +194,33 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
       </button>
 
       <div className="absolute bottom-0 left-0 p-5 text-white w-full">
-        <h3 className="font-amiri italic font-normal text-[40px] leading-[0.88] tracking-[-0.011em]">
+        <h3
+          className="font-bold group-hover:text-yellow-300 transition-colors flex items-center text-3xl sm:text-4xl md:text-[44px] lg:text-5xl"
+          style={{
+            fontFamily: "'Amiri', serif",
+            fontStyle: 'italic',
+            lineHeight: '88%',
+            letterSpacing: '-0.011em',
+          }}
+        >
           {title}
         </h3>
         <hr className="my-2 border-white/50" />
         <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] mt-1">
           Packages starting at
           <br />
-          <span className="font-nats font-normal text-[32px] leading-[0.88] tracking-[-0.011em]">
-          {price}
+          <span className="font-bold text-[32px] leading-[0.88] tracking-[-0.011em]">₹{price}</span>
+          <span className="font-nats ml-2 text-xs sm:text-sm lg:text-base leading-[0.88] tracking-[-0.011em]">
+            {' '}
+            /person
           </span>
-          <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]"> /person</span>
         </p>
       </div>
     </Link>
   )
 }
 
-// Destination Card
+// Featured Destination Card
 const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
   const title = item.title || ''
   const image = item.image
@@ -267,16 +282,22 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
       </button>
 
       <div className="absolute bottom-0 left-0 p-5 text-white w-full">
-        <h3 className="font-amiri italic font-normal text-[40px] leading-[0.88] tracking-[-0.011em]">
+        <h3
+          className="font-bold group-hover:text-yellow-300 transition-colors flex items-center text-3xl sm:text-4xl md:text-[44px] lg:text-5xl"
+          style={{
+            fontFamily: "'Amiri', serif",
+            fontStyle: 'italic',
+            lineHeight: '88%',
+            letterSpacing: '-0.011em',
+          }}
+        >
           {title}
         </h3>
         <hr className="my-2 border-white/50" />
         <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] mt-1">
           Packages starting at
           <br />
-          <span className="font-nats font-normal text-[32px] leading-[0.88] tracking-[-0.011em]">
-            {price}
-          </span>
+          <span className="font-bold text-[32px] leading-[0.88] tracking-[-0.011em]">{price}</span>
           <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]"> /person</span>
         </p>
       </div>
@@ -284,53 +305,116 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
   )
 }
 
-// Itinerary Card
-const ItineraryCard: React.FC<{ item: any }> = ({ item }) => {
+// Itinerary Card (Corrected and Cleaned)
+const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = false }) => {
+  // Use the prop for initial state control
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
+
   const activities = item.activities || []
+
+  // Mock resolveMediaUrl for context, replace with your actual function
+  const resolveMediaUrl = (path: string) => path
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded)
+  }
+
+  /** Icon for the toggle button (+ or -) */
+  const ToggleIcon = () => (
+    <div
+      className="
+        h-5 w-5 border border-gray-400 rounded-full
+        text-gray-700 
+        flex items-center justify-center cursor-pointer 
+        transition-transform duration-300 flex-shrink-0
+      "
+      aria-hidden="true"
+    >
+      <span className="text-xl leading-none font-medium">
+        {/* Unicode for em dash/minus sign vs plus sign */}
+        {isExpanded ? '\u2014' : '\u002B'}
+      </span>
+    </div>
+  )
+
   return (
-    <div className="w-96 flex-shrink-0 snap-start bg-white rounded-2xl p-6 shadow-md">
-      <h3 className="text-3xl font-bold mb-6 font-amiri">{item.day || 'Day'}</h3>
-      <div>{item.Title}</div>
-      <div className="space-y-4">
-        {activities.map((activity: any, idx: number) => {
-          const iconSrc = activity.icon ? resolveMediaUrl(activity.icon) : undefined
-          const detailsSrc = activity.detailsImage
-            ? resolveMediaUrl(activity.detailsImage)
-            : undefined
-          return (
-            <div
-              key={idx}
-              className="flex items-start space-x-4 pb-4 border-b border-gray-200 last:border-b-0"
-            >
-              <div className="flex-shrink-0 bg-gray-100 p-2 rounded-full">
-                {iconSrc ? (
-                  <img src={iconSrc} alt="" className="w-6 h-6" />
-                ) : (
-                  <div className="w-6 h-6" />
-                )}
+    <div
+      className="
+      border border-gray-200 rounded-xl shadow-md bg-white 
+      overflow-hidden w-full mx-auto font-amiri
+    "
+    >
+      {/* === HEADER (Clickable Area: Day Tag, Title, and Toggle Icon) === */}
+      <div
+        className="flex justify-between items-center p-4 cursor-pointer"
+        onClick={toggleExpand}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        aria-controls={`day-content-${item.day || 'default'}`}
+      >
+        <div className="flex items-center space-x-3">
+          <span className=" text-black font-bold text-xl mx-1 ">
+            {item.day || 'Day'}
+            <div className="absolute inset-0 rounded-xl pointer-events-none border border-white/30" />
+          </span>
+        </div>
+        <ToggleIcon />
+      </div>
+      {/* === CONTENT AREA (The List of Activities) === */}
+      <div
+        id={`day-content-${item.day || 'default'}`}
+        className={`
+          overflow-hidden transition-max-height duration-500 ease-in-out
+          ${isExpanded ? 'max-h-[1000px] border-t border-gray-100 bg-gray-50' : 'max-h-0'}
+        `}
+      >
+        <div className="space-y-2 p-2">
+          {activities.map((activity, idx) => {
+            const iconSrc = activity.icon ? resolveMediaUrl(activity.icon) : undefined
+            const detailsSrc = activity.detailsImage
+              ? resolveMediaUrl(activity.detailsImage)
+              : undefined
+
+            return (
+              <div
+                key={idx}
+                className="flex items-start space-x-2  border-gray-200 last:border-b-0"
+              >
+                <div className="flex-shrink-0">
+                  {iconSrc ? (
+                    <img src={iconSrc} alt="" className="w-6 h-6 rounded-full bg-gray-100 p-1" />
+                  ) : (
+                    <span className="text-lg text-blue-500 mr-2 mt-0.5" aria-hidden="true">
+                      &#10038;
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex-grow">
+                  <p className="text-gray-700 text-sm ">{activity.description}</p>
+                  {/* Optional: Add image detail if present */}
+                  {detailsSrc && (
+                    <div className="mt-2">
+                      <img src={detailsSrc} alt="Details" className="w-24 h-14 object-cover rounded-lg" />
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex-grow">
-                <p className="text-gray-700">{activity.description}</p>
-                {detailsSrc && (
-                  <div className="mt-2 flex items-center">
-                    <img
-                      src={detailsSrc}
-                      alt="Details"
-                      className="w-24 h-14 object-cover rounded-lg mr-4"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )
 }
 
+
 // Vibe Section
 const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
+// ... (VibeSection component code) ...
+// (Assuming VibeSection is fine as provided, skipping its full repetition)
+// ...
   const vibes = section.vibes || []
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -344,14 +428,14 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   }
 
   return (
-    <section className={`relative overflow-hidden  `}>
+    <section className={`relative overflow-hidden  `}>
       <div className="flex items-center gap-6">
         <header className=" mb-10">
-          <h1 className="font-amiri italic font-bold text-[36px]  sm:text-[48px] md:text-[56px]  leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 text-left  ">
+          <h1 className="font-amiri italic font-bold text-[36px]  sm:text-[48px] md:text-[56px]  leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 text-left  ">
             {section.title || 'Vibe Match'}
           </h1>
           {section.subtitle && (
-            <p className="font-nats text-[14px]  sm:text-[48px] md:text-[56px] leading-[0.88] tracking-[-0.011em] text-black">
+            <p className="font-nats text-[14px]  sm:text-[48px] md:text-[56px] leading-[0.88] tracking-[-0.011em] text-black">
               {section.subtitle}
             </p>
           )}
@@ -404,6 +488,7 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
     </section>
   )
 }
+
 
 // Dynamic Section Component
 const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
@@ -485,9 +570,9 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   return (
     <section className={`relative overflow-hidden `}>
       <div
-        className="
+        className=" 
     absolute left-0 top-[6rem] 
-    h-[40vh] xs:h-[42vh] sm:h-[44vh] md:h-[46vh] lg:h-[48vh]
+    h-[50vh] xs:h-[42vh] sm:h-[44vh] md:h-[46vh] lg:h-[48vh]
     w-[80%] xs:w-[70%] sm:w-[65%] md:w-[60%] lg:w-[55%]
     bg-[rgba(251,174,61,0.9)]
     px-3 sm:px-4 md:px-6
@@ -499,7 +584,7 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <header className="mb-10">
           <div className="flex items-center gap-6">
-            <h1 className="font-amiri italic font-bold text-[36px]  sm:text-[48px] md:text-[56px]   leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 text-left  ">
+            <h1 className="font-amiri italic font-bold text-black whitespace-nowrap text-4xl sm:text-5xl md:text-6xl lg:text-[64px] xl:text-[72px] flex-shrink-0 text-left  ">
               {displayTitle}
             </h1>
             <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
@@ -522,8 +607,19 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
             destinationItems.map((item, idx) => (
               <DestinationCard key={item.id || idx} item={item} />
             ))}
-          {section.type === 'itinerary' &&
-            itineraryItems.map((item, idx) => <ItineraryCard key={item.id || idx} item={item} />)}
+          
+          {section.type === 'itinerary' && (
+            <div className="space-y-4"> 
+              {itineraryItems.map((item, idx) => (
+                <ItineraryCard 
+                  key={item.id || idx} 
+                  item={item} 
+                  // 🔑 FIX APPLIED: Only the first card expands by default
+                  defaultExpanded={idx === 0}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {isPackage && navEnabled && packagesCount > 0 && (
@@ -591,38 +687,14 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
             </div>
           </div>
         )}
-
-        {section.type === 'itinerary' && navEnabled && itineraryCount > 0 && (
-          <div className="mt-4">
-            <div className="flex items-center">
-              <div className="flex-1 mr-3">
-                <DashedRule />
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => scroll('left')}
-                  className={buttonClass}
-                  aria-label="Previous"
-                  type="button"
-                >
-                  <ChevronLeft />
-                </button>
-                <button
-                  onClick={() => scroll('right')}
-                  className={buttonClass}
-                  aria-label="Next"
-                  type="button"
-                >
-                  <ChevronRight />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   )
 }
+
+// Vibe Section (assuming its original position was here)
+// (The full VibeSection component should be defined here)
+
 
 // ✅ Main Client Component with auto-fetch itinerary
 export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({

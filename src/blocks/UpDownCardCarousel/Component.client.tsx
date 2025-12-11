@@ -389,7 +389,7 @@ export const UpDownCardCarouselClient: React.FC<{
         <div
           className="relative flex items-center"
           style={{
-            height: '600px',
+            height: '500px',
             width: '100vw',
             overflow: 'visible',
           }}
@@ -412,7 +412,7 @@ export const UpDownCardCarouselClient: React.FC<{
 
           <div
             ref={scrollContainerRef}
-            className="flex items-center overflow-x-auto scrollbar-hide"
+            className="flex items-center overflow-auto scrollbar-hide"
             style={{
               gap: '28px',
               height: '600px',
@@ -420,8 +420,11 @@ export const UpDownCardCarouselClient: React.FC<{
               paddingRight: '24px',
               width: '100%',
               WebkitOverflowScrolling: 'touch',
-              overflowY: 'hidden',
-              touchAction: 'pan-x',
+
+              // ✅ Enable both directions
+              overflowX: 'auto',
+              overflowY: 'auto',
+              touchAction: 'pan-x pan-y',
             }}
           >
             {Array.isArray(cards) &&

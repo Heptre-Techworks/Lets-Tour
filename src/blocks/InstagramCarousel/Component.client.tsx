@@ -1,13 +1,15 @@
 // src/blocks/InstagramCarousel/Component.client.tsx
 'use client'
 
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { cn } from '@/utilities/ui'
 import RichText from '@/components/RichText'
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
-// Client-only Instagram embed
+// Static image import for the right container
+const rightContainerImage =
+  'https://zozxszsaofxvunkl.public.blob.vercel-storage.com/hw__bpyheb9jkbw2_large_2x.png'
 const InstagramEmbed = dynamic(
   () => import('react-social-media-embed').then((m) => m.InstagramEmbed),
   { ssr: false },
@@ -15,7 +17,9 @@ const InstagramEmbed = dynamic(
 
 type GridPost = { url: string; captioned?: boolean }
 
-// Instagram icon
+// 🚩 FIXED: The raw HTML constant is replaced with a proper URL constant (RAW_INSTAGRAM_EMBED_HTML_OVERLAY was incorrect type/usage).
+const VIDEO_URL =
+  'https://zozxszsaofxvunkl.public.blob.vercel-storage.com/AQPcZr0VAFuUhDLpW0DzIMo4roUsUsN9tIEJOmTOiGg195MSvQYTkvpLGkH7ek1QeI-6NMc0EAlNMLf1jq96MPSPvEZH6YvZl5KqEHQ.mp4'
 const InstagramGlyph = ({ className = 'h-4 w-4' }: { className?: string }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -75,28 +79,16 @@ const EmbedWrapper = ({
 // Grid component
 const InstagramImageGrid: React.FC<{
   posts: GridPost[]
-  columnsDesktop?: number
-  columnsTablet?: number
-  columnsMobile?: number
   gutter?: string
   aspect?: number
   trimTop?: number
   trimBottom?: number
   className?: string
-}> = ({
-  posts,
-  columnsDesktop = 4,
-  columnsTablet = 3,
-  columnsMobile = 2,
-  gutter = '12px',
-  aspect = 1,
-  trimTop = 88,
-  trimBottom = 120,
-  className,
-}) => {
+}> = ({ posts, gutter = '12px', aspect = 1, trimTop = 88, trimBottom = 120, className }) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null)
   const [cardWidth, setCardWidth] = React.useState(320)
-  const [colCount, setColCount] = React.useState(columnsDesktop)
+
+  const COLUMNS = 2
 
   const pairedColumns = React.useMemo(() => {
     const out: Array<[GridPost | undefined, GridPost | undefined]> = []
@@ -109,21 +101,18 @@ const InstagramImageGrid: React.FC<{
     const onResize = () => {
       if (!containerRef.current) return
       const w = containerRef.current.clientWidth
-      const ww = window.innerWidth
-      const cols = ww >= 1024 ? columnsDesktop : ww >= 768 ? columnsTablet : columnsMobile
-      setColCount(cols)
-      const cw = Math.max(220, Math.floor((w - (cols - 1) * parsePx(gutter)) / cols))
+      const cw = Math.max(220, Math.floor((w - (COLUMNS - 1) * parsePx(gutter)) / COLUMNS))
       setCardWidth(cw)
     }
     onResize()
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
-  }, [columnsDesktop, columnsTablet, columnsMobile, gutter])
+  }, [gutter])
 
   const columnHeight = Math.round(cardWidth * aspect * 2)
   const bigH = Math.round(columnHeight * 0.62)
   const smallH = columnHeight - bigH
-  const embedWidth = cardWidth + 160
+  const embedWidth = cardWidth // Fixed for no overflow
 
   return (
     <section className={cn(className)} aria-label="Instagram images grid">
@@ -131,7 +120,7 @@ const InstagramImageGrid: React.FC<{
         ref={containerRef}
         className="ig2-grid"
         style={{
-          gridTemplateColumns: `repeat(${colCount}, 1fr)`,
+          gridTemplateColumns: `repeat(${COLUMNS}, 1fr)`,
           gap: gutter,
         }}
       >
@@ -237,60 +226,117 @@ export const InstagramCarouselClient: React.FC<any> = ({
   const typedCaption = caption as DefaultTypedEditorState | null | undefined
   const hasCaption = !!typedCaption && typeof typedCaption === 'object' && 'root' in typedCaption
 
-  const columnsDesktop = layout?.columnsDesktop ?? 4
-  const columnsTablet = layout?.columnsTablet ?? 3
-  const columnsMobile = layout?.columnsMobile ?? 2
   const gutter = layout?.gutter ?? '12px'
   const showCaptionsGlobal = !!layout?.showCaptions
 
-  const mappedPosts: GridPost[] = (posts || []).map((p: any) => ({
-    url: p?.url ?? '',
-    captioned: showCaptionsGlobal || !!p?.captioned,
-  }))
+  const allMappedPosts: GridPost[] = (posts || [])
+    .map((p: any) => ({
+      url: p?.url ?? '',
+      captioned: showCaptionsGlobal || !!p?.captioned,
+    }))
+    .filter((p: GridPost) => p.url && p.url.trim().length > 0)
 
-  const postCount = mappedPosts.filter((p) => p.url && p.url.trim().length > 0).length
+  const MAX_POSTS_PER_GRID = 4
+  const gridOnePosts = allMappedPosts.slice(0, MAX_POSTS_PER_GRID)
+  const gridTwoPosts = allMappedPosts.slice(MAX_POSTS_PER_GRID, MAX_POSTS_PER_GRID * 2)
+
+  const postCount = allMappedPosts.length
   const avatarUrl =
     typeof profile?.avatarUrl === 'object' ? profile.avatarUrl?.url : profile?.avatarUrl
 
+  // State to store left container height and ref to measure it
+  const [leftGridHeight, setLeftGridHeight] = useState('auto')
+  const leftGridRef = useRef<HTMLDivElement>(null)
+
+  // Ref for the Video container (REPLACED rightEmbedRef)
+  const videoContainerRef = useRef<HTMLDivElement>(null)
+
+  // Placeholder state for the second grid (retained, though not used for rendering)
+  const [loadSecondGrid, setLoadSecondGrid] = useState(false)
+
+  useEffect(() => {
+    if (gridTwoPosts.length > 0) {
+      const timer = setTimeout(() => {
+        setLoadSecondGrid(true)
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [gridTwoPosts.length])
+
+  // Effect to measure LEFT CONTAINER HEIGHT
+  useEffect(() => {
+    const measureHeight = () => {
+      // Small timeout to allow the Instagram embeds to render and set the height
+      setTimeout(() => {
+        if (leftGridRef.current) {
+          const height = leftGridRef.current.offsetHeight
+          setLeftGridHeight(`${height}px`)
+        } else {
+          // Fallback height if not measured yet
+          setLeftGridHeight('500px')
+        }
+      }, 100)
+    }
+
+    // Measure on mount and on resize
+    measureHeight()
+    window.addEventListener('resize', measureHeight)
+
+    return () => window.removeEventListener('resize', measureHeight)
+  }, [gridOnePosts.length])
+
+  // FIXED EFFECT: Autoplay and Mute the direct video embed (replaces old Instagram script loading)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const videoElement = videoContainerRef.current?.querySelector('video')
+      if (videoElement) {
+        videoElement.muted = true
+        videoElement.playsInline = true
+        videoElement.loop = true
+        videoElement.play().catch((error) => {
+          console.warn('Video autoplay was prevented:', error)
+        })
+      }
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [videoContainerRef.current])
+
   return (
-    <div className={cn('container py-12', className)}>
-      {/* NATS only (per your CSS) */}
-      <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />{' '}
-      {/* NATS webfont [no extra props] */}
+    <div className={cn('container py-8', className)}>
+      <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />
+
       {(heading || profile?.handle) && (
-        <header className="mb-8 flex items-center">
+        <header className="mb-8 flex flex-wrap items-center gap-3">
           {avatarUrl && (
             <img
               src={avatarUrl}
               alt={`${profile?.handle ?? 'Instagram'} logo`}
-              className="mr-3 h-8 w-8 rounded-full object-cover"
+              className="h-8 w-8 rounded-full object-cover"
             />
           )}
 
           <div className="flex flex-col">
-            {/* Heading bumped: 3xl */}
             <h3
-              className="text-3xl font-semibold leading-tight text-black"
+              className="text-2xl sm:text-3xl font-semibold leading-tight text-black"
               style={{ fontFamily: "'NATS', sans-serif" }}
             >
               {heading ?? 'Latest on Instagram'}
             </h3>
-
-            {/* Meta bumped: base */}
             <span
-              className="text-base leading-snug text-black"
+              className="text-sm sm:text-base leading-snug text-black"
               style={{ fontFamily: "'NATS', sans-serif" }}
             >
               {postCount} posts
             </span>
           </div>
 
-          <div className="mx-3 h-10 w-px bg-gray-400" aria-hidden="true" />
+          <div className="hidden sm:block h-10 w-px bg-gray-400" aria-hidden="true" />
 
           {profile?.profileUrl && (
             <a
               href={profile.profileUrl}
-              className="inline-flex items-center gap-2 rounded-xl px-5 py-2 text-base font-medium text-white transition duration-300 hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-xl px-4 sm:px-5 py-2 text-sm sm:text-base font-medium text-white transition duration-300 hover:bg-blue-700"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -304,19 +350,81 @@ export const InstagramCarouselClient: React.FC<any> = ({
           )}
         </header>
       )}
-      <InstagramImageGrid
-        posts={mappedPosts}
-        columnsDesktop={columnsDesktop}
-        columnsTablet={columnsTablet}
-        columnsMobile={columnsMobile}
-        gutter={gutter}
-        aspect={1}
-        trimTop={80}
-        trimBottom={10}
-      />
+
+      {/* Responsive Grid Container: side-by-side on large screens, stretch items to match height */}
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-stretch">
+        {/* LEFT CONTAINER: Instagram Grid (Max 4 Posts) */}
+        {gridOnePosts.length > 0 && (
+          // Attach REF to the wrapper div to measure its height
+          <div className="w-full lg:w-1/2" ref={leftGridRef}>
+            <InstagramImageGrid
+              posts={gridOnePosts}
+              gutter={gutter}
+              aspect={1}
+              trimTop={80}
+              trimBottom={10}
+            />
+          </div>
+        )}
+
+        {/* RIGHT CONTAINER: Static Image with Video Overlay */}
+        <div className="w-full lg:w-1/2 m-5">
+          <div
+            className="ig2-cell w-full"
+            style={{
+              height: leftGridHeight, // Dynamic height applied
+              overflow: 'hidden',
+              borderRadius: '20px', // Device rounded corners (Fixed from 10px)
+              position: 'relative', // Context for absolute children
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'top',
+            }}
+          >
+            {/* 1. Base Image Layer (Static Image) */}
+            <img
+              src={rightContainerImage.src || (rightContainerImage as any)}
+              alt="Custom promotional image"
+              className="w-full h-[440px] sm:h-[440px] md:h-[550px]  object-contain"
+              loading="lazy"
+              style={{ position: 'absolute', inset: 0 }}
+            />
+
+            <div
+              ref={videoContainerRef}
+              className="
+    z-10 
+    pointer-events-auto 
+    relative 
+     w-[200px]  sm:w-[200px] md:w-[250px]
+     h-[430px] sm-h[450px] md:h-[530px] 
+    top-[5px] sm:top-[11px] md:top-[10px]  
+    rounded-[30px] 
+    overflow-hidden
+  "
+            >
+              <video
+                src={VIDEO_URL}
+                controls={false} // Hide default controls
+                autoPlay={true}
+                muted={true}
+                playsInline={true}
+                loop={true}
+                // Size the video element to fill its container
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '20px',
+                  objectFit: 'cover',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {hasCaption && (
         <div className="mt-6">
-          {/* Keep caption default; font family only */}
           <div style={{ fontFamily: "'NATS', sans-serif", color: '#000000' }}>
             <RichText data={typedCaption!} enableGutter={false} />
           </div>

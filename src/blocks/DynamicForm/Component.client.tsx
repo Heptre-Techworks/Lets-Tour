@@ -1,7 +1,14 @@
 // src/blocks/DynamicForm/Component.client.tsx
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
+import emailjs from '@emailjs/browser' // 1. 🛠️ Import EmailJS
+
+// --- EmailJS Configuration ---
+const EMAILJS_SERVICE_ID = 'Lets-Tour-Demo'
+const EMAILJS_TEMPLATE_ID = 'template_154333w'
+const EMAILJS_PUBLIC_KEY = '7KpM1U3hexIGQWnuc' // User ID is the Public Key
+// ---
 
 type FormField = {
   label: string
@@ -30,7 +37,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
   subtitle,
   fields = [],
   submitButtonText = 'Submit',
-  successMessage = "Thank you! We'll get back to you soon.",
+  successMessage = "Thank thank you! We'll get back to you soon.",
   packageOptions = [],
 }) => {
   const [formData, setFormData] = useState<Record<string, any>>({})
@@ -38,6 +45,29 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
+  // 2. 🚀 Initialize EmailJS on component mount
+  useEffect(() => {
+    emailjs.init(EMAILJS_PUBLIC_KEY)
+  }, [])
+
+  const getSelectedPackageOption = (value: string) => {
+    return packageOptions.find((opt) => opt.value === value)
+  }
+
+  const selectedPackageOption = useMemo(() => {
+    const packageValue = formData['package']
+    return packageValue ? getSelectedPackageOption(packageValue) : undefined
+  }, [formData, packageOptions])
+
+  useEffect(() => {
+    if (selectedPackageOption && isDropdownOpen) {
+      setIsDropdownOpen(false)
+      setSearchQuery('')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPackageOption])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -105,7 +135,10 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
     setSubmitStatus('idle')
     setErrorMessage('')
 
+    const transformedData = transformFormData(formData, formType)
+
     try {
+      // 1. Submit to API/Database (Original Logic)
       const collectionMap: Record<string, string> = {
         review: 'reviews',
         booking: 'bookings',
@@ -115,8 +148,6 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
 
       const collection = collectionMap[formType] || 'reviews'
       const endpoint = `/api/${collection}`
-
-      const transformedData = transformFormData(formData, formType)
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -136,9 +167,27 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
         throw new Error(errorDetails)
       }
 
+      // 2. 📧 Send Email via EmailJS (New Logic)
+      // Note: We use the raw formData for the email template as transformedData might be nested/complex.
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          ...formData, // Send raw form data for template variables
+          form_type: formType,
+          // You might add a custom field for the recipient email if required by the template
+          // recipient_email: formData.email,
+        })
+      } catch (emailError) {
+        // Log the email error but don't stop the form success flow
+        // if the API submission was already successful.
+        console.error('EmailJS failed to send:', emailError)
+        // Optionally, you could set a specific success message mentioning the email issue.
+      }
+
+      // 3. Cleanup and Success State
       setSubmitStatus('success')
       setFormData({})
       setSearchQuery('')
+      setIsDropdownOpen(false)
     } catch (error: any) {
       setSubmitStatus('error')
       setErrorMessage(error.message || 'Something went wrong. Please try again.')
@@ -150,9 +199,9 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
   const getWidthClass = (width?: string | null) => {
     switch (width) {
       case 'half':
-        return 'w-full sm:w-1/2 px-2' // ✅ Mobile full width, half on tablet+
+        return 'w-full sm:w-1/2 px-2'
       case 'third':
-        return 'w-full md:w-1/3 px-2' // ✅ Stack on mobile, 3 per row on desktop
+        return 'w-full md:w-1/3 px-2'
       default:
         return 'w-full px-2'
     }
@@ -161,7 +210,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
   const renderField = (field: FormField, index: number) => {
     const widthClass = getWidthClass(field.width)
     const inputClasses =
-      'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base'
+      'w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base'
 
     const fieldElement = (() => {
       switch (field.type) {
@@ -174,7 +223,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
               required={field.required}
               rows={field.rows || 4}
               placeholder={field.placeholder || undefined}
-              className={`${inputClasses} resize-y`}
+              className={`${inputClasses} resize-y py-3`}
             />
           )
 
@@ -185,32 +234,89 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
             )
 
             return (
-              <div className="space-y-2">
+              <div className="relative space-y-2">
+                {/* Search Input */}
                 <input
                   type="text"
                   placeholder="🔍 Search packages..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`${inputClasses} bg-gray-50`}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setIsDropdownOpen(true)
+                  }}
+                  onFocus={() => setIsDropdownOpen(true)}
+                  disabled={!!selectedPackageOption && !isDropdownOpen}
+                  className={`${inputClasses} bg-gray-50 disabled:cursor-not-allowed disabled:opacity-75`}
                 />
-                <select
+
+                {/* Selected Package Display */}
+                {selectedPackageOption && !isDropdownOpen && (
+                  <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <span className="text-sm sm:text-base text-blue-900 font-medium">
+                      {selectedPackageOption.label}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData((prev) => ({ ...prev, [field.name]: '' }))
+                        setSearchQuery('')
+                        setIsDropdownOpen(true)
+                      }}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-semibold"
+                    >
+                      Change
+                    </button>
+                  </div>
+                )}
+
+                {/* Dropdown List */}
+                {isDropdownOpen && (
+                  <div className="relative">
+                    <div className="absolute z-10 w-full max-h-60 sm:max-h-80 overflow-y-auto overflow-x-hidden bg-white border border-gray-300 rounded-lg shadow-lg">
+                      {filteredOptions.length > 0 ? (
+                        <>
+                          <div className="sticky top-0 bg-gray-100 px-3 py-2 text-xs sm:text-sm font-semibold text-gray-600 border-b">
+                            {filteredOptions.length} package
+                            {filteredOptions.length !== 1 ? 's' : ''} found
+                          </div>
+                          {filteredOptions.map((option, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({ ...prev, [field.name]: option.value }))
+                              }}
+                              className={`w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base hover:bg-blue-50 transition-colors whitespace-nowrap ${
+                                formData[field.name] === option.value
+                                  ? 'bg-blue-100 font-semibold text-blue-900'
+                                  : 'text-gray-800'
+                              }`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </>
+                      ) : (
+                        <div className="px-4 py-6 text-center">
+                          <p className="text-sm sm:text-base text-gray-500">No packages found</p>
+                          <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                            Try adjusting your search
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {/* Close dropdown overlay */}
+                    <div className="fixed inset-0 z-0" onClick={() => setIsDropdownOpen(false)} />
+                  </div>
+                )}
+
+                {/* Hidden input for form validation */}
+                <input
+                  type="hidden"
                   name={field.name}
                   value={formData[field.name] || ''}
-                  onChange={handleChange}
                   required={field.required}
-                  className={`${inputClasses} ${!formData[field.name] ? 'text-gray-400' : 'text-gray-900'} max-h-48 overflow-y-auto`}
-                  size={Math.min(filteredOptions.length + 1, 6)}
-                >
-                  <option value="">-- Select a package --</option>
-                  {filteredOptions.map((option, idx) => (
-                    <option key={idx} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                {filteredOptions.length === 0 && searchQuery && (
-                  <p className="text-sm text-red-500">No packages found</p>
-                )}
+                />
               </div>
             )
           }
@@ -272,7 +378,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
     return (
       <div key={index} className={`${widthClass} mb-4`}>
         {field.type !== 'checkbox' && (
-          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+          <label className="block text-sm sm:text-base font-medium text-gray-700 mb-1.5">
             {field.label}
             {field.required && <span className="text-red-500 ml-1">*</span>}
           </label>
@@ -283,16 +389,16 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 bg-white rounded-xl shadow-lg">
-      <div className="mb-8 text-center sm:text-left">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">{title}</h2>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 bg-white rounded-xl shadow-lg">
+      <div className="mb-6 text-center sm:text-left">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1">{title}</h2>
         {subtitle && <p className="text-base sm:text-lg text-gray-600">{subtitle}</p>}
       </div>
 
       {submitStatus === 'success' ? (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6 sm:p-8 text-center">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-6 sm:p-7 text-center">
           <svg
-            className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-green-500 mb-4"
+            className="mx-auto h-12 w-12 sm:h-14 sm:w-14 text-green-500 mb-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -303,7 +409,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
           <p className="text-base sm:text-lg text-green-700">{successMessage}</p>
           <button
             onClick={() => setSubmitStatus('idle')}
-            className="mt-6 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            className="mt-5 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
           >
             Submit Another
           </button>
@@ -315,7 +421,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
           </div>
 
           {submitStatus === 'error' && (
-            <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4 sm:p-5 text-sm sm:text-base">
+            <div className="mt-5 bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 text-sm sm:text-base">
               <div className="flex items-start">
                 <svg
                   className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 mt-0.5 mr-2 flex-shrink-0"
@@ -339,7 +445,7 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="mt-8 w-full bg-blue-600 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-lg font-semibold text-base sm:text-lg hover:bg-blue-700 disabled:bg-gray-400 transition duration-200 shadow-md hover:shadow-lg"
+            className="mt-6 w-full bg-blue-600 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-lg font-semibold text-base sm:text-lg hover:bg-blue-700 disabled:bg-gray-400 transition duration-200 shadow-md hover:shadow-lg"
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">

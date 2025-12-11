@@ -1,34 +1,156 @@
+// src/blocks/DynamicScroller/Component.client.tsx
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 
-// Card component explore our features section not included in the main component
-const Card: React.FC<{ title: string; description: string }> = ({ title, description }) => (
-  <div className="flex-shrink-0 w-64 h-80 bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-between m-4">
-    <div>
-      {/* Card title: NATS 24px, 24px line-height, -0.011em */}
-      <h3 className="font-nats text-[24px] leading-[24px] tracking-[-0.011em] text-gray-800 mb-2">
-        {title}
-      </h3>
-      {/* Card body: NATS 24px, 24px line-height, -0.011em */}
-      <p className="font-nats text-[24px] leading-[24px] tracking-[-0.011em] text-gray-600">
-        {description}
-      </p>
-    </div>
-  </div>
-)
+// --- TYPES ---
+type MediaSize = { url?: string | null; width?: number; height?: number }
+type Media =
+  | {
+      id: string
+      url?: string | null
+      filename?: string | null
+      alt?: string | null
+      sizes?: Record<string, MediaSize | undefined> | null
+    }
+  | string
+  | null
+  | undefined
 
-// ✅ Define client props separately (without blockType requirement)
+type Item = {
+  blockType: 'packageItem' | 'itineraryDay' | 'destinationItem'
+  slug?: string
+  href?: string
+  [key: string]: any
+}
+
 type FeatureCarouselClientProps = {
   dataSource?: string
   featureSource?: string
   heading?: string
   subheading?: string
-  cards?: Array<{ title?: string; description?: string }>
+  cards?: Array<{ title?: string; description?: string; mediaUrl?: string }>
   showNavigationButtons?: boolean
   scrollPercentage?: number
 }
+
+
+// --- UTILS ---
+
+function resolveMediaUrl(media: Media): string | undefined {
+  if (media && typeof media === 'object' && 'id' in media) {
+    const m = media as Exclude<Media, string | null | undefined> & { id: string }
+    if (m.url) return m.url
+    if (m.filename) return `/media/${m.filename}`
+    return undefined
+  }
+  if (typeof media === 'string') {
+    if (/^https?:\/\//i.test(media)) return media
+    return undefined
+  }
+  return undefined
+}
+
+function transformPackageToCards(
+  pkg: any,
+  source: string,
+): Array<{ title: string; description: string; mediaUrl?: string }> {
+  const mapItem = (item: any) => ({
+    title: item?.name || item?.title || item?.text || '',
+    description: item?.description || item?.summary || item?.text || '',
+    mediaUrl: resolveMediaUrl(item?.icon || item?.image || item?.media),
+  });
+
+  switch (source) {
+    case 'highlights':
+      return (pkg.highlights || []).map(mapItem);
+    case 'inclusions':
+      return (pkg.inclusions || []).map(mapItem);
+    case 'activities':
+      return (pkg.activities || []).map(mapItem);
+    case 'amenities':
+      return (pkg.amenities || []).map(mapItem);
+    default:
+      return [];
+  }
+}
+
+function getHeadingForSource(packageName: string, source: string): string {
+  const headings: Record<string, string> = {
+    highlights: `${packageName} Highlights`,
+    inclusions: `What's Included in ${packageName}`,
+    activities: `Activities in ${packageName}`,
+    amenities: `Amenities & Features`,
+  }
+  return headings[source] || `${packageName} Features`
+}
+
+function getSubheadingForSource(pkg: any, source: string): string {
+  const subheadings: Record<string, string> = {
+    highlights: pkg.tagline || 'Discover what makes this package special',
+    inclusions: 'Everything you need for an amazing experience',
+    activities: 'Exciting experiences waiting for you',
+    amenities: 'Comfort and convenience throughout your journey',
+  }
+  return subheadings[source] || pkg.summary || ''
+}
+
+
+// --- COMPONENTS ---
+
+/** Renders the feature image/icon, or nothing if no URL is provided. */
+const ImagePlaceholder: React.FC<{ mediaUrl?: string }> = ({ mediaUrl }) => {
+    if (mediaUrl) {
+        return <img src={mediaUrl} alt="Feature Icon" className="w-20 h-20 object-contain" />;
+    }
+    return null; // Return null to remove the element entirely if no image is found
+};
+
+/** Card component for displaying features in the carousel. */
+const Card: React.FC<{ title: string; description: string; mediaUrl?: string }> = ({ title, description, mediaUrl }) => {
+  const hasMedia = !!mediaUrl;
+
+  return (
+    <div
+      className="
+          flex-shrink-0 w-64 h-80 
+          bg-white 
+          rounded-2xl 
+          shadow-lg 
+          p-6 
+          flex flex-col justify-between 
+          m-4 
+          cursor-pointer 
+          
+          // INTERACTIVE STYLES
+          transition-all duration-300 ease-in-out 
+          hover:shadow-xl 
+          hover:scale-[1.01] 
+          hover:translate-y-[-2px] 
+          hover:border-2 hover:border-indigo-500
+      "
+    >
+      {/* Image container: Only renders if mediaUrl is present */}
+      {hasMedia && (
+        <div className="flex-grow w-20 h-20 mb-4 flex items-center justify-center">
+            <ImagePlaceholder mediaUrl={mediaUrl} />
+        </div> 
+      )}
+      
+      {/* Content wrapper: Adjusts layout if image is missing */}
+      <div className={hasMedia ? '' : 'flex-grow flex flex-col justify-end'}>
+        <h3 className="font-nats font-bold text-[24px] leading-[24px] tracking-[-0.011em] text-gray-800 mb-2">
+          {title}
+        </h3>
+        <p className="font-nats text-[22px] leading-[24px] tracking-[-0.011em] text-gray-600">
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 
 // Main component
 export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
@@ -147,13 +269,11 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
       <div className="w-full px-4 sm:px-6 md:px-12 lg:px-16">
         {/* Header section */}
         <div className="text-left mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-            {/* Heading */}
-            <h1 className="font-amiri italic font-bold text-[36px] sm:text-[48px] md:text-[64px] leading-[1.1] tracking-[-0.011em] text-gray-900 whitespace-nowrap mb-2 sm:mb-0">
-              {heading}
-            </h1>
-            <div className="w-full border-t border-dashed border-gray-400"></div>
-          </div>
+          <h1 className="font-amiri italic flex flex-row font-bold text-[36px] sm:text-[48px] md:text-[64px] leading-[1.1] tracking-[-0.011em] text-gray-900  ">
+            {heading}
+          </h1>
+          <div className="w-full border-t border-dashed border-gray-400"></div>
+
 
           {/* Subheading */}
           {subheading && (
@@ -170,15 +290,19 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
           <div className="overflow-hidden py-4">
             <div
               ref={containerRef}
-              className="flex transition-transform duration-500 ease-in-out space-x-4 sm:space-x-6"
+              className="flex transition-transform duration-400 ease-in-out space-x-4 px-4 sm:space-x-6 sm:px-6"
               style={{ transform: `translateX(-${scrollPosition}px)` }}
             >
               {cards.map((item: any, index: number) => (
                 <div
                   key={item?.id || index}
-                  className="min-w-[250px] sm:min-w-[300px] md:min-w-[350px] lg:min-w-[400px] flex-shrink-0"
+                  className="min-w-[150px] sm:min-w-[300px] md:min-w-[350px] lg:min-w-[200px] flex-shrink-0"
                 >
-                  <Card title={item?.title || ''} description={item?.description || ''} />
+                  <Card 
+                    title={item?.title || ''} 
+                    description={item?.description || ''} 
+                    mediaUrl={item?.mediaUrl}
+                  />
                 </div>
               ))}
             </div>
@@ -238,70 +362,6 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
       </div>
     </div>
   )
-}
-
-// Helper functions (same as server-side)
-function transformPackageToCards(
-  pkg: any,
-  source: string,
-): Array<{ title: string; description: string }> {
-  switch (source) {
-    case 'highlights':
-      return (pkg.highlights || []).map((h: any) => ({
-        title: h.text || '',
-        description: h.text || '',
-      }))
-
-    case 'inclusions':
-      return (pkg.inclusions || []).map((inc: any) => {
-        const inclusion = typeof inc === 'object' ? inc : null
-        return {
-          title: inclusion?.name || inclusion?.title || 'Inclusion',
-          description: inclusion?.description || inclusion?.summary || '',
-        }
-      })
-
-    case 'activities':
-      return (pkg.activities || []).map((act: any) => {
-        const activity = typeof act === 'object' ? act : null
-        return {
-          title: activity?.name || activity?.title || 'Activity',
-          description: activity?.description || activity?.summary || '',
-        }
-      })
-
-    case 'amenities':
-      return (pkg.amenities || []).map((am: any) => {
-        const amenity = typeof am === 'object' ? am : null
-        return {
-          title: amenity?.name || amenity?.title || 'Amenity',
-          description: amenity?.description || amenity?.summary || '',
-        }
-      })
-
-    default:
-      return []
-  }
-}
-
-function getHeadingForSource(packageName: string, source: string): string {
-  const headings: Record<string, string> = {
-    highlights: `${packageName} Highlights`,
-    inclusions: `What's Included in ${packageName}`,
-    activities: `Activities in ${packageName}`,
-    amenities: `Amenities & Features`,
-  }
-  return headings[source] || `${packageName} Features`
-}
-
-function getSubheadingForSource(pkg: any, source: string): string {
-  const subheadings: Record<string, string> = {
-    highlights: pkg.tagline || 'Discover what makes this package special',
-    inclusions: 'Everything you need for an amazing experience',
-    activities: 'Exciting experiences waiting for you',
-    amenities: 'Comfort and convenience throughout your journey',
-  }
-  return subheadings[source] || pkg.summary || ''
 }
 
 export default FeatureCarouselClient

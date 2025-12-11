@@ -68,7 +68,7 @@ export const UpDownCardCarousel = async (props: UpDownCardCarouselProps) => {
 
           return {
             name: dest.name,
-            details: dest.shortDescription || dest.locationDetails || '',
+            details: dest.heroData.tagline || dest.shortDescription || dest.locationDetails || '',
             price: dest.startingPrice || 0,
             discount: discountLabel,
             image: dest.featuredImage,

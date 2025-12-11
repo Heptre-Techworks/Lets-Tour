@@ -20,6 +20,7 @@ import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { PackageCategories } from './collections/PackageCategories'
 import { Destinations } from './collections/Destinations'
+import { InternationalPackage } from './collections/InternationalPackage'
 import { Packages } from './collections/Packages'
 import { SearchFilters } from './collections/SearchFilters'
 import { PackageLayout } from './PackageLayout/config'
@@ -76,6 +77,7 @@ export default buildConfig({
     Users,
     PackageCategories,
     Destinations,
+    InternationalPackage,
     Packages,
     AccommodationTypes,
     Activities,
@@ -93,7 +95,7 @@ export default buildConfig({
     Regions,
     Reviews,
     SocialPosts,
-    Vibes
+    Vibes,
   ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, SearchFilters, PackageLayout, DestinationLayout],
@@ -150,6 +152,15 @@ export default buildConfig({
             name: 'Admin',
             email: 'admin@letstour.com',
             password: 'admin123',
+            role: 'admin',
+          },
+        })
+        await payload.create({
+          collection: 'users',
+          data: {
+            name: 'user',
+            email: 'dhanushkumark62@gmail.com',
+            password: '123456789',
             role: 'admin',
           },
         })

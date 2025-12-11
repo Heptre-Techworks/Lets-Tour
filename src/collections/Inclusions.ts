@@ -58,6 +58,14 @@ export const Inclusions: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
     },
+    {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'inclusion-image',
+      },
+    },
   ],
 }
 

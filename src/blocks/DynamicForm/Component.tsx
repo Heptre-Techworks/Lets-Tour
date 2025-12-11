@@ -6,7 +6,7 @@ import { DynamicFormClient } from './Component.client'
 
 export const DynamicForm = async () => {
   const payload = await getPayload({ config: configPromise })
-  
+
   // ✅ Fetch all published packages for the dropdown
   const packagesResult = await payload.find({
     collection: 'packages',
@@ -30,8 +30,8 @@ export const DynamicForm = async () => {
   const bookingFormProps = {
     formType: 'booking' as const,
     title: 'Book Your Dream Vacation',
-    subtitle: 'Fill out the form below and we\'ll get back to you within 24 hours',
-    packageOptions,  // ✅ Pass packages to client
+    subtitle: "Fill out the form below and we'll get back to you within 24 hours",
+    packageOptions, // ✅ Pass packages to client
     fields: [
       // ✅ Package selection with search
       {
@@ -43,7 +43,7 @@ export const DynamicForm = async () => {
         width: 'full' as const,
         options: packageOptions,
       },
-      
+
       // Personal Details
       {
         label: 'Full Name',
@@ -69,7 +69,7 @@ export const DynamicForm = async () => {
         required: true,
         width: 'full' as const,
       },
-      
+
       // Trip Details
       {
         label: 'Travel Start Date',
@@ -85,7 +85,7 @@ export const DynamicForm = async () => {
         required: false,
         width: 'half' as const,
       },
-      
+
       // Number of People
       {
         label: 'Number of Adults',
@@ -111,7 +111,7 @@ export const DynamicForm = async () => {
         required: false,
         width: 'third' as const,
       },
-      
+
       // Contact Details
       {
         label: 'Contact Phone',
@@ -138,7 +138,7 @@ export const DynamicForm = async () => {
         rows: 3,
         width: 'full' as const,
       },
-      
+
       // Pricing
       {
         label: 'Total Price (₹)',
@@ -161,7 +161,7 @@ export const DynamicForm = async () => {
           { label: '£ GBP', value: 'GBP' },
         ],
       },
-      
+
       // Special Requests
       {
         label: 'Special Requests / Dietary Requirements',
@@ -172,7 +172,7 @@ export const DynamicForm = async () => {
         rows: 4,
         width: 'full' as const,
       },
-      
+
       // Terms & Conditions
       {
         label: 'I agree to the terms and conditions and privacy policy',
@@ -183,7 +183,8 @@ export const DynamicForm = async () => {
       },
     ],
     submitButtonText: 'Submit Booking Request',
-    successMessage: 'Thank you for your booking request! We\'ll contact you within 24 hours to confirm your reservation and discuss payment options.',
+    successMessage:
+      "Thank you for your booking request! We'll contact you within 24 hours to confirm your reservation and discuss payment options.",
   }
 
   return <DynamicFormClient {...bookingFormProps} />

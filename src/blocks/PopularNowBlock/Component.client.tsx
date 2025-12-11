@@ -38,8 +38,6 @@ const getImageSrc = (card: CardData) => {
   return ''
 }
 
-// Bumped sizes aligned to shared CSS:
-// xs: 300×194, sm: 350×194, md: 400×222, lg: 450×250, xl: 475×264
 const DestinationCard: React.FC<{
   name: string
   price: string
@@ -50,10 +48,7 @@ const DestinationCard: React.FC<{
   const cardContent = (
     <li
       className="
-        relative
-        w-[300px] sm:w-[350px] md:w-[400px] lg:w-[450px] xl:w-[475px]
-        h-[194px] sm:h-[194px] md:h-[222px] lg:h-[250px] xl:h-[264px]
-        flex-shrink-0
+        relative w-72 h-96 flex-shrink-0 snap-center rounded-2xl shadow-lg overflow-hidden group bg-black/5 block hover:shadow-2xl transition-shadow duration-300
       "
     >
       {src ? (
@@ -103,9 +98,6 @@ const DestinationCard: React.FC<{
           }}
         >
           <span className="hidden md:inline" style={{ fontSize: '16px' }}>
-            Starting from <span className="font-semibold">{price}</span>
-          </span>
-          <span className="inline md:hidden">
             Starting from <span className="font-semibold">{price}</span>
           </span>
         </p>
@@ -272,6 +264,7 @@ export const PopularNowClient: React.FC<{
               >
                 {heading}
               </h1>
+              
               <div
                 className="hidden sm:block flex-grow w-full border-t border-dashed"
                 style={{ borderColor: '#353535' }}

@@ -32,20 +32,6 @@ export const FooterClient: React.FC<FooterClientProps> = ({ data }) => {
             )}
 
             {/* --- Social Links (dynamic if present in CMS) --- */}
-            {hasSocialLinks && (
-              <div className="flex flex-wrap justify-center sm:justify-start gap-4">
-                {data.socialLinks?.map((item, i) => {
-                  if (!item?.link) return null
-                  return (
-                    <CMSLink
-                      key={i}
-                      {...item.link}
-                      className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white transition-all duration-300"
-                    />
-                  )
-                })}
-              </div>
-            )}
           </div>
 
           {/* --- Navigation Groups --- */}

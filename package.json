@@ -22,6 +22,7 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@payloadcms/admin-bar": "3.53.0",
     "@payloadcms/db-mongodb": "3.53.0",
     "@payloadcms/live-preview-react": "3.53.0",

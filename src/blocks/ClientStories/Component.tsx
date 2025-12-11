@@ -28,28 +28,36 @@ const useSlugReplacement = () => {
   return { slug: slugInfo.formatted, rawSlug: slugInfo.raw, replaceSlug }
 }
 
-// ✅ useWindowSize hook
+// ✅ Enhanced useWindowSize hook with debounce
 const useWindowSize = () => {
   const [windowSize, setWindowSize] = useState<{
     width: number | undefined
     height: number | undefined
-  }>({
-    width: undefined,
-    height: undefined,
-  })
+  }>(() => ({
+    width: typeof window !== 'undefined' ? window.innerWidth : undefined,
+    height: typeof window !== 'undefined' ? window.innerHeight : undefined,
+  }))
 
   useEffect(() => {
-    function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      })
+    let timeoutId: ReturnType<typeof setTimeout>
+
+    const handleResize = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        setWindowSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        })
+      }, 150)
     }
 
     window.addEventListener('resize', handleResize)
     handleResize()
 
-    return () => window.removeEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      clearTimeout(timeoutId)
+    }
   }, [])
 
   return windowSize
@@ -60,7 +68,6 @@ type MediaLike = { url?: string | null; alt?: string | null }
 type ClientStoriesBlockProps = {
   heading?: string
   subheading?: string
-  buttonText?: string
   background?: MediaLike | string | null
   backgroundUrl?: string | null
   overlay?: MediaLike | null
@@ -75,6 +82,19 @@ type ClientStoriesBlockProps = {
   }> | null
 }
 
+type CardData = {
+  name: string
+  rating: number
+  story: string
+  photo?: string | null
+}
+
+const extractMediaUrl = (media: any): string | null => {
+  if (!media || typeof media === 'string') return null
+  if (typeof media === 'object' && typeof media.url === 'string') return media.url
+  return null
+}
+
 const getImageSrc = (img?: MediaLike | string | null, url?: string | null) => {
   if (img && typeof img === 'object' && 'url' in img && img?.url) return img.url as string
   if (typeof img === 'string') return img
@@ -85,13 +105,13 @@ const getImageSrc = (img?: MediaLike | string | null, url?: string | null) => {
 const StarRating: React.FC<{ rating?: number | null }> = ({ rating = 0 }) => {
   const safe = Math.max(0, Math.min(5, Number(rating) || 0))
   return (
-    <div className="flex items-center" aria-label={`Rating ${safe} of 5`}>
+    <div className="flex items-center gap-0.5" aria-label={`Rating ${safe} of 5`}>
       {Array.from({ length: 5 }).map((_, i) => {
         const on = i < safe
         return (
           <svg
             key={i}
-            className={`w-5 h-5 ${on ? 'text-yellow-400' : 'text-gray-500'} fill-current`}
+            className={`w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 ${on ? 'text-yellow-400' : 'text-gray-500'} fill-current`}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             aria-hidden="true"
@@ -107,7 +127,6 @@ const StarRating: React.FC<{ rating?: number | null }> = ({ rating = 0 }) => {
 export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
   heading = 'Our client stories from {slug}!',
   subheading = 'Hear what travelers say about {slug}',
-  buttonText = 'View all',
   background,
   backgroundUrl,
   overlay,
@@ -124,14 +143,31 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
 
   const { width: windowWidth } = useWindowSize()
 
+  // ✅ Enhanced responsive card calculation with better breakpoints
   const cardsPerView = useMemo(() => {
     if (windowWidth === undefined) return Math.max(1, Number(cardsPerViewRaw) || 2)
-    if (windowWidth < 768) return 1.2 // Mobile
+    if (windowWidth < 360) return 1 // Extra small mobile
+    if (windowWidth < 480) return 1.15 // Small mobile
+    if (windowWidth < 640) return 1.3 // Medium mobile
+    if (windowWidth < 768) return 1.5 // Large mobile
     if (windowWidth < 1024) return 2 // Tablet
-    return Math.max(1, Number(cardsPerViewRaw) || 3) // Desktop
+    if (windowWidth < 1280) return 2.5 // Small desktop
+    if (windowWidth < 1536) return Math.max(2, Number(cardsPerViewRaw) || 3) // Medium desktop
+    return Math.max(2, Number(cardsPerViewRaw) || 3) // Large desktop
   }, [windowWidth, cardsPerViewRaw])
 
-  const gapPx = Math.max(0, Number(gapPxRaw) || 24)
+  // We always need an integer slide size for logic
+  const slideSize = Math.max(1, Math.floor(cardsPerView))
+
+  // ✅ Responsive gap sizing
+  const gapPx = useMemo(() => {
+    if (windowWidth === undefined) return Math.max(0, Number(gapPxRaw) || 24)
+    if (windowWidth < 480) return 12 // Extra small mobile
+    if (windowWidth < 768) return 16 // Mobile
+    if (windowWidth < 1024) return 24 // Tablet
+    if (windowWidth < 1536) return 28 // Small desktop
+    return Math.max(0, Number(gapPxRaw) || 32) // Large desktop
+  }, [windowWidth, gapPxRaw])
 
   // ✅ Fetch reviews from collection if needed
   const [reviewsFromCollection, setReviewsFromCollection] = useState<Review[]>([])
@@ -178,26 +214,43 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
     fetchReviews()
   }, [populateBy, limit, rawSlug])
 
-  // ✅ Transform reviews to card format
-  const cards = useMemo(() => {
+  // ✅ Transform reviews to card format (with photo)
+  const cards: CardData[] = useMemo(() => {
     if (populateBy === 'manual') {
-      return Array.isArray(manualCards) ? manualCards : []
+      return (Array.isArray(manualCards) ? manualCards : []).map((c) => ({
+        name: c?.name ?? '',
+        rating: c?.rating ?? 5,
+        story: c?.story ?? '',
+        photo: null,
+      }))
     }
 
     return reviewsFromCollection.map((review) => {
-      const user = typeof review.user === 'object' ? review.user : null
+      const user =
+        review && typeof review.user === 'object' && review.user !== null && 'name' in review.user
+          ? (review.user as any)
+          : null
+
+      let firstPhoto: string | null = null
+      if (Array.isArray(review.photos) && review.photos.length > 0) {
+        const first = review.photos[0] as any
+        firstPhoto = extractMediaUrl(first?.image)
+      }
+
       return {
-        name: user?.name || 'Anonymous',
+        name: review.submitterName || 'Anonymous',
         rating: review.rating || 5,
         story: review.body || '',
+        photo: firstPhoto,
       }
     })
   }, [populateBy, manualCards, reviewsFromCollection])
 
   const totalSlides = useMemo(
-    () => Math.max(1, Math.ceil(cards.length / cardsPerView)),
-    [cards, cardsPerView],
+    () => Math.max(1, Math.ceil(cards.length / slideSize)),
+    [cards.length, slideSize],
   )
+
   const [currentSlide, setCurrentSlide] = useState(1)
 
   useEffect(() => {
@@ -208,7 +261,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
   const handleNext = () => setCurrentSlide((prev) => (prev === totalSlides ? 1 : prev + 1))
 
   const cardWidthPct = 100 / cardsPerView
-  const translatePct = (currentSlide - 1) * (cardWidthPct * cardsPerView)
+  const translatePct = (currentSlide - 1) * (cardWidthPct * slideSize)
 
   const bgSrc = getImageSrc(background as any, backgroundUrl as any)
   const overlaySrc =
@@ -217,10 +270,15 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
 
   if (loading) {
     return (
-      <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p style={{ fontFamily: "'NATS', sans-serif" }}>Loading stories...</p>
+      <section className="relative w-full min-h-[60vh] sm:min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
+        <div className="text-center px-4">
+          <div className="animate-spin rounded-full h-8 w-8 xs:h-10 xs:w-10 sm:h-12 sm:w-12 border-b-2 border-white mx-auto mb-3 sm:mb-4" />
+          <p
+            style={{ fontFamily: "'NATS', sans-serif" }}
+            className="text-xs xs:text-sm sm:text-base"
+          >
+            Loading stories...
+          </p>
         </div>
       </section>
     )
@@ -228,8 +286,11 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
 
   if (cards.length === 0) {
     return (
-      <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
-        <p className="text-gray-400" style={{ fontFamily: "'NATS', sans-serif" }}>
+      <section className="relative w-full min-h-[60vh] sm:min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
+        <p
+          className="text-gray-400 px-4 text-xs xs:text-sm sm:text-base"
+          style={{ fontFamily: "'NATS', sans-serif" }}
+        >
           No client stories available yet.
         </p>
       </section>
@@ -238,14 +299,13 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
 
   return (
     <>
-      {/* Load custom fonts */}
       <link
         href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap"
         rel="stylesheet"
       />
       <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />
 
-      <section className="relative w-full min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900">
+      <section className="relative w-full min-h-[60vh] xs:min-h-[65vh] sm:min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900">
         {/* Background */}
         {bgSrc ? (
           <img
@@ -280,62 +340,40 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
         )}
 
         {/* Main content */}
-        <div className="relative z-10 flex flex-col justify-between min-h-[65vh] p-4 md:p-8 lg:p-16">
+        <div className="relative z-10 flex flex-col justify-between min-h-[60vh] xs:min-h-[65vh] sm:min-h-[70vh] p-3 xs:p-4 sm:p-6 md:p-8 lg:p-10 xl:p-14 2xl:p-16">
           <div className="flex flex-col lg:flex-row lg:items-start w-full flex-grow relative">
-            {/* Left column */}
-            <div className="w-full lg:w-1/3 lg:pr-12 space-y-4 text-left mb-12 lg:mb-0">
+            {/* Left column - Heading */}
+            <div className="w-full lg:w-1/3 lg:pr-6 xl:pr-10 2xl:pr-12 space-y-2 xs:space-y-3 sm:space-y-4 text-left mb-6 xs:mb-7 sm:mb-8 lg:mb-0">
               <h1
                 className="
-    text-white 
-    flex items-center 
-    font-[700] italic
-    text-[36px] sm:text-[48px] md:text-[64px] lg:text-[80px]
-    leading-[88%] tracking-[-0.011em]
-  "
+                  text-white 
+                  flex items-center 
+                  font-[700] italic
+                  text-[28px] xs:text-[32px] sm:text-[40px] md:text-[48px] lg:text-[56px] xl:text-[64px] 2xl:text-[80px]
+                  leading-[88%] tracking-[-0.011em]
+                "
                 style={{ fontFamily: "'Amiri', serif" }}
               >
                 {displayHeading}
               </h1>
 
-              {displaySubheading ? (
+              {displaySubheading && (
                 <p
-                  className="text-white flex items-center text-lg sm:text-xl md:text-2xl"
+                  className="text-white flex items-center text-sm xs:text-base sm:text-lg md:text-xl lg:text-xl xl:text-2xl"
                   style={{
                     fontFamily: "'NATS', sans-serif",
                     fontWeight: 400,
-                    lineHeight: '1.2',
+                    lineHeight: '1.3',
                     letterSpacing: '-0.011em',
                   }}
                 >
                   {displaySubheading}
                 </p>
-              ) : null}
-              {buttonText ? (
-                <button
-                  type="button"
-                  className={`
-    flex items-center justify-center text-center text-white
-    rounded-2xl shadow-md hover:opacity-90 transition-opacity duration-300
-    w-[140px] h-[40px] text-base
-    sm:w-[180px] sm:h-[45px] sm:text-lg
-    md:w-[200px] md:h-[50px] md:text-xl
-  `}
-                  style={{
-                    background: '#FBAE3D',
-                    fontFamily: "'NATS', sans-serif",
-                    fontWeight: 400,
-                    letterSpacing: '-0.011em',
-                    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
-                    borderRadius: '16px',
-                  }}
-                >
-                  {buttonText}
-                </button>
-              ) : null}
+              )}
             </div>
 
-            {/* Right column */}
-            <div className="p-4 pt-10 w-full lg:w-2/3 h-full overflow-hidden">
+            {/* Right column - Cards carousel */}
+            <div className="w-full lg:w-2/3 h-full overflow-hidden px-0">
               <div
                 className="flex transition-transform duration-500 ease-in-out"
                 style={{
@@ -345,55 +383,86 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 aria-live="polite"
               >
                 {cards.map((card, idx) => {
-                  const currentCardIndex = Math.round(
-                    (translatePct / 100) * (cards.length / cardsPerView),
-                  )
-                  const isLeftmost = idx === currentCardIndex
+                  const slideStartIndex = (currentSlide - 1) * slideSize
+                  const isLeftmost = idx === slideStartIndex
 
                   return (
                     <div
                       key={`${card?.name ?? 'card'}-${idx}`}
                       className={`
-    flex-shrink-0 
-    transition-transform duration-500 ease-in-out 
-    ${isLeftmost ? 'scale-105 sm:scale-110 z-10' : 'scale-100'}
-  `}
+                        flex-shrink-0 relative 
+                        transition-transform duration-500 ease-in-out 
+                        ${isLeftmost ? 'scale-[1.01] xs:scale-[1.02] sm:scale-[1.03] lg:scale-105 xl:scale-110 z-10' : 'scale-100'}
+                      `}
                       style={{
-                        width: `calc(${cardWidthPct}% - ${gapPx - gapPx / cardsPerView}px)`,
+                        width:
+                          windowWidth && windowWidth < 480
+                            ? '85vw'
+                            : `calc(${cardWidthPct}% - ${gapPx - gapPx / cardsPerView}px)`,
+                        minWidth:
+                          windowWidth && windowWidth < 360
+                            ? '280px'
+                            : windowWidth && windowWidth < 480
+                              ? '85vw'
+                              : 'auto',
+                        maxWidth: windowWidth && windowWidth < 480 ? '320px' : 'none',
                       }}
                     >
                       <div
                         className={`
-                          w-full h-[200px] sm:h-[280px] md:h-[320px] p-4 sm:p-5 backdrop-blur-md text-left transition-all duration-500
-      ${isLeftmost ? 'bg-white/20 shadow-xl sm:shadow-2xl' : 'bg-white/10 shadow-md sm:shadow-lg'}
-      rounded-2xl
-    `}
+                          w-full
+                          h-[320px] xs:h-[320px] sm:h-[340px] md:h-[380px] lg:h-[400px] xl:h-[420px]
+                          p-3 xs:p-4 sm:p-5 md:p-6
+                          backdrop-blur-md text-left transition-all duration-500
+                          ${isLeftmost ? 'bg-white/20 shadow-xl' : 'bg-white/10 shadow-lg'}
+                          rounded-xl sm:rounded-2xl
+                        `}
                       >
-                        <div className="flex flex-col h-full">
-                          {/* Header Section */}
-                          <div className="mb-2 md:mb-4 shrink-0">
-                            <h3
-                              className="font-bold text-base sm:text-lg"
-                              style={{
-                                fontFamily: "'NATS', sans-serif",
-                              }}
-                            >
-                              {card?.name ?? ''}
-                            </h3>
+                        <div className="flex flex-col h-full w-full">
+                          {/* Image Section (Background) */}
+                          {card.photo && (
+                            <div className="absolute inset-0 z-0 rounded-xl sm:rounded-2xl overflow-hidden">
+                              <img
+                                src={card.photo || '/placeholder.png'}
+                                alt={card.name || 'Client photo'}
+                                className="
+                                  w-full 
+                                  h-full 
+                                  object-cover 
+                                  shadow-lg transition-transform duration-300 ease-out
+                                  hover:scale-105 hover:-rotate-1 hover:shadow-2xl
+                                "
+                              />
+                            </div>
+                          )}
 
-                            <StarRating rating={card?.rating as number} />
-                          </div>
+                          {/* Content Section */}
+                          <div className="flex flex-col h-full relative z-10 p-0 justify-end">
+                            {/* Story Text Section */}
+                            <div className="overflow-y-auto overscroll-contain pr-1 sm:pr-2 mb-2 xs:mb-3 sm:mb-4 max-h-[140px] xs:max-h-[150px] sm:max-h-[180px] md:max-h-[200px]">
+                              <p
+                                className="text-grey-200 leading-relaxed whitespace-pre-line text-[11px] xs:text-xs sm:text-sm md:text-base overflow-hidden"
+                                style={{
+                                  fontFamily: "'NATS', sans-serif",
+                                }}
+                              >
+                                {card?.story ? `"${card.story}"` : ''}
+                              </p>
+                            </div>
 
-                          {/* Story Text Section */}
-                          <div className="flex-1 overflow-y-auto overscroll-contain pr-1 sm:pr-2">
-                            <p
-                              className="text-gray-300 leading-relaxed whitespace-pre-line text-xs sm:text-sm md:text-base"
-                              style={{
-                                fontFamily: "'NATS', sans-serif",
-                              }}
-                            >
-                              {card?.story ? `"${card.story}"` : ''}
-                            </p>
+                            {/* Header Section (Name and Rating) */}
+                            <div className="shrink-0">
+                              <h3
+                                className="font-bold text-[11px] xs:text-xs sm:text-sm md:text-base lg:text-lg mb-1 xs:mb-1.5 sm:mb-2 text-yellow"
+                                style={{
+                                  fontFamily: "'NATS', sans-serif",
+                                }}
+                              >
+                                {card?.name ?? ''}
+                              </h3>
+
+                              <StarRating rating={card?.rating as number} />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -405,9 +474,9 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
           </div>
 
           {/* Bottom navigation */}
-          <div className="relative mt-auto pt-10">
+          <div className="relative mt-4 xs:mt-5 sm:mt-6 lg:mt-8 xl:mt-10">
             <div
-              className="absolute top-0 left-0 w-full h-8"
+              className="absolute top-0 left-0 w-full h-4 xs:h-5 sm:h-6 md:h-8 opacity-40 xs:opacity-50 sm:opacity-60 md:opacity-100"
               style={{
                 background:
                   "url(\"data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='white' stroke-width='4' stroke-dasharray='50 30' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e\")",
@@ -418,13 +487,19 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 zIndex: 10,
               }}
             />
-            <div className="flex items-center justify-between mt-6">
-              <div className="flex-1" />
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between mt-3 xs:mt-4 sm:mt-5 md:mt-6">
+              <div className="hidden sm:flex flex-1" />
+
+              {/* Navigation buttons */}
+              <div className="flex items-center gap-2 xs:gap-3 sm:gap-4">
                 <button
                   onClick={handlePrev}
                   aria-label="Previous"
-                  className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+                  className="
+                    w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-12 md:h-12
+                    flex items-center justify-center rounded-full 
+                    hover:opacity-80 active:scale-95 transition-all
+                  "
                   type="button"
                   style={{
                     background: 'rgba(237, 237, 237, 0.75)',
@@ -434,7 +509,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 sm:h-6 sm:w-6"
+                    className="h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5 md:h-6 md:w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -450,7 +525,11 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 <button
                   onClick={handleNext}
                   aria-label="Next"
-                  className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full hover:opacity-80 transition-opacity"
+                  className="
+                    w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-12 md:h-12
+                    flex items-center justify-center rounded-full 
+                    hover:opacity-80 active:scale-95 transition-all
+                  "
                   type="button"
                   style={{
                     background: 'rgba(237, 237, 237, 0.75)',
@@ -460,7 +539,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 sm:h-6 sm:w-6"
+                    className="h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5 md:h-6 md:w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -474,9 +553,11 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                   </svg>
                 </button>
               </div>
+
+              {/* Slide counter */}
               <div className="flex-1 flex justify-end items-center">
                 <div
-                  className="text-white flex items-center tracking-wider text-4xl sm:text-5xl"
+                  className="text-white flex items-center tracking-wider text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl"
                   style={{
                     fontFamily: "'NATS', sans-serif",
                     fontWeight: 400,
@@ -485,7 +566,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                   }}
                 >
                   {currentSlide}
-                  <span className="text-gray-400 mx-2 sm:mx-3">/</span>
+                  <span className="text-gray-400 mx-1 xs:mx-1.5 sm:mx-2 md:mx-3">/</span>
                   {totalSlides}
                 </div>
               </div>

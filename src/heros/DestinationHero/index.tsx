@@ -221,7 +221,7 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
 
-      <div className="relative w-full h-full flex flex-col justify-end text-white px-4 sm:px-6 md:px-12 pb-8 sm:pb-12">
+      <div className="relative w-full h-full flex flex-col justify-end text-white px-4 sm:px-6 md:px-12  sm:pb-12">
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 w-full">
           <h1
             className="font-amiri italic text-[2.2rem] sm:text-[3.5rem] md:text-[6rem] leading-tight tracking-[-0.011em] capitalize text-center md:text-left w-full"
