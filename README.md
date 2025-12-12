@@ -17,14 +17,6 @@ Core features:
 
 Go to Payload Cloud and [clone this template](https://payloadcms.com/new/clone/website). This will create a new repository on your GitHub account with this template's code which you can then clone to your own machine.
 
-#### Method 2
-
-Use the `create-payload-app` CLI to clone this template directly to your machine:
-
-```bash
-pnpx create-payload-app my-project -t website
-```
-
 ### Development
 
 1. First [clone the repo](#clone) if you have not done so already
