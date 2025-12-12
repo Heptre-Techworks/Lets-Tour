@@ -25,14 +25,6 @@ Use the `create-payload-app` CLI to clone this template directly to your machine
 pnpx create-payload-app my-project -t website
 ```
 
-#### Method 3
-
-Use the `git` CLI to clone this template directly to your machine:
-
-```bash
-git clone -n --depth=1 --filter=tree:0 https://github.com/payloadcms/payload my-project && cd my-project && git sparse-checkout set --no-cone templates/website && git checkout && rm -rf .git && git init && git add . && git mv -f templates/website/{.,}* . && git add . && git commit -m "Initial commit"
-```
-
 ### Development
 
 1. First [clone the repo](#clone) if you have not done so already
