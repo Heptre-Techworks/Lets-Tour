@@ -16,7 +16,7 @@ export const Bookings: CollectionConfig = {
     defaultColumns: ['bookingReference', 'user', 'package', 'startDate', 'status'],
     group: 'Bookings',
   },
-
+ 
   access: {
     read: ({ req }) => {
       const user = req?.user

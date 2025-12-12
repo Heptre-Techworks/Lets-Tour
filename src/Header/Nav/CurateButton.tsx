@@ -9,12 +9,17 @@ export const CurateButton: React.FC<{ data: Header }> = ({ data }) => {
   const href = data?.curateButton?.href || '/curate'
   if (!show) return null
 
+  const closeMobileMenu = useCallback(() => {
+    setIsMenuOpen(false)
+  }, [])
+
   return (
     <Link
       href={href}
       // Mobile-first: smaller padding (px-6, py-1), then scales up for large screens (lg:px-8, lg:py-1.5)
       className="inline-flex items-center justify-center rounded-full bg-[#FBAE3D] px-6 py-1 lg:px-8 lg:py-1.5 transition-all duration-200"
       aria-label={text}
+      onLinkClick={closeMobileMenu}
     >
       <span
         // Mobile-first: slightly smaller text (text-lg), then scales up for large screens (lg:text-[20px])
