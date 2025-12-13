@@ -82,10 +82,7 @@ const DestinationCard: React.FC<{
             fontSize: '28px',
           }}
         >
-          <span className="hidden md:inline" style={{ fontSize: '32px' }}>
-            {name}
-          </span>
-          <span className="inline md:hidden">{name}</span>
+          <span style={{ fontSize: '32px' }}>{name}</span>
         </h3>
         <p
           className="mt-1"
@@ -97,7 +94,7 @@ const DestinationCard: React.FC<{
             fontSize: '12px',
           }}
         >
-          <span className="hidden md:inline" style={{ fontSize: '16px' }}>
+          <span style={{ fontSize: '16px' }}>
             Starting from <span className="font-semibold">{price}</span>
           </span>
         </p>
@@ -264,7 +261,7 @@ export const PopularNowClient: React.FC<{
               >
                 {heading}
               </h1>
-              
+
               <div
                 className="hidden sm:block flex-grow w-full border-t border-dashed"
                 style={{ borderColor: '#353535' }}

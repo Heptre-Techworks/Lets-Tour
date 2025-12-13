@@ -19,10 +19,21 @@ type Media =
   | null
   | undefined
 
+// Type for an individual itinerary activity
+type Activity = {
+  icon?: Media | string | null
+  description?: string
+  detailsImage?: Media | string | null
+  text?: string // Added if text field is used as fallback for description
+}
+
 type Item = {
   blockType: 'packageItem' | 'itineraryDay' | 'destinationItem'
   slug?: string
   href?: string
+  // Added type for activities to fix TypeScript error
+  activities?: Activity[]
+  day?: string | number
   [key: string]: any
 }
 
@@ -55,8 +66,8 @@ type Section = {
 
 // Custom Prop Type for ItineraryCard
 type ItineraryCardProps = {
-    item: Item; 
-    defaultExpanded?: boolean;
+  item: Item
+  defaultExpanded?: boolean
 }
 
 // Utils
@@ -310,10 +321,8 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = f
   // Use the prop for initial state control
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
-  const activities = item.activities || []
-
-  // Mock resolveMediaUrl for context, replace with your actual function
-  const resolveMediaUrl = (path: string) => path
+  // Activities now correctly typed as Activity[]
+  const activities = (item.activities || []) as Activity[]
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded)
@@ -370,6 +379,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = f
         `}
       >
         <div className="space-y-2 p-2">
+          {/* Fix applied: 'activity' is now correctly typed as Activity */}
           {activities.map((activity, idx) => {
             const iconSrc = activity.icon ? resolveMediaUrl(activity.icon) : undefined
             const detailsSrc = activity.detailsImage
@@ -377,10 +387,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = f
               : undefined
 
             return (
-              <div
-                key={idx}
-                className="flex items-start space-x-2  border-gray-200 last:border-b-0"
-              >
+              <div key={idx} className="flex items-start space-x-2 border-gray-200 last:border-b-0">
                 <div className="flex-shrink-0">
                   {iconSrc ? (
                     <img src={iconSrc} alt="" className="w-6 h-6 rounded-full bg-gray-100 p-1" />
@@ -396,7 +403,11 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = f
                   {/* Optional: Add image detail if present */}
                   {detailsSrc && (
                     <div className="mt-2">
-                      <img src={detailsSrc} alt="Details" className="w-24 h-14 object-cover rounded-lg" />
+                      <img
+                        src={detailsSrc}
+                        alt="Details"
+                        className="w-24 h-14 object-cover rounded-lg"
+                      />
                     </div>
                   )}
                 </div>
@@ -409,12 +420,8 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = f
   )
 }
 
-
 // Vibe Section
 const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
-// ... (VibeSection component code) ...
-// (Assuming VibeSection is fine as provided, skipping its full repetition)
-// ...
   const vibes = section.vibes || []
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -488,7 +495,6 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
     </section>
   )
 }
-
 
 // Dynamic Section Component
 const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
@@ -567,6 +573,8 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
     )
   }
 
+  // NOTE: Itinerary content is not in the horizontal scroll container, so scroll nav is not shown.
+
   return (
     <section className={`relative overflow-hidden `}>
       <div
@@ -596,31 +604,35 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
           ) : null}
         </header>
 
-        <div
-          ref={scrollRef}
-          className="flex gap-6 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory"
-          style={{ scrollbarWidth: 'none' } as any}
-        >
-          {isPackage &&
-            packageItems.map((item, idx) => <PackageCard key={item.id || idx} item={item} />)}
-          {isDestination &&
-            destinationItems.map((item, idx) => (
-              <DestinationCard key={item.id || idx} item={item} />
-            ))}
-          
-          {section.type === 'itinerary' && (
-            <div className="space-y-4"> 
-              {itineraryItems.map((item, idx) => (
-                <ItineraryCard 
-                  key={item.id || idx} 
-                  item={item} 
-                  // 🔑 FIX APPLIED: Only the first card expands by default
-                  defaultExpanded={idx === 0}
-                />
+        {/* Conditional rendering for horizontal scroller content */}
+        {(isPackage || isDestination) && (
+          <div
+            ref={scrollRef}
+            className="flex gap-6 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none' } as any}
+          >
+            {isPackage &&
+              packageItems.map((item, idx) => <PackageCard key={item.id || idx} item={item} />)}
+            {isDestination &&
+              destinationItems.map((item, idx) => (
+                <DestinationCard key={item.id || idx} item={item} />
               ))}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Conditional rendering for itinerary content (vertical stack) */}
+        {section.type === 'itinerary' && (
+          <div className="space-y-4">
+            {itineraryItems.map((item, idx) => (
+              <ItineraryCard
+                key={item.id || idx}
+                item={item}
+                // Only the first card expands by default
+                defaultExpanded={idx === 0}
+              />
+            ))}
+          </div>
+        )}
 
         {isPackage && navEnabled && packagesCount > 0 && (
           <div className="mt-4">
@@ -692,24 +704,21 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   )
 }
 
-// Vibe Section (assuming its original position was here)
-// (The full VibeSection component should be defined here)
-
-
-// ✅ Main Client Component with auto-fetch itinerary
+// Main Client Component with auto-fetch itinerary
 export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({
   sections: initialSections = [],
 }) => {
   const pathname = usePathname()
   const [sections, setSections] = useState(initialSections)
 
-  // ✅ Auto-fetch itinerary when in package auto mode (same pattern as DestinationHeroCarousel)
+  // Auto-fetch itinerary when in package auto mode
   useEffect(() => {
     const fetchPackageItinerary = async () => {
       const itinerarySection = sections.find((s) => s.type === 'itinerary')
 
       if (!itinerarySection) return
       if (itinerarySection.itinerarySource !== 'package') return
+      // Skip if items already exist or a package relation is manually set
       if (itinerarySection.items && itinerarySection.items.length > 0) return
       if (itinerarySection.packageRelation) return
 
@@ -728,16 +737,21 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({
         if (data.docs[0]?.itinerary) {
           const itinerary = data.docs[0].itinerary
 
-          const itineraryItems = (itinerary || []).map((day: any, idx: number) => ({
-            blockType: 'itineraryDay' as const,
-            id: day.id || `day-${idx}`,
-            day: day.dayTitle || day.day || `Day ${idx + 1}`,
-            activities: (day.activities || []).map((activity: any) => ({
-              icon: activity.icon,
-              description: activity.description || activity.text || '',
-              detailsImage: activity.image || activity.detailsImage,
-            })),
-          }))
+          const itineraryItems = (itinerary || []).map(
+            (day: any, idx: number): Item => ({
+              blockType: 'itineraryDay',
+              id: day.id || `day-${idx}`,
+              day: day.dayTitle || day.day || `Day ${idx + 1}`,
+              // Cast fetched activities to the defined Activity type
+              activities: (day.activities || []).map(
+                (activity: any): Activity => ({
+                  icon: activity.icon,
+                  description: activity.description || activity.text || '',
+                  detailsImage: activity.image || activity.detailsImage,
+                }),
+              ),
+            }),
+          )
 
           setSections((prevSections) =>
             prevSections.map((section) =>

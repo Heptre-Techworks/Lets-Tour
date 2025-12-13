@@ -383,7 +383,7 @@ export const InstagramCarouselClient: React.FC<any> = ({
           >
             {/* 1. Base Image Layer (Static Image) */}
             <img
-              src={rightContainerImage.src || (rightContainerImage as any)}
+              src={rightContainerImage}
               alt="Custom promotional image"
               className="w-full h-[440px] sm:h-[440px] md:h-[550px]  object-contain"
               loading="lazy"
