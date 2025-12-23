@@ -1,7 +1,8 @@
 // storage-adapter-import-placeholder
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
-import { s3Storage } from '@payloadcms/storage-s3' // NEW
+// import { s3Storage } from '@payloadcms/storage-s3' // NEW
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 
 import sharp from 'sharp' // sharp-import
 import path from 'path'
@@ -104,32 +105,40 @@ export default buildConfig({
     autoRevalidatePlugin,
 
     // S3 Storage for Payload (v3) — map collection slugs to S3
-    s3Storage({
+    // s3Storage({
+    //   collections: {
+    //     // MUST equal your upload-enabled collection slug ("media" here)
+    //     media: true,
+    //     // You can add more upload collections here or pass per-collection options, e.g.:
+    //     // documents: { prefix: 'docs/' },
+    //     // mediaWithPresigned: {
+    //     //   signedDownloads: {
+    //     //     shouldUseSignedURL: ({ filename }) => filename.endsWith('.mp4'),
+    //     //   },
+    //     // },
+    //   },
+    //   bucket: process.env.S3_BUCKET as string,
+    //   config: {
+    //     region: process.env.S3_REGION as string,
+    //     credentials: {
+    //       accessKeyId: process.env.S3_ACCESS_KEY_ID as string,
+    //       secretAccessKey: process.env.S3_SECRET_ACCESS_KEY as string,
+    //     },
+    //     // For S3‑compatible providers only:
+    //     // endpoint: process.env.S3_ENDPOINT,
+    //     // forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+    //   },
+    //   // Global toggles you can enable if needed:
+    //   // clientUploads: true, // direct browser uploads (allow CORS PUT on bucket)
+    //   // signedDownloads: true, // presigned GETs while preserving access control
+    // }),
+    vercelBlobStorage({
+      enabled: true,
       collections: {
-        // MUST equal your upload-enabled collection slug ("media" here)
-        media: true,
-        // You can add more upload collections here or pass per-collection options, e.g.:
-        // documents: { prefix: 'docs/' },
-        // mediaWithPresigned: {
-        //   signedDownloads: {
-        //     shouldUseSignedURL: ({ filename }) => filename.endsWith('.mp4'),
-        //   },
-        // },
+        media: true, // Maps to your Media collection slug
       },
-      bucket: process.env.S3_BUCKET as string,
-      config: {
-        region: process.env.S3_REGION as string,
-        credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID as string,
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY as string,
-        },
-        // For S3‑compatible providers only:
-        // endpoint: process.env.S3_ENDPOINT,
-        // forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-      },
-      // Global toggles you can enable if needed:
-      // clientUploads: true, // direct browser uploads (allow CORS PUT on bucket)
-      // signedDownloads: true, // presigned GETs while preserving access control
+      // Ensure this token is in your .env
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     }),
   ],
   secret: process.env.PAYLOAD_SECRET,
