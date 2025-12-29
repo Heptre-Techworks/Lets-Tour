@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { cn } from '@/utilities/ui'
+import Image from 'next/image'
 
 type MaybeImage = { url?: string | null; alt?: string | null } | string | null | undefined
 
@@ -40,11 +41,12 @@ const HoverImage: React.FC<{
       onMouseLeave={handleMouseLeave}
     >
       {src && (
-        <img
+        <Image
           src={src}
           alt={alt}
           className="w-full h-full object-cover transition-transform duration-300 ease-out"
           style={{ transform }}
+          fill
         />
       )}
       {overlay && <div className="absolute inset-0 bg-black/40 pointer-events-none" />}

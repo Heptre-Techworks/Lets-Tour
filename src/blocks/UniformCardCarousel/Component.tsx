@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Media {
   url: string
@@ -60,7 +61,7 @@ export const UniformCardCarousel: React.FC<UniformCardCarouselProps> = ({
             {title}
           </h2>
           <div className="hidden sm:block flex-1 h-px bg-black/20">
-            <img src="/line-6-1.svg" alt="Line" className="w-full h-px object-cover" />
+            <Image fill src="/line-6-1.svg" alt="Line" className="w-full h-px object-cover" />
           </div>
         </div>
         <p className="[font-family:'NATS-Regular',Helvetica] text-black text-sm sm:text-lg md:text-2xl leading-snug max-w-2xl">
@@ -110,7 +111,8 @@ export const UniformCardCarousel: React.FC<UniformCardCarouselProps> = ({
               >
                 <CardContent className="p-0 relative h-full">
                   {/* Background Image */}
-                  <img
+                  <Image
+                    fill
                     src={heroImageUrl}
                     alt={destination.name}
                     className="absolute inset-0 w-full h-full object-cover rounded-2xl"
@@ -145,7 +147,8 @@ export const UniformCardCarousel: React.FC<UniformCardCarouselProps> = ({
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <img
+                        <Image
+                          fill
                           src="/vector-1.svg"
                           alt="Vector"
                           className="w-[120px] sm:w-[160px] md:w-[200px] h-px object-cover mb-2"
@@ -158,7 +161,7 @@ export const UniformCardCarousel: React.FC<UniformCardCarouselProps> = ({
                       <Link href={`/destinations/${destination.slug}`}>
                         <Button className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 bg-[#1e1e1e] hover:bg-[#1e1e1e]/80 rounded-full p-0">
                           <div className="w-6 h-6 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center">
-                            <img src="/arrow-1.svg" alt="Arrow" className="w-3 sm:w-4" />
+                            <Image src="/arrow-1.svg" alt="Arrow" className="w-3 sm:w-4" fill />
                           </div>
                         </Button>
                       </Link>

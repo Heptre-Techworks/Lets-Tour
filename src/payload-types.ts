@@ -913,13 +913,13 @@ export interface Package {
   slug?: string | null;
   slugLock?: boolean | null;
   /**
+   * Brief summary for package cards (e.g., "Madrid 2N, Seville 2N, Granada 1N...")
+   */
+  Summary: string;
+  /**
    * Short tagline for the package
    */
   tagline?: string | null;
-  /**
-   * Brief summary for package cards (e.g., "Madrid 2N, Seville 2N, Granada 1N...")
-   */
-  summary: string;
   /**
    * Full package description shown on package page
    */
@@ -3921,8 +3921,8 @@ export interface PackagesSelect<T extends boolean = true> {
   name?: T;
   slug?: T;
   slugLock?: T;
+  Summary?: T;
   tagline?: T;
-  summary?: T;
   description?: T;
   heroImage?: T;
   gallery?: T;

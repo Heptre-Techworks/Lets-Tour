@@ -35,20 +35,20 @@ export const Packages: CollectionConfig = {
     ...slugField(),
 
     {
-      name: 'tagline',
-      type: 'text',
-      admin: {
-        description: 'Short tagline for the package',
-      },
-    },
-    {
-      name: 'summary',
+      name: 'Summary',
       type: 'textarea',
       required: true,
       maxLength: 300,
       admin: {
         description:
           'Brief summary for package cards (e.g., "Madrid 2N, Seville 2N, Granada 1N...")',
+      },
+    },
+    {
+      name: 'tagline',
+      type: 'text',
+      admin: {
+        description: 'Short tagline for the package',
       },
     },
     {

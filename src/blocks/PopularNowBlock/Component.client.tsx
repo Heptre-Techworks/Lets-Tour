@@ -3,8 +3,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Amiri } from 'next/font/google'
+import Image from 'next/image'
 
 // Amiri for headings (normal + italic)
+// This automatically includes font-display: swap
 const amiri = Amiri({
   subsets: ['latin'],
   weight: ['400', '700'],
@@ -52,7 +54,8 @@ const DestinationCard: React.FC<{
       "
     >
       {src ? (
-        <img
+        <Image
+          fill
           src={src}
           alt={alt || name}
           className="w-full h-full object-cover rounded-2xl shadow-lg"
@@ -69,7 +72,7 @@ const DestinationCard: React.FC<{
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-2xl" />
 
-      {/* Text overlay: Amiri (title) + NATS (price), keep typographic spec */}
+      {/* Text overlay */}
       <div className="absolute bottom-0 left-0 p-4 sm:p-5 md:p-6 text-white">
         <h3
           className="font-bold"
@@ -242,14 +245,14 @@ export const PopularNowClient: React.FC<{
         min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-screen
       "
     >
-      {/* NATS for subheading/prices */}
-      <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />
+      {/* FIXED: Removed NATS link. This is now handled in globals.css to fix FOIT/Lighthouse error */}
 
       {/* Header */}
       <div className="w-full px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8 md:mb-10">
         <div className="max-w-7xl mx-auto">
           <header>
             <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
+              {/* Using amiri.className here is great for performance! */}
               <h1
                 className={`${amiri.className} italic font-bold flex-shrink-0`}
                 style={{
@@ -287,7 +290,6 @@ export const PopularNowClient: React.FC<{
         </div>
       </div>
 
-      {/* Scrollers (layout/animations unchanged) */}
       <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 w-full">
         {Array.isArray(rows) && rows.length > 0 ? (
           rows

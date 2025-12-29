@@ -8,6 +8,8 @@ interface UserProfileProps {
   size?: number
 }
 
+// no usage of this component in future use
+
 export const UserProfile: React.FC<UserProfileProps> = ({
   imageUrl,
   altText = 'User Profile',

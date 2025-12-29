@@ -1,5 +1,5 @@
 import React from 'react'
-
+import Image from 'next/image'
 interface Media {
   url: string
   alt?: string
@@ -37,7 +37,8 @@ const StaticImageBlock: React.FC<Props> = ({
         `}
       >
         {/* ✅ Responsive Image */}
-        <img
+        <Image
+          fill
           src={image.url}
           alt={image.alt || ''}
           // The key to responsiveness: w-full h-full ensures the image fills the container.

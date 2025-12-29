@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link' // ✅ ADD
+import Image from 'next/image'
 
 type MediaLike = { url?: string | null; alt?: string | null }
 
@@ -285,7 +286,8 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
       <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col md:flex-row mb-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300 font-sans">
         {/* Image container with "card-in-card" effect */}
         <div className="md:w-64 p-3 flex-shrink-0">
-          <img
+          <Image
+            fill
             className="h-[48vh] w-full object-cover rounded-xl shadow-md transition-transform duration-300 group-hover:scale-105" // ✅ ADD HOVER EFFECT
             src={imageSrc}
             alt={pkg.title}
@@ -406,28 +408,31 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
               {pkg.recentBookings > 0 && (
                 <div className="mt-3 mb-2 flex  flex-row items-center justify-end space-x-2">
                   <div className="flex -space-x-1">
-                    <img
+                    <Image
+                      fill
                       className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
                       src="https://placehold.co/32x32/FFC107/FFFFFF/png?text=A"
                       alt="User A"
                     />
-                    <img
+                    <Image
+                      fill
                       className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
                       src="https://placehold.co/32x32/4CAF50/FFFFFF/png?text=B"
                       alt="User B"
                     />
-                    <img
+                    <Image
+                      fill
                       className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
                       src="https://placehold.co/32x32/2196F3/FFFFFF/png?text=C"
                       alt="User C"
                     />
                   </div>
-                  <p className="font-nats ">
+                  <span className="font-nats ">
                     {pkg.recentBookings} +
                     <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 m-2">
                       bookings in past month
                     </p>
-                  </p>
+                  </span>
                 </div>
               )}
             </div>

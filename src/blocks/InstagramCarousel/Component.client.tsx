@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { cn } from '@/utilities/ui'
 import RichText from '@/components/RichText'
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import Image from 'next/image'
 
 // Static image import for the right container
 const rightContainerImage =
@@ -17,7 +18,6 @@ const InstagramEmbed = dynamic(
 
 type GridPost = { url: string; captioned?: boolean }
 
-// 🚩 FIXED: The raw HTML constant is replaced with a proper URL constant (RAW_INSTAGRAM_EMBED_HTML_OVERLAY was incorrect type/usage).
 const VIDEO_URL =
   'https://zozxszsaofxvunkl.public.blob.vercel-storage.com/AQPcZr0VAFuUhDLpW0DzIMo4roUsUsN9tIEJOmTOiGg195MSvQYTkvpLGkH7ek1QeI-6NMc0EAlNMLf1jq96MPSPvEZH6YvZl5KqEHQ.mp4'
 const InstagramGlyph = ({ className = 'h-4 w-4' }: { className?: string }) => (
@@ -76,7 +76,6 @@ const EmbedWrapper = ({
   )
 }
 
-// Grid component
 const InstagramImageGrid: React.FC<{
   posts: GridPost[]
   gutter?: string
@@ -112,7 +111,7 @@ const InstagramImageGrid: React.FC<{
   const columnHeight = Math.round(cardWidth * aspect * 2)
   const bigH = Math.round(columnHeight * 0.62)
   const smallH = columnHeight - bigH
-  const embedWidth = cardWidth // Fixed for no overflow
+  const embedWidth = cardWidth
 
   return (
     <section className={cn(className)} aria-label="Instagram images grid">
@@ -132,7 +131,6 @@ const InstagramImageGrid: React.FC<{
 
           return (
             <div key={`col-${colIndex}`} className="ig2-col" style={{ gap: gutter }}>
-              {/* Top cell */}
               {top ? (
                 <div className="ig2-cell" style={{ height: `${topH}px` }}>
                   <div className="ig2-clip" style={{ height: `${topH}px` }}>
@@ -155,7 +153,6 @@ const InstagramImageGrid: React.FC<{
                 <div className="ig2-cell" style={{ height: `${topH}px` }} />
               )}
 
-              {/* Bottom cell */}
               {bottom ? (
                 <div className="ig2-cell" style={{ height: `${bottomH}px` }}>
                   <div className="ig2-clip" style={{ height: `${bottomH}px` }}>
@@ -214,7 +211,6 @@ const InstagramImageGrid: React.FC<{
   )
 }
 
-// Exported component
 export const InstagramCarouselClient: React.FC<any> = ({
   heading,
   profile,
@@ -225,7 +221,6 @@ export const InstagramCarouselClient: React.FC<any> = ({
 }) => {
   const typedCaption = caption as DefaultTypedEditorState | null | undefined
   const hasCaption = !!typedCaption && typeof typedCaption === 'object' && 'root' in typedCaption
-
   const gutter = layout?.gutter ?? '12px'
   const showCaptionsGlobal = !!layout?.showCaptions
 
@@ -238,54 +233,28 @@ export const InstagramCarouselClient: React.FC<any> = ({
 
   const MAX_POSTS_PER_GRID = 4
   const gridOnePosts = allMappedPosts.slice(0, MAX_POSTS_PER_GRID)
-  const gridTwoPosts = allMappedPosts.slice(MAX_POSTS_PER_GRID, MAX_POSTS_PER_GRID * 2)
-
-  const postCount = allMappedPosts.length
   const avatarUrl =
     typeof profile?.avatarUrl === 'object' ? profile.avatarUrl?.url : profile?.avatarUrl
 
-  // State to store left container height and ref to measure it
   const [leftGridHeight, setLeftGridHeight] = useState('auto')
   const leftGridRef = useRef<HTMLDivElement>(null)
-
-  // Ref for the Video container (REPLACED rightEmbedRef)
   const videoContainerRef = useRef<HTMLDivElement>(null)
 
-  // Placeholder state for the second grid (retained, though not used for rendering)
-  const [loadSecondGrid, setLoadSecondGrid] = useState(false)
-
-  useEffect(() => {
-    if (gridTwoPosts.length > 0) {
-      const timer = setTimeout(() => {
-        setLoadSecondGrid(true)
-      }, 500)
-      return () => clearTimeout(timer)
-    }
-  }, [gridTwoPosts.length])
-
-  // Effect to measure LEFT CONTAINER HEIGHT
   useEffect(() => {
     const measureHeight = () => {
-      // Small timeout to allow the Instagram embeds to render and set the height
       setTimeout(() => {
         if (leftGridRef.current) {
-          const height = leftGridRef.current.offsetHeight
-          setLeftGridHeight(`${height}px`)
+          setLeftGridHeight(`${leftGridRef.current.offsetHeight}px`)
         } else {
-          // Fallback height if not measured yet
           setLeftGridHeight('500px')
         }
       }, 100)
     }
-
-    // Measure on mount and on resize
     measureHeight()
     window.addEventListener('resize', measureHeight)
-
     return () => window.removeEventListener('resize', measureHeight)
   }, [gridOnePosts.length])
 
-  // FIXED EFFECT: Autoplay and Mute the direct video embed (replaces old Instagram script loading)
   useEffect(() => {
     const timer = setTimeout(() => {
       const videoElement = videoContainerRef.current?.querySelector('video')
@@ -293,69 +262,71 @@ export const InstagramCarouselClient: React.FC<any> = ({
         videoElement.muted = true
         videoElement.playsInline = true
         videoElement.loop = true
-        videoElement.play().catch((error) => {
-          console.warn('Video autoplay was prevented:', error)
-        })
+        videoElement.play().catch((error) => console.warn(error))
       }
     }, 100)
-
     return () => clearTimeout(timer)
-  }, [videoContainerRef.current])
+  }, [])
 
   return (
     <div className={cn('container py-8', className)}>
-      <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />
+      {/* FIXED: Removed NATS link as it is now in global.css to resolve FOIT/Lighthouse error */}
 
       {(heading || profile?.handle) && (
-        <header className="mb-8 flex flex-wrap items-center gap-3">
+        <header className="mb-10 flex flex-wrap items-center gap-4 border-b pb-4">
           {avatarUrl && (
-            <img
+            <Image
               src={avatarUrl}
               alt={`${profile?.handle ?? 'Instagram'} logo`}
-              className="h-8 w-8 rounded-full object-cover"
+              className="h-10 w-10 rounded-full object-cover shadow-md"
+              fill
             />
           )}
 
           <div className="flex flex-col">
             <h3
-              className="text-2xl sm:text-3xl font-semibold leading-tight text-black"
+              className="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900"
               style={{ fontFamily: "'NATS', sans-serif" }}
             >
               {heading ?? 'Latest on Instagram'}
             </h3>
             <span
-              className="text-sm sm:text-base leading-snug text-black"
+              className="text-sm sm:text-base leading-snug text-gray-600"
               style={{ fontFamily: "'NATS', sans-serif" }}
             >
-              {postCount} posts
+              @{profile?.handle ?? 'Our Feed'} ({allMappedPosts.length} posts)
             </span>
           </div>
 
-          <div className="hidden sm:block h-10 w-px bg-gray-400" aria-hidden="true" />
+          <div className="hidden sm:block h-12 w-px bg-gray-300 mx-4" aria-hidden="true" />
 
           {profile?.profileUrl && (
             <a
               href={profile.profileUrl}
-              className="inline-flex items-center gap-2 rounded-xl px-4 sm:px-5 py-2 text-sm sm:text-base font-medium text-white transition duration-300 hover:bg-blue-700"
+              className="relative group inline-flex items-center gap-3 rounded-full px-5 py-3 text-sm sm:text-base font-medium text-white shadow-lg ml-auto lg:ml-0 transition-all duration-300 ease-in-out overflow-hidden"
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                backgroundColor: '#007BFF',
+                background:
+                  'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
                 fontFamily: "'NATS', sans-serif",
               }}
             >
-              <InstagramGlyph className="h-4 w-4 text-white" />
-              <span>{profile?.followLabel ?? 'Follow us'}</span>
+              <span
+                className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-yellow-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+                aria-hidden="true"
+              ></span>
+              <InstagramGlyph className="h-5 w-5 text-white relative z-10" />
+              <span className="tracking-wide relative z-10">
+                {profile?.followLabel ?? 'Follow us'}
+              </span>
             </a>
           )}
         </header>
       )}
 
-      {/* Responsive Grid Container: side-by-side on large screens, stretch items to match height */}
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-stretch">
-        {/* LEFT CONTAINER: Instagram Grid (Max 4 Posts) */}
         {gridOnePosts.length > 0 && (
-          // Attach REF to the wrapper div to measure its height
           <div className="w-full lg:w-1/2" ref={leftGridRef}>
             <InstagramImageGrid
               posts={gridOnePosts}
@@ -367,50 +338,40 @@ export const InstagramCarouselClient: React.FC<any> = ({
           </div>
         )}
 
-        {/* RIGHT CONTAINER: Static Image with Video Overlay */}
         <div className="w-full lg:w-1/2 m-5">
           <div
             className="ig2-cell w-full"
             style={{
-              height: leftGridHeight, // Dynamic height applied
+              height: leftGridHeight,
               overflow: 'hidden',
-              borderRadius: '20px', // Device rounded corners (Fixed from 10px)
-              position: 'relative', // Context for absolute children
+              borderRadius: '20px',
+              position: 'relative',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'top',
             }}
           >
-            {/* 1. Base Image Layer (Static Image) */}
-            <img
-              src={rightContainerImage}
-              alt="Custom promotional image"
-              className="w-full h-[440px] sm:h-[440px] md:h-[550px]  object-contain"
-              loading="lazy"
-              style={{ position: 'absolute', inset: 0 }}
-            />
+            <picture>
+              <img
+                src={rightContainerImage}
+                alt="Custom promotional image"
+                className="w-full h-[440px] sm:h-[440px] md:h-[550px] object-contain"
+                loading="lazy"
+                style={{ position: 'absolute', inset: 0 }}
+              />
+            </picture>
 
             <div
               ref={videoContainerRef}
-              className="
-    z-10 
-    pointer-events-auto 
-    relative 
-     w-[200px]  sm:w-[200px] md:w-[250px]
-     h-[430px] sm-h[450px] md:h-[530px] 
-    top-[5px] sm:top-[11px] md:top-[10px]  
-    rounded-[30px] 
-    overflow-hidden
-  "
+              className="z-10 pointer-events-auto relative w-[200px] sm:w-[200px] md:w-[250px] h-[430px] sm-h[450px] md:h-[530px] top-[5px] sm:top-[11px] md:top-[10px] rounded-[30px] overflow-hidden"
             >
               <video
                 src={VIDEO_URL}
-                controls={false} // Hide default controls
+                controls={false}
                 autoPlay={true}
                 muted={true}
                 playsInline={true}
                 loop={true}
-                // Size the video element to fill its container
                 style={{
                   width: '100%',
                   height: '100%',

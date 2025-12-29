@@ -2,15 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === Base Layer (Typography + Variables) === */
+/* === 1. External Font Definitions (The Fix) === */
 @layer base {
+  /* This ensures the browser shows fallback text until NATS is loaded */
+  @font-face {
+    font-family: 'NATS';
+    src: url('https://fonts.cdnfonts.com/s/15858/NATS-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* <--- THIS FIXES THE LIGHTHOUSE ERROR */
+  }
+
   /* Reset all headings */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     font-size: unset;
     font-weight: unset;
   }
@@ -40,27 +44,28 @@
     --success: 196 52% 74%;
     --warning: 34 89% 85%;
     --error: 10 100% 86%;
+    --font-nats: 'NATS', sans-serif;
+    --font-amiri: 'Amiri', serif;
   }
 
   /* === Global Reset and Base Styles === */
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     box-sizing: border-box;
   }
 
-  html,
-  body {
+  html, body {
     margin: 0;
     padding: 0;
     width: 100%;
-    overflow-x: hidden; /* Removes horizontal scrollbars */
+    overflow-x: hidden;
+    scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground flex flex-col min-h-[100vh];
     font-family: 'NATS', sans-serif;
     line-height: 1.5;
+    /* font-display is not a valid property for body, it belongs in @font-face */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -75,7 +80,6 @@
 
   /* === Fluid Responsive Typography === */
   html {
-    /* Automatically scales between 14px → 17px based on screen width */
     font-size: clamp(14px, 2vw, 17px);
     scroll-behavior: smooth;
   }
@@ -111,7 +115,6 @@ footer {
 
 /* === Utility Layer === */
 @layer utilities {
-  /* Hide scrollbar (for mobile sliders) */
   .scrollbar-hidden::-webkit-scrollbar {
     display: none;
   }
@@ -121,18 +124,16 @@ footer {
     scrollbar-width: none;
   }
 
-  /* Universal responsive container padding */
   .container-responsive {
     @apply w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12;
   }
 
-  /* Remove tap highlight on mobile */
-  button,
-  a {
+  button, a {
     -webkit-tap-highlight-color: transparent;
   }
 }
 
+/* === Animations === */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -147,10 +148,9 @@ footer {
   animation: fadeInUp 0.3s ease-out;
 }
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
 }
