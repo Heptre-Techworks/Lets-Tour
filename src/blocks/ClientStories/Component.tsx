@@ -433,8 +433,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                                 src={card.photo || '/placeholder.png'}
                                 alt={card.name || 'Client photo'}
                                 className="w-full h-full object-cover transition-all duration-700 ease-in-out transform  group-hover:scale-110 group-hover:-rotate-1 "
-                                width={500}
-                                height={500}
+                                fill
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/40 to-transparent z-10 transition-opacity duration-500 " />
                             </div>

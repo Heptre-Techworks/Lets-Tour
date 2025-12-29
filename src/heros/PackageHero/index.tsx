@@ -7,7 +7,6 @@ import React, { useEffect, useState } from 'react'
 import type { Media as MediaType, Package, Review } from '@/payload-types'
 import { Media } from '@/components/Media'
 import Link from 'next/link'
-import Image from 'next/image'
 
 const StarIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className || 'w-5 h-5 text-yellow-400'} fill="currentColor" viewBox="0 0 20 20">
@@ -112,7 +111,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
 
   const title = pkg.name
   const rating = pkg.starRating || pkg.rating || 5
-  const location = pkg.summary || ''
+  const location = pkg.Summary || ''
   const description = typeof pkg.description === 'string' ? pkg.description : ''
 
   const vacationTypes = pkg.categories
@@ -294,12 +293,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                           key={booking.id}
                           className="w-10 h-10 rounded-full border-2 border-gray-600 overflow-hidden bg-gray-700"
                         >
-                          <Image
-                            fill
-                            src={booking.avatar}
-                            alt=""
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={booking.avatar} alt="" className="w-full h-full object-cover" />
                         </div>
                       ))}
                     </div>
