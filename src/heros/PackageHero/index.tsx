@@ -4,7 +4,7 @@
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-import type { Media as MediaType, Package, Review } from '@/payload-types'
+import type { Package, Review } from '@/payload-types'
 import { Media } from '@/components/Media'
 import Link from 'next/link'
 
@@ -51,6 +51,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   const [pkg, setPackage] = useState<Package | null>(packageProp || null)
   const [recentReviews, setRecentReviews] = useState<Review[]>(recentReviewsProp)
   const [loading, setLoading] = useState(!packageProp)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
     if (packageProp) return
@@ -83,6 +84,56 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   useEffect(() => {
     setHeaderTheme('dark')
   }, [setHeaderTheme])
+
+  const handleDownload = async () => {
+    if (!pkg || isDownloading) return
+
+    // Get brouchre from package (note the typo in the field name)
+    const brouchre = pkg.brouchre
+
+    if (!brouchre || typeof brouchre !== 'object') {
+      alert('No brochure available for download')
+      return
+    }
+
+    setIsDownloading(true)
+
+    try {
+      // Get the URL from the brouchre object
+      const brouchreUrl = brouchre.url
+
+      if (!brouchreUrl) {
+        alert('Brochure URL not found')
+        setIsDownloading(false)
+        return
+      }
+
+      // Fetch the PDF file
+      const response = await fetch(brouchreUrl)
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch brochure')
+      }
+
+      // Get the blob
+      const blob = await response.blob()
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = brouchre.filename || `${pkg.slug || 'package'}-brochure.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading brochure:', error)
+      alert('Failed to download brochure. Please try again.')
+    } finally {
+      setIsDownloading(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -151,6 +202,9 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
 
   const mainImage = pkg.heroImage
   const backgroundImage = pkg.gallery?.[0] || pkg.heroImage
+
+  // Check if brouchre is available
+  const hasBrouchre = pkg.brouchre && typeof pkg.brouchre === 'object' && pkg.brouchre.url
 
   return (
     <section
@@ -310,12 +364,40 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                 </div>
 
                 <div className="flex items-center gap-4">
-                  {enableDownload && (
+                  {enableDownload && hasBrouchre && (
                     <button
-                      className="p-3 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors"
-                      aria-label="Download package details"
+                      onClick={handleDownload}
+                      disabled={isDownloading}
+                      className={`p-3 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-colors ${
+                        isDownloading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                      }`}
+                      aria-label="Download brochure"
+                      title="Download brochure"
                     >
-                      <DownloadIcon />
+                      {isDownloading ? (
+                        <svg
+                          className="animate-spin h-6 w-6 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                      ) : (
+                        <DownloadIcon />
+                      )}
                     </button>
                   )}
                   {/* Button label: NATS 24px line-height 0% style */}

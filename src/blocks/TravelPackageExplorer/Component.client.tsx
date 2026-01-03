@@ -411,11 +411,13 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
                       src="https://placehold.co/32x32/FFC107/FFFFFF/png?text=A"
                       alt="User A"
                     />
-                    <img className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
+                    <img
+                      className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
                       src="https://placehold.co/32x32/4CAF50/FFFFFF/png?text=B"
                       alt="User B"
                     />
-                    <img className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
+                    <img
+                      className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
                       src="https://placehold.co/32x32/2196F3/FFFFFF/png?text=C"
                       alt="User C"
                     />

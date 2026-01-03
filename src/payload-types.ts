@@ -947,6 +947,10 @@ export interface Package {
    */
   gallery?: (string | Media)[] | null;
   /**
+   * Upload PDF brochure for the package
+   */
+  brouchre: string | Media;
+  /**
    * Destinations included in this package
    */
   destinations: (string | Destination)[];
@@ -3926,6 +3930,7 @@ export interface PackagesSelect<T extends boolean = true> {
   description?: T;
   heroImage?: T;
   gallery?: T;
+  brouchre?: T;
   destinations?: T;
   route?:
     | T

@@ -80,6 +80,18 @@ export const Packages: CollectionConfig = {
       },
     },
 
+    //==================== Pdf Brouchre upload  ====================
+
+    {
+      name: 'brouchre',
+      type: 'upload',
+      relationTo: 'media',
+      required: true,
+      admin: {
+        description: 'Upload PDF brochure for the package',
+      },
+    },
+
     // ==================== DESTINATIONS & ROUTE ====================
     {
       name: 'destinations',
