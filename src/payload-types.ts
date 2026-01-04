@@ -949,7 +949,7 @@ export interface Package {
   /**
    * Upload PDF brochure for the package
    */
-  brouchre: string | Media;
+  brouchre?: (string | null) | Media;
   /**
    * Destinations included in this package
    */
