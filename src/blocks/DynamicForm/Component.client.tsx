@@ -168,19 +168,13 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
       }
 
       // 2. 📧 Send Email via EmailJS (New Logic)
-      // Note: We use the raw formData for the email template as transformedData might be nested/complex.
       try {
         await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-          ...formData, // Send raw form data for template variables
+          ...formData,
           form_type: formType,
-          // You might add a custom field for the recipient email if required by the template
-          // recipient_email: formData.email,
         })
       } catch (emailError) {
-        // Log the email error but don't stop the form success flow
-        // if the API submission was already successful.
         console.error('EmailJS failed to send:', emailError)
-        // Optionally, you could set a specific success message mentioning the email issue.
       }
 
       // 3. Cleanup and Success State
@@ -272,41 +266,54 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
                 {/* Dropdown List */}
                 {isDropdownOpen && (
                   <div className="relative">
-                    <div className="absolute z-10 w-full max-h-60 sm:max-h-80 overflow-y-auto overflow-x-hidden bg-white border border-gray-300 rounded-lg shadow-lg">
-                      {filteredOptions.length > 0 ? (
-                        <>
-                          <div className="sticky top-0 bg-gray-100 px-3 py-2 text-xs sm:text-sm font-semibold text-gray-600 border-b">
-                            {filteredOptions.length} package
-                            {filteredOptions.length !== 1 ? 's' : ''} found
-                          </div>
-                          {filteredOptions.map((option, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => {
-                                setFormData((prev) => ({ ...prev, [field.name]: option.value }))
-                              }}
-                              className={`w-full text-left px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base hover:bg-blue-50 transition-colors whitespace-nowrap ${
-                                formData[field.name] === option.value
-                                  ? 'bg-blue-100 font-semibold text-blue-900'
-                                  : 'text-gray-800'
-                              }`}
-                            >
-                              {option.label}
-                            </button>
-                          ))}
-                        </>
-                      ) : (
-                        <div className="px-4 py-6 text-center">
-                          <p className="text-sm sm:text-base text-gray-500">No packages found</p>
-                          <p className="text-xs sm:text-sm text-gray-400 mt-1">
-                            Try adjusting your search
-                          </p>
-                        </div>
-                      )}
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl animate-in slide-in-from-top-2 duration-200">
+                      {/* Internal Style for Scrollbar */}
+                      <style>{`
+                        .scrollbar-custom::-webkit-scrollbar { width: 8px; }
+                        .scrollbar-custom::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 10px; }
+                        .scrollbar-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f3f4f6; }
+                        .scrollbar-custom::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+                      `}</style>
+                      
+                      <div className="scrollbar-custom overflow-y-auto max-h-60 rounded-lg border border-gray-200">
+  <div className="sticky top-0 z-10 bg-gray-50 px-3 py-2 text-xs font-bold text-gray-500 border-b uppercase tracking-wider">
+    {filteredOptions.length} Package
+    {filteredOptions.length !== 1 ? 's' : ''} Found
+  </div>
+
+  {filteredOptions.length > 0 ? (
+    filteredOptions.map((option) => (
+      <button
+        key={option.value}
+        type="button"
+        onClick={() => {
+          setFormData((prev) => ({
+            ...prev,
+            [field.name]: option.value,
+          }))
+          setIsDropdownOpen(false)
+        }}
+        className={`w-full text-left px-4 py-3 text-sm border-b border-gray-50 last:border-none transition-colors
+          ${
+            formData[field.name] === option.value
+              ? 'bg-blue-100 font-semibold text-blue-900'
+              : 'text-gray-800 hover:bg-blue-50'
+          }
+        `}
+      >
+        {option.label}
+      </button>
+    ))
+  ) : (
+    <div className="p-4 text-center text-gray-400 text-sm italic">
+      No packages found
+    </div>
+  )}
+</div>
+
                     </div>
-                    {/* Close dropdown overlay */}
-                    <div className="fixed inset-0 z-0" onClick={() => setIsDropdownOpen(false)} />
+                    {/* Overlay to close when clicking outside */}
+                    <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
                   </div>
                 )}
 

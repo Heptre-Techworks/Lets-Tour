@@ -1,8 +1,6 @@
-// src/components/site/Header/Nav/HoverMenu.tsx
 'use client'
 import Link from 'next/link'
-import React, { useEffect, useState, useCallback } from 'react'
-import { createPortal } from 'react-dom' // Added for improved modal management if needed (currently not used but often helpful)
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 
 type Item = { id: string; name: string; slug: string }
 
@@ -15,12 +13,13 @@ interface HoverMenuProps {
 }
 
 const LoadingIndicator: React.FC = () => (
-  <div className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-500">
-    <span className="relative flex h-2 w-2">
-      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gray-400 opacity-75"></span>
-      <span className="relative inline-flex rounded-full h-2 w-2 bg-gray-500"></span>
-    </span>
-    <span>Loading...</span>
+  <div className="flex flex-col items-center justify-center p-8 space-y-3">
+    <div className="flex space-x-1">
+      <div className="h-2 w-2 bg-[#FBAE3D] rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+      <div className="h-2 w-2 bg-[#FBAE3D] rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+      <div className="h-2 w-2 bg-[#FBAE3D] rounded-full animate-bounce"></div>
+    </div>
+    <span className="text-xs font-medium text-gray-400 uppercase tracking-widest">Loading</span>
   </div>
 )
 
@@ -34,64 +33,37 @@ export const HoverMenu: React.FC<HoverMenuProps> = ({
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState<Item[]>([])
+  const menuRef = useRef<HTMLDivElement>(null)
 
-  // Use a click handler to toggle menu on desktop/mobile
-  const toggleMenu = () => setOpen((prevOpen) => !prevOpen)
-  const closeMenu = () => setOpen(false)
+  const toggleMenu = () => setOpen((prev) => !prev)
+  const closeMenu = useCallback(() => setOpen(false), [])
 
-  // Handle closing the menu and optionally calling a parent handler (from Navigation.tsx)
   const handleLinkClick = useCallback(() => {
     closeMenu()
-    if (onLinkClick) {
-      onLinkClick()
-    }
-  }, [onLinkClick])
+    onLinkClick?.()
+  }, [closeMenu, onLinkClick])
 
-  // --- ESC KEY CLOSING (UX Enhancement) ---
+  // --- ESC KEY & CLICK OUTSIDE ---
   useEffect(() => {
-    const handleKeydown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+    const handleEvents = (event: any) => {
+      if (event.key === 'Escape') closeMenu()
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         closeMenu()
       }
     }
-    document.addEventListener('keydown', handleKeydown)
-    return () => document.removeEventListener('keydown', handleKeydown)
-  }, [])
-
-  // --- CLICK OUTSIDE CLOSING (UX Enhancement for desktop) ---
-  useEffect(() => {
-    const handleMouseDown = (event: MouseEvent) => {
-      const target = event.target as HTMLElement
-      const menuElement = document.getElementById(
-        'desktop-menu-container-' + label.replace(/\s+/g, '-'),
-      )
-      const buttonElement = document.getElementById('menu-button-' + label.replace(/\s+/g, '-'))
-
-      // Close if clicking outside the menu and outside the button
-      if (
-        open &&
-        menuElement &&
-        !menuElement.contains(target) &&
-        buttonElement &&
-        !buttonElement.contains(target)
-      ) {
-        // Check if the screen is wider than the mobile breakpoint (sm: 640px in Tailwind default)
-        if (window.innerWidth >= 640) {
-          closeMenu()
-        }
-      }
+    document.addEventListener('keydown', handleEvents)
+    document.addEventListener('mousedown', handleEvents)
+    return () => {
+      document.removeEventListener('keydown', handleEvents)
+      document.removeEventListener('mousedown', handleEvents)
     }
+  }, [closeMenu])
 
-    document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
-  }, [open, label])
-
-  // Data fetching effect
+  // --- DATA FETCHING ---
   useEffect(() => {
     if (open && items.length === 0 && !loading) {
       setLoading(true)
-      // FIX: Use the native fetch endpoint directly
-      fetch(endpoint, { next: { revalidate: 60 } })
+      fetch(endpoint)
         .then((r) => r.json())
         .then((data) => {
           const docs = Array.isArray(data?.docs) ? data.docs : []
@@ -101,132 +73,116 @@ export const HoverMenu: React.FC<HoverMenuProps> = ({
     }
   }, [open, items.length, loading, endpoint])
 
+  const slugifiedLabel = label.replace(/\s+/g, '-').toLowerCase()
+
   return (
-    <div className="relative">
-      {/* --- BUTTON/TRIGGER (Cool Styling) --- */}
+    <div className="relative inline-block" ref={menuRef}>
+      {/* --- TRIGGER BUTTON --- */}
       <button
         type="button"
-        id={'menu-button-' + label.replace(/\s+/g, '-')}
-        className={`
-          cursor-pointer font-sans leading-[0.88] text-[14px] sm:text-[20px] md:text-[20px] lg:text-[24px]
-          font-medium relative group
-          text-black md:text-white
-          tracking-[-0.011em] 
-          transition-colors duration-300
-          ${className || ''} 
-        `}
         onClick={toggleMenu}
         aria-expanded={open}
-        aria-controls={`mobile-menu-${label.replace(/\s+/g, '-')} desktop-menu-${label.replace(/\s+/g, '-')}`}
+        className={`
+          group flex items-center gap-1.5 py-2
+          font-sans text-[15px] sm:text-[18px] lg:text-[20px] font-semibold
+          text-gray-900 md:text-white transition-all duration-300
+          ${className || ''}
+        `}
       >
-        <span className="align-middle group-hover:text-[#FBAE3D] md:group-hover:text-[#FBAE3D] transition-colors">
+        <span className="relative">
           {label}
+          <span className={`
+            absolute -bottom-1 left-0 h-[2px] bg-[#FBAE3D] transition-all duration-300
+            ${open ? 'w-full' : 'w-0 group-hover:w-full'}
+          `} />
         </span>
-        {/* Subtle underline effect */}
-        <span className="absolute bottom-[-5px] left-0 h-0.5 w-full bg-[#FBAE3D] transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
+        <svg 
+          className={`w-4 h-4 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} 
+          fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
 
-      {/* 1. MOBILE SLIDE-IN MENU (Fixed, Full-Screen, hidden on 'sm' and up) */}
+      {/* --- MOBILE OVERLAY MENU --- */}
       <div
-        id={`mobile-menu-${label.replace(/\s+/g, '-')}`}
-        className={[
-          // Base Mobile Styles: Full height, fixed, slide-in from right
-          'fixed inset-y-0 right-0 z-[1000] transform transition-transform duration-500 ease-in-out', // Increased Z-index and faster transition
-          'w-full bg-white shadow-2xl ',
-          'p-6 flex flex-col',
-          'sm:hidden',
-          // Visibility Logic
-          open ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none',
-        ].join(' ')}
-        role="menu"
-        aria-label={`${label} mobile menu`}
+        className={`
+          fixed inset-0 z-[1000] bg-black/20 backdrop-blur-sm transition-opacity duration-300 sm:hidden
+          ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
+        `}
+        onClick={closeMenu}
       >
-        {/* --- MOBILE HEADER --- */}
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-gray-200">
-          <h3 className="font-bold text-xl text-gray-900">{label}</h3>
-          <button
-            onClick={closeMenu}
-            aria-label="Close menu"
-            className="p-2 text-gray-700 hover:bg-red-500 hover:text-white rounded-full transition-colors"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="24"
-              height="24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-
-        {/* List Container (Handles scrolling) */}
-        <div className="flex-grow overflow-y-hidden">
-          {loading ? (
-            <LoadingIndicator />
-          ) : (
-            <ul className="space-y-1">
-              {items.map((it) => (
-                <li key={it.id} role="none">
-                  <Link
-                    href={`${hrefBase}/${it.slug}`}
-                    className="block px-3 py-3 text-base font-medium text-gray-800 hover:bg-[#FBAE3D]/20 hover:text-gray-900 rounded transition-all duration-200 transform hover:translate-x-1"
-                    role="menuitem"
-                    onClick={handleLinkClick}
-                  >
-                    {it.name}
-                  </Link>
-                </li>
-              ))}
-              {items.length === 0 && (
-                <li className="px-3 py-2 text-sm text-gray-500">No items available.</li>
+        <div
+          className={`
+            absolute right-0 top-0 h-full w-[80%] max-w-sm bg-white shadow-2xl transition-transform duration-500 ease-out
+            ${open ? 'translate-x-0' : 'translate-x-full'}
+          `}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#FBAE3D]">{label}</span>
+              <button onClick={closeMenu} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="flex-grow overflow-y-auto p-4">
+              {loading ? <LoadingIndicator /> : (
+                <div className="grid gap-2">
+                  {items.map((it) => (
+                    <Link
+                      key={it.id}
+                      href={`${hrefBase}/${it.slug}`}
+                      onClick={handleLinkClick}
+                      className="px-4 py-4 text-lg font-medium text-gray-800 active:bg-orange-50 rounded-xl"
+                    >
+                      {it.name}
+                    </Link>
+                  ))}
+                </div>
               )}
-            </ul>
-          )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 2. DESKTOP HOVER MENU (Absolute, Fade-in, hidden below 'sm') */}
-      <div
-        id={'desktop-menu-container-' + label.replace(/\s+/g, '-')}
-        className={[
-          'hidden sm:block',
-          'absolute left-1/2 -translate-x-1/2 top-full mt-3 z-50',
-          'w-[320px] rounded-xl bg-white/95 shadow-2xl ring-1 ring-black/10',
-          'p-3 transition-all duration-200',
-          open
-            ? 'opacity-100 pointer-events-auto scale-100'
-            : 'opacity-0 pointer-events-none scale-95',
-        ].join(' ')}
-        role="menu"
-        aria-label={`${label} desktop menu`}
-      >
-        {loading ? (
-          <LoadingIndicator />
-        ) : (
-          <ul className="max-h-[60vh] overflow-y-auto space-y-1">
-            {items.map((it) => (
-              <li key={it.id} role="none">
-                <Link
-                  href={`${hrefBase}/${it.slug}`}
-                  className="block px-4 py-2 text-sm text-gray-800 hover:bg-[#FBAE3D]/20 hover:text-gray-900 rounded transition-all duration-200 transform hover:translate-x-0.5"
-                  role="menuitem"
-                  onClick={handleLinkClick}
-                >
-                  {it.name}
-                </Link>
-              </li>
-            ))}
-            {items.length === 0 && (
-              <li className="px-3 py-2 text-sm text-gray-500">No items available.</li>
+      {/* --- DESKTOP DROPDOWN --- */}
+      <div className={`
+        hidden sm:block absolute left-1/2 -translate-x-1/2 top-full pt-4 z-50 transition-all duration-300
+        ${open ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}
+      `}>
+        <div className="w-[340px] bg-white/95 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden">
+          <div className="max-h-[400px] overflow-y-auto scrollbar-hide">
+            {loading ? <LoadingIndicator /> : (
+              <div className="p-3">
+                <div className="px-3 py-2 mb-2">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em]">Explore {label}</p>
+                </div>
+                {items.length > 0 ? (
+                  <div className="grid gap-1">
+                    {items.map((it) => (
+                      <Link
+                        key={it.id}
+                        href={`${hrefBase}/${it.slug}`}
+                        onClick={handleLinkClick}
+                        className="group flex items-center justify-between px-4 py-3 rounded-xl hover:bg-[#FBAE3D] transition-all duration-200"
+                      >
+                        <span className="text-sm font-semibold text-gray-700 group-hover:text-white transition-colors">
+                          {it.name}
+                        </span>
+                        <svg className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center text-gray-400 text-sm italic">No entries found.</div>
+                )}
+              </div>
             )}
-          </ul>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   )
