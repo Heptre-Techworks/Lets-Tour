@@ -63,7 +63,7 @@ const ToolbarFontDropdown = () => {
       {/* value must be string, Select handles internal option mapping */}
       <Select
          options={fonts}
-         value={selectedFont} 
+         value={fonts.find(f => f.value === selectedFont)} 
          onChange={(option: any) => applyFont(option ? (Array.isArray(option) ? option[0].value : option.value) : 'Inter, sans-serif')}
       />
     </div>
