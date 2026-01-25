@@ -25,6 +25,14 @@ export const Packages: CollectionConfig = {
   fields: [
     // ==================== BASIC INFO ====================
     {
+      name: 'overview',
+      type: 'richText',
+      required: true,
+      admin: {
+        description: 'Brief overview of the package',
+      },
+    },
+    {
       name: 'name',
       type: 'text',
       required: true,

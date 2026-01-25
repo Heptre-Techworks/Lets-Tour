@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
 import Image from 'next/image'
+import RichText from '@/components/RichText'
 
 interface Media {
   url: string
@@ -17,7 +18,7 @@ interface Destination {
   name: string
   slug: string
   country: string
-  shortDescription?: string
+  shortDescription?: any
   featured?: boolean
   heroImage?: Media | string
   startingPrice?: number
@@ -140,10 +141,18 @@ export const UniformCardCarousel: React.FC<UniformCardCarouselProps> = ({
                     <h3 className="[font-family:'Amiri',Helvetica] italic text-white text-2xl sm:text-3xl md:text-4xl leading-tight mb-1 sm:mb-2">
                       {destination.name}
                     </h3>
-                    <p className="[font-family:'NATS-Regular',Helvetica] text-white text-xs sm:text-sm leading-snug mb-3 sm:mb-5 line-clamp-2">
-                      {destination.shortDescription ||
-                        `${destination.country} - Experience the beauty and culture`}
-                    </p>
+                    <div className="[font-family:'NATS-Regular',Helvetica] text-white text-xs sm:text-sm leading-snug mb-3 sm:mb-5 line-clamp-2 relative z-10">
+                       {destination.shortDescription ? (
+                         <RichText 
+                           data={destination.shortDescription} 
+                           enableGutter={false}
+                           enableProse={false}
+                           className="text-white bg-transparent"
+                         />
+                       ) : (
+                         `${destination.country} - Experience the beauty and culture`
+                       )}
+                    </div>
 
                     <div className="flex items-center justify-between">
                       <div>

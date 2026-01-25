@@ -53,7 +53,7 @@ export const Regions: CollectionConfig = {
     },
     {
       name: 'description',
-      type: 'textarea',
+      type: 'richText',
     },
     {
       name: 'code',

@@ -51,9 +51,8 @@ export const Places: CollectionConfig = {
     // ✅ NEW: For carousel cards
     {
       name: 'shortDescription',
-      type: 'textarea',
+      type: 'richText',
       required: true,
-      maxLength: 150,
       admin: {
         description: 'Brief excerpt for carousel cards (max 150 chars)',
       },

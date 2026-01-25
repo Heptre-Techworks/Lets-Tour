@@ -37,9 +37,8 @@ export const Destinations: CollectionConfig = {
 
     {
       name: 'shortDescription',
-      type: 'textarea',
+      type: 'richText',
       required: true,
-      maxLength: 200,
       admin: {
         description: 'Brief description for cards on homepage (max 200 characters)',
       },

@@ -108,7 +108,9 @@ export const ImageGridClient: React.FC<any> = ({
               </p>
             )}
             {leftHero?.trail && (
-              <p className="text-xs sm:text-sm text-gray-400 mt-1">{leftHero.trail}</p>
+              <div className="text-xs sm:text-sm text-gray-400 mt-1">
+                 <RichText data={leftHero.trail} enableGutter={false} enableProse={false} />
+              </div>
             )}
           </div>
         </HoverImage>
@@ -127,7 +129,9 @@ export const ImageGridClient: React.FC<any> = ({
                 <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2">{explore.title}</h3>
               )}
               {explore?.description && (
-                <p className="text-gray-300 mt-3 text-sm sm:text-base">{explore.description}</p>
+                <div className="text-gray-300 mt-3 text-sm sm:text-base">
+                  <RichText data={explore.description} enableGutter={false} enableProse={false} />
+                </div>
               )}
               {explore?.button?.label && (
                 <a
@@ -192,7 +196,9 @@ export const ImageGridClient: React.FC<any> = ({
               </h2>
             )}
             {activities?.description && (
-              <p className="text-gray-200 mt-3 text-sm sm:text-base">{activities.description}</p>
+              <div className="text-gray-200 mt-3 text-sm sm:text-base">
+                 <RichText data={activities.description} enableGutter={false} enableProse={false} />
+              </div>
             )}
             {activities?.button?.label && (
               <a

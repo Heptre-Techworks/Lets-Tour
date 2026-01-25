@@ -73,7 +73,7 @@ export const Cities: CollectionConfig = {
     
     {
       name: 'description',
-      type: 'textarea',
+      type: 'richText',
       admin: {
         description: 'Brief city description',
       },

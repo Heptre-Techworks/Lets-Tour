@@ -20,15 +20,7 @@ export const ThemeSettings: GlobalConfig = {
             description: 'The name of the font as it appears in Google Fonts (e.g. "Pacifico")',
           },
         },
-        {
-          name: 'value',
-          type: 'text',
-          label: 'CSS Value',
-          required: true,
-          admin: {
-            description: 'The CSS font-family value (e.g. "Pacifico, cursive")',
-          },
-        },
+        // Value removed - auto-generated
         {
           name: 'link',
           type: 'text',

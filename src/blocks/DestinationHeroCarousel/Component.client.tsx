@@ -4,6 +4,7 @@
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
+import RichText from '@/components/RichText'
 
 const ChevronLeftIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
   <svg
@@ -79,7 +80,7 @@ interface Stop {
   name: string
   city: string
   image: Media | string
-  excerpt: string
+  excerpt: any
   slug?: string
 }
 
@@ -380,7 +381,9 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
                           </div>
                           <div className="bg-orange-400 text-white px-4 h-[180px] flex flex-col justify-center text-center rounded-b-lg">
                             <h3 className="font-serif italic text-xl md:text-2xl">{stop.name}</h3>
-                            <p className="text-sm mt-1">{stop.excerpt}</p>
+                            <div className="text-sm mt-1">
+                               <RichText data={stop.excerpt} enableGutter={false} enableProse={false} />
+                            </div>
                           </div>
                         </>
                       ) : (

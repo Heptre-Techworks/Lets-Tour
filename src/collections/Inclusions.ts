@@ -51,7 +51,7 @@ export const Inclusions: CollectionConfig = {
     },
     {
       name: 'description',
-      type: 'textarea',
+      type: 'richText',
     },
     {
       name: 'icon',

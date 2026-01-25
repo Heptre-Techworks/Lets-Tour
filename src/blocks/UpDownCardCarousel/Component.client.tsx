@@ -3,6 +3,7 @@
 import React, { useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import RichText from '@/components/RichText'
 
 // Narrow media shape from Payload Upload relation
 type MediaLike =
@@ -17,7 +18,7 @@ type MediaLike =
 // Local card helper type
 type CardLike = {
   name?: string | null
-  details?: string | null
+  details?: any
   discount?: string | null
   price?: number | string | null
   image?: MediaLike | string | null
@@ -233,7 +234,7 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
               {card?.name ?? ''}
             </h3>
             {card?.details ? (
-              <p
+              <div
                 className="flex items-center mt-2 sm:mt-3 text-sm sm:text-base lg:text-lg"
                 style={{
                   fontFamily: "'NATS', sans-serif",
@@ -241,8 +242,8 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
                   letterSpacing: '-0.011em',
                 }}
               >
-                {card.details}
-              </p>
+                <RichText data={card.details} enableGutter={false} enableProse={false} />
+              </div>
             ) : null}
 
             {/* {card?.details && (

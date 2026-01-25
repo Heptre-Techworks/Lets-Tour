@@ -21,8 +21,8 @@ const ToolbarFontDropdown = () => {
         const data = await response.json()
         const customFonts = data.fonts?.map((f: any) => ({
           label: f.name,
-          value: f.value, 
-          link: f.link // We'll need to inject this
+          value: `${f.name}, sans-serif`, // Auto-generate CSS value
+          link: f.link 
         })) || []
 
         // Inject Styles dynamically
@@ -63,6 +63,7 @@ const ToolbarFontDropdown = () => {
       {/* value must be string, Select handles internal option mapping */}
       <Select
          options={fonts}
+         // Fix: Check if value matches (handling the auto-generated suffix)
          value={fonts.find(f => f.value === selectedFont)} 
          onChange={(option: any) => applyFont(option ? (Array.isArray(option) ? option[0].value : option.value) : 'Inter, sans-serif')}
       />

@@ -497,7 +497,21 @@ export interface Destination {
   /**
    * Brief description for cards on homepage (max 200 characters)
    */
-  shortDescription: string;
+  shortDescription: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
   /**
    * Full destination overview displayed on destination page
    */
@@ -662,7 +676,21 @@ export interface Region {
    * Type of regional division
    */
   type?: ('province' | 'territory' | 'county' | 'district' | 'other') | null;
-  description?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   /**
    * Region code (e.g., "CAT", "AND")
    */
@@ -695,7 +723,21 @@ export interface City {
   /**
    * Brief city description
    */
-  description?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   /**
    * City thumbnail/card image
    */
@@ -724,7 +766,21 @@ export interface Place {
   /**
    * Brief excerpt for carousel cards (max 150 chars)
    */
-  shortDescription: string;
+  shortDescription: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
   /**
    * Full place description
    */
@@ -908,6 +964,24 @@ export interface InfoPanelBlock {
  */
 export interface Package {
   id: string;
+  /**
+   * Brief overview of the package
+   */
+  overview: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
   /**
    * Package name (e.g., "Spanish Escape")
    */
@@ -1155,7 +1229,21 @@ export interface Inclusion {
    */
   name: string;
   category?: ('accommodation' | 'transportation' | 'meals' | 'activities' | 'guides' | 'other') | null;
-  description?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   icon?: (string | null) | Media;
   /**
    * inclusion-image
@@ -1179,7 +1267,21 @@ export interface Exclusion {
    */
   name: string;
   category?: ('transportation' | 'meals' | 'insurance' | 'personal' | 'documents' | 'other') | null;
-  description?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   icon?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
@@ -3924,6 +4026,7 @@ export interface InternationalPackageSelect<T extends boolean = true> {
  * via the `definition` "packages_select".
  */
 export interface PackagesSelect<T extends boolean = true> {
+  overview?: T;
   name?: T;
   slug?: T;
   slugLock?: T;
@@ -4730,10 +4833,6 @@ export interface ThemeSetting {
          */
         name: string;
         /**
-         * The CSS font-family value (e.g. "Pacifico, cursive")
-         */
-        value: string;
-        /**
          * The full URL from Google Fonts (e.g. https://fonts.googleapis.com/css2?family=Pacifico&display=swap)
          */
         link: string;
@@ -5358,7 +5457,6 @@ export interface ThemeSettingsSelect<T extends boolean = true> {
     | T
     | {
         name?: T;
-        value?: T;
         link?: T;
         id?: T;
       };
