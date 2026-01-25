@@ -12,13 +12,31 @@ export const CurateButton: React.FC<{ data: Header }> = ({ data }) => {
   return (
     <Link
       href={href}
-      // Mobile-first: smaller padding (px-6, py-1), then scales up for large screens (lg:px-8, lg:py-1.5)
-      className="inline-flex items-center justify-center rounded-full bg-[#FBAE3D] px-6 py-1 lg:px-8 lg:py-1.5 transition-all duration-200"
       aria-label={text}
+      className="
+    inline-flex items-center justify-center 
+    rounded-full bg-[#FBAE3D] 
+px-6 py-1 lg:px-8 lg:py-1.5    text-white shadow-md
+    transition-all duration-300 ease-out
+    hover:bg-[#e89d2d] hover:shadow-lg hover:-translate-y-0.5
+    active:scale-95 active:shadow-inner
+    group overflow-hidden relative
+  "
     >
+      {/* Optional: Subtle inner glow/gradient for depth */}
+      <span className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
       <span
-        // Mobile-first: slightly smaller text (text-lg), then scales up for large screens (lg:text-[20px])
-        className="font-sans text-white text-lg lg:text-[20px] leading-[0.88] tracking-[-0.011em]"
+        className="
+      relative z-10
+      font-sans font-bold uppercase tracking-wider
+      text-sm sm:text-base lg:text-lg
+      leading-none
+    "
+        style={{
+          letterSpacing: '0.05em', // Better readability for buttons
+          textShadow: '0px 1px 2px rgba(0,0,0,0.1)',
+        }}
       >
         {text}
       </span>

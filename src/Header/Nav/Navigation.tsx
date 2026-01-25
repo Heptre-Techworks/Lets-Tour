@@ -51,6 +51,13 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
         hrefBase: '/packages',
         endpoint: '/api/packages?where[isPublished][equals]=true&limit=50&sort=name&depth=0',
       },
+      // {
+      //   key: 'international-package',
+      //   label: 'International Package',
+      //   hrefBase: '/international-package',
+      //   endpoint:
+      //     '/api/international-package?where[isPublished][equals]=true&limit=50&sort=name&depth=0',
+      // },
     ],
     [],
   )
@@ -176,7 +183,7 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
         </div>
 
         {/* Menu Items (Scrollable content) */}
-        <div className="w-full flex flex-col items-start justify-start gap-5 sm:gap-6 overflow-y-auto">
+        <div className="w-full flex flex-col items-start justify-start gap-5 sm:gap-6 ">
           {mainMenuItems.map((item) => (
             <HoverMenu
               key={`${item.key}-mobile`}

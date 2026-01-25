@@ -3,6 +3,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 
 // --- TYPES ---
 type MediaSize = { url?: string | null; width?: number; height?: number }
@@ -25,16 +26,22 @@ type Item = {
   [key: string]: any
 }
 
+type CardData = {
+  title?: string
+  description?: string
+  iconUrl?: string // Icon URL (small image)
+  imageUrl?: string // Full Image URL (large feature image)
+}
+
 type FeatureCarouselClientProps = {
   dataSource?: string
   featureSource?: string
   heading?: string
   subheading?: string
-  cards?: Array<{ title?: string; description?: string; mediaUrl?: string }>
+  cards?: Array<CardData>
   showNavigationButtons?: boolean
   scrollPercentage?: number
 }
-
 
 // --- UTILS ---
 
@@ -52,27 +59,25 @@ function resolveMediaUrl(media: Media): string | undefined {
   return undefined
 }
 
-function transformPackageToCards(
-  pkg: any,
-  source: string,
-): Array<{ title: string; description: string; mediaUrl?: string }> {
-  const mapItem = (item: any) => ({
+function transformPackageToCards(pkg: any, source: string): Array<CardData> {
+  const mapItem = (item: any): CardData => ({
     title: item?.name || item?.title || item?.text || '',
     description: item?.description || item?.summary || item?.text || '',
-    mediaUrl: resolveMediaUrl(item?.icon || item?.image || item?.media),
-  });
+    iconUrl: resolveMediaUrl(item?.icon), // Use icon for iconUrl
+    imageUrl: resolveMediaUrl(item?.image || item?.media), // Use image or media for imageUrl
+  })
 
   switch (source) {
     case 'highlights':
-      return (pkg.highlights || []).map(mapItem);
+      return (pkg.highlights || []).map(mapItem)
     case 'inclusions':
-      return (pkg.inclusions || []).map(mapItem);
+      return (pkg.inclusions || []).map(mapItem)
     case 'activities':
-      return (pkg.activities || []).map(mapItem);
+      return (pkg.activities || []).map(mapItem)
     case 'amenities':
-      return (pkg.amenities || []).map(mapItem);
+      return (pkg.amenities || []).map(mapItem)
     default:
-      return [];
+      return []
   }
 }
 
@@ -96,61 +101,92 @@ function getSubheadingForSource(pkg: any, source: string): string {
   return subheadings[source] || pkg.summary || ''
 }
 
-
 // --- COMPONENTS ---
 
 /** Renders the feature image/icon, or nothing if no URL is provided. */
-const ImagePlaceholder: React.FC<{ mediaUrl?: string }> = ({ mediaUrl }) => {
-    if (mediaUrl) {
-        return <img src={mediaUrl} alt="Feature Icon" className="w-20 h-20 object-contain" />;
-    }
-    return null; // Return null to remove the element entirely if no image is found
-};
+const ImagePlaceholder: React.FC<{ iconUrl?: string }> = ({ iconUrl }) => {
+  if (iconUrl) {
+    return <Image src={iconUrl} alt="Feature Icon" className="w-full h-full object-contain" fill />
+  }
+  return null
+}
 
 /** Card component for displaying features in the carousel. */
-const Card: React.FC<{ title: string; description: string; mediaUrl?: string }> = ({ title, description, mediaUrl }) => {
-  const hasMedia = !!mediaUrl;
+const Card: React.FC<{
+  title: string
+  description: string
+  iconUrl?: string
+  imageUrl?: string
+}> = ({ title, description, iconUrl, imageUrl }) => {
+  const hasIcon = !!iconUrl
+  const hasImage = !!imageUrl
 
   return (
     <div
       className="
-          flex-shrink-0 w-64 h-80 
-          bg-white 
-          rounded-2xl 
-          shadow-lg 
-          p-6 
-          flex flex-col justify-between 
-          m-4 
-          cursor-pointer 
+          relative flex-shrink-0 w-64 h-80 
+          bg-white overflow-hidden group
+          rounded-2xl shadow-xl 
+          flex flex-col
+          m-4 cursor-pointer 
           
-          // INTERACTIVE STYLES
           transition-all duration-300 ease-in-out 
-          hover:shadow-xl 
-          hover:scale-[1.01] 
-          hover:translate-y-[-2px] 
-          hover:border-2 hover:border-indigo-500
-      "
+          hover:shadow-2xl 
+          hover:scale-[1.02] 
+          hover:translate-y-[-4px] 
+          hover:border-2 hover:border-[#FBAE3D] /* Enhanced hover color */
+        "
     >
-      {/* Image container: Only renders if mediaUrl is present */}
-      {hasMedia && (
-        <div className="flex-grow w-20 h-20 mb-4 flex items-center justify-center">
-            <ImagePlaceholder mediaUrl={mediaUrl} />
-        </div> 
+      {/* 1. FEATURE IMAGE (Background/Top) */}
+      {hasImage && (
+        <Image
+          src={imageUrl}
+          alt={title || 'Feature image'}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          fill
+        />
       )}
-      
-      {/* Content wrapper: Adjusts layout if image is missing */}
-      <div className={hasMedia ? '' : 'flex-grow flex flex-col justify-end'}>
-        <h3 className="font-nats font-bold text-[24px] leading-[24px] tracking-[-0.011em] text-gray-800 mb-2">
-          {title}
-        </h3>
-        <p className="font-nats text-[22px] leading-[24px] tracking-[-0.011em] text-gray-600">
-          {description}
-        </p>
+
+      {/* 2. ICON (Small indicator, placed over image or at top if no image) */}
+      {hasIcon && (
+        <div
+          className={`absolute top-4 left-4 w-10 h-10 rounded-full flex items-center justify-center ${hasImage ? 'z-10' : ''}`}
+        >
+          <ImagePlaceholder iconUrl={iconUrl} />
+        </div>
+      )}
+
+      {/* 3. CONTENT WRAPPER */}
+      <div className={`relative z-10 w-full h-full flex flex-col ${!hasImage ? 'p-6' : ''}`}>
+        {/* Fill vertical space above content/icon */}
+        <div className="flex-grow min-h-[1rem]"></div>
+
+        <div
+          className={
+            hasImage
+              ? 'p-4 mt-auto rounded-t-xl bg-gradient-to-t from-black/80 to-transparent' // FIX: Removed bg-black/50/backdrop-blur; using a dark gradient for contrast
+              : ''
+          }
+        >
+          <h3
+            className="font-nats font-bold text-[24px] leading-[24px] tracking-[-0.011em] mb-2"
+            // Ensure text is white over dark gradient/image
+            style={{ color: hasImage ? 'white' : '#1f2937' }}
+          >
+            {title}
+          </h3>
+          <p
+            className="font-nats text-[20px] leading-[22px] tracking-[-0.011em]"
+            // Ensure text is light gray over dark gradient/image
+            style={{ color: hasImage ? '#e5e7eb' : '#4b5563' }}
+          >
+            {description}
+          </p>
+        </div>
       </div>
     </div>
-  );
-};
-
+  )
+}
 
 // Main component
 export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
@@ -164,10 +200,13 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
   scrollPercentage = 80,
 }) => {
   const pathname = usePathname()
-  const [scrollPosition, setScrollPosition] = useState(0)
+
   const containerRef = useRef<HTMLDivElement | null>(null)
+
+  // States related to scroll calculation
   const [containerWidth, setContainerWidth] = useState(0)
   const [maxScroll, setMaxScroll] = useState(0)
+  const [currentScrollLeft, setCurrentScrollLeft] = useState(0) // Tracks actual scroll position
 
   // Dynamic data state
   const [heading, setHeading] = useState(initialHeading)
@@ -179,6 +218,7 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
   useEffect(() => {
     const style = document.createElement('style')
     style.innerHTML = `
+      @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
       .font-amiri { font-family: 'Amiri', serif; }
       .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
     `
@@ -188,7 +228,7 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
     }
   }, [])
 
-  // ✅ Auto-fetch package data from URL
+  // Auto-fetch package data from URL
   useEffect(() => {
     const fetchPackageData = async () => {
       if (dataSource !== 'auto') return
@@ -226,35 +266,56 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
     fetchPackageData()
   }, [pathname, dataSource, featureSource])
 
-  // Calculate widths and max scroll
+  // Calculate widths and max scroll, and attach scroll listener
   useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
     const calculateWidths = () => {
-      if (containerRef.current) {
-        const container = containerRef.current
-        const scrollWidth = container.scrollWidth
-        const clientWidth = container.clientWidth
-        setContainerWidth(clientWidth)
-        setMaxScroll(scrollWidth - clientWidth)
-      }
+      const scrollWidth = container.scrollWidth
+      const clientWidth = container.clientWidth
+      setContainerWidth(clientWidth)
+      setMaxScroll(scrollWidth - clientWidth)
+      setCurrentScrollLeft(container.scrollLeft) // Keep current position updated on resize
     }
-    calculateWidths()
+
+    const updateScrollState = () => {
+      setCurrentScrollLeft(container.scrollLeft)
+    }
+
+    calculateWidths() // Initial calculation
+
+    // Listeners
     window.addEventListener('resize', calculateWidths)
+    container.addEventListener('scroll', updateScrollState, { passive: true })
+
     return () => {
       window.removeEventListener('resize', calculateWidths)
+      container.removeEventListener('scroll', updateScrollState)
     }
   }, [cards])
 
+  // Scroll handling logic updated to use native scrollLeft for smooth scrolling
   const handleScroll = (direction: 'left' | 'right') => {
-    const scrollAmount = containerWidth * ((scrollPercentage || 80) / 100)
-    let newScrollPosition =
-      direction === 'left' ? scrollPosition - scrollAmount : scrollPosition + scrollAmount
-    newScrollPosition = Math.max(0, Math.min(newScrollPosition, maxScroll))
-    setScrollPosition(newScrollPosition)
+    const container = containerRef.current
+    if (!container) return
+
+    const scrollAmount = container.clientWidth * ((scrollPercentage || 80) / 100)
+    let newScrollLeft =
+      direction === 'left'
+        ? container.scrollLeft - scrollAmount
+        : container.scrollLeft + scrollAmount
+
+    // Clamp scroll position
+    newScrollLeft = Math.max(0, Math.min(newScrollLeft, maxScroll))
+
+    container.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
+    // The scroll listener (updateScrollState) handles state update
   }
 
   if (loading) {
     return (
-      <div className="w-full min-h-screen flex flex-col justify-center items-center font-sans py-12">
+      <div className="w-full min-h-[50vh] flex flex-col justify-center items-center font-sans py-12">
         <div className="text-center text-gray-500">Loading features...</div>
       </div>
     )
@@ -265,19 +326,26 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
   }
 
   return (
-    <div className="w-full min-h-screen flex flex-col justify-center font-sans py-8 md:py-12">
+    <div className="w-full min-h-[50vh] flex flex-col justify-center font-sans py-8 md:py-12">
       <div className="w-full px-4 sm:px-6 md:px-12 lg:px-16">
         {/* Header section */}
         <div className="text-left mb-6 sm:mb-8">
-          <h1 className="font-amiri italic flex flex-row font-bold text-[36px] sm:text-[48px] md:text-[64px] leading-[1.1] tracking-[-0.011em] text-gray-900  ">
+          {/* Decorative Dashed Rule above Heading */}
+          <div className="flex items-center gap-4 mb-2">
+            <div className="flex-grow border-t-2 border-dashed border-gray-300"></div>
+            <h2 className="text-sm font-semibold tracking-wider uppercase text-[#FBAE3D]">
+              {featureSource.toUpperCase()}
+            </h2>
+            <div className="flex-grow border-t-2 border-dashed border-gray-300"></div>
+          </div>
+
+          <h1 className="font-amiri italic font-bold text-[36px] sm:text-[48px] md:text-[64px] leading-[1.1] tracking-[-0.011em] text-gray-900">
             {heading}
           </h1>
-          <div className="w-full border-t border-dashed border-gray-400"></div>
-
 
           {/* Subheading */}
           {subheading && (
-            <p className="font-nats text-[18px] sm:text-[22px] md:text-[26px] leading-[1.1] tracking-[-0.011em] text-gray-900 mt-2">
+            <p className="font-nats text-[18px] sm:text-[22px] md:text-[26px] leading-[1.1] tracking-[-0.011em] text-gray-700 mt-2">
               {subheading}
             </p>
           )}
@@ -285,23 +353,27 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
 
         {/* Carousel section */}
         <div className="relative">
-          <div className="absolute top-0 right-0 w-2/3 sm:w-1/2 h-1/2 bg-[#08121E] -z-10"></div>
+          {/* Background element - Now styled as a subtle corner accent */}
+          <div className="absolute top-0 right-0 w-1/4 h-1/2 bg-[#FBAE3D]/10 rounded-bl-[100px] -z-10 transition-all duration-500"></div>
 
-          <div className="overflow-hidden py-4">
+          <div className="py-4 -mx-4 sm:-mx-6 md:-mx-12 lg:-mx-16">
             <div
               ref={containerRef}
-              className="flex transition-transform duration-400 ease-in-out space-x-4 px-4 sm:space-x-6 sm:px-6"
-              style={{ transform: `translateX(-${scrollPosition}px)` }}
+              // FIX: Removed unnecessary transition classes for smooth scrolling to work correctly
+              className="flex overflow-x-auto space-x-4 px-4 sm:space-x-6 sm:px-6 md:px-12 lg:px-16 pb-6"
+              style={{ scrollbarWidth: 'none' }} // Hide scrollbar for Firefox
             >
               {cards.map((item: any, index: number) => (
                 <div
                   key={item?.id || index}
-                  className="min-w-[150px] sm:min-w-[300px] md:min-w-[350px] lg:min-w-[200px] flex-shrink-0"
+                  // Responsive card container widths
+                  className="min-w-[85%] sm:min-w-[45%] md:min-w-[30%] lg:min-w-[280px] xl:min-w-[320px] flex-shrink-0"
                 >
-                  <Card 
-                    title={item?.title || ''} 
-                    description={item?.description || ''} 
-                    mediaUrl={item?.mediaUrl}
+                  <Card
+                    title={item?.title || ''}
+                    description={item?.description || ''}
+                    iconUrl={item?.iconUrl}
+                    imageUrl={item?.imageUrl}
                   />
                 </div>
               ))}
@@ -311,17 +383,17 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
           {/* Navigation buttons */}
           {showNavigationButtons && (
             <div className="flex items-center mt-6 sm:mt-8">
-              <div className="flex-grow border-t border-dashed border-gray-400 mr-4 sm:mr-6"></div>
+              <div className="flex-grow border-t border-dashed border-gray-300 mr-4 sm:mr-6"></div>
               <div className="flex space-x-2 sm:space-x-3">
                 <button
                   onClick={() => handleScroll('left')}
-                  disabled={scrollPosition === 0}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
+                  disabled={currentScrollLeft <= 1}
+                  className="w-12 h-12 rounded-full bg-[#1f2937] text-white flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:bg-[#374151] shadow-lg"
                   aria-label="Scroll left"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 sm:h-6 sm:w-6"
+                    className="h-6 w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -336,13 +408,13 @@ export const FeatureCarouselClient: React.FC<FeatureCarouselClientProps> = ({
                 </button>
                 <button
                   onClick={() => handleScroll('right')}
-                  disabled={scrollPosition >= maxScroll - 1}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-200 text-gray-800 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:bg-gray-300"
+                  disabled={currentScrollLeft >= maxScroll - 1}
+                  className="w-12 h-12 rounded-full bg-[#1f2937] text-white flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:bg-[#374151] shadow-lg"
                   aria-label="Scroll right"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 sm:h-6 sm:w-6"
+                    className="h-6 w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

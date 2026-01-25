@@ -22,9 +22,7 @@ export async function generateStaticParams() {
   })
 
   const params =
-    pages.docs
-      ?.filter((doc) => doc.slug !== 'home')
-      .map(({ slug }) => ({ slug })) ?? []
+    pages.docs?.filter((doc) => doc.slug !== 'home').map(({ slug }) => ({ slug })) ?? []
 
   return params
 }
@@ -41,8 +39,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   const url = '/' + slug
 
   // prefer-const fix: initialize inline with const
-  const page: RequiredDataFromCollectionSlug<'pages'> | null =
-    await queryPageBySlug({ slug })
+  const page: RequiredDataFromCollectionSlug<'pages'> | null = await queryPageBySlug({ slug })
 
   if (!page) {
     return <PayloadRedirects url={url} />
@@ -52,7 +49,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   const { layout } = page
 
   return (
-    <article className="pt-16 pb-24">
+    <article className="pt-16 pb-15">
       <PageClient />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />

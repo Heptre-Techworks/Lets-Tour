@@ -4,7 +4,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import type { Review } from '@/payload-types'
-
+import Image from 'next/image'
 // ✅ Slug replacement hook
 const useSlugReplacement = () => {
   const pathname = usePathname()
@@ -105,13 +105,13 @@ const getImageSrc = (img?: MediaLike | string | null, url?: string | null) => {
 const StarRating: React.FC<{ rating?: number | null }> = ({ rating = 0 }) => {
   const safe = Math.max(0, Math.min(5, Number(rating) || 0))
   return (
-    <div className="flex items-center gap-0.5" aria-label={`Rating ${safe} of 5`}>
+    <div className="flex items-center gap-0.5 " aria-label={`Rating ${safe} of 5`}>
       {Array.from({ length: 5 }).map((_, i) => {
         const on = i < safe
         return (
           <svg
             key={i}
-            className={`w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 ${on ? 'text-yellow-400' : 'text-gray-500'} fill-current`}
+            className={`w-5 h-5 xs:w-5 xs:h-5 sm:w-5 sm:h-5 ${on ? 'text-yellow-400' : 'text-gray-500'} fill-current`}
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             aria-hidden="true"
@@ -161,12 +161,12 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
 
   // ✅ Responsive gap sizing
   const gapPx = useMemo(() => {
-    if (windowWidth === undefined) return Math.max(0, Number(gapPxRaw) || 24)
+    if (windowWidth === undefined) return Math.max(0, Number(gapPxRaw) || 20)
     if (windowWidth < 480) return 12 // Extra small mobile
     if (windowWidth < 768) return 16 // Mobile
-    if (windowWidth < 1024) return 24 // Tablet
-    if (windowWidth < 1536) return 28 // Small desktop
-    return Math.max(0, Number(gapPxRaw) || 32) // Large desktop
+    if (windowWidth < 1024) return 20 // Tablet
+    if (windowWidth < 1536) return 20 // Small desktop
+    return Math.max(0, Number(gapPxRaw) || 20) // Large desktop
   }, [windowWidth, gapPxRaw])
 
   // ✅ Fetch reviews from collection if needed
@@ -272,13 +272,26 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
     return (
       <section className="relative w-full min-h-[60vh] sm:min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
         <div className="text-center px-4">
-          <div className="animate-spin rounded-full h-8 w-8 xs:h-10 xs:w-10 sm:h-12 sm:w-12 border-b-2 border-white mx-auto mb-3 sm:mb-4" />
-          <p
-            style={{ fontFamily: "'NATS', sans-serif" }}
-            className="text-xs xs:text-sm sm:text-base"
-          >
-            Loading stories...
-          </p>
+          <div className="flex flex-col items-center justify-center gap-4">
+            <div className="relative flex h-16 w-16 items-center justify-center">
+              {/* Outer Compass Ring */}
+              <div className="absolute inset-0 rounded-full border-2 border-dashed border-sky-200 animate-[spin_8s_linear_infinite]"></div>
+
+              {/* Pulse effect */}
+              <div className="absolute inset-0 rounded-full bg-sky-100 animate-ping opacity-25"></div>
+
+              {/* Compass Needle */}
+              <div className="relative h-10 w-1 bg-gradient-to-b from-sky-600 via-sky-400 to-transparent rounded-full animate-spin">
+                <div className="absolute top-0 -left-1 h-3 w-3 rounded-full bg-sky-600 shadow-sm"></div>
+              </div>
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-bold tracking-tight text-sky-900">Lets Tour</h3>
+              <p className="text-xs font-medium text-sky-500 animate-pulse">
+                Finding your next adventure...
+              </p>
+            </div>
+          </div>
         </div>
       </section>
     )
@@ -299,20 +312,22 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
 
   return (
     <>
+      {/* FIXED: Added &display=swap for Lighthouse performance */}
       <link
         href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap"
         rel="stylesheet"
       />
-      <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />
+      {/* REMOVED: link for cdnfonts/nats (already handled in globals.css) */}
 
       <section className="relative w-full min-h-[60vh] xs:min-h-[65vh] sm:min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900">
         {/* Background */}
         {bgSrc ? (
-          <img
+          <Image
             src={bgSrc}
             alt={(background as any)?.alt || 'Background'}
             className="absolute inset-0 w-full h-full object-cover opacity-40"
             style={{ zIndex: 0, pointerEvents: 'none' }}
+            fill
           />
         ) : (
           <div
@@ -327,7 +342,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
             className="absolute bottom-0 left-0 right-0 w-full pointer-events-none"
             style={{ zIndex: 1, height: '40%' }}
           >
-            <img
+            <Image
               src={overlaySrc}
               alt={overlay?.alt || 'Decorative Overlay'}
               className="w-full h-full object-cover"
@@ -335,6 +350,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 opacity: 0.9,
                 mixBlendMode: 'overlay',
               }}
+              fill
             />
           </div>
         )}
@@ -408,60 +424,42 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                         maxWidth: windowWidth && windowWidth < 480 ? '320px' : 'none',
                       }}
                     >
-                      <div
-                        className={`
-                          w-full
-                          h-[320px] xs:h-[320px] sm:h-[340px] md:h-[380px] lg:h-[400px] xl:h-[420px]
-                          p-3 xs:p-4 sm:p-5 md:p-6
-                          backdrop-blur-md text-left transition-all duration-500
-                          ${isLeftmost ? 'bg-white/20 shadow-xl' : 'bg-white/10 shadow-lg'}
-                          rounded-xl sm:rounded-2xl
-                        `}
-                      >
-                        <div className="flex flex-col h-full w-full">
+                      <div className="w-full h-[320px] xs:h-[320px] sm:h-[340px] md:h-[380px] lg:h-[400px] xl:h-[420px] p-3 xs:p-4 sm:p-5 md:p-6 text-left transition-all duration-500 rounded-xl sm:rounded-2xl">
+                        <div className="group relative  h-full w-full rounded-xl sm:rounded-2xl overflow-hidden bg-[#1a1a1a] border border-white/5 ">
                           {/* Image Section (Background) */}
                           {card.photo && (
-                            <div className="absolute inset-0 z-0 rounded-xl sm:rounded-2xl overflow-hidden">
-                              <img
+                            <div className="absolute inset-0 z-0">
+                              <Image
                                 src={card.photo || '/placeholder.png'}
                                 alt={card.name || 'Client photo'}
-                                className="
-                                  w-full 
-                                  h-full 
-                                  object-cover 
-                                  shadow-lg transition-transform duration-300 ease-out
-                                  hover:scale-105 hover:-rotate-1 hover:shadow-2xl
-                                "
+                                className="w-full h-full object-cover transition-all duration-700 ease-in-out transform  group-hover:scale-110 group-hover:-rotate-1 "
+                                fill
                               />
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/40 to-transparent z-10 transition-opacity duration-500 " />
                             </div>
                           )}
 
                           {/* Content Section */}
-                          <div className="flex flex-col h-full relative z-10 p-0 justify-end">
+                          <div className="relative z-20 flex flex-col h-full p-4 sm:p-6 justify-end transform transition-transform duration-500 ease-out group-hover:-translate-y-1">
                             {/* Story Text Section */}
-                            <div className="overflow-y-auto overscroll-contain pr-1 sm:pr-2 mb-2 xs:mb-3 sm:mb-4 max-h-[140px] xs:max-h-[150px] sm:max-h-[180px] md:max-h-[200px]">
+                            <div className="overflow-y-hidden mb-3 max-h-[140px] xs:max-h-[160px]">
                               <p
-                                className="text-grey-200 leading-relaxed whitespace-pre-line text-[11px] xs:text-xs sm:text-sm md:text-base overflow-hidden"
-                                style={{
-                                  fontFamily: "'NATS', sans-serif",
-                                }}
+                                className="text-gray-100 leading-relaxed whitespace-pre-line text-base md:text-[18px] italic transition-colors duration-500 group-hover:text-white"
+                                style={{ fontFamily: "'NATS', sans-serif" }}
                               >
                                 {card?.story ? `"${card.story}"` : ''}
                               </p>
                             </div>
-
-                            {/* Header Section (Name and Rating) */}
-                            <div className="shrink-0">
+                            <div className="shrink-0 pt-2 border-t border-white/10 transition-all duration-500 group-hover:border-white/30">
                               <h3
-                                className="font-bold text-[11px] xs:text-xs sm:text-sm md:text-base lg:text-lg mb-1 xs:mb-1.5 sm:mb-2 text-yellow"
-                                style={{
-                                  fontFamily: "'NATS', sans-serif",
-                                }}
+                                className="font-bold text-[24px] sm:text-[28px] leading-none mb-2 text-yellow-400 transition-transform duration-500 group-hover:scale-[1.02] origin-left"
+                                style={{ fontFamily: "'NATS', sans-serif" }}
                               >
                                 {card?.name ?? ''}
                               </h3>
-
-                              <StarRating rating={card?.rating as number} />
+                              <div className="flex items-center transform transition-transform duration-500 delay-75 group-hover:translate-x-1">
+                                <StarRating rating={card?.rating as number} />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -496,7 +494,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                   onClick={handlePrev}
                   aria-label="Previous"
                   className="
-                    w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-12 md:h-12
+                    w-12 h-12 xs:w-12 xs:h-12 sm:w-10 sm:h-10 md:w-12 md:h-12
                     flex items-center justify-center rounded-full 
                     hover:opacity-80 active:scale-95 transition-all
                   "
@@ -509,7 +507,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5 md:h-6 md:w-6"
+                    className="h-6 w-6 xs:h-6 xs:w-6 sm:h-5 sm:w-5 md:h-6 md:w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -526,7 +524,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                   onClick={handleNext}
                   aria-label="Next"
                   className="
-                    w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-12 md:h-12
+                    w-12 h-12 xs:w-12 xs:h-12 sm:w-10 sm:h-10 md:w-12 md:h-12
                     flex items-center justify-center rounded-full 
                     hover:opacity-80 active:scale-95 transition-all
                   "
@@ -539,7 +537,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-3 w-3 xs:h-4 xs:w-4 sm:h-5 sm:w-5 md:h-6 md:w-6"
+                    className="h-6 w-6 xs:h-6 xs:w-6 sm:h-5 sm:w-5 md:h-6 md:w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

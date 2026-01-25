@@ -20,7 +20,7 @@ const nextConfig = {
       }),
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
+        hostname: 'images.unsplash.com' && 'zozxszsaofxvunkl.public.blob.vercel-storage.com',
         port: '',
         pathname: '/**',
       },
@@ -28,7 +28,7 @@ const nextConfig = {
   },
   // FIXED: Use serverExternalPackages instead of experimental.serverComponentsExternalPackages
   serverExternalPackages: ['payload', 'nodemailer', '@payloadcms/payload-cloud'],
-  
+
   webpack: (webpackConfig, { isServer }) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],

@@ -1,11 +1,11 @@
-// src/blocks/DynamicScroller/Component.client.tsx
 'use client'
 
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
-// Types
+// --- Types ---
 type MediaSize = { url?: string | null; width?: number; height?: number }
 type Media =
   | {
@@ -19,21 +19,25 @@ type Media =
   | null
   | undefined
 
-// Type for an individual itinerary activity
 type Activity = {
   icon?: Media | string | null
   description?: string
   detailsImage?: Media | string | null
-  text?: string // Added if text field is used as fallback for description
+  text?: string
 }
 
 type Item = {
   blockType: 'packageItem' | 'itineraryDay' | 'destinationItem'
+  id?: string
   slug?: string
   href?: string
-  // Added type for activities to fix TypeScript error
   activities?: Activity[]
   day?: string | number
+  title?: string
+  image?: Media
+  price?: string | number
+  tag?: string
+  tagColor?: string
   [key: string]: any
 }
 
@@ -64,16 +68,48 @@ type Section = {
   packageRelation?: any
 }
 
-// Custom Prop Type for ItineraryCard
-type ItineraryCardProps = {
+interface ItineraryCardProps {
   item: Item
   defaultExpanded?: boolean
 }
 
-// Utils
+// --- Utils ---
+
+/** Custom smooth scroll helper for consistent cross-browser behavior */
+const smoothScroll = (element: HTMLDivElement, target: number, duration: number = 400) => {
+  const start = element.scrollLeft
+  const change = target - start
+  let currentTime = 0
+  const increment = 20
+
+  const animateScroll = () => {
+    currentTime += increment
+    const val = easeInOutQuad(currentTime, start, change, duration)
+    element.scrollLeft = val
+    if (currentTime < duration) {
+      setTimeout(animateScroll, increment)
+    }
+  }
+  animateScroll()
+}
+
+const easeInOutQuad = (t: number, b: number, c: number, d: number) => {
+  t /= d / 2
+  if (t < 1) return (c / 2) * t * t + b
+  t--
+  return (-c / 2) * (t * (t - 2) - 1) + b
+}
+
+function formatPrice(price: string | number | undefined): string {
+  if (price === undefined || price === null) return '0'
+  const num = typeof price === 'string' ? parseFloat(price.replace(/,/g, '')) : price
+  if (isNaN(num)) return '0'
+  return new Intl.NumberFormat('en-IN').format(num)
+}
+
 function resolveMediaUrl(media: Media): string | undefined {
   if (media && typeof media === 'object' && 'id' in media) {
-    const m = media as Exclude<Media, string | null | undefined> & { id: string }
+    const m = media as any
     if (m.url) return m.url
     if (m.filename) return `/media/${m.filename}`
     return undefined
@@ -87,13 +123,13 @@ function resolveMediaUrl(media: Media): string | undefined {
 
 function resolveMediaAlt(media: Media, fallback: string): string {
   if (media && typeof media === 'object' && 'id' in media) {
-    const m = media as Exclude<Media, string | null | undefined> & { id: string }
+    const m = media as any
     return (m.alt ?? '').trim() || fallback
   }
   return fallback
 }
 
-// Icons
+// --- Icons ---
 const ChevronLeft: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg
     viewBox="0 0 24 24"
@@ -143,7 +179,8 @@ const DashedRule: React.FC<{ className?: string }> = ({ className }) => {
   return <div style={style} className={className} aria-hidden />
 }
 
-// Package Card
+// --- Cards ---
+
 const PackageCard: React.FC<{ item: any }> = ({ item }) => {
   const title = item.title || ''
   const image = item.image
@@ -152,86 +189,48 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
   const src = resolveMediaUrl(image)
   const alt = resolveMediaAlt(image, title)
 
-  const handleHeartClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
-
   return (
     <Link
       href={href}
-      className="relative w-72 h-96 flex-shrink-0 snap-center rounded-2xl shadow-lg overflow-hidden group bg-black/5 block hover:shadow-2xl transition-shadow duration-300"
+      className="relative w-72 h-96 flex-shrink-0 snap-start rounded-2xl shadow-lg overflow-hidden group bg-black/5 block hover:shadow-2xl transition-all duration-500"
     >
       {src ? (
-        <img
+        <Image
+          fill
           src={src}
           alt={alt}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
       ) : (
         <div className="w-full h-full bg-gray-200" aria-hidden />
       )}
-
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90 transition-opacity duration-500 group-hover:opacity-100" />
 
       {item.tag && (
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-4 left-4 z-10">
           <span
-            className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} font-nats text-[18px] leading-[0.88] tracking-[-0.011em]`}
+            className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} font-nats text-[18px] shadow-sm`}
           >
             {item.tag}
           </span>
         </div>
       )}
 
-      <button
-        onClick={handleHeartClick}
-        className="absolute top-4 right-4 bg-black/30 p-2 rounded-full cursor-pointer hover:bg-black/50 transition-colors"
-        aria-label="Add to favorites"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-        </svg>
-      </button>
-
-      <div className="absolute bottom-0 left-0 p-5 text-white w-full">
-        <h3
-          className="font-bold group-hover:text-yellow-300 transition-colors flex items-center text-3xl sm:text-4xl md:text-[44px] lg:text-5xl"
-          style={{
-            fontFamily: "'Amiri', serif",
-            fontStyle: 'italic',
-            lineHeight: '88%',
-            letterSpacing: '-0.011em',
-          }}
-        >
+      <div className="absolute bottom-0 left-0 p-5 text-white w-full z-10">
+        <h3 className="font-bold group-hover:text-yellow-300 transition-colors duration-300 text-3xl sm:text-4xl font-amiri italic leading-[0.9] tracking-tight">
           {title}
         </h3>
-        <hr className="my-2 border-white/50" />
-        <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] mt-1">
-          Packages starting at
-          <br />
-          <span className="font-bold text-[32px] leading-[0.88] tracking-[-0.011em]">₹{price}</span>
-          <span className="font-nats ml-2 text-xs sm:text-sm lg:text-base leading-[0.88] tracking-[-0.011em]">
-            {' '}
-            /person
-          </span>
+        <hr className="my-3 border-white/30" />
+        <p className="font-nats text-[16px] leading-tight">
+          Packages starting at <br />
+          <span className="font-bold text-[32px]">₹{formatPrice(price)}</span>
+          <span className="ml-2 opacity-80">/person</span>
         </p>
       </div>
     </Link>
   )
 }
 
-// Featured Destination Card
 const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
   const title = item.title || ''
   const image = item.image
@@ -240,173 +239,87 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
   const src = resolveMediaUrl(image)
   const alt = resolveMediaAlt(image, title)
 
-  const handleHeartClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
-
   return (
     <Link
       href={href}
-      className="relative w-72 h-96 flex-shrink-0 snap-center rounded-2xl shadow-lg overflow-hidden group bg-black/5 block hover:shadow-2xl transition-shadow duration-300"
+      className="relative w-72 h-96 flex-shrink-0 snap-start rounded-2xl shadow-lg overflow-hidden group bg-black/5 block transition-all duration-500"
     >
       {src ? (
-        <img
+        <Image
+          fill
           src={src}
           alt={alt}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
       ) : (
-        <div className="w-full h-full bg-gray-200" aria-hidden />
+        <div className="w-full h-full bg-gray-200" />
       )}
-
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-      {item.tag && (
-        <div className="absolute top-4 left-4">
-          <span
-            className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} font-nats text-[18px] leading-[0.88] tracking-[-0.011em]`}
-          >
-            {item.tag}
-          </span>
-        </div>
-      )}
-
-      <button
-        onClick={handleHeartClick}
-        className="absolute top-4 right-4 bg-black/30 p-2 rounded-full cursor-pointer hover:bg-black/50 transition-colors"
-        aria-label="Add to favorites"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-        </svg>
-      </button>
-
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
       <div className="absolute bottom-0 left-0 p-5 text-white w-full">
-        <h3
-          className="font-bold group-hover:text-yellow-300 transition-colors flex items-center text-3xl sm:text-4xl md:text-[44px] lg:text-5xl"
-          style={{
-            fontFamily: "'Amiri', serif",
-            fontStyle: 'italic',
-            lineHeight: '88%',
-            letterSpacing: '-0.011em',
-          }}
-        >
+        <h3 className="font-bold group-hover:text-yellow-300 transition-colors duration-300 text-3xl sm:text-4xl font-amiri italic leading-[0.9]">
           {title}
         </h3>
-        <hr className="my-2 border-white/50" />
-        <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] mt-1">
-          Packages starting at
-          <br />
-          <span className="font-bold text-[32px] leading-[0.88] tracking-[-0.011em]">{price}</span>
-          <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]"> /person</span>
+        <hr className="my-3 border-white/30" />
+        <p className="font-nats text-[16px]">
+          Packages starting at <br />
+          <span className="font-bold text-[32px]">{price}</span>
+          <span className="opacity-80"> /person</span>
         </p>
       </div>
     </Link>
   )
 }
 
-// Itinerary Card (Corrected and Cleaned)
 const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = false }) => {
-  // Use the prop for initial state control
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
-
-  // Activities now correctly typed as Activity[]
   const activities = (item.activities || []) as Activity[]
 
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded)
-  }
-
-  /** Icon for the toggle button (+ or -) */
-  const ToggleIcon = () => (
-    <div
-      className="
-        h-5 w-5 border border-gray-400 rounded-full
-        text-gray-700 
-        flex items-center justify-center cursor-pointer 
-        transition-transform duration-300 flex-shrink-0
-      "
-      aria-hidden="true"
-    >
-      <span className="text-xl leading-none font-medium">
-        {/* Unicode for em dash/minus sign vs plus sign */}
-        {isExpanded ? '\u2014' : '\u002B'}
-      </span>
-    </div>
-  )
-
   return (
-    <div
-      className="
-      border border-gray-200 rounded-xl shadow-md bg-white 
-      overflow-hidden w-full mx-auto font-amiri
-    "
-    >
-      {/* === HEADER (Clickable Area: Day Tag, Title, and Toggle Icon) === */}
+    <div className="border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden w-full max-w-2xl transition-all duration-500 ease-in-out hover:shadow-md">
       <div
-        className="flex justify-between items-center p-4 cursor-pointer"
-        onClick={toggleExpand}
+        className="flex justify-between items-center p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
         role="button"
-        tabIndex={0}
-        aria-expanded={isExpanded}
-        aria-controls={`day-content-${item.day || 'default'}`}
       >
-        <div className="flex items-center space-x-3">
-          <span className=" text-black font-bold text-xl mx-1 ">
-            {item.day || 'Day'}
-            <div className="absolute inset-0 rounded-xl pointer-events-none border border-white/30" />
-          </span>
+        <span className="text-black font-bold text-2xl font-amiri">{item.day || 'Day'}</span>
+        <div
+          className={`h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center text-gray-700 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`}
+        >
+          <span className="text-xl leading-none">{isExpanded ? '\u2212' : '\u002B'}</span>
         </div>
-        <ToggleIcon />
       </div>
-      {/* === CONTENT AREA (The List of Activities) === */}
       <div
-        id={`day-content-${item.day || 'default'}`}
-        className={`
-          overflow-hidden transition-max-height duration-500 ease-in-out
-          ${isExpanded ? 'max-h-[1000px] border-t border-gray-100 bg-gray-50' : 'max-h-0'}
-        `}
+        className={`transition-[max-height,opacity] duration-700 ease-in-out ${isExpanded ? 'max-h-[2000px] opacity-100 border-t border-gray-100 bg-gray-50/50' : 'max-h-0 opacity-0'}`}
       >
-        <div className="space-y-2 p-2">
-          {/* Fix applied: 'activity' is now correctly typed as Activity */}
+        <div className="space-y-6 p-6">
           {activities.map((activity, idx) => {
-            const iconSrc = activity.icon ? resolveMediaUrl(activity.icon) : undefined
-            const detailsSrc = activity.detailsImage
-              ? resolveMediaUrl(activity.detailsImage)
-              : undefined
-
+            const iconSrc = resolveMediaUrl(activity.icon)
+            const detailsSrc = resolveMediaUrl(activity.detailsImage)
             return (
-              <div key={idx} className="flex items-start space-x-2 border-gray-200 last:border-b-0">
-                <div className="flex-shrink-0">
+              <div key={idx} className="flex items-start space-x-4 animate-fadeIn">
+                <div className="flex-shrink-0 mt-1">
                   {iconSrc ? (
-                    <img src={iconSrc} alt="" className="w-6 h-6 rounded-full bg-gray-100 p-1" />
+                    <Image
+                      fill
+                      src={iconSrc}
+                      alt=""
+                      className="w-6 h-6 rounded-full bg-white shadow-sm p-1 object-contain"
+                    />
                   ) : (
-                    <span className="text-lg text-blue-500 mr-2 mt-0.5" aria-hidden="true">
-                      &#10038;
-                    </span>
+                    <span className="text-xl text-yellow-500">✦</span>
                   )}
                 </div>
-
                 <div className="flex-grow">
-                  <p className="text-gray-700 text-sm ">{activity.description}</p>
-                  {/* Optional: Add image detail if present */}
+                  <p className="text-gray-700 text-base font-nats leading-relaxed">
+                    {activity.description}
+                  </p>
                   {detailsSrc && (
-                    <div className="mt-2">
-                      <img
+                    <div className="mt-3 overflow-hidden rounded-lg shadow-sm w-48 h-28">
+                      <Image
+                        fill
                         src={detailsSrc}
-                        alt="Details"
-                        className="w-24 h-14 object-cover rounded-lg"
+                        alt="Activity"
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       />
                     </div>
                   )}
@@ -420,7 +333,8 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = f
   )
 }
 
-// Vibe Section
+// --- Sections ---
+
 const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   const vibes = section.vibes || []
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -428,65 +342,51 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   const scroll = (vibeSlug: string, direction: 'left' | 'right') => {
     const el = scrollRefs.current[vibeSlug]
     if (!el) return
-    const cardWidth = (el.children[0] as HTMLElement | undefined)?.clientWidth || 0
-    const gap = 24
-    const scrollAmount = cardWidth + gap
-    el.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' })
+    const cardWidth = (el.children[0] as HTMLElement | undefined)?.clientWidth || 288
+    const scrollTarget = el.scrollLeft + (direction === 'left' ? -(cardWidth + 24) : cardWidth + 24)
+    smoothScroll(el, scrollTarget)
   }
 
   return (
-    <section className={`relative overflow-hidden  `}>
-      <div className="flex items-center gap-6">
-        <header className=" mb-10">
-          <h1 className="font-amiri italic font-bold text-[36px]  sm:text-[48px] md:text-[56px]  leading-[0.88] tracking-[-0.011em] text-black flex-shrink-0 text-left  ">
+    <section className="relative overflow-hidden py-16">
+      <div className="container mx-auto px-4">
+        <header className="mb-12">
+          <h1 className="font-amiri italic font-bold text-[48px] md:text-[64px] leading-tight text-black">
             {section.title || 'Vibe Match'}
           </h1>
           {section.subtitle && (
-            <p className="font-nats text-[14px]  sm:text-[48px] md:text-[56px] leading-[0.88] tracking-[-0.011em] text-black">
-              {section.subtitle}
-            </p>
+            <p className="font-nats text-[24px] md:text-[32px] opacity-70">{section.subtitle}</p>
           )}
         </header>
-
-        <div className="space-y-12">
+        <div className="space-y-20">
           {vibes.map((vibe) => (
             <div key={vibe.vibeSlug} className="relative">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-3xl font-semibold font-amiri">{vibe.vibeName}</h2>
-                <div className="flex items-center gap-2">
+              <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-2">
+                <h2 className="text-3xl font-bold font-amiri text-gray-800">{vibe.vibeName}</h2>
+                <div className="flex gap-3">
                   <button
                     onClick={() => scroll(vibe.vibeSlug, 'left')}
-                    className="w-10 h-10 rounded-full flex items-center justify-center bg-black text-white shadow-md hover:scale-110 transition-transform"
-                    aria-label="Previous"
-                    type="button"
+                    className="w-10 h-10 rounded-full flex items-center justify-center bg-black hover:bg-gray-800 text-white transition-all"
                   >
                     <ChevronLeft />
                   </button>
                   <button
                     onClick={() => scroll(vibe.vibeSlug, 'right')}
-                    className="w-10 h-10 rounded-full flex items-center justify-center bg-black text-white shadow-md hover:scale-110 transition-transform"
-                    aria-label="Next"
-                    type="button"
+                    className="w-10 h-10 rounded-full flex items-center justify-center bg-black hover:bg-gray-800 text-white transition-all"
                   >
                     <ChevronRight />
                   </button>
                 </div>
               </div>
-
               <div
                 ref={(el) => {
                   scrollRefs.current[vibe.vibeSlug] = el
                 }}
-                className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory"
-                style={{ scrollbarWidth: 'none' } as any}
+                className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scroll-smooth hide-scrollbar"
               >
                 {vibe.items.map((item, idx) => (
-                  <PackageCard key={item.id || idx} item={item} />
+                  <PackageCard key={idx} item={item} />
                 ))}
-              </div>
-
-              <div className="mt-2 text-right font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600">
-                {vibe.items.length} packages
               </div>
             </div>
           ))}
@@ -496,207 +396,109 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   )
 }
 
-// Dynamic Section Component
 const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   const pathname = usePathname()
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [currentIndex, setCurrentIndex] = useState(1)
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const formattedSlug = useMemo(() => {
     const segments = pathname.split('/').filter(Boolean)
-    const rawSlug = segments[segments.length - 1] || ''
-    return rawSlug
+    return (segments[segments.length - 1] || '')
       .split('-')
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(' ')
   }, [pathname])
 
   const displayTitle = section.title?.replace(/{slug}/gi, formattedSlug) || ''
-  const displaySubtitle = section.subtitle?.replace(/{slug}/gi, formattedSlug) || ''
+  const displaySubtitle = "Today's enemy is tomorrow's friend."
 
   const scroll = (direction: 'left' | 'right') => {
     const el = scrollRef.current
     if (!el) return
-    const cardWidth = (el.children[0] as HTMLElement | undefined)?.clientWidth || 0
-    const gap = 24
-    const scrollAmount = cardWidth + gap
-    el.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' })
+    const cardWidth = (el.children[0] as HTMLElement | undefined)?.clientWidth || 288
+    const scrollTarget = el.scrollLeft + (direction === 'left' ? -(cardWidth + 24) : cardWidth + 24)
+    smoothScroll(el, scrollTarget)
   }
 
-  const items = (section.items || []) as Item[]
-  const isPackage = section.type === 'package'
-  const isDestination = section.type === 'destination'
-  const packageItems = items.filter((item) => item.blockType === 'packageItem')
-  const destinationItems = items.filter((item) => item.blockType === 'destinationItem')
-  const itineraryItems = items.filter((item) => item.blockType === 'itineraryDay')
-  const packagesCount = packageItems.length
-  const destinationsCount = destinationItems.length
-  const itineraryCount = itineraryItems.length
+  const items = section.items || []
+  const packageItems = items.filter((i) => i.blockType === 'packageItem')
+  const destinationItems = items.filter((i) => i.blockType === 'destinationItem')
+  const itineraryItems = items.filter((i) => i.blockType === 'itineraryDay')
 
   const handleScroll = () => {
-    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
-    scrollTimeoutRef.current = setTimeout(() => {
-      const scroller = scrollRef.current
-      if (!scroller) return
-      const scrollLeft = scroller.scrollLeft
-      const cardWidth = (scroller.children[0] as HTMLElement | undefined)?.clientWidth || 0
-      const gap = 24
-      const activeIndex = Math.round(scrollLeft / (cardWidth + gap))
-      setCurrentIndex(activeIndex + 1)
-    }, 150)
+    const el = scrollRef.current
+    if (!el) return
+    const cardWidth = (el.children[0] as HTMLElement | undefined)?.clientWidth || 288
+    setCurrentIndex(Math.round(el.scrollLeft / (cardWidth + 24)) + 1)
   }
-
-  useEffect(() => {
-    const scroller = scrollRef.current
-    if (scroller) scroller.addEventListener('scroll', handleScroll, { passive: true })
-    return () => {
-      if (scroller) scroller.removeEventListener('scroll', handleScroll)
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
-    }
-  }, [packageItems.length, destinationItems.length, itineraryItems.length])
-
-  const buttonClass =
-    'w-12 h-12 rounded-full flex items-center justify-center bg-black text-white shadow-md transition-transform hover:scale-110'
-
-  const navEnabled = Boolean(section.navigation)
-
-  if (!section.type || items.length === 0) {
-    return (
-      <section
-        className={`relative overflow-hidden ${section?.theme?.background || 'bg-white'} py-12`}
-      >
-        <div className="container mx-auto px-4 text-center text-gray-500">
-          {!section.type ? 'Section type not configured' : 'No items available'}
-        </div>
-      </section>
-    )
-  }
-
-  // NOTE: Itinerary content is not in the horizontal scroll container, so scroll nav is not shown.
 
   return (
-    <section className={`relative overflow-hidden `}>
-      <div
-        className=" 
-    absolute left-0 top-[6rem] 
-    h-[50vh] xs:h-[42vh] sm:h-[44vh] md:h-[46vh] lg:h-[48vh]
-    w-[80%] xs:w-[70%] sm:w-[65%] md:w-[60%] lg:w-[55%]
-    bg-[rgba(251,174,61,0.9)]
-    px-3 sm:px-4 md:px-6
-    transition-all duration-300 ease-in-out
-  "
-        aria-hidden="true"
-      ></div>
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <header className="mb-10">
-          <div className="flex items-center gap-6">
-            <h1 className="font-amiri italic font-bold text-black whitespace-nowrap text-4xl sm:text-5xl md:text-6xl lg:text-[64px] xl:text-[72px] flex-shrink-0 text-left  ">
+    <section className="relative overflow-hidden py-20">
+      <div className="absolute left-0 top-[10%] h-[70%] w-[85%] bg-yellow-400/10 -skew-y-3 -z-10" />
+      <div className="container mx-auto px-4 relative z-10">
+        <header className="mb-12">
+          <div className="flex items-center gap-8">
+            <h1 className="font-amiri italic font-bold text-black  text-black whitespace-nowrap text-4xl sm:text-5xl md:text-6xl lg:text-[64px] xl:text-[72px] leading-none">
               {displayTitle}
             </h1>
-            <div className="flex-grow w-full border-t-4 border-dotted border-gray-300" />
+            <div className="flex-grow">
+              <DashedRule className="opacity-20" />
+            </div>
           </div>
-          {displaySubtitle ? (
-            <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-black mt-2 pl-[5%]">
+          {displaySubtitle && (
+            <p className="font-nats text-black mt-4 sm:mt-5 flex items-center text-xl sm:text-xl md:text-xl lg:text-2xl leading-tight">
               {displaySubtitle}
             </p>
-          ) : null}
+          )}
         </header>
 
-        {/* Conditional rendering for horizontal scroller content */}
-        {(isPackage || isDestination) && (
+        {(section.type === 'package' || section.type === 'destination') && (
           <div
             ref={scrollRef}
-            className="flex gap-6 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none' } as any}
+            onScroll={handleScroll}
+            className="flex gap-6 overflow-x-auto pb-10 snap-x snap-mandatory scroll-smooth hide-scrollbar"
           >
-            {isPackage &&
-              packageItems.map((item, idx) => <PackageCard key={item.id || idx} item={item} />)}
-            {isDestination &&
-              destinationItems.map((item, idx) => (
-                <DestinationCard key={item.id || idx} item={item} />
-              ))}
+            {section.type === 'package' &&
+              packageItems.map((item, idx) => <PackageCard key={idx} item={item} />)}
+            {section.type === 'destination' &&
+              destinationItems.map((item, idx) => <DestinationCard key={idx} item={item} />)}
           </div>
         )}
 
-        {/* Conditional rendering for itinerary content (vertical stack) */}
         {section.type === 'itinerary' && (
-          <div className="space-y-4">
+          <div className="space-y-6 max-w-4xl mx-auto">
             {itineraryItems.map((item, idx) => (
-              <ItineraryCard
-                key={item.id || idx}
-                item={item}
-                // Only the first card expands by default
-                defaultExpanded={idx === 0}
-              />
+              <ItineraryCard key={idx} item={item} defaultExpanded={idx === 0} />
             ))}
           </div>
         )}
 
-        {isPackage && navEnabled && packagesCount > 0 && (
-          <div className="mt-4">
-            <div className="flex items-center">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => scroll('left')}
-                  className={buttonClass}
-                  aria-label="Previous"
-                  type="button"
-                >
-                  <ChevronLeft />
-                </button>
-                <button
-                  onClick={() => scroll('right')}
-                  className={buttonClass}
-                  aria-label="Next"
-                  type="button"
-                >
-                  <ChevronRight />
-                </button>
-              </div>
-              <div className="mx-3 flex-1">
-                <DashedRule />
-              </div>
-              <div className="pr-2">
-                <span className="font-nats text-[56px] leading-[0.88] tracking-[-0.011em] text-black">
-                  {currentIndex}/{packagesCount}
-                </span>
-              </div>
+        {section.navigation && (section.type === 'package' || section.type === 'destination') && (
+          <div className="mt-8 flex items-center justify-between">
+            <div className="flex gap-4">
+              <button
+                onClick={() => scroll('left')}
+                className="w-14 h-14 rounded-full flex items-center justify-center bg-black hover:bg-gray-800 text-white shadow-xl transition-all active:scale-95"
+              >
+                <ChevronLeft width="24" height="24" />
+              </button>
+              <button
+                onClick={() => scroll('right')}
+                className="w-14 h-14 rounded-full flex items-center justify-center bg-black hover:bg-gray-800 text-white shadow-xl transition-all active:scale-95"
+              >
+                <ChevronRight width="24" height="24" />
+              </button>
             </div>
-          </div>
-        )}
-
-        {isDestination && navEnabled && destinationsCount > 0 && (
-          <div className="mt-4">
-            <div className="flex items-center">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => scroll('left')}
-                  className={buttonClass}
-                  aria-label="Previous"
-                  type="button"
-                >
-                  <ChevronLeft />
-                </button>
-                <button
-                  onClick={() => scroll('right')}
-                  className={buttonClass}
-                  aria-label="Next"
-                  type="button"
-                >
-                  <ChevronRight />
-                </button>
-              </div>
-              <div className="mx-3 flex-1">
-                <DashedRule />
-              </div>
-              <div className="pr-2">
-                <span className="font-nats text-[56px] leading-[0.88] tracking-[-0.011em] text-black">
-                  {currentIndex}/{destinationsCount}
-                </span>
-              </div>
+            <div className="flex-grow mx-8 opacity-20">
+              <DashedRule />
             </div>
+            <span className="font-nats text-[48px] md:text-[64px] text-black font-light lining-nums">
+              {currentIndex.toString().padStart(2, '0')}
+              <span className="mx-2 opacity-30">/</span>
+              {(section.type === 'package' ? packageItems.length : destinationItems.length)
+                .toString()
+                .padStart(2, '0')}
+            </span>
           </div>
         )}
       </div>
@@ -704,67 +506,49 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   )
 }
 
-// Main Client Component with auto-fetch itinerary
+// --- Main Client Component ---
 export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({
   sections: initialSections = [],
 }) => {
   const pathname = usePathname()
   const [sections, setSections] = useState(initialSections)
+  const hasFetchedRef = useRef(false)
 
-  // Auto-fetch itinerary when in package auto mode
   useEffect(() => {
-    const fetchPackageItinerary = async () => {
-      const itinerarySection = sections.find((s) => s.type === 'itinerary')
+    const fetchItinerary = async () => {
+      const itenSec = sections.find(
+        (s) =>
+          s.type === 'itinerary' &&
+          s.itinerarySource === 'package' &&
+          (!s.items || s.items.length === 0),
+      )
+      if (!itenSec || hasFetchedRef.current) return
 
-      if (!itinerarySection) return
-      if (itinerarySection.itinerarySource !== 'package') return
-      // Skip if items already exist or a package relation is manually set
-      if (itinerarySection.items && itinerarySection.items.length > 0) return
-      if (itinerarySection.packageRelation) return
-
-      const segments = pathname.split('/').filter(Boolean)
-      if (segments[0] !== 'packages') return
-
-      const packageSlug = segments[1]
-      if (!packageSlug) return
+      const slug = pathname.split('/').filter(Boolean)[1]
+      if (pathname.split('/')[1] !== 'packages' || !slug) return
 
       try {
-        const response = await fetch(
-          `/api/packages?where[slug][equals]=${packageSlug}&depth=2&limit=1`,
-        )
-        const data = await response.json()
-
-        if (data.docs[0]?.itinerary) {
-          const itinerary = data.docs[0].itinerary
-
-          const itineraryItems = (itinerary || []).map(
-            (day: any, idx: number): Item => ({
-              blockType: 'itineraryDay',
-              id: day.id || `day-${idx}`,
-              day: day.dayTitle || day.day || `Day ${idx + 1}`,
-              // Cast fetched activities to the defined Activity type
-              activities: (day.activities || []).map(
-                (activity: any): Activity => ({
-                  icon: activity.icon,
-                  description: activity.description || activity.text || '',
-                  detailsImage: activity.image || activity.detailsImage,
-                }),
-              ),
-            }),
-          )
-
-          setSections((prevSections) =>
-            prevSections.map((section) =>
-              section.type === 'itinerary' ? { ...section, items: itineraryItems } : section,
-            ),
-          )
+        hasFetchedRef.current = true
+        const res = await fetch(`/api/packages?where[slug][equals]=${slug}&depth=2&limit=1`)
+        const data = await res.json()
+        if (data.docs?.[0]?.itinerary) {
+          const items: Item[] = data.docs[0].itinerary.map((day: any, i: number) => ({
+            blockType: 'itineraryDay',
+            id: day.id || `day-${i}`,
+            day: day.dayTitle || day.day || `Day ${i + 1}`,
+            activities: (day.activities || []).map((a: any) => ({
+              icon: a.icon,
+              description: a.description || a.text || '',
+              detailsImage: a.image || a.detailsImage,
+            })),
+          }))
+          setSections((prev) => prev.map((s) => (s.type === 'itinerary' ? { ...s, items } : s)))
         }
-      } catch (error) {
-        console.error('Error fetching package itinerary on client:', error)
+      } catch (e) {
+        console.error('Fetch error:', e)
       }
     }
-
-    fetchPackageItinerary()
+    fetchItinerary()
   }, [pathname, sections])
 
   return (
@@ -772,22 +556,26 @@ export const DynamicScrollerClient: React.FC<{ sections: Section[] }> = ({
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
         .font-amiri { font-family: 'Amiri', serif; }
-        /* NATS fallbacks if the font is not loaded globally */
-        .font-nats { font-family: 'NATS', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; }
+        .font-nats { font-family: 'NATS', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+        
+        html { scroll-behavior: smooth; }
       `}</style>
-      <div className="min-h-[70vh] font-sans">
-        {sections.map((section, idx) => {
-          if (section.type === 'vibe') {
-            return <VibeSection key={section?.id || `vibe-${idx}`} section={section} />
-          }
-
-          return (
-            <DynamicSection
-              key={typeof section?.id === 'string' ? section.id : `section-${idx}`}
-              section={section}
-            />
-          )
-        })}
+      <div className="min-h-[70vh] font-sans overflow-x-hidden">
+        {sections.map((section, idx) =>
+          section.type === 'vibe' ? (
+            <VibeSection key={idx} section={section} />
+          ) : (
+            <DynamicSection key={idx} section={section} />
+          ),
+        )}
       </div>
     </>
   )

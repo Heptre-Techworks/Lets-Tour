@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 // Narrow media shape from Payload Upload relation
 type MediaLike =
@@ -164,7 +165,8 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
         }}
       >
         {imgSrc ? (
-          <img
+          <Image
+            fill
             src={imgSrc}
             alt={alt ?? 'Image'}
             className="w-full h-full object-cover rounded-xl"
@@ -243,7 +245,7 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
               </p>
             ) : null}
 
-            {card?.details && (
+            {/* {card?.details && (
               <div
                 className="my-3 sm:my-3.5"
                 style={{
@@ -251,7 +253,7 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
                   width: '100%',
                 }}
               />
-            )}
+            )} */}
 
             <div className="flex justify-between items-center mt-2.5">
               <div className="flex items-center flex-wrap">
@@ -272,7 +274,7 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
                     opacity: 0.8,
                   }}
                 >
-                  (per person)
+                  {/* (per person) */}
                 </span>
               </div>
             </div>
@@ -340,11 +342,11 @@ export const UpDownCardCarouselClient: React.FC<{
 
   return (
     <>
+      {/* FIXED: Added &display=swap to Amiri font link */}
       <link
         href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap"
         rel="stylesheet"
       />
-      <link href="https://fonts.cdnfonts.com/css/nats" rel="stylesheet" />
 
       <section
         className="w-screen relative pb-12 sm:pb-16 md:pb-20"
@@ -373,7 +375,7 @@ export const UpDownCardCarouselClient: React.FC<{
             </div>
             {subheading ? (
               <p
-                className="text-black mt-4 sm:mt-5 flex items-center text-base sm:text-lg md:text-xl lg:text-2xl"
+                className="text-black mt-4 sm:mt-5 flex items-center text-xl sm:text-xl md:text-xl lg:text-2xl"
                 style={{
                   fontFamily: "'NATS', sans-serif",
                   lineHeight: '88%',

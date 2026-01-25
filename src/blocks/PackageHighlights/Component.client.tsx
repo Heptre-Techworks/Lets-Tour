@@ -143,6 +143,8 @@ export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = (
                 key={index}
                 className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-300 hover:scale-[1.03]"
               >
+                <picture>
+
                 <img
                   src={imageSrc}
                   alt={
@@ -155,7 +157,9 @@ export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = (
                     e.currentTarget.onerror = null
                     e.currentTarget.src = 'https://placehold.co/400/CCCCCC/FFFFFF?text=Image+Error'
                   }}
+                  
                 />
+                </picture>
               </div>
             )
           })}

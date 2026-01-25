@@ -3,6 +3,7 @@
 
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 
 const ChevronLeftIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
   <svg
@@ -369,11 +370,12 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
                             className="w-full overflow-hidden"
                             style={{ height: '300px', clipPath: 'url(#card-shape)' }}
                           >
-                            <img
+                            <Image
                               src={getImageUrl(stop.image)}
                               alt={`${stop.name}, ${stop.city}`}
                               className="h-full w-full object-cover"
                               draggable={false}
+                              fill
                             />
                           </div>
                           <div className="bg-orange-400 text-white px-4 h-[180px] flex flex-col justify-center text-center rounded-b-lg">
@@ -383,11 +385,12 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
                         </>
                       ) : (
                         <div className="relative w-full h-full">
-                          <img
+                          <Image
                             src={getImageUrl(stop.image)}
                             alt={`${stop.name}, ${stop.city}`}
                             className="h-full w-full object-cover rounded-lg"
                             draggable={false}
+                            fill
                           />
                           <div className="absolute bottom-0 left-0 w-full bg-orange-400/90 h-20 flex items-center justify-center text-center rounded-b-lg">
                             <h3 className="font-serif italic text-white text-lg">{`${stop.name}, ${stop.city}`}</h3>

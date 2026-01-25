@@ -422,12 +422,12 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
                       alt="User C"
                     />
                   </div>
-                  <p className="font-nats ">
+                  <span className="font-nats ">
                     {pkg.recentBookings} +
                     <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 m-2">
                       bookings in past month
                     </p>
-                  </p>
+                  </span>
                 </div>
               )}
             </div>
