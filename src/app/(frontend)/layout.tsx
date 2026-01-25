@@ -15,6 +15,7 @@ import { draftMode } from 'next/headers'
 
 import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
+import { getCachedGlobal } from '@/utilities/getGlobals'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
@@ -23,8 +24,44 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
         <InitTheme />
-        <link href="/favicon.ico" rel="icon" sizes="32x32" />
-        <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+        <InitTheme />
+        {/* Dynamic Favicon */}
+        {(async () => {
+          try {
+            const headerData: any = await getCachedGlobal('header', 1)()
+            const logo = headerData?.logo
+            let logoUrl = '/favicon.svg' // fallback
+            if (logo && typeof logo === 'object' && logo.url) {
+                logoUrl = logo.url
+            } else if (typeof logo === 'string') {
+                logoUrl = logo
+            }
+            return <link href={logoUrl} rel="icon" />
+          } catch (e) {
+            return <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+          }
+        })()}
+        
+        {/* Dynamic Google Fonts Injection */}
+        {(async () => {
+           try {
+             // We can't use type-safe 'theme-settings' yet if types aren't regenerated. Cast to any.
+             const theme: any = await getCachedGlobal('theme-settings' as any)()
+             const fonts = theme?.fonts || []
+             
+             if (fonts.length === 0) return null
+
+             return (
+               <>
+                 {fonts.map((f: any, i: number) => (
+                    f.link ? <link key={i} href={f.link} rel="stylesheet" /> : null
+                 ))}
+               </>
+             )
+           } catch (e) {
+             return null
+           }
+        })()}
       </head>
       <body>
         <Providers>

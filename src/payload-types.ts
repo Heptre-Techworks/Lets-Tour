@@ -145,6 +145,7 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    'theme-settings': ThemeSetting;
     'search-filters': SearchFilter;
     packageLayout: PackageLayout;
     destinationLayout: DestinationLayout;
@@ -152,6 +153,7 @@ export interface Config {
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'theme-settings': ThemeSettingsSelect<false> | ThemeSettingsSelect<true>;
     'search-filters': SearchFiltersSelect<false> | SearchFiltersSelect<true>;
     packageLayout: PackageLayoutSelect<false> | PackageLayoutSelect<true>;
     destinationLayout: DestinationLayoutSelect<false> | DestinationLayoutSelect<true>;
@@ -4708,6 +4710,32 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "theme-settings".
+ */
+export interface ThemeSetting {
+  id: string;
+  fonts?:
+    | {
+        /**
+         * The name of the font as it appears in Google Fonts (e.g. "Pacifico")
+         */
+        name: string;
+        /**
+         * The CSS font-family value (e.g. "Pacifico, cursive")
+         */
+        value: string;
+        /**
+         * The full URL from Google Fonts (e.g. https://fonts.googleapis.com/css2?family=Pacifico&display=swap)
+         */
+        link: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "search-filters".
  */
 export interface SearchFilter {
@@ -5299,6 +5327,23 @@ export interface FooterSelect<T extends boolean = true> {
       };
   showThemeSelector?: T;
   copyright?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "theme-settings_select".
+ */
+export interface ThemeSettingsSelect<T extends boolean = true> {
+  fonts?:
+    | T
+    | {
+        name?: T;
+        value?: T;
+        link?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

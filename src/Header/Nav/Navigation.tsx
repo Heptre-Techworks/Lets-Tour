@@ -37,30 +37,64 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
   }, [])
 
   // Define the main menu items that use the HoverMenu
-  const mainMenuItems = useMemo(
-    () => [
+  const mainMenuItems = useMemo(() => {
+    // If user has defined mainNav in CMS, use it
+    const cmsNav = data?.mainNav
+    if (cmsNav && cmsNav.length > 0) {
+      return cmsNav.map((item) => {
+        let endpoint = ''
+        let hrefBase = ''
+
+        if (item.type === 'dynamic') {
+           switch (item.resource) {
+             case 'destinations':
+               endpoint = '/api/destinations?where[isPublished][equals]=true&limit=50&sort=name&depth=0'
+               hrefBase = '/destinations'
+               break
+             case 'packages':
+               endpoint = '/api/packages?where[isPublished][equals]=true&limit=50&sort=name&depth=0'
+               hrefBase = '/packages'
+               break
+             case 'package-categories':
+               endpoint = '/api/package-categories?limit=50&sort=name&depth=0'
+               hrefBase = '/packages' // Categories usually filter the packages page or have their own route
+               break
+             case 'international-package':
+               endpoint = '/api/international-package?where[isPublished][equals]=true&limit=50&sort=name&depth=0'
+               hrefBase = '/international-package'
+               break
+           }
+        }
+
+        return {
+          key: item.id || item.label,
+          label: item.label,
+          hrefBase: hrefBase || item.url || '#',
+          endpoint,
+          type: item.type,
+        }
+      })
+    }
+
+    // Default Fallback
+    return [
       {
         key: 'destinations',
         label: 'Destinations',
         hrefBase: '/destinations',
         endpoint: '/api/destinations?where[isPublished][equals]=true&limit=50&sort=name&depth=0',
+        type: 'dynamic',
       },
       {
         key: 'packages',
         label: 'Packages',
-        hrefBase: '/packages',
-        endpoint: '/api/packages?where[isPublished][equals]=true&limit=50&sort=name&depth=0',
+        hrefBase: '/packages', 
+        // CHANGED: Now fetching Categories instead of all packages
+        endpoint: '/api/package-categories?limit=50&sort=name&depth=0',
+        type: 'dynamic',
       },
-      // {
-      //   key: 'international-package',
-      //   label: 'International Package',
-      //   hrefBase: '/international-package',
-      //   endpoint:
-      //     '/api/international-package?where[isPublished][equals]=true&limit=50&sort=name&depth=0',
-      // },
-    ],
-    [],
-  )
+    ]
+  }, [data?.mainNav])
 
   // Links that appear in the top strip (i.e., not using HoverMenu)
   const stripLinks = useMemo(
@@ -134,12 +168,22 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
       <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
         <div className="pointer-events-auto flex items-center justify-center gap-6 lg:gap-8 xl:gap-10 whitespace-nowrap">
           {mainMenuItems.map((item) => (
-            <HoverMenu
-              key={`${item.key}-desktop`}
-              label={item.label}
-              hrefBase={item.hrefBase}
-              endpoint={item.endpoint}
-            />
+             item.type === 'link' || !item.endpoint ? (
+                 <Link 
+                    key={`${item.key}-desktop`} 
+                    href={item.hrefBase}
+                    className="font-sans text-[15px] sm:text-[18px] lg:text-[20px] font-semibold text-gray-900 md:text-white transition-all duration-300 hover:text-[#FBAE3D]"
+                 >
+                    {item.label}
+                 </Link>
+             ) : (
+                <HoverMenu
+                  key={`${item.key}-desktop`}
+                  label={item.label}
+                  hrefBase={item.hrefBase}
+                  endpoint={item.endpoint}
+                />
+             )
           ))}
 
           <CurateButton data={data} />
@@ -185,14 +229,25 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
         {/* Menu Items (Scrollable content) */}
         <div className="w-full flex flex-col items-start justify-start gap-5 sm:gap-6 ">
           {mainMenuItems.map((item) => (
-            <HoverMenu
-              key={`${item.key}-mobile`}
-              label={item.label}
-              hrefBase={item.hrefBase}
-              endpoint={item.endpoint}
-              onLinkClick={closeMobileMenu}
-              className="text-lg font-semibold text-black hover:text-blue-600 transition w-full p-2"
-            />
+             item.type === 'link' || !item.endpoint ? (
+                <Link
+                  key={`${item.key}-mobile`}
+                  href={item.hrefBase}
+                  onClick={closeMobileMenu}
+                  className="text-lg font-semibold text-black hover:text-blue-600 transition w-full p-2"
+                >
+                  {item.label}
+                </Link>
+             ) : (
+                <HoverMenu
+                  key={`${item.key}-mobile`}
+                  label={item.label}
+                  hrefBase={item.hrefBase}
+                  endpoint={item.endpoint}
+                  onLinkClick={closeMobileMenu}
+                  className="text-lg font-semibold text-black hover:text-blue-600 transition w-full p-2"
+                />
+             )
           ))}
 
           {stripLinks.map((item, index) => (

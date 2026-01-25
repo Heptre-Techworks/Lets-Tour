@@ -72,6 +72,25 @@ export const FormBlock: React.FC<
             method: 'POST',
           })
 
+          // Secondary submission to Google Sheets (Fire & Forget)
+          try {
+            const sheetPayload = dataToSend.reduce(
+              (acc, item) => {
+                acc[item.field] = item.value
+                return acc
+              },
+              {} as Record<string, unknown>,
+            )
+
+            fetch('https://sheets-writer-1037202171762.us-central1.run.app', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(sheetPayload),
+            }).catch((err) => console.warn('Google Sheets submission failed:', err))
+          } catch (e) {
+            console.warn('Error preparing sheet payload:', e)
+          }
+
           const res = await req.json()
           clearTimeout(loadingTimerID)
 

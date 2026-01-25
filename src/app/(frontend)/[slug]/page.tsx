@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import type { Page } from '@/payload-types'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
@@ -9,6 +10,7 @@ import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { getCachedCollection } from '@/utilities/getGlobals'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -68,14 +70,27 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 
 const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = await draftMode()
-  const payload = await getPayload({ config: configPromise })
-  const result = await payload.find({
-    collection: 'pages',
-    draft,
+  
+  if (draft) {
+    // Determine if we need to fall back to payload.find for draft mode (uncached)
+    const payload = await getPayload({ config: configPromise })
+    const result = await payload.find({
+      collection: 'pages',
+      draft,
+      limit: 1,
+      pagination: false,
+      overrideAccess: draft,
+      where: { slug: { equals: slug } },
+    })
+    return result.docs?.[0] || null
+  }
+  
+  // Use persistent cache for published pages
+  const result = await getCachedCollection('pages', { 
     limit: 1,
     pagination: false,
-    overrideAccess: draft,
-    where: { slug: { equals: slug } },
-  })
-  return result.docs?.[0] || null
+    where: { slug: { equals: slug } }
+  })()
+  
+  return (result.docs?.[0] as Page) || null
 })

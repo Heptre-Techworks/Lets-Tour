@@ -96,6 +96,7 @@ export const revalidateSite: CollectionAfterChangeHook = async ({
     // Revalidate cache tags
     revalidateTag('collection')
     revalidateTag(collectionSlug)
+    revalidateTag(`collection_${collectionSlug}`) // Match getCachedCollection
     
     console.log(`✅ Site revalidated after ${collectionSlug} change`)
   } catch (error) {
@@ -122,6 +123,7 @@ export const revalidateSiteOnDelete: CollectionAfterDeleteHook = async ({
     revalidatePath('/', 'layout')
     revalidateTag('collection')
     revalidateTag(collectionSlug)
+    revalidateTag(`collection_${collectionSlug}`)
     
     console.log(`✅ Site revalidated after ${collectionSlug} deletion`)
   } catch (error) {
@@ -148,6 +150,7 @@ export const revalidateGlobal: GlobalAfterChangeHook = async ({
     revalidatePath('/', 'layout')
     revalidateTag('global')
     revalidateTag(globalSlug)
+    revalidateTag(`global_${globalSlug}`) // Match getCachedGlobal
     
     console.log(`✅ Site revalidated after ${globalSlug} change`)
   } catch (error) {

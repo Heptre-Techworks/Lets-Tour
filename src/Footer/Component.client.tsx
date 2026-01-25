@@ -36,27 +36,29 @@ export const FooterClient: React.FC<FooterClientProps> = ({ data }) => {
 
           {/* --- Navigation Groups --- */}
           <div className="lg:col-span-3">
-            {hasGroups ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 text-center sm:text-left">
-                {data.navGroups?.map((group, i) => (
-                  <div key={i}>
-                    {group.groupLabel && (
-                      <h3 className="text-white font-semibold text-sm uppercase mb-3 tracking-wider">
-                        {group.groupLabel}
-                      </h3>
-                    )}
-                    <FooterNav data={{ navItems: group.links } as any} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-6 text-center sm:text-left">
-                <h3 className="text-white font-semibold text-sm uppercase mb-3 tracking-wider">
-                  Quick Links
-                </h3>
-                <FooterNav data={data} />
-              </div>
-            )}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 text-center sm:text-left">
+              {/* Groups */}
+              {hasGroups && data.navGroups?.map((group, i) => (
+                <div key={i}>
+                  {group.groupLabel && (
+                    <h3 className="text-white font-semibold text-sm uppercase mb-3 tracking-wider">
+                      {group.groupLabel}
+                    </h3>
+                  )}
+                  <FooterNav data={{ navItems: group.links } as any} />
+                </div>
+              ))}
+              
+              {/* Quick Links (navItems) - Render if they exist */}
+              {data.navItems && data.navItems.length > 0 && (
+                <div key="quick-links">
+                  <h3 className="text-white font-semibold text-sm uppercase mb-3 tracking-wider">
+                    Quick Links
+                  </h3>
+                  <FooterNav data={data} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

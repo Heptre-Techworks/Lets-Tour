@@ -6,8 +6,12 @@ import {
   ParagraphFeature,
   lexicalEditor,
   UnderlineFeature,
+  HTMLConverterFeature,
+  TextStateFeature,
+  defaultColors, 
   type LinkFields,
 } from '@payloadcms/richtext-lexical'
+import { DynamicFontFeature } from './lexical/features/DynamicFont'
 
 export const defaultLexical = lexicalEditor({
   features: [
@@ -15,6 +19,27 @@ export const defaultLexical = lexicalEditor({
     UnderlineFeature(),
     BoldFeature(),
     ItalicFeature(),
+    HTMLConverterFeature({}),
+    TextStateFeature({
+      state: {
+        // Colors (Background and Text)
+        color: {
+           ...defaultColors.text,
+        },
+        background: {
+           ...defaultColors.background,
+        },
+        // Legacy Font Sizes
+        'font-size': {
+           'small': { label: 'Small', css: { 'font-size': '14px' } },
+           'medium': { label: 'Medium', css: { 'font-size': '16px' } },
+           'large': { label: 'Large', css: { 'font-size': '20px' } },
+           'xlarge': { label: 'Extra Large', css: { 'font-size': '24px' } },
+           'xxlarge': { label: 'Huge', css: { 'font-size': '32px' } },
+        }
+      },
+    }),
+    DynamicFontFeature(),
     LinkFeature({
       enabledCollections: ['pages', 'posts'],
       fields: ({ defaultFields }) => {

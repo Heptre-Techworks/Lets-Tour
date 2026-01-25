@@ -8,6 +8,7 @@ import sharp from 'sharp' // sharp-import
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
+import { ThemeSettings } from './globals/ThemeSettings'
 
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
@@ -99,7 +100,7 @@ export default buildConfig({
     Vibes,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, SearchFilters, PackageLayout, DestinationLayout],
+  globals: [Header, Footer, ThemeSettings, SearchFilters, PackageLayout, DestinationLayout],
   plugins: [
     ...plugins,
     autoRevalidatePlugin,
