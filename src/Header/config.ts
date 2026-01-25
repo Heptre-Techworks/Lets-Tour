@@ -66,6 +66,47 @@ export const Header: GlobalConfig = {
         },
       ],
     },
+    {
+      name: 'mainNav',
+      type: 'array',
+      label: 'Main Navigation (Center)',
+      fields: [
+        {
+          name: 'label',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'type',
+          type: 'select',
+          options: [
+            { label: 'Link', value: 'link' },
+            { label: 'Dynamic Menu', value: 'dynamic' },
+          ],
+          defaultValue: 'link',
+        },
+        {
+          name: 'url',
+          type: 'text',
+          admin: {
+            condition: (_, siblingData) => siblingData?.type === 'link',
+          },
+        },
+        {
+          name: 'resource',
+          type: 'select',
+          options: [
+            { label: 'Destinations', value: 'destinations' },
+            { label: 'Packages', value: 'packages' },
+            { label: 'Package Categories', value: 'package-categories' },
+            { label: 'International Packages', value: 'international-package' },
+          ],
+          admin: {
+            condition: (_, siblingData) => siblingData?.type === 'dynamic',
+          },
+        },
+      ],
+    },
   ],
   hooks: {
     afterChange: [revalidateHeader],

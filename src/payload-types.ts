@@ -4579,6 +4579,15 @@ export interface Header {
     text?: string | null;
     href?: string | null;
   };
+  mainNav?:
+    | {
+        label: string;
+        type?: ('link' | 'dynamic') | null;
+        url?: string | null;
+        resource?: ('destinations' | 'packages' | 'package-categories' | 'international-package') | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -5251,6 +5260,15 @@ export interface HeaderSelect<T extends boolean = true> {
         show?: T;
         text?: T;
         href?: T;
+      };
+  mainNav?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        url?: T;
+        resource?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
