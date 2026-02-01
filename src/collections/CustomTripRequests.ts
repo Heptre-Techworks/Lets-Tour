@@ -3,7 +3,10 @@ import { sendLeadEmail } from '../hooks/sendLeadEmail'
 
 export const CustomTripRequests: CollectionConfig = {
   slug: 'custom-trip-requests',
-  admin: { useAsTitle: 'id' },
+  admin: {
+    useAsTitle: 'id',
+    group: 'User Data',
+  },
   access: {
     create: () => true,
     read: ({ req }) => req?.user?.role === 'admin',

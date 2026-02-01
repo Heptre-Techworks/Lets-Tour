@@ -10,9 +10,10 @@ export const Destinations: CollectionConfig = {
   slug: 'destinations',
   
   admin: {
+    group: 'Trips & Packages',
     useAsTitle: 'name',
     defaultColumns: ['name', 'region', 'isFeatured', 'isPopular', 'startingPrice'],
-    group: 'Content',
+
     description: 'Manage destination countries and their content',
   },
 

@@ -9,7 +9,7 @@ export const PackageCategories: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'type', 'parent'],
-    group: 'Taxonomies',
+    group: 'Trip Configuration',
   },
 
   access: {

@@ -16,7 +16,7 @@ export const Categories: CollectionConfig<'categories'> = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'type', 'parent'],
-    group: 'Taxonomies',
+    group: 'Website Content',
     description: 'Categories for experiences, trip types, vibes, and destination labels',
   },
 

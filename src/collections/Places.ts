@@ -9,7 +9,7 @@ export const Places: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'city', 'destination', 'isPublished'],
-    group: 'Content',
+    group: 'Trip Configuration',
   },
 
   access: {

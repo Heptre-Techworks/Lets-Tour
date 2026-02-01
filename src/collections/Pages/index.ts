@@ -70,6 +70,7 @@ export const Pages: CollectionConfig<'pages'> = {
         collection: 'pages',
         req,
       }),
+    group: 'Website Content',
     useAsTitle: 'title',
   },
   fields: [

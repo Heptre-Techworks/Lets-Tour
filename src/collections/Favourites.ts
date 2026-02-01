@@ -1,9 +1,13 @@
-// src/collections/Favorites.ts
+
 import type { CollectionConfig } from 'payload'
 
 export const Favorites: CollectionConfig = {
   slug: 'favorites',
-  admin: { useAsTitle: 'id' },
+  admin: {
+    useAsTitle: 'id',
+    group: 'User Data',
+    defaultColumns: ['user', 'package', 'createdAt'],
+  },
   indexes: [
     // Unique per user + target combo. For polymorphic relationships,
     // index the field itself; the adapter will handle the underlying keys.

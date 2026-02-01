@@ -1,9 +1,13 @@
-// src/collections/BulkBookingRequests.ts
+
 import type { CollectionConfig } from 'payload'
 
 export const BulkBookingRequests: CollectionConfig = {
   slug: 'bulk-booking-requests',
-  admin: { useAsTitle: 'contactName' },
+  admin: {
+    useAsTitle: 'contactName',
+    group: 'User Data',
+    defaultColumns: ['contactName', 'email', 'destination', 'status', 'createdAt'],
+  },
   access: {
     create: () => true,
     read: ({ req }) => req?.user?.role === 'admin',

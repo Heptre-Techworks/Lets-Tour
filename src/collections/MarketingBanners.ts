@@ -9,7 +9,7 @@ export const MarketingBanners: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'percentageOff', 'isActive', 'sortOrder'],
-    group: 'Marketing',
+    group: 'Website Content',
   },
 
   access: {

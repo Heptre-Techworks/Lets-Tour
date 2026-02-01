@@ -9,7 +9,7 @@ export const SocialPosts: CollectionConfig = {
   admin: {
     useAsTitle: 'postUrl',
     defaultColumns: ['postUrl', 'platform', 'isFeatured', 'createdAt'],
-    group: 'Content',
+    group: 'Website Content',
     description: 'Manage social media posts for Instagram carousel',
   },
 

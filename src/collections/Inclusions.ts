@@ -9,7 +9,7 @@ export const Inclusions: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['code', 'name'],
-    group: 'Taxonomies',
+    group: 'Trip Configuration',
   },
 
   access: {

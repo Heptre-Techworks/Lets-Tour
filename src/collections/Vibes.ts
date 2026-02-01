@@ -8,7 +8,7 @@ export const Vibes: CollectionConfig = {
   
   admin: {
     useAsTitle: 'name',
-    group: 'Taxonomies',
+    group: 'Trip Configuration',
   },
 
   access: {

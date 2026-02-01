@@ -8,7 +8,7 @@ export const SearchFilters: GlobalConfig = {
   label: 'Search Filters',
   
   admin: {
-    group: 'Settings',
+    group: 'Website Content',
   },
 
   access: {

@@ -999,6 +999,12 @@ export interface InfoPanelBlock {
 export interface Package {
   id: string;
   /**
+   * Package name (e.g., "Spanish Escape")
+   */
+  name: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  /**
    * Brief overview of the package
    */
   overview: {
@@ -1016,12 +1022,6 @@ export interface Package {
     };
     [k: string]: unknown;
   };
-  /**
-   * Package name (e.g., "Spanish Escape")
-   */
-  name: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
   /**
    * Brief summary for package cards (e.g., "Madrid 2N, Seville 2N, Granada 1N...")
    */
@@ -1082,24 +1082,7 @@ export interface Package {
       }[]
     | null;
   /**
-   * e.g., "8N/9D", "7 Days / 8 Nights"
-   */
-  duration: string;
-  /**
-   * Starting price per person
-   */
-  price: number;
-  currency?: ('INR' | 'USD' | 'EUR' | 'GBP') | null;
-  /**
-   * Discounted price (optional)
-   */
-  discountedPrice?: number | null;
-  /**
-   * Star rating (1-5 stars) shown on package hero
-   */
-  starRating?: number | null;
-  /**
-   * Complete day-by-day itinerary - used by DynamicScroller block
+   * Complete day-by-day itinerary
    */
   itinerary?:
     | {
@@ -1108,31 +1091,22 @@ export interface Package {
          */
         dayNumber: number;
         /**
-         * Day label for DynamicScroller (e.g., "Day 1 - Arrival Into Paris")
+         * Day label (e.g., "Day 1 - Arrival Into Paris")
          */
         day: string;
         /**
-         * Activities shown in DynamicScroller itinerary cards
+         * Activities for Itinerary Card
          */
         activities?:
           | {
-              /**
-               * Small icon for this activity (e.g., plane, hotel, food)
-               */
               icon?: (string | null) | Media;
-              /**
-               * Activity description (e.g., "Check-in at hotel", "Visit Eiffel Tower")
-               */
               description: string;
-              /**
-               * Optional thumbnail image for this activity
-               */
               detailsImage?: (string | null) | Media;
               id?: string | null;
             }[]
           | null;
         /**
-         * Additional title (for package detail page)
+         * Additional title
          */
         title?: string | null;
         /**
@@ -1140,7 +1114,7 @@ export interface Package {
          */
         subtitle?: string | null;
         /**
-         * Full day description for package detail page
+         * Full day description
          */
         description?: {
           root: {
@@ -1157,33 +1131,55 @@ export interface Package {
           };
           [k: string]: unknown;
         } | null;
-        /**
-         * City visited on this day
-         */
         city?: (string | null) | City;
-        /**
-         * Places/attractions visited on this day
-         */
         places?: (string | Place)[] | null;
         mealsIncluded?: {
           breakfast?: boolean | null;
           lunch?: boolean | null;
           dinner?: boolean | null;
         };
-        /**
-         * Hero image for this day
-         */
         image?: (string | null) | Media;
-        /**
-         * Additional notes/tips for this day
-         */
         notes?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Key highlights with icons (e.g., "★ Return Economy Class Airfare")
+   * e.g., "8N/9D", "7 Days / 8 Nights"
    */
+  duration: string;
+  /**
+   * Starting price per person
+   */
+  price: number;
+  currency?: ('INR' | 'USD' | 'EUR' | 'GBP') | null;
+  /**
+   * Discounted price (optional)
+   */
+  discountedPrice?: number | null;
+  /**
+   * Average customer rating
+   */
+  rating?: number | null;
+  /**
+   * Bookings in past 30 days
+   */
+  bookingsCount30d?: number | null;
+  /**
+   * What's included
+   */
+  inclusions?: (string | Inclusion)[] | null;
+  /**
+   * What's not included
+   */
+  exclusions?: (string | Exclusion)[] | null;
+  goodToKnow?:
+    | {
+        title?: string | null;
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  isPublished?: boolean | null;
   highlights?:
     | {
         icon?: ('star' | 'flight' | 'hotel' | 'meal' | 'transport' | 'ticket' | 'activity' | 'feature') | null;
@@ -1192,63 +1188,21 @@ export interface Package {
       }[]
     | null;
   /**
-   * What's included in the package
-   */
-  inclusions?: (string | Inclusion)[] | null;
-  /**
-   * What's not included
-   */
-  exclusions?: (string | Exclusion)[] | null;
-  /**
-   * Important information for travelers
-   */
-  goodToKnow?:
-    | {
-        /**
-         * Info title (optional)
-         */
-        title?: string | null;
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Package labels like Best Seller / Premium
+   * Labels like Best Seller
    */
   labels?: (string | Category)[] | null;
   /**
-   * Target audience (Couples, Family, Solo, etc.)
+   * Target audience
    */
   categories?: (string | PackageCategory)[] | null;
-  /**
-   * Package themes (e.g., Honeymoon, Adventure, Wildlife)
-   */
   themes?: (string | Theme)[] | null;
-  /**
-   * Activity types included
-   */
+  vibe?: (string | null) | Vibe;
   activities?: (string | Activity)[] | null;
   amenities?: (string | Amenity)[] | null;
   accommodationTypes?: (string | AccommodationType)[] | null;
-  /**
-   * Package vibe/mood (e.g., Outdoor, Relaxing, Glamping, Girls Day Out)
-   */
-  vibe?: (string | null) | Vibe;
-  /**
-   * Average customer rating
-   */
-  rating?: number | null;
-  /**
-   * Bookings in past 30 days (e.g., "250+ bookings")
-   */
-  bookingsCount30d?: number | null;
-  /**
-   * Show in featured sections
-   */
   isFeatured?: boolean | null;
   isFamilyFriendly?: boolean | null;
   isHoneymoon?: boolean | null;
-  isPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -4096,10 +4050,10 @@ export interface InternationalPackageSelect<T extends boolean = true> {
  * via the `definition` "packages_select".
  */
 export interface PackagesSelect<T extends boolean = true> {
-  overview?: T;
   name?: T;
   slug?: T;
   slugLock?: T;
+  overview?: T;
   Summary?: T;
   tagline?: T;
   description?: T;
@@ -4115,11 +4069,6 @@ export interface PackagesSelect<T extends boolean = true> {
         order?: T;
         id?: T;
       };
-  duration?: T;
-  price?: T;
-  currency?: T;
-  discountedPrice?: T;
-  starRating?: T;
   itinerary?:
     | T
     | {
@@ -4149,13 +4098,12 @@ export interface PackagesSelect<T extends boolean = true> {
         notes?: T;
         id?: T;
       };
-  highlights?:
-    | T
-    | {
-        icon?: T;
-        text?: T;
-        id?: T;
-      };
+  duration?: T;
+  price?: T;
+  currency?: T;
+  discountedPrice?: T;
+  rating?: T;
+  bookingsCount30d?: T;
   inclusions?: T;
   exclusions?: T;
   goodToKnow?:
@@ -4165,19 +4113,24 @@ export interface PackagesSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  isPublished?: T;
+  highlights?:
+    | T
+    | {
+        icon?: T;
+        text?: T;
+        id?: T;
+      };
   labels?: T;
   categories?: T;
   themes?: T;
+  vibe?: T;
   activities?: T;
   amenities?: T;
   accommodationTypes?: T;
-  vibe?: T;
-  rating?: T;
-  bookingsCount30d?: T;
   isFeatured?: T;
   isFamilyFriendly?: T;
   isHoneymoon?: T;
-  isPublished?: T;
   updatedAt?: T;
   createdAt?: T;
 }

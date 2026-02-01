@@ -12,9 +12,10 @@ export const InternationalPackage: CollectionConfig = {
   slug: 'international-package',
 
   admin: {
+    group: 'Trips & Packages',
     useAsTitle: 'name',
     defaultColumns: ['name', 'region', 'isFeatured', 'isPopular', 'startingPrice'],
-    group: 'Content',
+
     description: 'Manage destination countries and their content',
   },
 

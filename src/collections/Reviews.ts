@@ -9,7 +9,7 @@ export const Reviews: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'user', 'rating', 'published'],
-    group: 'User Content',
+    group: 'Website Content',
   },
 
   access: {
