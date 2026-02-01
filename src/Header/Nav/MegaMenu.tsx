@@ -138,7 +138,7 @@ export const MegaMenu: React.FC = () => {
            {/* Footer Ad/CTA */}
            <div className="bg-gray-900 text-white p-4 flex justify-between items-center text-xs px-8">
               <span className="opacity-70">Cannot find your dream location?</span>
-              <Link href="/custom-trip" className="text-[#FBAE3D] font-bold hover:underline">
+              <Link href="/curate" className="text-[#FBAE3D] font-bold hover:underline">
                  Customize your own trip &rarr;
               </Link>
            </div>

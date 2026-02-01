@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { usePageTransition } from '@/providers/PageTransitionContext'
 
 export const GlobalPreloader: React.FC = () => {
-  const { isTransitioning, endTransition } = usePageTransition()
+  const { isTransitioning, endTransition, contentLoading } = usePageTransition()
   
   // Transition logic state
   const [show, setShow] = useState(true)
@@ -38,8 +38,8 @@ export const GlobalPreloader: React.FC = () => {
       setTextIndex(0)
     } else {
       // Stop showing loader (start exit animation)
-      // Only if we are currently showing it
-      if (show && !isExiting) {
+      // Only if we are currently showing it AND content is not loading
+      if (show && !isExiting && !contentLoading) {
         const minTime = 800 // Ensure it's visible for at least a moment if it was quick
         const exitTimer = setTimeout(() => {
           setIsExiting(true)
@@ -52,13 +52,15 @@ export const GlobalPreloader: React.FC = () => {
 
   // 3. Initial Load Handling (Show once on first mount)
   useEffect(() => {
+    if (contentLoading) return
+
     // This runs only once on initial full page load
     const timer = setTimeout(() => {
         setIsExiting(true)
         setTimeout(() => setShow(false), 800)
     }, 2500) // Initial load stays longer for branding
     return () => clearTimeout(timer)
-  }, [])
+  }, [contentLoading])
 
 
   // --- Content Logic ---

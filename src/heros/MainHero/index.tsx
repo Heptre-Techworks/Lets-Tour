@@ -1,6 +1,7 @@
 'use client'
 
 import { useHeaderTheme } from '@/providers/HeaderTheme'
+import { usePageTransition } from '@/providers/PageTransitionContext'
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import type { Media as PayloadMedia } from '@/payload-types'
 import { Media as MediaComponent } from '@/components/Media'
@@ -99,6 +100,27 @@ export const MainHero: React.FC<MainHeroProps> = ({
     people: '',
     category: '',
   })
+
+
+
+  // Content Loading Logic
+  const { setContentLoading } = usePageTransition()
+  
+  useEffect(() => {
+    // Start loading on mount
+    setContentLoading(true)
+    
+    // Failsafe: If image doesn't load in 3s, remove loader anyway
+    const timer = setTimeout(() => {
+      setContentLoading(false)
+    }, 5000)
+    
+    return () => clearTimeout(timer)
+  }, [setContentLoading])
+
+  const handleImageLoad = () => {
+    setContentLoading(false)
+  }
 
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -207,6 +229,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
                   index === currentSlide ? 'opacity-100' : 'opacity-0'
                 }`}
                 priority={index === 0}
+                onLoad={index === 0 ? handleImageLoad : undefined}
                 resource={slide.backgroundImage}
               />
             </div>
