@@ -374,12 +374,14 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
                             <Image
                               src={getImageUrl(stop.image)}
                               alt={`${stop.name}, ${stop.city}`}
-                              className="h-full w-full object-cover"
+                              className="h-full w-full object-cover transition-transform duration-700 ease-out" // Added transition
                               draggable={false}
                               fill
+                              sizes="(max-width: 768px) 100vw, 500px"
+                              priority={true} // Priority for center
                             />
                           </div>
-                          <div className="bg-orange-400 text-white px-4 h-[180px] flex flex-col justify-center text-center rounded-b-lg">
+                          <div className="bg-orange-400 text-white px-4 h-[180px] flex flex-col justify-center text-center rounded-b-lg transition-colors duration-500">
                             <h3 className="font-serif italic text-xl md:text-2xl">{stop.name}</h3>
                             <div className="text-sm mt-1">
                                <RichText data={stop.excerpt} enableGutter={false} enableProse={false} />
@@ -387,13 +389,15 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
                           </div>
                         </>
                       ) : (
-                        <div className="relative w-full h-full">
+                        <div className="relative w-full h-full transition-opacity duration-500">
                           <Image
                             src={getImageUrl(stop.image)}
                             alt={`${stop.name}, ${stop.city}`}
-                            className="h-full w-full object-cover rounded-lg"
+                            className="h-full w-full object-cover rounded-lg brightness-75 hover:brightness-100 transition-all duration-500"
                             draggable={false}
                             fill
+                            sizes="(max-width: 768px) 100vw, 300px"
+                            loading="eager" // Preload adjacent images
                           />
                           <div className="absolute bottom-0 left-0 w-full bg-orange-400/90 h-20 flex items-center justify-center text-center rounded-b-lg">
                             <h3 className="font-serif italic text-white text-lg">{`${stop.name}, ${stop.city}`}</h3>

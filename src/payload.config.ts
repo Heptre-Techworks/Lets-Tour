@@ -1,5 +1,6 @@
 // storage-adapter-import-placeholder
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 // import { s3Storage } from '@payloadcms/storage-s3' // NEW
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
@@ -147,6 +148,19 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
+  email: nodemailerAdapter({
+    defaultFromAddress: process.env.ZOHO_USER || 'admin@example.com',
+    defaultFromName: 'Lets Tour',
+    transportOptions: {
+      host: process.env.SMTP_HOST || 'smtppro.zoho.in',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.ZOHO_USER,
+        pass: process.env.ZOHO_PASS,
+      },
+    },
+  }),
   onInit: async (payload) => {
     try {
       const existingUsers = await payload.find({

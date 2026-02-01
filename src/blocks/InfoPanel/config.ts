@@ -60,11 +60,10 @@ export const InfoPanel: Block = {
     },
     {
       name: 'subheading',
-      type: 'textarea',
+      type: 'richText',
       label: 'Subheading',
       admin: {
         condition: (_, siblingData) => siblingData.dataSource === 'manual',
-        rows: 2,
       },
     },
     {
@@ -96,12 +95,9 @@ export const InfoPanel: Block = {
       fields: [
         {
           name: 'text',
-          type: 'textarea',
+          type: 'richText',
           label: 'Item Text',
           required: true,
-          admin: {
-            rows: 3,
-          },
         },
       ],
     },

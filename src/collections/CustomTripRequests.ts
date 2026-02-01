@@ -1,5 +1,5 @@
-// src/collections/CustomTripRequests.ts
 import type { CollectionConfig } from 'payload'
+import { sendLeadEmail } from '../hooks/sendLeadEmail'
 
 export const CustomTripRequests: CollectionConfig = {
   slug: 'custom-trip-requests',
@@ -39,6 +39,9 @@ export const CustomTripRequests: CollectionConfig = {
       ],
     },
   ],
+  hooks: {
+    afterChange: [sendLeadEmail],
+  },
 }
 
 export default CustomTripRequests

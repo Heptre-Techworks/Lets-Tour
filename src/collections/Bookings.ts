@@ -1,5 +1,5 @@
-// src/collections/Bookings.ts
 import type { CollectionConfig, FieldAccess } from 'payload'
+import { sendLeadEmail } from '../hooks/sendLeadEmail'
 
 const canReadBookingUser: FieldAccess = ({ req, doc }) => {
   const user = req?.user
@@ -252,6 +252,7 @@ export const Bookings: CollectionConfig = {
         return data
       },
     ],
+    afterChange: [sendLeadEmail],
   },
 }
 

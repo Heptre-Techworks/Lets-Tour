@@ -2,14 +2,15 @@
 
 import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import RichText from '@/components/RichText'
 
 type InfoPanelClientProps = {
   dataSource?: string
   panelType?: string
   title?: string
-  subheading?: string
+  subheading?: any
   listType?: 'disc' | 'decimal'
-  items?: Array<{ text: string } | string>
+  items?: Array<{ text: any } | any>
 }
 
 export const InfoPanelClient: React.FC<InfoPanelClientProps> = ({
@@ -108,9 +109,13 @@ export const InfoPanelClient: React.FC<InfoPanelClientProps> = ({
 
           {/* Subheading: NATS 26px, 88%, -0.011em */}
           {subheading && (
-            <p className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-gray-900">
-              {subheading}
-            </p>
+            <div className="font-nats text-[26px] leading-[0.88] tracking-[-0.011em] text-gray-900">
+               {typeof subheading === 'string' ? (
+                  subheading
+               ) : (
+                  <RichText data={subheading as any} enableGutter={false} enableProse={false} />
+               )}
+            </div>
           )}
 
           <div className="w-full border-t-4 border-dotted border-gray-300 pt-4" />
@@ -121,7 +126,11 @@ export const InfoPanelClient: React.FC<InfoPanelClientProps> = ({
           <ListComponent className={`${listStyleClass} list-outside pl-6 space-y-4 text-gray-700`}>
             {items.map((item: any, index: number) => (
               <li key={index} className="font-nats text-[24px] leading-[24px] tracking-[-0.011em]">
-                {item?.text || item}
+                {typeof (item?.text || item) === 'string' ? (
+                   item?.text || item
+                ) : (
+                   <RichText data={item?.text || item} enableGutter={false} enableProse={false} />
+                )}
               </li>
             ))}
           </ListComponent>

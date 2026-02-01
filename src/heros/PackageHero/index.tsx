@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react'
 import type { Package, Review } from '@/payload-types'
 import { Media } from '@/components/Media'
 import Link from 'next/link'
+import RichText from '@/components/RichText'
 
 const StarIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className || 'w-5 h-5 text-yellow-400'} fill="currentColor" viewBox="0 0 20 20">
@@ -163,7 +164,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   const title = pkg.name
   const rating = pkg.starRating || pkg.rating || 5
   const location = pkg.Summary || ''
-  const description = typeof pkg.description === 'string' ? pkg.description : ''
+  // description is handled by RichText now
 
   const vacationTypes = pkg.categories
     ? (Array.isArray(pkg.categories) ? pkg.categories : []).map((cat) => {
@@ -279,9 +280,9 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                 </div>
 
                 {/* Description: NATS 20px 100% */}
-                <p className="font-nats text-[20px] leading-[1] tracking-[-0.011em] text-gray-200">
-                  {description}
-                </p>
+                <div className="font-nats text-[20px] leading-[1] tracking-[-0.011em] text-gray-200">
+                  <RichText data={pkg.description} enableGutter={false} enableProse={false} />
+                </div>
               </div>
 
               {vacationTypes.length > 0 && (

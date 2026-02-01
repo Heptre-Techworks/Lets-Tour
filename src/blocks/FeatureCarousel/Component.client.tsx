@@ -4,6 +4,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
+import RichText from '@/components/RichText'
 
 // --- TYPES ---
 type MediaSize = { url?: string | null; width?: number; height?: number }
@@ -28,7 +29,7 @@ type Item = {
 
 type CardData = {
   title?: string
-  description?: string
+  description?: any
   iconUrl?: string // Icon URL (small image)
   imageUrl?: string // Full Image URL (large feature image)
 }
@@ -114,7 +115,7 @@ const ImagePlaceholder: React.FC<{ iconUrl?: string }> = ({ iconUrl }) => {
 /** Card component for displaying features in the carousel. */
 const Card: React.FC<{
   title: string
-  description: string
+  description: any
   iconUrl?: string
   imageUrl?: string
 }> = ({ title, description, iconUrl, imageUrl }) => {
@@ -175,13 +176,16 @@ const Card: React.FC<{
           >
             {title}
           </h3>
-          <p
+          <div
             className="font-nats text-[20px] leading-[22px] tracking-[-0.011em]"
-            // Ensure text is light gray over dark gradient/image
             style={{ color: hasImage ? '#e5e7eb' : '#4b5563' }}
           >
-            {description}
-          </p>
+             {typeof description === 'string' ? (
+                description
+              ) : (
+                <RichText data={description} enableGutter={false} enableProse={false} />
+              )}
+          </div>
         </div>
       </div>
     </div>

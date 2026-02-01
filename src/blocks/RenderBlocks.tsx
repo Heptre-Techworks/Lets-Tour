@@ -112,6 +112,9 @@ function serializeBlockData(block: any) {
           slug: value.slug,
           filename: value.filename,
         }
+      } else if ('root' in value) {
+        // ✅ Preserve Lexical Rich Text objects
+        serialized[key] = value
       } else {
         // Plain object (like theme, navigation, etc.)
         serialized[key] = value

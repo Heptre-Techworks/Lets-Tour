@@ -30,10 +30,12 @@ export const generateMeta = async (args: {
     ? doc?.meta?.title 
     : "Let's Tour"
 
+  const description = typeof doc?.meta?.description === 'string' ? doc.meta.description : ''
+  
   return {
-    description: doc?.meta?.description,
+    description,
     openGraph: mergeOpenGraph({
-      description: doc?.meta?.description || '',
+      description,
       images: ogImage
         ? [
             {

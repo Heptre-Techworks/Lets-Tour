@@ -65,7 +65,7 @@ export default async function Page({ params: paramsPromise }: Args) {
       <PageClient />
       <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
-      <RenderHero hero={(layoutGlobal as any)?.hero} />
+      <RenderHero hero={(layoutGlobal as any)?.hero} packageData={packageData as any} />
       <RenderBlocks blocks={(layoutGlobal as any)?.layout ?? []} />
     </article>
   )
@@ -86,14 +86,19 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 const queryPackageBySlug = cache(async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = await draftMode()
   const payload = await getPayload({ config: configPromise })
-  const result = await payload.find({
-    collection: 'packages',
-    draft,
-    overrideAccess: true, // Always true to allow access
-    limit: 1,
-    pagination: false,
-    depth: 0,
-    where: { slug: { equals: slug } },
-  })
-  return (result.docs?.[0] as RequiredDataFromCollectionSlug<'packages'>) || null
+  try {
+    const result = await payload.find({
+      collection: 'packages',
+      draft,
+      overrideAccess: true, // Always true to allow access
+      limit: 1,
+      pagination: false,
+      depth: 0,
+      where: { slug: { equals: slug } },
+    })
+    return (result.docs?.[0] as RequiredDataFromCollectionSlug<'packages'>) || null
+  } catch (error) {
+    console.error('Error fetching package by slug:', error)
+    return null
+  }
 })

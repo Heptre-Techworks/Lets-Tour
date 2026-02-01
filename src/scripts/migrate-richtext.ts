@@ -19,7 +19,7 @@ const migrate = async () => {
 
   console.log('🚀 Starting Migration...')
 
-  const collections = ['destinations', 'packages', 'places', 'cities', 'regions', 'inclusions', 'exclusions'] as const
+  const collections = ['destinations', 'packages', 'places', 'cities', 'regions', 'inclusions', 'exclusions', 'pages'] as const
   
   // Map collection to fields
   const fieldMap: Record<string, string[]> = {
@@ -105,6 +105,52 @@ const migrate = async () => {
              console.log(`   📝 Converting itinerary descriptions for doc ID: ${doc.id}`)
              updateData.itinerary = newItinerary
            }
+        }
+      }
+
+      // 3. Handle Special Case: Pages InfoPanel Blocks (layout)
+      if (slug === 'pages' && (doc as any).layout) {
+        const layout = (doc as any).layout
+        if (Array.isArray(layout)) {
+          let layoutChanged = false
+          const newLayout = layout.map((block: any) => {
+            if (block.blockType === 'infoPanel') {
+              let blockChanged = false
+              const newBlock = { ...block }
+
+              // Convert subheading
+              if (newBlock.dataSource === 'manual' && typeof newBlock.subheading === 'string' && newBlock.subheading.trim().length > 0) {
+                newBlock.subheading = convertToLexical(newBlock.subheading)
+                blockChanged = true
+              }
+
+              // Convert items
+              if (newBlock.dataSource === 'manual' && Array.isArray(newBlock.items)) {
+                const newItems = newBlock.items.map((item: any) => {
+                  if (typeof item.text === 'string' && item.text.trim().length > 0) {
+                    blockChanged = true
+                    return { ...item, text: convertToLexical(item.text) }
+                  }
+                  return item
+                })
+                if (blockChanged) {
+                  newBlock.items = newItems
+                }
+              }
+
+              if (blockChanged) {
+                layoutChanged = true
+                return newBlock
+              }
+            }
+            return block
+          })
+
+          if (layoutChanged) {
+            hasChange = true
+            updateData.layout = newLayout
+            console.log(`   📝 Converting InfoPanel blocks for page ID: ${doc.id}`)
+          }
         }
       }
 

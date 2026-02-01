@@ -2,13 +2,8 @@
 'use client'
 
 import React, { useState, useMemo, useEffect } from 'react'
-import emailjs from '@emailjs/browser' // 1. 🛠️ Import EmailJS
+// EmailJS Removed in favor of Server-Side Hooks
 
-// --- EmailJS Configuration ---
-const EMAILJS_SERVICE_ID = 'Lets-Tour-Demo'
-const EMAILJS_TEMPLATE_ID = 'template_154333w'
-const EMAILJS_PUBLIC_KEY = '7KpM1U3hexIGQWnuc' // User ID is the Public Key
-// ---
 
 type FormField = {
   label: string
@@ -47,10 +42,8 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
   const [searchQuery, setSearchQuery] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
-  // 2. 🚀 Initialize EmailJS on component mount
-  useEffect(() => {
-    emailjs.init(EMAILJS_PUBLIC_KEY)
-  }, [])
+  // EmailJS Init Removed
+
 
   const getSelectedPackageOption = (value: string) => {
     return packageOptions.find((opt) => opt.value === value)
@@ -167,15 +160,8 @@ export const DynamicFormClient: React.FC<DynamicFormClientProps> = ({
         throw new Error(errorDetails)
       }
 
-      // 2. 📧 Send Email via EmailJS (New Logic)
-      try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-          ...formData,
-          form_type: formType,
-        })
-      } catch (emailError) {
-        console.error('EmailJS failed to send:', emailError)
-      }
+      // Email sending is now handled by the server (Payload Hook)
+
 
       // 3. Cleanup and Success State
       setSubmitStatus('success')
