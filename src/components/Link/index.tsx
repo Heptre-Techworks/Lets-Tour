@@ -39,7 +39,14 @@ export const CustomLink: React.FC<CustomLinkProps> = ({
     // If target="_blank", we should not trigger transition
     if (props.target === '_blank') return
 
+    const currentPath = window.location.pathname
+    
     if (isInternal && !isAnchor) {
+        // Prevent transition loop if navigating to the same page
+        if (safeHref === currentPath) {
+             return onClick ? onClick(e) : undefined
+        }
+
       e.preventDefault()
       triggerTransition()
       setTimeout(() => {

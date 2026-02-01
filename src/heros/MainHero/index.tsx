@@ -115,7 +115,10 @@ export const MainHero: React.FC<MainHeroProps> = ({
       setContentLoading(false)
     }, 5000)
     
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      setContentLoading(false)
+    }
   }, [setContentLoading])
 
   const handleImageLoad = () => {
@@ -186,7 +189,10 @@ export const MainHero: React.FC<MainHeroProps> = ({
     router.push(`/destinations/${formData.destination}`)
   }
 
-  if (!slides || slides.length === 0) return null
+  if (!slides || slides.length === 0) {
+      if (typeof window !== 'undefined') setContentLoading(false)
+      return null
+  }
 
   const activeSlide = slides[currentSlide]
 

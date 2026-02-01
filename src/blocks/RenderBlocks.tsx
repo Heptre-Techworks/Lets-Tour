@@ -130,8 +130,9 @@ function serializeBlockData(block: any) {
 
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
+  packageContext?: any // Pass the full package object
 }> = (props) => {
-  const { blocks } = props
+  const { blocks, packageContext } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -147,6 +148,20 @@ export const RenderBlocks: React.FC<{
             if (Block) {
               // ✅ Serialize block data before passing to client component
               const serializedBlock = serializeBlockData(block)
+
+              // ✅ Inject Package Context if available and block is context-aware
+              if (packageContext) {
+                 if (blockType === 'packageHighlights' || 
+                     blockType === 'infoPanel') {
+                    
+                    // override dataSource if it was set to 'auto' or even if we just want to force it
+                    // usually 'auto' is the trigger for dynamic content
+                    if (serializedBlock.dataSource === 'auto' || !serializedBlock.dataSource) {
+                        serializedBlock.dataSource = 'package'
+                        serializedBlock.package = packageContext
+                    }
+                 }
+              }
 
               return (
                 <div key={index}>

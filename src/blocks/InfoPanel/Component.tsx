@@ -104,6 +104,12 @@ async function transformPackageToPanelData(pkg: any, type: string, payload: any)
         inclusionIds.map(async (incId: any) => {
           const id = typeof incId === 'object' ? incId.id : incId
           if (!id) return null
+          
+          // Optimization: Use already populated data
+          if (typeof incId === 'object' && (incId.description || incId.name)) {
+              return { text: incId.description || incId.name }
+          }
+
           try {
             const inc = await payload.findByID({
               collection: 'inclusions',
@@ -133,6 +139,12 @@ async function transformPackageToPanelData(pkg: any, type: string, payload: any)
         exclusionIds.map(async (excId: any) => {
           const id = typeof excId === 'object' ? excId.id : excId
           if (!id) return null
+          
+          // Optimization: Use already populated data
+          if (typeof excId === 'object' && (excId.description || excId.name)) {
+              return { text: excId.description || excId.name }
+          }
+
           try {
             const exc = await payload.findByID({
               collection: 'exclusions',

@@ -1,5 +1,5 @@
-import { GlobalPreloader } from '@/components/GlobalPreloader'
+import { PreloaderVisual } from '@/components/GlobalPreloader'
 
 export default function Loading() {
-  return <GlobalPreloader />
+  return <PreloaderVisual text="Loading content..." />
 }
