@@ -455,6 +455,16 @@ export const Packages: CollectionConfig = {
       },
     },
     {
+      name: 'themes',
+      type: 'relationship',
+      relationTo: 'themes',
+      hasMany: true,
+      admin: {
+        description: 'Package themes (e.g., Honeymoon, Adventure, Wildlife)',
+        position: 'sidebar',
+      },
+    },
+    {
       name: 'activities',
       type: 'relationship',
       relationTo: 'activities',

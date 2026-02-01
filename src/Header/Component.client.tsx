@@ -4,6 +4,7 @@ import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import type { Header } from '@/payload-types'
+import CustomLink from '@/components/Link'
 import { HeaderLogo } from './Nav/HeaderLogo'
 import { Navigation } from './Nav/Navigation'
 // import { UserProfile } from './Nav/UserProfile'
@@ -31,13 +32,14 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between gap-4">
           {/* --- Logo Clickable to Home --- */}
-          <div
-            onClick={() => router.push('/')}
+
+          <CustomLink
+            href="/"
             className="cursor-pointer transition-transform duration-200 hover:scale-105"
             title="Go to Home"
           >
             <HeaderLogo data={data} />
-          </div>
+          </CustomLink>
 
           <div className="flex-1 min-w-0">
             <Navigation data={data} />

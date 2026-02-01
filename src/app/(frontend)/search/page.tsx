@@ -8,6 +8,8 @@ import { Search } from '@/search/Component'
 import PageClient from './page.client'
 import { CardPostData } from '@/components/Card'
 
+export const dynamic = 'force-dynamic'
+
 type Args = {
   searchParams: Promise<{
     q: string
@@ -67,7 +69,9 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
           <h1 className="mb-8 lg:mb-16">Search</h1>
 
           <div className="max-w-[50rem] mx-auto">
-            <Search />
+            <React.Suspense fallback={null}>
+              <Search />
+            </React.Suspense>
           </div>
         </div>
       </div>

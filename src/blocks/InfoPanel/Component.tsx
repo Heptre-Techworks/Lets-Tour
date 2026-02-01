@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { InfoPanelClient } from './Component.client'
@@ -26,14 +26,16 @@ export const InfoPanel = async (props: InfoPanelProps) => {
   if (dataSource === 'auto') {
     console.log('🔄 Auto mode - client will fetch from URL')
     return (
-      <InfoPanelClient 
-        dataSource="auto"
-        panelType={panelType || 'goodToKnow'}
-        title=""
-        subheading=""
-        listType={manualData.listType || 'disc'}
-        items={[]}
-      />
+      <Suspense fallback={null}>
+        <InfoPanelClient 
+          dataSource="auto"
+          panelType={panelType || 'goodToKnow'}
+          title=""
+          subheading=""
+          listType={manualData.listType || 'disc'}
+          items={[]}
+        />
+      </Suspense>
     )
   }
 

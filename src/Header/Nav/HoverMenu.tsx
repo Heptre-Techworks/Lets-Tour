@@ -1,5 +1,5 @@
 'use client'
-import Link from 'next/link'
+import Link from '@/components/Link'
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 
 type Item = { id: string; name: string; slug: string }

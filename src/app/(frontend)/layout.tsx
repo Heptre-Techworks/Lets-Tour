@@ -1,13 +1,15 @@
 import type { Metadata } from 'next'
+import { PageTransitionProvider } from '@/providers/PageTransitionContext'
 
 import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
 import { Footer } from '@/Footer/Component'
 import { Header } from '@/Header/Component'
+import { GlobalPreloader } from '@/components/GlobalPreloader'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
@@ -44,19 +46,24 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <link key={i} href={link} rel="stylesheet" />
         ))}
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <Providers>
-          <AdminBar
-            adminBarProps={{
-              preview: isEnabled,
-            }}
-          />
+          <PageTransitionProvider>
+            <AdminBar
+                adminBarProps={{
+                preview: isEnabled,
+                }}
+            />
 
-          <Header />
-          <main>
-            {children}
-          </main>
-          <Footer />
+            <Suspense fallback={null}>
+            <GlobalPreloader />
+          </Suspense>
+            <Header />
+            <main>
+                {children}
+            </main>
+            <Footer />
+          </PageTransitionProvider>
         </Providers>
         <Analytics />
       </body>

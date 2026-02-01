@@ -1,15 +1,69 @@
 'use client'
 
 import React, { useEffect, useState, useMemo } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { usePageTransition } from '@/providers/PageTransitionContext'
 
 export const GlobalPreloader: React.FC = () => {
+  const { isTransitioning, endTransition } = usePageTransition()
+  
+  // Transition logic state
   const [show, setShow] = useState(true)
   const [isExiting, setIsExiting] = useState(false)
+  
+  // Text cycling state
   const [textIndex, setTextIndex] = useState(0)
   const pathname = usePathname()
-  
-  // Extract major segment
+  const searchParams = useSearchParams()
+
+  // 1. Handle Navigation Completion
+  // When pathname or searchParams change, it means the new route has mounted.
+  // We trigger the exit sequence.
+  useEffect(() => {
+    if (isTransitioning) {
+      // Small delay to ensure the new page render is visible behind the loader before we fade out
+      const timer = setTimeout(() => {
+        endTransition()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [pathname, searchParams, isTransitioning, endTransition])
+
+  // 2. Control Visibility based on Context
+  useEffect(() => {
+    if (isTransitioning) {
+      // Start showing loader immediately
+      setShow(true)
+      setIsExiting(false)
+      setTextIndex(0)
+    } else {
+      // Stop showing loader (start exit animation)
+      // Only if we are currently showing it
+      if (show && !isExiting) {
+        const minTime = 800 // Ensure it's visible for at least a moment if it was quick
+        const exitTimer = setTimeout(() => {
+          setIsExiting(true)
+          setTimeout(() => setShow(false), 800) // Unmount after fade out
+        }, minTime)
+        return () => clearTimeout(exitTimer)
+      }
+    }
+  }, [isTransitioning, show, isExiting])
+
+  // 3. Initial Load Handling (Show once on first mount)
+  useEffect(() => {
+    // This runs only once on initial full page load
+    const timer = setTimeout(() => {
+        setIsExiting(true)
+        setTimeout(() => setShow(false), 800)
+    }, 2500) // Initial load stays longer for branding
+    return () => clearTimeout(timer)
+  }, [])
+
+
+  // --- Content Logic ---
+
+  // Extract major segment for dynamic text
   const exploreName = useMemo(() => {
     const segments = pathname.split('/').filter(Boolean)
     if (segments.length > 1 && (segments[0] === 'destinations' || segments[0] === 'packages')) {
@@ -24,9 +78,15 @@ export const GlobalPreloader: React.FC = () => {
   // Animation phrases
   const phrases = [
     `Preparing for ${exploreName || 'your trip'}...`,
+    'Checking weather conditions...',
     'Packing bags...',
+    'Finding best routes...',
     'Checking maps...',
+    'Reviewing itinerary...',
+    'Booking local guides...',
+    'Polishing sunglasses...',
     'Fueling jet...',
+    'Securing overhead bin...',
     `Welcome to ${destinationText}!`,
   ]
 
@@ -38,20 +98,6 @@ export const GlobalPreloader: React.FC = () => {
     }, 800) // Change text every 800ms
     return () => clearInterval(interval)
   }, [isExiting, phrases.length])
-
-  // Lifecycle
-  useEffect(() => {
-    // Force show for at least 2.5s for animation, then wait up to 8s max
-    const minTime = 2500
-    const maxTime = 8000
-
-    const exitTimer = setTimeout(() => {
-      setIsExiting(true) // Trigger exit animation (fade out)
-      setTimeout(() => setShow(false), 800) // Unmount after fade
-    }, minTime)
-
-    return () => clearTimeout(exitTimer)
-  }, [])
 
   if (!show) return null
 
@@ -69,7 +115,7 @@ export const GlobalPreloader: React.FC = () => {
           100% { transform: scale(1) translateX(0) rotate(0deg); }
         }
         .animate-plane-journey {
-          animation: planeJourney 2s ease-in-out forwards;
+          animation: planeJourney 2s ease-in-out forwards infinite;
         }
       `}} />
 

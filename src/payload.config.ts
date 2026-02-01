@@ -45,6 +45,7 @@ import Regions from './collections/Regions'
 import { Reviews } from './collections/Reviews'
 import { SocialPosts } from './collections/SocialPosts'
 import Vibes from './collections/Vibes'
+import { Themes } from './collections/Themes'
 import { autoRevalidatePlugin } from './plugins/autoValidate'
 
 const filename = fileURLToPath(import.meta.url)
@@ -99,6 +100,7 @@ export default buildConfig({
     Reviews,
     SocialPosts,
     Vibes,
+    Themes,
   ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, ThemeSettings, SearchFilters, PackageLayout, DestinationLayout],

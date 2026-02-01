@@ -54,6 +54,7 @@
     "lucide-react": "^0.378.0",
     "mongodb": "^6.18.0",
     "next": "15.4.8",
+    "next-nprogress-bar": "^2.4.7",
     "next-sitemap": "^4.2.3",
     "nodemailer": "^7.0.13",
     "payload": "3.53.0",

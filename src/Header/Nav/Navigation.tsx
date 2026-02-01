@@ -2,11 +2,12 @@
 'use client'
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
-import Link from 'next/link'
+import Link from '@/components/Link'
 import { Menu, X, ChevronLeft } from 'lucide-react'
 import type { Header } from '@/payload-types'
 import { CurateButton } from './CurateButton'
 import { HoverMenu } from './HoverMenu'
+import { MegaMenu } from './MegaMenu'
 import { Poppins } from 'next/font/google'
 
 const poppins = Poppins({
@@ -167,8 +168,12 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
       {/* Center Overlay for Main Menus (Desktop) */}
       <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
         <div className="pointer-events-auto flex items-center justify-center gap-6 lg:gap-8 xl:gap-10 whitespace-nowrap">
-          {mainMenuItems.map((item) => (
-             item.type === 'link' || !item.endpoint ? (
+          {mainMenuItems.map((item) => {
+             if (item.key === 'destinations' || item.label.toLowerCase() === 'destinations') {
+                 return <MegaMenu key="mega-destinations" />
+             }
+
+             return item.type === 'link' || !item.endpoint ? (
                  <Link 
                     key={`${item.key}-desktop`} 
                     href={item.hrefBase}
@@ -184,7 +189,7 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
                   endpoint={item.endpoint}
                 />
              )
-          ))}
+          })}
 
           <CurateButton data={data} />
         </div>

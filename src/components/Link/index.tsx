@@ -1,40 +1,88 @@
-import { Button, type ButtonProps } from '@/components/ui/button'
-import { cn } from '@/utilities/ui'
-import Link from 'next/link'
+'use client'
+
 import React from 'react'
+import Link, { LinkProps } from 'next/link'
+import { useRouter } from 'next/navigation'
+import { usePageTransition } from '@/providers/PageTransitionContext'
+import type { Page, Post } from '@/payload-types' // Adjust types as needed based on your project
 
-import type { Page, Post } from '@/payload-types'
-
-type CMSLinkType = {
-  appearance?: 'inline' | ButtonProps['variant']
-  children?: React.ReactNode
+interface CustomLinkProps extends LinkProps, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'onClick'> {
+  children: React.ReactNode
   className?: string
-  label?: string | null
-  newTab?: boolean | null
-  reference?: {
-    relationTo: 'pages' | 'posts'
-    value: Page | Post | string | number
-  } | null
-  size?: ButtonProps['size'] | null
-  type?: 'custom' | 'reference' | null
-  url?: string | null
+  href: string | null | undefined // Handled safely below
 }
 
-export const CMSLink: React.FC<CMSLinkType> = (props) => {
-  const {
-    type,
-    appearance = 'inline',
-    children,
-    className,
-    label,
-    newTab,
-    reference,
-    size: sizeFromProps,
-    url,
-  } = props
+export const CustomLink: React.FC<CustomLinkProps> = ({
+  children,
+  href,
+  onClick,
+  ...props
+}) => {
+  const router = useRouter()
+  const { triggerTransition } = usePageTransition()
 
+  const safeHref = href || '#'
+
+  const handleTransition = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    if (onClick) {
+      onClick(e)
+    }
+
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.defaultPrevented) {
+      return
+    }
+
+    const isInternal = safeHref.startsWith('/') || safeHref.startsWith('.')
+    const isAnchor = safeHref.startsWith('#')
+    
+    // Check key targets where we want the explicit loader
+    // If target="_blank", we should not trigger transition
+    if (props.target === '_blank') return
+
+    if (isInternal && !isAnchor) {
+      e.preventDefault()
+      triggerTransition()
+      setTimeout(() => {
+        router.push(safeHref)
+      }, 100) 
+    }
+  }
+
+  return (
+    <Link href={safeHref} onClick={handleTransition} {...props}>
+      {children}
+    </Link>
+  )
+}
+
+// --- CMSLink Wrapper for Payload Data ---
+
+type CMSLinkType = {
+  type?: 'custom' | 'reference' | null
+  url?: string | null
+  newTab?: boolean | null
+  reference?: {
+    value: string | Page | Post | any
+    relationTo: 'pages' | 'posts' | 'destinations' | 'packages'
+  } | null
+  label?: string | null
+  appearance?: 'default' | 'primary' | 'secondary' | null
+  children?: React.ReactNode
+  className?: string
+}
+
+export const CMSLink: React.FC<CMSLinkType> = ({
+  type,
+  url,
+  newTab,
+  reference,
+  label,
+  children,
+  className,
+  ...rest
+}) => {
   const href =
-    type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
+    type === 'reference' && typeof reference?.value === 'object' && reference.value?.slug
       ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
           reference.value.slug
         }`
@@ -42,25 +90,22 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
 
   if (!href) return null
 
-  const size = appearance === 'link' ? 'clear' : sizeFromProps
-  const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
+  const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
 
-  /* Ensure we don't break any styles set by richText */
-  if (appearance === 'inline') {
-    return (
-      <Link className={cn(className)} href={href || url || ''} {...newTabProps}>
-        {label && label}
-        {children && children}
-      </Link>
-    )
-  }
+  /* Ensure we don't pass 'appearance' or other non-DOM props to CustomLink if they leak in via ...rest */ 
+  // But CMSLinkType destructuring handles most.
 
   return (
-    <Button asChild className={className} size={size} variant={appearance}>
-      <Link className={cn(className)} href={href || url || ''} {...newTabProps}>
-        {label && label}
-        {children && children}
-      </Link>
-    </Button>
+    <CustomLink
+      href={href}
+      className={className}
+      {...newTabProps}
+      {...rest}
+    >
+      {label && label}
+      {children && children}
+    </CustomLink>
   )
 }
+
+export default CustomLink

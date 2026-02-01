@@ -286,7 +286,7 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
         {/* Image container with "card-in-card" effect */}
         <div className="md:w-64 p-3 flex-shrink-0">
           <img
-            className="h-[48vh] w-full object-cover rounded-xl shadow-md transition-transform duration-300 group-hover:scale-105" // ✅ ADD HOVER EFFECT
+            className="h-64 md:h-72 w-full object-cover rounded-xl shadow-md transition-transform duration-300 group-hover:scale-105" // ✅ FIXED: Consistent height
             src={imageSrc}
             alt={pkg.title}
             onError={(e) => {

@@ -127,6 +127,19 @@ export const Destinations: CollectionConfig = {
       },
     },
     {
+      name: 'type',
+      type: 'select',
+      options: [
+        { label: 'International', value: 'international' },
+        { label: 'Domestic', value: 'domestic' },
+      ],
+      defaultValue: 'international',
+      required: true,
+      admin: {
+        description: 'Classify as International or Domestic',
+      },
+    },
+    {
       name: 'country',
       type: 'text',
       admin: {

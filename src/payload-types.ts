@@ -93,6 +93,7 @@ export interface Config {
     reviews: Review;
     'social-posts': SocialPost;
     vibes: Vibe;
+    themes: Theme;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -130,6 +131,7 @@ export interface Config {
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'social-posts': SocialPostsSelect<false> | SocialPostsSelect<true>;
     vibes: VibesSelect<false> | VibesSelect<true>;
+    themes: ThemesSelect<false> | ThemesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -563,6 +565,10 @@ export interface Destination {
    * Broader geographical area (e.g., Europe, Asia)
    */
   region?: (string | null) | Region;
+  /**
+   * Classify as International or Domestic
+   */
+  type: 'international' | 'domestic';
   /**
    * Country name (if destination is a region within a country)
    */
@@ -1215,6 +1221,10 @@ export interface Package {
    */
   categories?: (string | PackageCategory)[] | null;
   /**
+   * Package themes (e.g., Honeymoon, Adventure, Wildlife)
+   */
+  themes?: (string | Theme)[] | null;
+  /**
    * Activity types included
    */
   activities?: (string | Activity)[] | null;
@@ -1311,6 +1321,33 @@ export interface Exclusion {
     [k: string]: unknown;
   } | null;
   icon?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themes".
+ */
+export interface Theme {
+  id: string;
+  /**
+   * Theme name (e.g., Honeymoon, Adventure)
+   */
+  name: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  /**
+   * Icon for the theme (optional)
+   */
+  icon?: (string | null) | Media;
+  /**
+   * Main image for the theme page
+   */
+  featuredImage?: (string | null) | Media;
+  /**
+   * Short description of the theme
+   */
+  description?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3080,6 +3117,10 @@ export interface PayloadLockedDocument {
         value: string | Vibe;
       } | null)
     | ({
+        relationTo: 'themes';
+        value: string | Theme;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: string | Redirect;
       } | null)
@@ -3954,6 +3995,7 @@ export interface DestinationsSelect<T extends boolean = true> {
         heroBackgroundPattern?: T;
       };
   region?: T;
+  type?: T;
   country?: T;
   continent?: T;
   cities?: T;
@@ -4125,6 +4167,7 @@ export interface PackagesSelect<T extends boolean = true> {
       };
   labels?: T;
   categories?: T;
+  themes?: T;
   activities?: T;
   amenities?: T;
   accommodationTypes?: T;
@@ -4433,6 +4476,20 @@ export interface VibesSelect<T extends boolean = true> {
   description?: T;
   icon?: T;
   color?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themes_select".
+ */
+export interface ThemesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  slugLock?: T;
+  icon?: T;
+  featuredImage?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
 }
