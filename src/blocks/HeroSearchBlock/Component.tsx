@@ -17,7 +17,7 @@ export const HeroSearchBlock: React.FC<Props> = ({
   backgroundImage,
   title = 'To travel is to live!',
   subtitle = '10,348 ft Mount Everest',
-  searchEnabled = true,
+  searchEnabled = false,
 }) => {
   const [searchData, setSearchData] = useState({
     destination: '',

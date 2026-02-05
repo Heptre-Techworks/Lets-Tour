@@ -224,9 +224,9 @@ export const MainHero: React.FC<MainHeroProps> = ({
         @keyframes fade-out-at-80 { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
       `}</style>
 
-      <section className="relative -mt-14 sm:-mt-20 md:-mt-[10.4rem] w-full h-full sm:h-[110vh] md:h-[125vh] overflow-hidden font-roboto text-white">
+      <section className="relative -mt-14 sm:-mt-20 md:-mt-[10.4rem] w-full h-[100dvh] overflow-hidden font-roboto text-white">
         {/* Background Image Slider */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 z-0">
           {slides.map((slide, index) => (
             <div key={slide.id || index} className="absolute inset-0">
               <MediaComponent
@@ -242,293 +242,161 @@ export const MainHero: React.FC<MainHeroProps> = ({
           ))}
         </div>
 
-        {/* Bottom gradient */}
-        <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-white via-white/80 to-transparent z-[10] pointer-events-none " />
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 z-[1] bg-black/10 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-full h-[60%] bg-gradient-to-t from-black/80 via-black/40 to-transparent z-[2] pointer-events-none" />
 
-        <div className="relative z-10 w-full h-full bg-black/20 flex flex-col">
-          {/* Top Section */}
-          <div className="relative pt-16 sm:pt-16 md:pt-32">
+        {/* Cloud Image - Fixed Background Layer */}
+        {cloudImage && (
+            <div className="absolute bottom-0 left-0 w-full z-[5] pointer-events-none mix-blend-screen opacity-90">
+               <div className="relative w-full h-[50vh] translate-y-[20%] sm:h-[60vh] sm:translate-y-[25%] md:h-auto md:aspect-[2/1] md:translate-y-[35%] lg:h-[600px] lg:aspect-auto lg:translate-y-[40%] xl:translate-y-[45%] 2xl:translate-y-[50%] min-[1800px]:translate-y-[65%]">
+                 <MediaComponent
+                   resource={cloudImage}
+                   fill
+                   imgClassName="object-cover object-bottom lg:object-center w-full h-full"
+                 />
+              </div>
+            </div>
+        )}
+
+        {/* Main Content Container */}
+        <div className="absolute inset-0 z-[10] flex flex-col justify-end pb-8 sm:pb-12 md:pb-16 pointer-events-none">
+            
+            {/* 1. Top Flight Animation */}
             {enableAirplaneAnimation && (
-              <div className="absolute top-0 left-0 w-full pointer-events-none mt-16 sm:mt-28 md:mt-40">
-                <div className="relative w-full">
+              <div className="relative w-full h-12 sm:h-16 mb-2 opacity-80 pointer-events-auto overflow-hidden shrink-0">
                   <div
-                    key={`top-animation-${currentSlide}`}
-                    className="absolute top-1/2 left-0 -translate-y-1/2 w-full px-4 sm:px-8 md:px-16"
+                    key={`plane-top-${currentSlide}`}
+                    className="absolute top-0 left-0 w-full h-full"
                     style={{ ...animationStyle, animationName: 'fade-out-at-80' }}
                   >
-                    <div className="absolute top-0 left-0 w-full h-0.5" style={{ zIndex: 2 }}>
-                      <svg className="w-full h-full overflow-visible">
-                        <line
-                          x1="0"
-                          y1="50%"
-                          x2="100%"
-                          y2="50%"
-                          stroke="rgba(255, 255, 255, 0.6)"
-                          strokeWidth="2"
-                          strokeDasharray="6 5"
-                          className="animate-draw-dashed-line"
-                          style={animationStyle}
-                        />
-                      </svg>
-                    </div>
-
-                    <AirplaneIcon
-                      className="absolute text-white text-3xl sm:text-4xl animate-plane-fly"
-                      style={{
-                        top: '0',
-                        transform: 'translateX(-50%) translateY(-50%) rotate(-90deg)',
-                        ...animationStyle,
-                        zIndex: 3,
-                      }}
-                    />
+                     {/* Dashed line */}
+                     <div className="absolute top-1/2 left-0 w-full h-0.5 px-4 sm:px-10">
+                        <svg className="w-full h-full overflow-visible">
+                          <line
+                            x1="0"
+                            y1="50%"
+                            x2="100%"
+                            y2="50%"
+                            stroke="rgba(255, 255, 255, 0.5)"
+                            strokeWidth="2"
+                            strokeDasharray="8 6"
+                            className="animate-draw-dashed-line"
+                            style={animationStyle}
+                          />
+                        </svg>
+                     </div>
+                     {/* Plane */}
+                     <AirplaneIcon
+                        className="absolute text-white text-xl sm:text-2xl animate-plane-fly"
+                        style={{
+                          top: '50%',
+                          marginTop: '-10px',
+                          transform: 'translateX(-50%) translateY(-50%) rotate(-90deg)',
+                          ...animationStyle,
+                        }}
+                      />
                   </div>
-                </div>
               </div>
             )}
-          </div>
-          {/* Middle Content */}
-          <div // Original (Layout Only):
-            className="relative z-10 h-full flex-grow flex flex-col justify-center items-center "
-          >
-            {/* Main Title (Kaushan Script 96px, 88% line-height, -0.011em) */}
-            <div className="text-center w-full max-w-[90%] sm:max-w-[70%] md:max-w-[50%] pt-18 sm:pt-16 md:pt-20">
-              <h1 className="font-kaushan text-[96px] leading-[0.88] tracking-[-0.011em] font-normal drop-shadow-lg pb-6 md:pb-10">
-                {activeSlide.headline || 'To travel is to live!'}
-              </h1>
+
+            {/* 2. Center Text Section */}
+            <div className="text-center w-full px-4 mb-4 sm:mb-6 pointer-events-auto z-20 shrink-0">
+               {/* Main Title */}
+               <h1 className="font-kaushan text-[36px] sm:text-[56px] md:text-[72px] lg:text-[80px] leading-[1.1] font-normal drop-shadow-2xl text-white mb-3">
+                 {activeSlide.headline || 'To travel is to live!'}
+               </h1>
+               
+               {/* Progress Dots */}
+               <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3">
+                   {slides.map((_, index) => {
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => setSlide(index, index > currentSlide ? 1 : -1)}
+                          className={`rounded-full transition-all duration-300 ${
+                            index === currentSlide 
+                              ? 'w-2 sm:w-3 h-2 sm:h-3 bg-white scale-125' 
+                              : 'w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white/50 hover:bg-white/80'
+                          }`}
+                          aria-label={`Go to slide ${index + 1}`}
+                        />
+                      )
+                   })}
+               </div>
+
+               {/* Location Text */}
+               <div className="overflow-hidden h-16 sm:h-20 relative flex flex-col items-center justify-center">
+                 <div style={textAnimation} className="mt-[-0.5rem] sm:mt-[-1rem]">
+                    <p className="font-neuton text-[16px] sm:text-[20px] text-white/90">
+                       {activeSlide.subtitle}
+                    </p>
+                    <h2 className="font-neuton text-[28px] sm:text-[42px] leading-tight text-white drop-shadow-md">
+                       {activeSlide.location}
+                    </h2>
+                 </div>
+               </div>
             </div>
 
-            {/* Location Info & Progress */}
-            <div className="w-full max-w-6xl h-8 relative">
-              {/* Left text (Neuton 24px/48px, 88%, -0.011em, 60% opacity) */}
-              <div
-                className="absolute left-0 top-1/2 -translate-y-1/2 text-left px-4 sm:px-0"
-                style={textAnimation}
-              >
-                <p className="font-neuton text-[24px] leading-[0.88] tracking-[-0.011em] text-white/60">
-                  {activeSlide.subtitle}
-                </p>
-                <h2 className="font-neuton text-[48px] leading-[0.88] tracking-[-0.011em] text-white/60">
-                  {activeSlide.location}
-                </h2>
-              </div>
+            {/* 3. Bottom Flight Animation */}
+            {enableAirplaneAnimation && (
+               <div className="relative w-full h-12 sm:h-16 mt-0 sm:mt-2 opacity-80 pointer-events-auto overflow-hidden shrink-0">
+                 <div
+                   key={`plane-bottom-${currentSlide}`}
+                   className="absolute top-0 left-0 w-full h-full"
+                   style={{ ...animationStyle, animationName: 'fade-out-at-80' }}
+                 > 
+                   {/* Dashed line */}
+                   <div className="absolute top-1/2 left-0 w-full h-0.5 px-4 sm:px-10">
+                        <svg className="w-full h-full overflow-visible">
+                          <line
+                            x1="0"
+                            y1="50%"
+                            x2="100%"
+                            y2="50%"
+                            stroke="rgba(255, 255, 255, 0.5)"
+                            strokeWidth="2"
+                            strokeDasharray="8 6"
+                            className="animate-draw-dashed-line-right"
+                            style={animationStyle}
+                          />
+                        </svg>
+                     </div>
 
-              {/* Center progress */}
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/4 h-full w-20 sm:w-24 md:w-28">
-                <div className="absolute top-1/2 right-full -translate-y-1/2 w-32 sm:w-40 md:w-48 h-0.5 mr-4">
-                  <svg className="w-full h-full">
-                    <line
-                      x1="0"
-                      y1="50%"
-                      x2="100%"
-                      y2="50%"
-                      stroke="rgba(255, 255, 255, 0.6)"
-                      strokeWidth="2"
-                      strokeDasharray="6 5"
+                   <AirplaneIcon
+                      className="absolute text-white text-xl sm:text-2xl animate-plane-fly-right"
+                      style={{
+                         top: '50%',
+                         marginTop: '-10px',
+                         transform: 'translateY(-50%) translateX(-50%) rotate(90deg)',
+                         ...animationStyle,
+                      }}
                     />
-                  </svg>
-                </div>
+                 </div>
+               </div>
+            )}
 
-                <div className="w-full h-full relative flex items-center justify-center">
-                  {slides.map((_, index) => {
-                    const slideCount = slides.length
-                    let distance = index - currentSlide
-                    if (Math.abs(distance) > slideCount / 2) {
-                      distance = distance > 0 ? distance - slideCount : distance + slideCount
-                    }
-                    const style: React.CSSProperties = {
-                      transition: 'transform 0.5s ease-out, opacity 0.5s ease-out',
-                      position: 'absolute',
-                      opacity: 1,
-                    }
-                    let dotClass = 'w-3 h-3 rounded-full'
-                    if (distance === 0) {
-                      style.transform = 'translateX(0) scale(1.6)'
-                      dotClass += ' bg-white'
-                    } else if (distance === -1) {
-                      style.transform = 'translateX(-40px) scale(1)'
-                      dotClass += ' bg-white/40'
-                    } else if (distance === 1) {
-                      style.transform = 'translateX(40px) scale(1)'
-                      dotClass += ' bg-white/40'
-                    } else {
-                      style.transform = `translateX(${Math.sign(distance) * 88}px) scale(0)`
-                      style.opacity = 0
-                      dotClass += ' bg-white/40'
-                    }
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => setSlide(index, index > currentSlide ? 1 : -1)}
-                        className={dotClass}
-                        style={style}
-                        aria-label={`Go to slide ${index + 1}`}
-                      />
-                    )
-                  })}
-                </div>
+        </div>
 
-                <div
-                  key={`bottom-animation-${currentSlide}`}
-                  className="absolute top-1/2 left-full -translate-y-1/2 w-[40vw] sm:w-[45vw] md:w-[50vw] h-4 ml-4"
-                  style={{ ...animationStyle, animationName: 'fade-out-at-80' }}
-                >
-                  <div
-                    className="absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2"
-                    style={{ zIndex: 2 }}
-                  >
-                    <svg className="w-full h-full overflow-visible">
-                      <line
-                        x1="0"
-                        y1="50%"
-                        x2="100%"
-                        y2="50%"
-                        stroke="rgba(255, 255, 255, 0.6)"
-                        strokeWidth="2"
-                        strokeDasharray="6 5"
-                        className="animate-draw-dashed-line-right"
-                        style={animationStyle}
-                      />
-                    </svg>
-                  </div>
-                  <AirplaneIcon
-                    className="absolute text-white text-xl sm:text-2xl animate-plane-fly-right"
-                    style={{
-                      top: '50%',
-                      transform: 'translateY(-50%) translateX(-50%) rotate(90deg)',
-                      ...animationStyle,
-                      zIndex: 3,
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Section */}
-            <div className="relative w-full h-full pt-20 sm:pt-15 md:pt-28 overflow-hidden">
-              {/* Background Image */}
-              {cloudImage && (
-                <div className="absolute inset-0 z-0 pointer-events-none">
-                  <MediaComponent
-                    resource={cloudImage}
-                    imgClassName="absolute top-0 left-0 w-full h-full object-cover object-top opacity-95"
-                  />
-                  {/* White gradient overlay for readability */}
-                  <div className="absolute inset-x-0 bottom-0 h-[20vh] bg-gradient-to-t from-white via-white/70 to-transparent" />
-                </div>
-              )}
-
-              {/* Centered Form Section */}
-              <div className="relative z-10 flex flex-col items-center justify-center h-50 px-3 sm:px-5 md:px-8">
-                <form
-                  onSubmit={handleSubmit}
-                  className="w-full max-w-6xl bg-transparent pointer-events-auto"
-                >
-                  {/* Responsive Grid */}
-                  <div
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 px-2
-                      bg-[#f0b95a] rounded-xl shadow-2xl overflow-hidden 
-                      text-black/80 divide-y sm:divide-y-0 sm:divide-x divide-black/10"
-                  >
-                    {/* Destination */}
-                    <select
-                      name="destination"
-                      value={formData.destination}
-                      onChange={handleInputChange}
-                      className="p-4 sm:p-5  bg-transparent focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-black/70 text-base sm:text-lg "
-                      aria-label="Destination"
-                    >
-                      <option value="" disabled>
-                        {placeholders?.destination || 'Destination'}
-                      </option>
-                      {destinationOptions.map((option) => (
-                        <option key={option.value || option.id} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-
-                    {/* Date */}
-                    <input
-                      type="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={handleInputChange}
-                      placeholder={placeholders?.date || 'Date'}
-                      className="p-4 sm:p-5 bg-transparent focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-black/70 text-base sm:text-lg"
-                      aria-label="Date"
-                    />
-
-                    {/* People */}
-                    <input
-                      type="number"
-                      name="people"
-                      value={formData.people}
-                      onChange={handleInputChange}
-                      min="1"
-                      placeholder={placeholders?.people || 'No of people'}
-                      className="p-4 sm:p-5 bg-transparent focus:outline-none focus:ring-2 focus:ring-black/20 placeholder:text-black/70 text-base sm:text-lg"
-                      aria-label="People"
-                    />
-
-                    {/* Category */}
-                    <select
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      className="p-4 sm:p-5 bg-transparent  placeholder:text-black/70 text-base sm:text-lg"
-                      aria-label="Category"
-                    >
-                      <option value="" disabled>
-                        {placeholders?.category || 'Category'}
-                      </option>
-                      {categoryOptions.map((option) => (
-                        <option key={option.value || option.id} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="text-center mt-5 sm:mt-6 pb-4">
-                    <button
-                      type="submit"
-                      className="w-full sm:w-[175px] h-[45px] rounded-[24px]
-             px-6 sm:px-8  
-             bg-white text-[#FBAE3D] font-nats font-medium 
-             shadow-md sm:shadow-lg 
-             hover:bg-gray-200 active:bg-gray-300 
-             transition-all duration-300 transform 
-             hover:scale-105 active:scale-95 
-             focus:outline-none focus:ring-2 focus:ring-gray-300 
-             disabled:opacity-60 disabled:cursor-not-allowed  text-center"
-                    >
-                      {buttonLabel}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-          {slides.length > 1 && (
+        {/* Nav Buttons (Sides) */}
+        {slides.length > 1 && (
             <>
               <button
                 onClick={goToPrev}
-                className="absolute left-4 md:left-8 top-1/3 -translate-y-1/2 w-12 h-12 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/30 transition-colors z-20"
+                className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-all z-20 border border-white/20 text-white"
                 aria-label="Previous slide"
               >
                 <ChevronLeftIcon />
               </button>
               <button
                 onClick={goToNext}
-                className="absolute right-4 md:right-8 top-1/3 -translate-y-1/2 w-12 h-12 bg-black/10 rounded-full flex items-center justify-center hover:bg-black/30 transition-colors z-20"
+                className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center transition-all z-20 border border-white/20 text-white"
                 aria-label="Next slide"
               >
                 <ChevronRightIcon />
               </button>
             </>
-          )}
-        </div>
+        )}
       </section>
     </>
   )
