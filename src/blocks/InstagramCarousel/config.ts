@@ -161,6 +161,14 @@ export const InstagramCarouselBlock: Block = {
         description: 'Optional text below the grid',
       },
     },
+    {
+      name: 'videoUrl',
+      type: 'text',
+      label: 'Feature Video URL',
+      admin: {
+        description: 'URL for the featured video on the right (mp4 link recommended)',
+      },
+    },
   ],
 };
 

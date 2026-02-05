@@ -2136,6 +2136,10 @@ export interface InstagramCarouselBlock {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * URL for the featured video on the right (mp4 link recommended)
+   */
+  videoUrl?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'instagramCarousel';
@@ -3622,6 +3626,7 @@ export interface InstagramCarouselBlockSelect<T extends boolean = true> {
         showCaptions?: T;
       };
   caption?: T;
+  videoUrl?: T;
   id?: T;
   blockName?: T;
 }

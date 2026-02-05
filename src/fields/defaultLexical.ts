@@ -8,7 +8,7 @@ import {
   UnderlineFeature,
   HTMLConverterFeature,
   TextStateFeature,
-  defaultColors, 
+  defaultColors,
   type LinkFields,
 } from '@payloadcms/richtext-lexical'
 import { DynamicFontFeature } from './lexical/features/DynamicFont'
@@ -29,7 +29,7 @@ export const defaultLexical = lexicalEditor({
         background: {
            ...defaultColors.background,
         },
-        // Legacy Font Sizes
+        // Font Sizes (Legacy Text State)
         'font-size': {
            'small': { label: 'Small', css: { 'font-size': '14px' } },
            'medium': { label: 'Medium', css: { 'font-size': '16px' } },

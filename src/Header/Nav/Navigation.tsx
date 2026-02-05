@@ -21,6 +21,10 @@ interface NavigationProps {
 
 export const Navigation: React.FC<NavigationProps> = ({ data }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  
+  // State for Desktop Mega Menus mutually exclusive toggle
+  const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null)
+  
   const navItems = useMemo(() => data?.navItems || [], [data?.navItems])
 
   const closeMobileMenu = useCallback(() => {
@@ -170,11 +174,27 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
         <div className="pointer-events-auto flex items-center justify-center gap-6 lg:gap-8 xl:gap-10 whitespace-nowrap">
           {mainMenuItems.map((item) => {
              if (item.key === 'destinations' || item.label.toLowerCase() === 'destinations') {
-                 return <MegaMenu key="mega-destinations" label="Destinations" type="destinations" />
+                 return (
+                    <MegaMenu 
+                      key="mega-destinations" 
+                      label="Destinations" 
+                      type="destinations" 
+                      isOpen={activeMegaMenu === 'destinations'}
+                      onToggle={(open) => setActiveMegaMenu(open ? 'destinations' : null)}
+                    />
+                 )
              }
              
              if (item.key === 'packages' || item.label.toLowerCase() === 'packages') {
-                 return <MegaMenu key="mega-packages" label="Packages" type="packages" />
+                 return (
+                   <MegaMenu 
+                     key="mega-packages" 
+                     label="Packages" 
+                     type="packages" 
+                     isOpen={activeMegaMenu === 'packages'}
+                     onToggle={(open) => setActiveMegaMenu(open ? 'packages' : null)}
+                   />
+                 )
              }
 
              return item.type === 'link' || !item.endpoint ? (

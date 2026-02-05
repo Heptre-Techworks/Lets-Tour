@@ -20,6 +20,7 @@ type GridPost = { url: string; captioned?: boolean }
 
 const VIDEO_URL =
   'https://zozxszsaofxvunkl.public.blob.vercel-storage.com/AQPcZr0VAFuUhDLpW0DzIMo4roUsUsN9tIEJOmTOiGg195MSvQYTkvpLGkH7ek1QeI-6NMc0EAlNMLf1jq96MPSPvEZH6YvZl5KqEHQ.mp4'
+
 const InstagramGlyph = ({ className = 'h-4 w-4' }: { className?: string }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +205,6 @@ const InstagramImageGrid: React.FC<{
           position: absolute;
           inset: 0;
           width: 100%;
-          pointer-events: none;
         }
       `}</style>
     </section>
@@ -218,6 +218,7 @@ export const InstagramCarouselClient: React.FC<any> = ({
   posts,
   caption,
   className,
+  videoUrl, // New prop maintained
 }) => {
   const typedCaption = caption as DefaultTypedEditorState | null | undefined
   const hasCaption = !!typedCaption && typeof typedCaption === 'object' && 'root' in typedCaption
@@ -225,35 +226,40 @@ export const InstagramCarouselClient: React.FC<any> = ({
   const showCaptionsGlobal = !!layout?.showCaptions
 
   const allMappedPosts: GridPost[] = (posts || [])
-    .map((p: any) => ({
-      url: p?.url ?? '',
-      captioned: showCaptionsGlobal || !!p?.captioned,
-    }))
-    .filter((p: GridPost) => p.url && p.url.trim().length > 0)
+  .map((p: any) => ({
+    url: p?.url ?? '',
+    captioned: showCaptionsGlobal || !!p?.captioned,
+  }))
+  .filter((p: GridPost) => p.url && p.url.trim().length > 0)
 
   const MAX_POSTS_PER_GRID = 4
   const gridOnePosts = allMappedPosts.slice(0, MAX_POSTS_PER_GRID)
   const avatarUrl =
     typeof profile?.avatarUrl === 'object' ? profile.avatarUrl?.url : profile?.avatarUrl
 
+  // Re-added State and Refs from original code
   const [leftGridHeight, setLeftGridHeight] = useState('auto')
   const leftGridRef = useRef<HTMLDivElement>(null)
   const videoContainerRef = useRef<HTMLDivElement>(null)
 
+  // Combined legacy measure logic + resilience
   useEffect(() => {
     const measureHeight = () => {
+      // Small timeout to allow render
       setTimeout(() => {
-        if (leftGridRef.current) {
+        if (leftGridRef.current && leftGridRef.current.offsetHeight > 50) {
           setLeftGridHeight(`${leftGridRef.current.offsetHeight}px`)
         } else {
-          setLeftGridHeight('500px')
+          // Fallback if measurement (0 or null) fails, so it doesn't disappear
+          setLeftGridHeight('550px') 
         }
-      }, 100)
+      }, 200)
     }
     measureHeight()
     window.addEventListener('resize', measureHeight)
     return () => window.removeEventListener('resize', measureHeight)
   }, [gridOnePosts.length])
+
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -269,11 +275,9 @@ export const InstagramCarouselClient: React.FC<any> = ({
   }, [])
 
   return (
-    <div className={cn('container py-8', className)}>
-      {/* FIXED: Removed NATS link as it is now in global.css to resolve FOIT/Lighthouse error */}
-
+    <div className={cn('container py-4', className)}>
       {(heading || profile?.handle) && (
-        <header className="mb-10 flex flex-wrap items-center gap-4 border-b pb-4">
+        <header className="mb-6 flex flex-wrap items-center gap-4 border-b pb-4">
           {avatarUrl && (
             <Image
               src={avatarUrl}
@@ -325,6 +329,7 @@ export const InstagramCarouselClient: React.FC<any> = ({
         </header>
       )}
 
+      {/* Main Content: Reverted to w-1/2 layout but without m-5 */}
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-stretch">
         {gridOnePosts.length > 0 && (
           <div className="w-full lg:w-1/2" ref={leftGridRef}>
@@ -338,7 +343,7 @@ export const InstagramCarouselClient: React.FC<any> = ({
           </div>
         )}
 
-        <div className="w-full lg:w-1/2 m-5">
+        <div className="w-full lg:w-1/2">
           <div
             className="ig2-cell w-full"
             style={{
@@ -366,7 +371,7 @@ export const InstagramCarouselClient: React.FC<any> = ({
               className="z-10 pointer-events-auto relative w-[200px] sm:w-[200px] md:w-[250px] h-[430px] sm-h[450px] md:h-[530px] top-[5px] sm:top-[11px] md:top-[10px] rounded-[30px] overflow-hidden"
             >
               <video
-                src={VIDEO_URL}
+                src={videoUrl || VIDEO_URL}
                 controls={false}
                 autoPlay={true}
                 muted={true}

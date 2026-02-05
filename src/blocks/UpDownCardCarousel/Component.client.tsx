@@ -424,9 +424,9 @@ export const UpDownCardCarouselClient: React.FC<{
               width: '100%',
               WebkitOverflowScrolling: 'touch',
 
-              // ✅ Enable both directions
+              // ✅ Enable horizontal only, prevent vertical trap
               overflowX: 'auto',
-              overflowY: 'auto',
+              overflowY: 'hidden',
               touchAction: 'pan-x pan-y',
             }}
           >

@@ -33,10 +33,25 @@ type Package = {
 interface MegaMenuProps {
   label?: string
   type?: 'destinations' | 'packages'
+  isOpen?: boolean
+  onToggle?: (open: boolean) => void
 }
 
-export const MegaMenu: React.FC<MegaMenuProps> = ({ label = 'Destinations', type = 'destinations' }) => {
-  const [open, setOpen] = useState(false)
+export const MegaMenu: React.FC<MegaMenuProps> = ({ 
+  label = 'Destinations', 
+  type = 'destinations',
+  isOpen,
+  onToggle
+}) => {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = isOpen !== undefined
+  const open = isControlled ? isOpen : internalOpen
+  
+  const handleOpenchange = (v: boolean) => {
+    if (onToggle) onToggle(v)
+    if (!isControlled) setInternalOpen(v)
+  }
+
   const [activeTab, setActiveTab] = useState<'international' | 'india'>('international')
   
   // Data State
@@ -158,7 +173,8 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({ label = 'Destinations', type
     <div className="group inline-block static">
       <button 
         className="relative z-50 flex items-center gap-1.5 py-4 font-sans text-[15px] sm:text-[18px] lg:text-[20px] font-semibold text-gray-900 md:text-white hover:text-[#FBAE3D] transition-colors"
-        onMouseEnter={() => setOpen(true)}
+        onMouseEnter={() => handleOpenchange(true)}
+        onClick={() => handleOpenchange(!open)}
       >
         {label}
         <ChevronDown size={16} className={`transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
@@ -168,8 +184,8 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({ label = 'Destinations', type
         className={`fixed left-0 right-0 top-[80px] w-full z-40 transition-all duration-300 transform origin-top
           ${open ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-4 invisible pointer-events-none'}
         `}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
+        onMouseEnter={() => handleOpenchange(true)}
+        onMouseLeave={() => handleOpenchange(false)}
       >
         <div className="bg-white shadow-2xl border-t border-gray-100 max-h-[85vh] overflow-y-auto w-full rounded-b-3xl mx-auto">
           <div className="container mx-auto px-4 py-8">
