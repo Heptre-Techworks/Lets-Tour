@@ -1,5 +1,7 @@
 import React from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
+
 interface Media {
   url: string
   alt?: string
@@ -12,6 +14,7 @@ interface Props {
   heightClass?: string
   overlay?: boolean
   overlayOpacity?: number
+  ctaLink?: string
 }
 
 const StaticImageBlock: React.FC<Props> = ({
@@ -21,41 +24,52 @@ const StaticImageBlock: React.FC<Props> = ({
   heightClass = 'h-[250px] xs:h-[350px] sm:h-[400px] md:min-h-[80vh] lg:min-h-[100vh',
   overlay = true,
   overlayOpacity = 0.5,
+  ctaLink,
 }) => {
   if (!image?.url) {
     return null
   }
 
+  const Content = (
+    <div
+      className={`
+        relative w-full
+        // 💡 Dynamic height class applied here
+        ${heightClass}
+        overflow-hidden
+      `}
+    >
+      {/* ✅ Responsive Image */}
+      <Image
+        fill
+        src={image.url}
+        alt={image.alt || ''}
+        // The key to responsiveness: w-full h-full ensures the image fills the container.
+        // object-cover ensures the image covers the area without distortion, cropping as needed.
+        className="
+          absolute top-0 left-0 w-full h-full object-cover
+        "
+      />
+
+      {/* ✅ Optional Overlay */}
+      {overlay && (
+        <div
+          className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-300"
+          style={{ opacity: overlayOpacity }}
+        />
+      )}
+    </div>
+  )
+
   return (
     <section className="relative w-full max-w-full overflow-hidden">
-      <div
-        className={`
-          relative w-full
-          // 💡 Dynamic height class applied here
-          ${heightClass}
-          overflow-hidden
-        `}
-      >
-        {/* ✅ Responsive Image */}
-        <Image
-          fill
-          src={image.url}
-          alt={image.alt || ''}
-          // The key to responsiveness: w-full h-full ensures the image fills the container.
-          // object-cover ensures the image covers the area without distortion, cropping as needed.
-          className="
-            absolute top-0 left-0 w-full h-full object-cover
-          "
-        />
-
-        {/* ✅ Optional Overlay */}
-        {overlay && (
-          <div
-            className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-300"
-            style={{ opacity: overlayOpacity }}
-          />
-        )}
-      </div>
+      {ctaLink ? (
+        <Link href={ctaLink} className="block w-full h-full cursor-pointer hover:opacity-95 transition-opacity">
+          {Content}
+        </Link>
+      ) : (
+        Content
+      )}
     </section>
   )
 }

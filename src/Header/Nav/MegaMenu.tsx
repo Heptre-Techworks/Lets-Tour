@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import Link from '@/components/Link'
 import { ChevronDown, MapPin, Globe, Layers } from 'lucide-react'
+import { JourneyLoader } from '@/components/JourneyLoader'
 
 // Types
 type Country = {
@@ -77,7 +78,11 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
   const [loading, setLoading] = useState(false)
 
   // Selection States
-  const [selectedContinent, setSelectedContinent] = useState<string>('Asia') // Display label
+  const [selectedContinent, setSelectedContinent] = useState<string>('Asia') 
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
+  
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null) // For India
+  
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null)
 
   // Fetch Data
@@ -86,7 +91,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
       setLoading(true)
       
       Promise.all([
-        // Fetch Destinations (depth=2 to get country details if needed)
+        // Fetch Destinations (depth=2 to get country details)
         fetch('/api/destinations?where[isPublished][equals]=true&limit=100&depth=2').then(r => r.json()),
         // Fetch Packages
         fetch('/api/packages?where[isPublished][equals]=true&limit=100&depth=2').then(r => r.json())
@@ -109,6 +114,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
     destinations.filter(d => d.type === 'international'), 
   [destinations])
 
+  // Continents
   const continents = useMemo(() => {
     const sourceList = internationalDestinations.map(d => d.continent)
     const set = new Set(sourceList.filter(Boolean))
@@ -122,40 +128,86 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
     }
   }, [type, activeTab, continents, selectedContinent])
 
-  const filteredDestinations = useMemo(() => {
+  // Countries (Available in selected Continent)
+  const availableCountries = useMemo(() => {
     if (!selectedContinent) return []
-    return internationalDestinations.filter(d => {
-       const label = d.continent ? CONTINENT_LABELS[d.continent] : ''
-       return label === selectedContinent
+    // Get destinations in this continent
+    const inContinent = internationalDestinations.filter(d => {
+        const cLabel = d.continent ? CONTINENT_LABELS[d.continent] : ''
+        return cLabel === selectedContinent
     })
+    
+    // Extract Unique Countries
+    const countryMap = new Map<string, string>() // id -> name
+    inContinent.forEach(d => {
+        if (typeof d.country === 'object' && d.country !== null) {
+            countryMap.set(d.country.id, d.country.name)
+        }
+    })
+    
+    return Array.from(countryMap.entries()).map(([id, name]) => ({ id, name })).sort((a,b) => a.name.localeCompare(b.name))
   }, [selectedContinent, internationalDestinations])
 
-  // 2. India Tab (Packages) - Kept for Destinations menu as "Packages in India"
-  const domesticPackages = useMemo(() => 
-    packages.filter(p => p.destination && p.destination.type === 'domestic'),
-  [packages])
-
-  const domesticThemes = useMemo(() => {
-    const themeMap = new Map<string, string>()
-    domesticPackages.forEach(p => {
-      p.themes?.forEach(t => themeMap.set(t.id, t.name))
-    })
-    return Array.from(themeMap.entries()).map(([id, name]) => ({ id, name })).sort((a,b) => a.name.localeCompare(b.name))
-  }, [domesticPackages])
-
-  // Default Theme for Domestic Tab
+  // Default Country
   useEffect(() => {
-    if (type === 'destinations' && activeTab === 'india' && !selectedTheme && domesticThemes.length > 0) {
-      setSelectedTheme(domesticThemes[0].id)
-    }
-  }, [type, activeTab, domesticThemes, selectedTheme])
+     if (type === 'destinations' && activeTab === 'international' && availableCountries.length > 0) {
+         // If current selected country is not in the new list, reset to first
+         const exists = availableCountries.find(c => c.id === selectedCountry)
+         if (!selectedCountry || !exists) {
+             setSelectedCountry(availableCountries[0].id)
+         }
+     } else if (availableCountries.length === 0) {
+         setSelectedCountry(null)
+     }
+  }, [type, activeTab, availableCountries, selectedCountry])
 
-  const filteredDomesticPackages = useMemo(() => {
-    if (!selectedTheme) return []
-    return domesticPackages.filter(p => 
-      p.themes && p.themes.some(t => t.id === selectedTheme)
+
+  // Final Grid: Destinations in Selected Country
+  const filteredDestinations = useMemo(() => {
+    if (!selectedCountry) return []
+    return internationalDestinations.filter(d => 
+        typeof d.country === 'object' && d.country?.id === selectedCountry
     )
-  }, [domesticPackages, selectedTheme])
+  }, [selectedCountry, internationalDestinations])
+
+
+  // 2. India Tab (Destinations -> Regions)
+  // Converting "Packages in India" to "Destinations in India" hierarchy as requested
+  const domesticDestinations = useMemo(() => 
+    destinations.filter(d => d.type === 'domestic'),
+  [destinations])
+
+  // Regions (Extracted from Domestic Destinations)
+  const domesticRegions = useMemo(() => {
+     const regionMap = new Map<string, string>() // id -> name
+     domesticDestinations.forEach(d => {
+         // @ts-ignore - Assuming region is populated as object due to depth=2, or we need to check type
+         if (d.region && typeof d.region === 'object' && d.region.name) {
+             // @ts-ignore
+             regionMap.set(d.region.id, d.region.name)
+         }
+     })
+     return Array.from(regionMap.entries()).map(([id, name]) => ({ id, name })).sort((a,b) => a.name.localeCompare(b.name))
+  }, [domesticDestinations])
+
+  // Default Region
+  useEffect(() => {
+    if (type === 'destinations' && activeTab === 'india' && domesticRegions.length > 0) {
+        const exists = domesticRegions.find(r => r.id === selectedRegion)
+        if (!selectedRegion || !exists) {
+            setSelectedRegion(domesticRegions[0].id)
+        }
+    }
+  }, [type, activeTab, domesticRegions, selectedRegion])
+
+  // Final Grid: Domestic Destinations in Selected Region
+  const filteredDomesticDestinations = useMemo(() => {
+      if (!selectedRegion) return []
+      return domesticDestinations.filter(d => 
+          // @ts-ignore
+          typeof d.region === 'object' && d.region?.id === selectedRegion
+      )
+  }, [selectedRegion, domesticDestinations])
 
 
   // ==========================================
@@ -210,10 +262,8 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
             
             <div className="min-h-[400px]">
                {loading ? (
-                 <div className="flex items-center justify-center h-64 text-gray-400 gap-2">
-                    <div className="w-2 h-2 bg-[#FBAE3D] rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-[#FBAE3D] rounded-full animate-bounce delay-75" />
-                    <div className="w-2 h-2 bg-[#FBAE3D] rounded-full animate-bounce delay-150" />
+                 <div className="flex items-center justify-center h-64 w-full">
+                    <JourneyLoader text={type === 'destinations' ? 'Mapping Routes...' : 'Curating Packages...'} />
                  </div>
                ) : (
                  <>
@@ -247,9 +297,9 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
                                }
                              `}
                            >
-                             <div className="flex items-center gap-2">
+                             <div className="flex items-center gap-2 uppercase">
                                <MapPin size={18} />
-                               PACKAGES IN INDIA
+                               Destinations In India
                              </div>
                            </button>
                         </div>
@@ -257,9 +307,10 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
                         {/* Content */}
                         {activeTab === 'international' && (
                           <div className="flex gap-8">
-                            <div className="w-1/5 border-r border-gray-100 pr-6">
+                            {/* Col 1: Continents */}
+                            <div className="w-1/6 border-r border-gray-100 pr-4">
                               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Continents</h3>
-                              <ul className="space-y-2">
+                              <ul className="space-y-1">
                                 {continents.map(c => (
                                   <li key={c}>
                                     <button
@@ -279,7 +330,35 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
                               </ul>
                             </div>
                             
-                            <div className="w-4/5">
+                            {/* Col 2: Countries */}
+                            <div className="w-1/6 border-r border-gray-100 pr-4">
+                               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Countries</h3>
+                               <ul className="space-y-1">
+                                  {availableCountries.map(country => (
+                                     <li key={country.id}>
+                                       <button
+                                         onClick={() => setSelectedCountry(country.id)}
+                                         onMouseEnter={() => setSelectedCountry(country.id)}
+                                         className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all
+                                           ${selectedCountry === country.id
+                                             ? 'bg-orange-50 text-[#FBAE3D] shadow-sm'
+                                             : 'text-gray-600 hover:bg-gray-50'
+                                           }
+                                         `}
+                                       >
+                                         {country.name}
+                                       </button>
+                                     </li>
+                                  ))}
+                                  {availableCountries.length === 0 && (
+                                     <li className="text-sm text-gray-400 italic px-4">No countries</li>
+                                  )}
+                               </ul>
+                            </div>
+
+                            {/* Col 3: Destinations Grid */}
+                            <div className="w-4/6 pl-4">
+                               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Destinations in {availableCountries.find(c => c.id === selectedCountry)?.name || '...'}</h3>
                                <div className={`grid grid-cols-2 lg:grid-cols-3 gap-6`}>
                                  {filteredDestinations.map(dest => (
                                    <Link 
@@ -302,62 +381,72 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
                                      </span>
                                    </Link>
                                  ))}
+                                 {filteredDestinations.length === 0 && (
+                                    <div className="col-span-3 text-center text-gray-400 py-10 italic">
+                                      Select a country to view destinations.
+                                    </div>
+                                 )}
                                </div>
-                               
-                               {filteredDestinations.length === 0 && (
-                                  <div className="text-center text-gray-400 py-10 italic">
-                                    No items found for {selectedContinent}.
-                                  </div>
-                               )}
                             </div>
                           </div>
                         )}
 
                         {activeTab === 'india' && (
                           <div className="flex gap-8">
-                             <div className="w-1/5 border-r border-gray-100 pr-6">
-                               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Themes</h3>
+                             {/* Col 1: Regions */}
+                             <div className="w-1/4 border-r border-gray-100 pr-6">
+                               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Regions</h3>
                                <ul className="space-y-2">
-                                 {domesticThemes.map(theme => (
-                                   <li key={theme.id}>
+                                 {domesticRegions.map(region => (
+                                   <li key={region.id}>
                                      <button
-                                       onClick={() => setSelectedTheme(theme.id)}
-                                       onMouseEnter={() => setSelectedTheme(theme.id)}
+                                       onClick={() => setSelectedRegion(region.id)}
+                                       onMouseEnter={() => setSelectedRegion(region.id)}
                                        className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all
-                                         ${selectedTheme === theme.id
+                                         ${selectedRegion === region.id
                                            ? 'bg-orange-50 text-[#FBAE3D] shadow-sm'
                                            : 'text-gray-600 hover:bg-gray-50'
                                          }
                                        `}
                                      >
-                                       {theme.name}
+                                       {region.name}
                                      </button>
                                    </li>
                                  ))}
+                                 {domesticRegions.length === 0 && (
+                                     <li className="text-sm text-gray-400 italic px-4">No regions found</li>
+                                 )}
                                </ul>
                              </div>
 
-                             <div className="w-4/5">
+                             {/* Col 2: Destinations Grid */}
+                             <div className="w-3/4">
+                                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Destinations in {domesticRegions.find(r => r.id === selectedRegion)?.name || 'India'}</h3>
                                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-                                  {filteredDomesticPackages.map(pkg => (
+                                  {filteredDomesticDestinations.map(dest => (
                                     <Link 
-                                      key={pkg.id}
-                                      href={`/packages/${pkg.slug}`}
-                                      className="group/item block bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-all"
+                                      key={dest.id}
+                                      href={`/destinations/${dest.slug}`}
+                                      className="group/item flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-all text-left"
                                     >
-                                      <div className="p-4">
-                                        <div className="text-[10px] font-bold text-[#FBAE3D] uppercase tracking-wide mb-1">
-                                           {pkg.destination?.name}
-                                        </div>
-                                        <h4 className="text-sm font-bold text-gray-800 leading-tight mb-2 group-hover/item:text-[#FBAE3D] transition-colors">
-                                          {pkg.title}
-                                        </h4>
-                                      </div>
+                                      {dest.featuredImage?.url && (
+                                       <div className="w-16 h-16 relative overflow-hidden rounded-lg border border-gray-100 group-hover/item:border-[#FBAE3D] transition-all bg-gray-100 flex-shrink-0">
+                                           {/* eslint-disable-next-line @next/next/no-img-element */}
+                                           <img 
+                                             src={dest.featuredImage.url} 
+                                             alt={dest.featuredImage.alt || dest.name}
+                                             className="object-cover w-full h-full"
+                                           />
+                                       </div>
+                                     )}
+                                     <span className="text-sm font-bold text-gray-700 group-hover/item:text-black leading-tight">
+                                       {dest.name}
+                                     </span>
                                     </Link>
                                   ))}
-                                  {filteredDomesticPackages.length === 0 && (
+                                  {filteredDomesticDestinations.length === 0 && (
                                      <div className="col-span-3 text-center text-gray-400 py-10 italic">
-                                       No packages found for this theme.
+                                       No destinations found in this region.
                                      </div>
                                   )}
                                 </div>

@@ -74,9 +74,15 @@ export const FormBlock: React.FC<
 
           // Secondary submission to Google Sheets (Fire & Forget)
           try {
+            // Safely map data for Sheets (flatten objects)
             const sheetPayload = dataToSend.reduce(
               (acc, item) => {
-                acc[item.field] = item.value
+                let val = item.value
+                if (typeof val === 'object' && val !== null) {
+                   // If it's rich text or complex object, stringify it
+                   val = JSON.stringify(val)
+                }
+                acc[item.field] = val
                 return acc
               },
               {} as Record<string, unknown>,

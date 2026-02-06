@@ -75,6 +75,39 @@ const PackageSectionBlock: Block = {
       ],
     },
     { name: 'showNavigation', type: 'checkbox', defaultValue: true },
+    {
+      name: 'typography',
+      type: 'group',
+      label: 'Typography Settings',
+      admin: {
+        description: 'Global font settings for this component',
+      },
+      fields: [
+        {
+          name: 'fontFamily',
+          type: 'select',
+          defaultValue: 'inter',
+          options: [
+            { label: 'Inter (Sans)', value: 'inter' },
+            { label: 'Merriweather (Serif)', value: 'merriweather' },
+            { label: 'Roboto (Sans)', value: 'roboto' },
+            { label: 'Poppins (Sans)', value: 'poppins' },
+          ],
+        },
+        {
+          name: 'fontSize',
+          type: 'select',
+          defaultValue: 'base',
+          options: [
+            { label: 'Small', value: 'sm' },
+            { label: 'Base', value: 'base' },
+            { label: 'Large', value: 'lg' },
+            { label: 'Extra Large', value: 'xl' },
+            { label: '2XL', value: '2xl' },
+          ],
+        },
+      ],
+    },
   ],
 }
 
@@ -130,6 +163,39 @@ const DestinationSectionBlock: Block = {
       ],
     },
     { name: 'showNavigation', type: 'checkbox', defaultValue: true },
+    {
+      name: 'typography',
+      type: 'group',
+      label: 'Typography Settings',
+      admin: {
+        description: 'Global font settings for this component',
+      },
+      fields: [
+        {
+          name: 'fontFamily',
+          type: 'select',
+          defaultValue: 'inter',
+          options: [
+            { label: 'Inter (Sans)', value: 'inter' },
+            { label: 'Merriweather (Serif)', value: 'merriweather' },
+            { label: 'Roboto (Sans)', value: 'roboto' },
+            { label: 'Poppins (Sans)', value: 'poppins' },
+          ],
+        },
+        {
+          name: 'fontSize',
+          type: 'select',
+          defaultValue: 'base',
+          options: [
+            { label: 'Small', value: 'sm' },
+            { label: 'Base', value: 'base' },
+            { label: 'Large', value: 'lg' },
+            { label: 'Extra Large', value: 'xl' },
+            { label: '2XL', value: '2xl' },
+          ],
+        },
+      ],
+    },
   ],
 }
 
@@ -179,6 +245,39 @@ const VibeSectionBlock: Block = {
       ],
     },
     { name: 'showNavigation', type: 'checkbox', defaultValue: true },
+    {
+      name: 'typography',
+      type: 'group',
+      label: 'Typography Settings',
+      admin: {
+        description: 'Global font settings for this component',
+      },
+      fields: [
+        {
+          name: 'fontFamily',
+          type: 'select',
+          defaultValue: 'inter',
+          options: [
+            { label: 'Inter (Sans)', value: 'inter' },
+            { label: 'Merriweather (Serif)', value: 'merriweather' },
+            { label: 'Roboto (Sans)', value: 'roboto' },
+            { label: 'Poppins (Sans)', value: 'poppins' },
+          ],
+        },
+        {
+          name: 'fontSize',
+          type: 'select',
+          defaultValue: 'base',
+          options: [
+            { label: 'Small', value: 'sm' },
+            { label: 'Base', value: 'base' },
+            { label: 'Large', value: 'lg' },
+            { label: 'Extra Large', value: 'xl' },
+            { label: '2XL', value: '2xl' },
+          ],
+        },
+      ],
+    },
   ],
 }
 
@@ -283,6 +382,39 @@ const ItinerarySectionBlock: Block = {
       type: 'checkbox', 
       defaultValue: true,
       label: 'Show Navigation Arrows',
+    },
+    {
+      name: 'typography',
+      type: 'group',
+      label: 'Typography Settings',
+      admin: {
+        description: 'Global font settings for this component',
+      },
+      fields: [
+        {
+          name: 'fontFamily',
+          type: 'select',
+          defaultValue: 'inter',
+          options: [
+            { label: 'Inter (Sans)', value: 'inter' },
+            { label: 'Merriweather (Serif)', value: 'merriweather' },
+            { label: 'Roboto (Sans)', value: 'roboto' },
+            { label: 'Poppins (Sans)', value: 'poppins' },
+          ],
+        },
+        {
+          name: 'fontSize',
+          type: 'select',
+          defaultValue: 'base',
+          options: [
+            { label: 'Small', value: 'sm' },
+            { label: 'Base', value: 'base' },
+            { label: 'Large', value: 'lg' },
+            { label: 'Extra Large', value: 'xl' },
+            { label: '2XL', value: '2xl' },
+          ],
+        },
+      ],
     },
   ],
 }

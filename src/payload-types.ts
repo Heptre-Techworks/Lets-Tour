@@ -307,6 +307,10 @@ export interface Page {
          * Choose the height of the image block
          */
         height?: ('small' | 'medium' | 'large' | 'xl') | null;
+        /**
+         * Optional: Make the entire image clickable by adding a URL (e.g., /contact)
+         */
+        ctaLink?: string | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'staticImageBlock';
@@ -1861,6 +1865,13 @@ export interface DynamicScroller_PackageSection {
     background?: string | null;
   };
   showNavigation?: boolean | null;
+  /**
+   * Global font settings for this component
+   */
+  typography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
+    fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'packageSection';
@@ -1888,6 +1899,13 @@ export interface DynamicScroller_DestinationSection {
     background?: string | null;
   };
   showNavigation?: boolean | null;
+  /**
+   * Global font settings for this component
+   */
+  typography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
+    fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'destinationSection';
@@ -1917,6 +1935,13 @@ export interface DynamicScroller_VibeSection {
     background?: string | null;
   };
   showNavigation?: boolean | null;
+  /**
+   * Global font settings for this component
+   */
+  typography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
+    fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'vibeSection';
@@ -1969,6 +1994,13 @@ export interface DynamicScroller_ItinerarySection {
     background?: string | null;
   };
   showNavigation?: boolean | null;
+  /**
+   * Global font settings for this component
+   */
+  typography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
+    fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'itinerarySection';
@@ -1980,6 +2012,19 @@ export interface DynamicScroller_ItinerarySection {
 export interface PopularNowBlock {
   heading?: string | null;
   subheading?: string | null;
+  /**
+   * Style for Section Title & Subtitle
+   */
+  headerTypography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
+    fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
+  };
+  /**
+   * Style for Cards (Titles, Prices, Tags)
+   */
+  cardTypography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
+  };
   pauseOnHover?: boolean | null;
   rows: {
     /**
@@ -2067,11 +2112,17 @@ export interface UpDownCardCarouselBlock {
       }[]
     | null;
   /**
-   * Global font settings for this component
+   * Style for Section Title & Subtitle
    */
-  typography?: {
+  headerTypography?: {
     fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
     fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
+  };
+  /**
+   * Style for Cards (Titles, Prices, Tags)
+   */
+  cardTypography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -3299,6 +3350,7 @@ export interface PagesSelect<T extends boolean = true> {
               overlay?: T;
               overlayOpacity?: T;
               height?: T;
+              ctaLink?: T;
               id?: T;
               blockName?: T;
             };
@@ -3510,6 +3562,12 @@ export interface DynamicScroller_PackageSectionSelect<T extends boolean = true> 
         background?: T;
       };
   showNavigation?: T;
+  typography?:
+    | T
+    | {
+        fontFamily?: T;
+        fontSize?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -3538,6 +3596,12 @@ export interface DynamicScroller_DestinationSectionSelect<T extends boolean = tr
         background?: T;
       };
   showNavigation?: T;
+  typography?:
+    | T
+    | {
+        fontFamily?: T;
+        fontSize?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -3556,6 +3620,12 @@ export interface DynamicScroller_VibeSectionSelect<T extends boolean = true> {
         background?: T;
       };
   showNavigation?: T;
+  typography?:
+    | T
+    | {
+        fontFamily?: T;
+        fontSize?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -3588,6 +3658,12 @@ export interface DynamicScroller_ItinerarySectionSelect<T extends boolean = true
         background?: T;
       };
   showNavigation?: T;
+  typography?:
+    | T
+    | {
+        fontFamily?: T;
+        fontSize?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -3598,6 +3674,17 @@ export interface DynamicScroller_ItinerarySectionSelect<T extends boolean = true
 export interface PopularNowBlockSelect<T extends boolean = true> {
   heading?: T;
   subheading?: T;
+  headerTypography?:
+    | T
+    | {
+        fontFamily?: T;
+        fontSize?: T;
+      };
+  cardTypography?:
+    | T
+    | {
+        fontFamily?: T;
+      };
   pauseOnHover?: T;
   rows?:
     | T
@@ -3642,11 +3729,16 @@ export interface UpDownCardCarouselBlockSelect<T extends boolean = true> {
         href?: T;
         id?: T;
       };
-  typography?:
+  headerTypography?:
     | T
     | {
         fontFamily?: T;
         fontSize?: T;
+      };
+  cardTypography?:
+    | T
+    | {
+        fontFamily?: T;
       };
   id?: T;
   blockName?: T;
@@ -5149,6 +5241,10 @@ export interface PackageLayout {
          * Choose the height of the image block
          */
         height?: ('small' | 'medium' | 'large' | 'xl') | null;
+        /**
+         * Optional: Make the entire image clickable by adding a URL (e.g., /contact)
+         */
+        ctaLink?: string | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'staticImageBlock';
@@ -5425,6 +5521,10 @@ export interface DestinationLayout {
          * Choose the height of the image block
          */
         height?: ('small' | 'medium' | 'large' | 'xl') | null;
+        /**
+         * Optional: Make the entire image clickable by adding a URL (e.g., /contact)
+         */
+        ctaLink?: string | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'staticImageBlock';
@@ -5732,6 +5832,7 @@ export interface PackageLayoutSelect<T extends boolean = true> {
               overlay?: T;
               overlayOpacity?: T;
               height?: T;
+              ctaLink?: T;
               id?: T;
               blockName?: T;
             };
@@ -5914,6 +6015,7 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
               overlay?: T;
               overlayOpacity?: T;
               height?: T;
+              ctaLink?: T;
               id?: T;
               blockName?: T;
             };

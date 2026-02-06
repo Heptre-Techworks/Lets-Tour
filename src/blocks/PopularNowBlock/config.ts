@@ -16,6 +16,56 @@ export const PopularNow: Block = {
       defaultValue: "Today's enemy is tomorrow's friend.",
     },
     {
+      name: 'headerTypography',
+      type: 'group',
+      label: 'Header Styling',
+      admin: { description: 'Style for Section Title & Subtitle' },
+      fields: [
+        {
+          name: 'fontFamily',
+          type: 'select',
+          defaultValue: 'inter',
+          options: [
+            { label: 'Inter (Sans)', value: 'inter' },
+            { label: 'Merriweather (Serif)', value: 'merriweather' },
+            { label: 'Roboto (Sans)', value: 'roboto' },
+            { label: 'Poppins (Sans)', value: 'poppins' },
+          ],
+        },
+        {
+          name: 'fontSize',
+          type: 'select',
+          defaultValue: 'base',
+          options: [
+            { label: 'Small', value: 'sm' },
+            { label: 'Base', value: 'base' },
+            { label: 'Large', value: 'lg' },
+            { label: 'Extra Large', value: 'xl' },
+            { label: '2XL', value: '2xl' },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'cardTypography',
+      type: 'group',
+      label: 'Card Content Styling',
+      admin: { description: 'Style for Cards (Titles, Prices, Tags)' },
+      fields: [
+        {
+          name: 'fontFamily',
+          type: 'select',
+          defaultValue: 'inter',
+          options: [
+            { label: 'Inter (Sans)', value: 'inter' },
+            { label: 'Merriweather (Serif)', value: 'merriweather' },
+            { label: 'Roboto (Sans)', value: 'roboto' },
+            { label: 'Poppins (Sans)', value: 'poppins' },
+          ],
+        },
+      ],
+    },
+    {
       name: 'pauseOnHover',
       type: 'checkbox',
       defaultValue: true,

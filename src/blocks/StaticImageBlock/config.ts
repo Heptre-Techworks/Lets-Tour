@@ -51,5 +51,13 @@ export const StaticImageBlock: Block = {
         description: 'Choose the height of the image block',
       },
     },
+    {
+      name: 'ctaLink',
+      type: 'text',
+      label: 'Call to Action Link (Href)',
+      admin: {
+        description: 'Optional: Make the entire image clickable by adding a URL (e.g., /contact)',
+      },
+    },
   ],
 };

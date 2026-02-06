@@ -46,7 +46,10 @@ const DestinationCard: React.FC<{
   src: string
   alt?: string | null
   href?: string
-}> = ({ name, price, src, alt, href }) => {
+  activeFont?: string
+  fontStyle?: string
+  isCustom?: boolean
+}> = ({ name, price, src, alt, href, activeFont, fontStyle, isCustom }) => {
   const cardContent = (
     <li
       className="
@@ -75,10 +78,10 @@ const DestinationCard: React.FC<{
       {/* Text overlay */}
       <div className="absolute bottom-0 left-0 p-4 sm:p-5 md:p-6 text-white">
         <h3
-          className="font-bold"
+          className={`font-bold ${!isCustom ? 'font-[Amiri]' : ''}`}
           style={{
-            fontFamily: "'Amiri', serif",
-            fontStyle: 'italic',
+            fontFamily: activeFont,
+            fontStyle: isCustom ? 'normal' : 'italic',
             fontWeight: 700,
             letterSpacing: '-0.011em',
             lineHeight: '88%',
@@ -88,9 +91,9 @@ const DestinationCard: React.FC<{
           <span style={{ fontSize: '32px' }}>{name}</span>
         </h3>
         <p
-          className="mt-1"
+          className={`mt-1 ${!isCustom ? 'font-[NATS]' : ''}`}
           style={{
-            fontFamily: "'NATS', sans-serif",
+            fontFamily: activeFont,
             fontWeight: 400,
             letterSpacing: '-0.011em',
             lineHeight: '88%',
@@ -114,6 +117,14 @@ const DestinationCard: React.FC<{
   }
   return cardContent
 }
+
+// ... InfiniteScroller (unchanged) ...
+
+// ... Main Component ...
+// inside the map:
+// <DestinationCard ... activeFont={activeFont} fontStyle={fontStyle} isCustom={!!typography?.fontFamily} />
+
+// (I will apply the change to the DestinationCard definition and the usage below)
 
 const InfiniteScroller: React.FC<{
   direction: 'left' | 'right'
@@ -221,13 +232,49 @@ export const PopularNowClient: React.FC<{
   subheading?: string
   pauseOnHover?: boolean
   rows: RowData[]
+  headerTypography?: any
+  cardTypography?: any
 }> = ({
   heading = 'Popular now!',
   subheading = "Today's enemy is tomorrow's friend.",
   pauseOnHover = true,
   rows = [],
+  headerTypography,
+  cardTypography,
+  ...rest
 }) => {
   const [isMobile, setIsMobile] = useState(false)
+
+  // Typography Helper
+  const getTypographyStyles = (typography: any, defaultFamily: string = "'Amiri', serif") => {
+    const fontMap: Record<string, string> = {
+        inter: "'Inter', sans-serif",
+        merriweather: "'Merriweather', serif",
+        roboto: "'Roboto', sans-serif",
+        poppins: "'Poppins', sans-serif",
+    }
+    const activeFont = typography?.fontFamily ? fontMap[typography.fontFamily] : defaultFamily
+    const fontStyle = typography?.fontFamily ? 'normal' : 'italic'
+    const isCustom = !!typography?.fontFamily
+
+    const size = typography?.fontSize || 'base'
+    const sizeMap: Record<string, { heading: string, subheading: string, mobileHeading: string, mobileSubheading: string }> = {
+        sm: { heading: '48px', subheading: '20px', mobileHeading: '28px', mobileSubheading: '16px' },
+        base: { heading: '64px', subheading: '26px', mobileHeading: '36px', mobileSubheading: '18px' },
+        lg: { heading: '80px', subheading: '32px', mobileHeading: '48px', mobileSubheading: '20px' },
+        xl: { heading: '96px', subheading: '40px', mobileHeading: '56px', mobileSubheading: '24px' },
+        '2xl': { heading: '112px', subheading: '48px', mobileHeading: '64px', mobileSubheading: '28px' },
+    }
+    const sizes = sizeMap[size] || sizeMap.base
+
+    return { activeFont, fontStyle, isCustom, sizes }
+  }
+
+  // Header Styles
+  const headerTypo = getTypographyStyles(headerTypography, "'Amiri', serif")
+
+  // Card Styles
+  const cardTypo = getTypographyStyles(cardTypography, "'Inter', sans-serif")
 
   useEffect(() => {
     const mqMobile = window.matchMedia('(max-width: 640px)')
@@ -244,19 +291,18 @@ export const PopularNowClient: React.FC<{
         py-10 sm:py-12 md:py-14 lg:py-16
         min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-screen
       "
+      style={{ fontFamily: headerTypo.activeFont }} 
     >
-      {/* FIXED: Removed NATS link. This is now handled in globals.css to fix FOIT/Lighthouse error */}
-
-      {/* Header */}
       <div className="w-full px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8 md:mb-10">
         <div className="max-w-7xl mx-auto">
           <header>
             <div className="flex items-center gap-3 sm:gap-4 lg:gap-6">
-              {/* Using amiri.className here is great for performance! */}
               <h1
-                className={`${amiri.className} italic font-bold flex-shrink-0`}
+                className="font-bold flex-shrink-0"
                 style={{
-                  fontSize: isMobile ? '36px' : '64px',
+                  fontFamily: headerTypo.activeFont,
+                  fontStyle: headerTypo.fontStyle,
+                  fontSize: isMobile ? headerTypo.sizes.mobileHeading : headerTypo.sizes.heading,
                   lineHeight: '88%',
                   letterSpacing: '-0.011em',
                   color: '#000000',
@@ -275,9 +321,9 @@ export const PopularNowClient: React.FC<{
               <p
                 className="mt-2"
                 style={{
-                  fontFamily: "'NATS', sans-serif",
+                  fontFamily: headerTypo.activeFont,
                   fontWeight: 400,
-                  fontSize: isMobile ? '18px' : '26px',
+                  fontSize: isMobile ? headerTypo.sizes.mobileSubheading : headerTypo.sizes.subheading,
                   lineHeight: '88%',
                   letterSpacing: '-0.011em',
                   color: '#000000',
@@ -318,6 +364,9 @@ export const PopularNowClient: React.FC<{
                       src={getImageSrc(card)}
                       alt={card?.alt ?? card?.name}
                       href={card?.href}
+                      activeFont={cardTypo.activeFont}
+                      fontStyle={cardTypo.fontStyle}
+                      isCustom={cardTypo.isCustom}
                     />
                   ))}
                 </InfiniteScroller>

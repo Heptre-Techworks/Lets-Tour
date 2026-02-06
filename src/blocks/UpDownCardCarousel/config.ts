@@ -89,12 +89,10 @@ export const UpDownCardCarousel: Block = {
       ],
     },
     {
-      name: 'typography',
+      name: 'headerTypography',
       type: 'group',
-      label: 'Typography Settings',
-      admin: {
-        description: 'Global font settings for this component',
-      },
+      label: 'Header Styling',
+      admin: { description: 'Style for Section Title & Subtitle' },
       fields: [
         {
           name: 'fontFamily',
@@ -117,6 +115,25 @@ export const UpDownCardCarousel: Block = {
             { label: 'Large', value: 'lg' },
             { label: 'Extra Large', value: 'xl' },
             { label: '2XL', value: '2xl' },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'cardTypography',
+      type: 'group',
+      label: 'Card Content Styling',
+      admin: { description: 'Style for Cards (Titles, Prices, Tags)' },
+      fields: [
+        {
+          name: 'fontFamily',
+          type: 'select',
+          defaultValue: 'inter',
+          options: [
+            { label: 'Inter (Sans)', value: 'inter' },
+            { label: 'Merriweather (Serif)', value: 'merriweather' },
+            { label: 'Roboto (Sans)', value: 'roboto' },
+            { label: 'Poppins (Sans)', value: 'poppins' },
           ],
         },
       ],

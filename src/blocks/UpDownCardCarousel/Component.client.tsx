@@ -117,7 +117,13 @@ const DashedRule: React.FC<{ className?: string }> = ({ className }) => (
   />
 )
 
-const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isEven }) => {
+const CarouselCard: React.FC<{ 
+    card: CardLike; 
+    isEven: boolean; 
+    activeFont?: string; 
+    fontStyle?: string;
+    isCustom?: boolean;
+}> = ({ card, isEven, activeFont, fontStyle, isCustom }) => {
   const [isFavorite, setIsFavorite] = React.useState(false)
 
   const priceNum =
@@ -202,7 +208,7 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
                   background: '#FBAE3D',
                   lineHeight: '88%',
                   letterSpacing: '-0.011em',
-                  fontFamily: "'NATS', sans-serif",
+                  fontFamily: activeFont,
                   borderRadius: '8px',
                 }}
               >
@@ -225,8 +231,8 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
             <h3
               className="font-bold group-hover:text-yellow-300 transition-colors flex items-center text-3xl sm:text-4xl md:text-[44px] lg:text-5xl"
               style={{
-                fontFamily: "'Amiri', serif",
-                fontStyle: 'italic',
+                fontFamily: activeFont,
+                fontStyle: isCustom ? 'normal' : 'italic',
                 lineHeight: '88%',
                 letterSpacing: '-0.011em',
               }}
@@ -237,7 +243,7 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
               <div
                 className="flex items-center mt-2 sm:mt-3 text-sm sm:text-base lg:text-lg"
                 style={{
-                  fontFamily: "'NATS', sans-serif",
+                  fontFamily: activeFont,
                   lineHeight: '88%',
                   letterSpacing: '-0.011em',
                 }}
@@ -246,22 +252,12 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
               </div>
             ) : null}
 
-            {/* {card?.details && (
-              <div
-                className="my-3 sm:my-3.5"
-                style={{
-                  border: '0.5px solid rgba(255, 255, 255, 0.5)',
-                  width: '100%',
-                }}
-              />
-            )} */}
-
             <div className="flex justify-between items-center mt-2.5">
               <div className="flex items-center flex-wrap">
                 <span
                   className="font-bold text-2xl sm:text-3xl lg:text-4xl"
                   style={{
-                    fontFamily: "'NATS', sans-serif",
+                    fontFamily: activeFont,
                     lineHeight: '88%',
                     letterSpacing: '-0.011em',
                   }}
@@ -271,7 +267,7 @@ const CarouselCard: React.FC<{ card: CardLike; isEven: boolean }> = ({ card, isE
                 <span
                   className="ml-2 text-xs sm:text-sm lg:text-base"
                   style={{
-                    fontFamily: "'NATS', sans-serif",
+                    fontFamily: activeFont,
                     opacity: 0.8,
                   }}
                 >
@@ -314,12 +310,47 @@ export const UpDownCardCarouselClient: React.FC<{
   heading?: string
   subheading?: string
   cards?: CardLike[]
+  headerTypography?: any
+  cardTypography?: any
 }> = ({
   heading = 'In Season',
   subheading = "Today's enemy is tomorrow's friend.*",
   cards = [],
+  headerTypography,
+  cardTypography
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+
+  // Typography Helper
+  const getTypographyStyles = (typography: any, defaultFamily: string = "'Amiri', serif") => {
+    const fontMap: Record<string, string> = {
+        inter: "'Inter', sans-serif",
+        merriweather: "'Merriweather', serif",
+        roboto: "'Roboto', sans-serif",
+        poppins: "'Poppins', sans-serif",
+    }
+    const activeFont = typography?.fontFamily ? fontMap[typography.fontFamily] : defaultFamily
+    const fontStyle = typography?.fontFamily ? 'normal' : 'italic'
+    const isCustom = !!typography?.fontFamily
+
+    const size = typography?.fontSize || 'base'
+    const sizeMap: Record<string, { heading: string, subheading: string }> = {
+        sm: { heading: 'text-3xl md:text-5xl', subheading: 'text-lg md:text-xl' },
+        base: { heading: 'text-4xl sm:text-5xl md:text-6xl lg:text-[64px] xl:text-[72px]', subheading: 'text-xl sm:text-xl md:text-xl lg:text-2xl' },
+        lg: { heading: 'text-5xl sm:text-6xl md:text-[80px]', subheading: 'text-2xl md:text-[32px]' },
+        xl: { heading: 'text-6xl sm:text-7xl md:text-[96px]', subheading: 'text-3xl md:text-[40px]' },
+        '2xl': { heading: 'text-7xl sm:text-8xl md:text-[112px]', subheading: 'text-4xl md:text-[48px]' },
+    }
+    const sizes = sizeMap[size] || sizeMap.base
+
+    return { activeFont, fontStyle, isCustom, sizes }
+  }
+
+  // Header Styles
+  const headerTypo = getTypographyStyles(headerTypography, "'Amiri', serif")
+  // Card Styles
+  const cardTypo = getTypographyStyles(cardTypography, "'Inter', sans-serif")
+
 
   // ✅ Custom 0.2-second smooth scroll
   const scroll = (direction: 'left' | 'right') => {
@@ -343,9 +374,8 @@ export const UpDownCardCarouselClient: React.FC<{
 
   return (
     <>
-      {/* FIXED: Added &display=swap to Amiri font link */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@400;700&family=Merriweather:wght@400;700&family=Roboto:wght@400;700&family=Poppins:wght@400;700&display=swap"
         rel="stylesheet"
       />
 
@@ -354,16 +384,17 @@ export const UpDownCardCarouselClient: React.FC<{
         style={{
           maxWidth: '100vw',
           overflow: 'hidden',
+          fontFamily: headerTypo.activeFont // Apply globally to section
         }}
       >
         <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20" style={{ marginBottom: '-20px' }}>
           <div className="pt-8 sm:pt-10 lg:pt-12">
             <div className="flex items-center gap-4 sm:gap-6 md:gap-8">
               <h1
-                className="font-bold text-black whitespace-nowrap text-4xl sm:text-5xl md:text-6xl lg:text-[64px] xl:text-[72px]"
+                className={`font-bold text-black whitespace-nowrap ${headerTypo.sizes.heading}`}
                 style={{
-                  fontFamily: "'Amiri', serif",
-                  fontStyle: 'italic',
+                  fontFamily: headerTypo.activeFont, // Use selected font
+                  fontStyle: headerTypo.fontStyle,
                   lineHeight: '88%',
                   letterSpacing: '-0.011em',
                 }}
@@ -376,9 +407,9 @@ export const UpDownCardCarouselClient: React.FC<{
             </div>
             {subheading ? (
               <p
-                className="text-black mt-4 sm:mt-5 flex items-center text-xl sm:text-xl md:text-xl lg:text-2xl"
+                className={`text-black mt-4 sm:mt-5 flex items-center ${headerTypo.sizes.subheading}`}
                 style={{
-                  fontFamily: "'NATS', sans-serif",
+                  fontFamily: headerTypo.activeFont, // Use selected font
                   lineHeight: '88%',
                   letterSpacing: '-0.011em',
                 }}
@@ -436,6 +467,9 @@ export const UpDownCardCarouselClient: React.FC<{
                   key={`${card?.name ?? 'card'}-${index}`}
                   card={card}
                   isEven={index % 2 === 0}
+                  activeFont={cardTypo.activeFont}
+                  fontStyle={cardTypo.fontStyle}
+                  isCustom={cardTypo.isCustom}
                 />
               ))}
           </div>

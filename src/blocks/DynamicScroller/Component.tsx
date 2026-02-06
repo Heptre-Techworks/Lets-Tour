@@ -33,6 +33,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
           title: section.title,
           subtitle: section.subtitle,
           theme: section.theme,
+          headerTypography: section.headerTypography,
+          cardTypography: section.cardTypography,
           navigation: section.showNavigation ? {} : undefined,
           items: [],
         }
@@ -149,6 +151,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
           title: section.title || 'Featured Destinations',
           subtitle: section.subtitle,
           theme: section.theme,
+          headerTypography: section.headerTypography,
+          cardTypography: section.cardTypography,
           navigation: section.showNavigation ? {} : undefined,
           items: [],
         }
@@ -235,6 +239,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
           title: section.title || 'Vibe Match',
           subtitle: section.subtitle || "Today's enemy is tomorrow's friend.*",
           theme: section.theme,
+          headerTypography: section.headerTypography,
+          cardTypography: section.cardTypography,
           navigation: section.showNavigation ? {} : undefined,
           vibes: [],
         }
@@ -310,6 +316,8 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
           title: section.title,
           subtitle: section.subtitle,
           theme: section.theme,
+          headerTypography: section.headerTypography,
+          cardTypography: section.cardTypography,
           navigation: section.showNavigation ? {} : undefined,
           items: [],
           // ✅ Pass these to client for auto-fetch

@@ -59,6 +59,8 @@ type Section = {
     titleColor?: string
     subtitleColor?: string
   }
+  headerTypography?: any
+  cardTypography?: any
   navigation?: {
     position?: string
   }
@@ -181,7 +183,7 @@ const DashedRule: React.FC<{ className?: string }> = ({ className }) => {
 
 // --- Cards ---
 
-const PackageCard: React.FC<{ item: any }> = ({ item }) => {
+const PackageCard: React.FC<{ item: any; activeFont?: string; fontStyle?: string; isCustom?: boolean }> = ({ item, activeFont, fontStyle, isCustom }) => {
   const title = item.title || ''
   const image = item.image
   const price = item.price || '0'
@@ -209,7 +211,8 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
       {item.tag && (
         <div className="absolute top-4 left-4 z-10">
           <span
-            className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} font-nats text-[18px] shadow-sm`}
+            className={`px-3 py-1 rounded-full ${item.tagColor || 'bg-white/90 text-gray-900'} text-[18px] shadow-sm`}
+            style={{ fontFamily: activeFont }}
           >
             {item.tag}
           </span>
@@ -217,11 +220,17 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
       )}
 
       <div className="absolute bottom-0 left-0 p-5 text-white w-full z-10">
-        <h3 className="font-bold group-hover:text-yellow-300 transition-colors duration-300 text-3xl sm:text-4xl font-amiri italic leading-[0.9] tracking-tight">
+        <h3 
+            className={`font-bold group-hover:text-yellow-300 transition-colors duration-300 text-3xl sm:text-4xl leading-[0.9] tracking-tight ${!isCustom ? 'font-amiri italic' : ''}`}
+            style={{ 
+                fontFamily: activeFont,
+                fontStyle: isCustom ? 'normal' : 'italic'
+            }}
+        >
           {title}
         </h3>
         <hr className="my-3 border-white/30" />
-        <p className="font-nats text-[16px] leading-tight">
+        <p className="text-[16px] leading-tight" style={{ fontFamily: activeFont }}>
           Packages starting at <br />
           <span className="font-bold text-[32px]">₹{formatPrice(price)}</span>
           <span className="ml-2 opacity-80">/person</span>
@@ -231,7 +240,7 @@ const PackageCard: React.FC<{ item: any }> = ({ item }) => {
   )
 }
 
-const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
+const DestinationCard: React.FC<{ item: any; activeFont?: string; fontStyle?: string; isCustom?: boolean }> = ({ item, activeFont, fontStyle, isCustom }) => {
   const title = item.title || ''
   const image = item.image
   const price = item.price || '0'
@@ -256,11 +265,17 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
       <div className="absolute bottom-0 left-0 p-5 text-white w-full">
-        <h3 className="font-bold group-hover:text-yellow-300 transition-colors duration-300 text-3xl sm:text-4xl font-amiri italic leading-[0.9]">
+        <h3 
+            className={`font-bold group-hover:text-yellow-300 transition-colors duration-300 text-3xl sm:text-4xl leading-[0.9] ${!isCustom ? 'font-amiri italic' : ''}`}
+            style={{ 
+                fontFamily: activeFont,
+                fontStyle: isCustom ? 'normal' : 'italic'
+            }}
+        >
           {title}
         </h3>
         <hr className="my-3 border-white/30" />
-        <p className="font-nats text-[16px]">
+        <p className="text-[16px]" style={{ fontFamily: activeFont }}>
           Packages starting at <br />
           <span className="font-bold text-[32px]">{price}</span>
           <span className="opacity-80"> /person</span>
@@ -270,7 +285,11 @@ const DestinationCard: React.FC<{ item: any }> = ({ item }) => {
   )
 }
 
-const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = false }) => {
+interface ItineraryCardPropsWithStyle extends ItineraryCardProps {
+    activeFont?: string
+}
+
+const ItineraryCard: React.FC<ItineraryCardPropsWithStyle> = ({ item, defaultExpanded = false, activeFont }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   const activities = (item.activities || []) as Activity[]
 
@@ -281,7 +300,12 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = f
         onClick={() => setIsExpanded(!isExpanded)}
         role="button"
       >
-        <span className="text-black font-bold text-2xl font-amiri">{item.day || 'Day'}</span>
+        <span 
+            className="text-black font-bold text-2xl"
+            style={{ fontFamily: activeFont }}
+        >
+            {item.day || 'Day'}
+        </span>
         <div
           className={`h-8 w-8 border border-gray-300 rounded-full flex items-center justify-center text-gray-700 transition-transform duration-500 ${isExpanded ? 'rotate-180' : ''}`}
         >
@@ -310,7 +334,10 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = f
                   )}
                 </div>
                 <div className="flex-grow">
-                  <p className="text-gray-700 text-base font-nats leading-relaxed">
+                  <p 
+                    className="text-gray-700 text-base leading-relaxed"
+                    style={{ fontFamily: activeFont }}
+                  >
                     {activity.description}
                   </p>
                   {detailsSrc && (
@@ -335,9 +362,41 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, defaultExpanded = f
 
 // --- Sections ---
 
+// Typography Helper
+// Typography Helper
+const getTypographyStyles = (typography: any, defaultFamily: string = "'Amiri', serif") => {
+  const fontMap: Record<string, string> = {
+      inter: "'Inter', sans-serif",
+      merriweather: "'Merriweather', serif",
+      roboto: "'Roboto', sans-serif",
+      poppins: "'Poppins', sans-serif",
+  }
+  const activeFont = typography?.fontFamily ? fontMap[typography.fontFamily] : defaultFamily
+  const fontStyle = typography?.fontFamily ? 'normal' : 'italic'
+  const isCustom = !!typography?.fontFamily
+
+  const size = typography?.fontSize || 'base'
+  const sizeMap: Record<string, { heading: string, subheading: string }> = {
+      sm: { heading: 'text-3xl md:text-5xl', subheading: 'text-lg md:text-xl' },
+      base: { heading: 'text-4xl sm:text-5xl md:text-6xl lg:text-[64px] xl:text-[72px]', subheading: 'text-xl sm:text-xl md:text-xl lg:text-2xl' },
+      lg: { heading: 'text-5xl sm:text-6xl md:text-[80px]', subheading: 'text-2xl md:text-[32px]' },
+      xl: { heading: 'text-6xl sm:text-7xl md:text-[96px]', subheading: 'text-3xl md:text-[40px]' },
+      '2xl': { heading: 'text-7xl sm:text-8xl md:text-[112px]', subheading: 'text-4xl md:text-[48px]' },
+  }
+  const sizes = sizeMap[size] || sizeMap.base
+
+  return { activeFont, fontStyle, isCustom, sizes }
+}
+
 const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   const vibes = section.vibes || []
   const scrollRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  
+  // Header Styles
+  const { activeFont: headerFont, fontStyle: headerStyle, isCustom: isCustomHeader, sizes } = getTypographyStyles(section.headerTypography)
+  
+  // Card Styles
+  const { activeFont: cardFont, fontStyle: cardStyle, isCustom: isCustomCard } = getTypographyStyles(section.cardTypography, "'Inter', sans-serif")
 
   const scroll = (vibeSlug: string, direction: 'left' | 'right') => {
     const el = scrollRefs.current[vibeSlug]
@@ -348,14 +407,25 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
   }
 
   return (
-    <section className="relative overflow-hidden py-16">
+    <section className="relative overflow-hidden py-16" style={{ fontFamily: headerFont }}>
       <div className="container mx-auto px-4">
         <header className="mb-12">
-          <h1 className="font-amiri italic font-bold text-[48px] md:text-[64px] leading-tight text-black">
+          <h1 
+            className={`font-bold leading-tight text-black ${sizes.heading} ${!isCustomHeader ? 'font-amiri italic' : ''}`}
+            style={{ 
+                fontFamily: headerFont,
+                fontStyle: isCustomHeader ? 'normal' : 'italic'
+            }}
+          >
             {section.title || 'Vibe Match'}
           </h1>
           {section.subtitle && (
-            <p className="font-nats text-[24px] md:text-[32px] opacity-70">{section.subtitle}</p>
+            <p 
+                className={`opacity-70 ${sizes.subheading} ${!isCustomHeader ? 'font-nats' : ''}`}
+                style={{ fontFamily: headerFont }}
+            >
+                {section.subtitle}
+            </p>
           )}
         </header>
         <div className="space-y-20">
@@ -385,7 +455,7 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
                 className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scroll-smooth hide-scrollbar"
               >
                 {vibe.items.map((item, idx) => (
-                  <PackageCard key={idx} item={item} />
+                  <PackageCard key={idx} item={item} activeFont={cardFont} fontStyle={cardStyle} isCustom={isCustomCard} />
                 ))}
               </div>
             </div>
@@ -400,6 +470,12 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   const pathname = usePathname()
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [currentIndex, setCurrentIndex] = useState(1)
+  
+  // Header Styles
+  const { activeFont: headerFont, fontStyle: headerStyle, isCustom: isCustomHeader, sizes } = getTypographyStyles(section.headerTypography)
+  
+  // Card Styles
+  const { activeFont: cardFont, fontStyle: cardStyle, isCustom: isCustomCard } = getTypographyStyles(section.cardTypography, "'Inter', sans-serif")
 
   const formattedSlug = useMemo(() => {
     const segments = pathname.split('/').filter(Boolean)
@@ -433,12 +509,18 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   }
 
   return (
-    <section className="relative overflow-hidden py-20">
+    <section className="relative overflow-hidden py-20" style={{ fontFamily: headerFont }}>
       <div className="absolute left-0 top-[10%] h-[70%] w-[85%] bg-yellow-400/10 -skew-y-3 -z-10" />
       <div className="container mx-auto px-4 relative z-10">
         <header className="mb-12">
           <div className="flex items-center gap-8">
-            <h1 className="font-amiri italic font-bold text-black  text-black whitespace-nowrap text-4xl sm:text-5xl md:text-6xl lg:text-[64px] xl:text-[72px] leading-none">
+            <h1 
+                className={`bold text-black whitespace-nowrap leading-none ${sizes.heading} ${!isCustomHeader ? 'font-amiri italic' : ''}`}
+                style={{ 
+                    fontFamily: headerFont,
+                    fontStyle: isCustomHeader ? 'normal' : 'italic'
+                }}
+            >
               {displayTitle}
             </h1>
             <div className="flex-grow">
@@ -446,7 +528,10 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
             </div>
           </div>
           {displaySubtitle && (
-            <p className="font-nats text-black mt-4 sm:mt-5 flex items-center text-xl sm:text-xl md:text-xl lg:text-2xl leading-tight">
+            <p 
+                className={`text-black mt-4 sm:mt-5 flex items-center leading-tight ${sizes.subheading} ${!isCustomHeader ? 'font-nats' : ''}`}
+                style={{ fontFamily: headerFont }}
+            >
               {displaySubtitle}
             </p>
           )}
@@ -459,16 +544,16 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
             className="flex gap-6 overflow-x-auto pb-10 snap-x snap-mandatory scroll-smooth hide-scrollbar"
           >
             {section.type === 'package' &&
-              packageItems.map((item, idx) => <PackageCard key={idx} item={item} />)}
+              packageItems.map((item, idx) => <PackageCard key={idx} item={item} activeFont={cardFont} fontStyle={cardStyle} isCustom={isCustomCard} />)}
             {section.type === 'destination' &&
-              destinationItems.map((item, idx) => <DestinationCard key={idx} item={item} />)}
+              destinationItems.map((item, idx) => <DestinationCard key={idx} item={item} activeFont={cardFont} fontStyle={cardStyle} isCustom={isCustomCard} />)}
           </div>
         )}
 
         {section.type === 'itinerary' && (
           <div className="space-y-6 max-w-4xl mx-auto">
             {itineraryItems.map((item, idx) => (
-              <ItineraryCard key={idx} item={item} defaultExpanded={idx === 0} />
+              <ItineraryCard key={idx} item={item} defaultExpanded={idx === 0} activeFont={cardFont} />
             ))}
           </div>
         )}
