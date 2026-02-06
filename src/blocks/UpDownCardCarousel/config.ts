@@ -88,6 +88,39 @@ export const UpDownCardCarousel: Block = {
         { name: 'href', type: 'text', label: 'Link URL' },
       ],
     },
+    {
+      name: 'typography',
+      type: 'group',
+      label: 'Typography Settings',
+      admin: {
+        description: 'Global font settings for this component',
+      },
+      fields: [
+        {
+          name: 'fontFamily',
+          type: 'select',
+          defaultValue: 'inter',
+          options: [
+            { label: 'Inter (Sans)', value: 'inter' },
+            { label: 'Merriweather (Serif)', value: 'merriweather' },
+            { label: 'Roboto (Sans)', value: 'roboto' },
+            { label: 'Poppins (Sans)', value: 'poppins' },
+          ],
+        },
+        {
+          name: 'fontSize',
+          type: 'select',
+          defaultValue: 'base',
+          options: [
+            { label: 'Small', value: 'sm' },
+            { label: 'Base', value: 'base' },
+            { label: 'Large', value: 'lg' },
+            { label: 'Extra Large', value: 'xl' },
+            { label: '2XL', value: '2xl' },
+          ],
+        },
+      ],
+    },
   ],
 };
 

@@ -5,12 +5,20 @@ import Link from '@/components/Link'
 import { ChevronDown, MapPin, Globe, Layers } from 'lucide-react'
 
 // Types
+type Country = {
+  id: string
+  name: string
+  continent: string
+  region?: string | { name: string }
+}
+
 type Destination = {
   id: string
   name: string
   slug: string
   type: 'international' | 'domestic'
-  continent?: string
+  continent?: 'asia' | 'europe' | 'north-america' | 'south-america' | 'africa' | 'oceania'
+  country?: Country | string // Handle both expanded and ID cases if depth varies
   visited?: boolean
   featuredImage?: { url: string; alt?: string }
 }
@@ -37,6 +45,15 @@ interface MegaMenuProps {
   onToggle?: (open: boolean) => void
 }
 
+const CONTINENT_LABELS: Record<string, string> = {
+  asia: 'Asia',
+  europe: 'Europe',
+  'north-america': 'North America',
+  'south-america': 'South America',
+  africa: 'Africa',
+  oceania: 'Oceania',
+}
+
 export const MegaMenu: React.FC<MegaMenuProps> = ({ 
   label = 'Destinations', 
   type = 'destinations',
@@ -60,7 +77,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
   const [loading, setLoading] = useState(false)
 
   // Selection States
-  const [selectedContinent, setSelectedContinent] = useState<string>('Asia')
+  const [selectedContinent, setSelectedContinent] = useState<string>('Asia') // Display label
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null)
 
   // Fetch Data
@@ -69,10 +86,10 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
       setLoading(true)
       
       Promise.all([
-        // Fetch Destinations
-        fetch('/api/destinations?where[isPublished][equals]=true&limit=100&depth=1').then(r => r.json()),
+        // Fetch Destinations (depth=2 to get country details if needed)
+        fetch('/api/destinations?where[isPublished][equals]=true&limit=100&depth=2').then(r => r.json()),
         // Fetch Packages
-        fetch('/api/packages?where[isPublished][equals]=true&limit=100&depth=1').then(r => r.json())
+        fetch('/api/packages?where[isPublished][equals]=true&limit=100&depth=2').then(r => r.json())
       ])
       .then(([destData, pkgData]) => {
         if (destData?.docs) setDestinations(destData.docs)
@@ -95,21 +112,22 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
   const continents = useMemo(() => {
     const sourceList = internationalDestinations.map(d => d.continent)
     const set = new Set(sourceList.filter(Boolean))
-    return Array.from(set).map(c => (c as string).charAt(0).toUpperCase() + (c as string).slice(1)).sort()
+    return Array.from(set).map(c => CONTINENT_LABELS[c as string] || c).sort()
   }, [internationalDestinations])
   
   // Default Continent
   useEffect(() => {
-    if (type === 'destinations' && activeTab === 'international' && (!selectedContinent || !continents.includes(selectedContinent)) && continents.length > 0) {
-      setSelectedContinent(continents[0])
+    if (type === 'destinations' && activeTab === 'international' && (!selectedContinent || !continents.includes(selectedContinent as string)) && continents.length > 0) {
+      setSelectedContinent(continents[0] as string)
     }
   }, [type, activeTab, continents, selectedContinent])
 
   const filteredDestinations = useMemo(() => {
     if (!selectedContinent) return []
-    return internationalDestinations.filter(d => 
-       d.continent && d.continent.toLowerCase() === selectedContinent.toLowerCase()
-    )
+    return internationalDestinations.filter(d => {
+       const label = d.continent ? CONTINENT_LABELS[d.continent] : ''
+       return label === selectedContinent
+    })
   }, [selectedContinent, internationalDestinations])
 
   // 2. India Tab (Packages) - Kept for Destinations menu as "Packages in India"

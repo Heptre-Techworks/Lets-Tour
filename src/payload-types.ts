@@ -94,6 +94,7 @@ export interface Config {
     'social-posts': SocialPost;
     vibes: Vibe;
     themes: Theme;
+    countries: Country;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -132,6 +133,7 @@ export interface Config {
     'social-posts': SocialPostsSelect<false> | SocialPostsSelect<true>;
     vibes: VibesSelect<false> | VibesSelect<true>;
     themes: ThemesSelect<false> | ThemesSelect<true>;
+    countries: CountriesSelect<false> | CountriesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -374,6 +376,7 @@ export interface Page {
     | ImageGridBlock
     | TravelPackageExplorerBlock
     | DynamicFormBlock
+    | AccreditationsGridBlock
   )[];
   meta?: {
     title?: string | null;
@@ -570,9 +573,9 @@ export interface Destination {
    */
   type: 'international' | 'domestic';
   /**
-   * Country name (if destination is a region within a country)
+   * Country this destination belongs to.
    */
-  country?: string | null;
+  country: string | Country;
   /**
    * Continent for filtering
    */
@@ -628,6 +631,10 @@ export interface Destination {
    * Apply categories like "Family Friendly", "Adventure"
    */
   categories?: (string | Category)[] | null;
+  /**
+   * Themes associated with this destination (e.g. Honeymoon, Adventure).
+   */
+  themes?: (string | Theme)[] | null;
   /**
    * Destination vibes/moods (e.g., Outdoor, Relaxing, Glamping)
    */
@@ -701,6 +708,33 @@ export interface Region {
    * Region code (e.g., "CAT", "AND")
    */
   code?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "countries".
+ */
+export interface Country {
+  id: string;
+  /**
+   * Country name (e.g., France, Japan)
+   */
+  name: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  /**
+   * The continent this country belongs to.
+   */
+  continent: 'asia' | 'europe' | 'north-america' | 'south-america' | 'africa' | 'oceania';
+  /**
+   * Region this country belongs to (optional, but good for filtering).
+   */
+  region?: (string | null) | Region;
+  /**
+   * Optional flag image.
+   */
+  flag?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -875,6 +909,33 @@ export interface Category {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themes".
+ */
+export interface Theme {
+  id: string;
+  /**
+   * Theme name (e.g., Honeymoon, Adventure)
+   */
+  name: string;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  /**
+   * Icon for the theme (optional)
+   */
+  icon?: (string | null) | Media;
+  /**
+   * Main image for the theme page
+   */
+  featuredImage?: (string | null) | Media;
+  /**
+   * Short description of the theme
+   */
+  description?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1192,6 +1253,18 @@ export interface Package {
    */
   labels?: (string | Category)[] | null;
   /**
+   * Continent for filtering
+   */
+  continent?: ('asia' | 'europe' | 'north-america' | 'south-america' | 'africa' | 'oceania') | null;
+  /**
+   * Country for filtering
+   */
+  country?: (string | null) | Country;
+  /**
+   * Region for filtering
+   */
+  region?: (string | null) | Region;
+  /**
    * Target audience
    */
   categories?: (string | PackageCategory)[] | null;
@@ -1275,33 +1348,6 @@ export interface Exclusion {
     [k: string]: unknown;
   } | null;
   icon?: (string | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "themes".
- */
-export interface Theme {
-  id: string;
-  /**
-   * Theme name (e.g., Honeymoon, Adventure)
-   */
-  name: string;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  /**
-   * Icon for the theme (optional)
-   */
-  icon?: (string | null) | Media;
-  /**
-   * Main image for the theme page
-   */
-  featuredImage?: (string | null) | Media;
-  /**
-   * Short description of the theme
-   */
-  description?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2020,6 +2066,13 @@ export interface UpDownCardCarouselBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Global font settings for this component
+   */
+  typography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
+    fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'upDownCardCarousel';
@@ -2286,6 +2339,22 @@ export interface DynamicFormBlock {
   blockType: 'dynamicForm';
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AccreditationsGridBlock".
+ */
+export interface AccreditationsGridBlock {
+  heading?: string | null;
+  images?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'accreditationsGrid';
+}
+/**
  * Manage destination countries and their content
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2355,9 +2424,9 @@ export interface InternationalPackage {
    */
   region?: (string | null) | Region;
   /**
-   * Country name (if destination is a region within a country)
+   * Country (selected from list)
    */
-  country?: string | null;
+  country: string | Country;
   /**
    * Continent for filtering
    */
@@ -2413,6 +2482,10 @@ export interface InternationalPackage {
    * Apply categories like "Family Friendly", "Adventure"
    */
   categories?: (string | Category)[] | null;
+  /**
+   * Themes associated with this destination (e.g. Honeymoon, Adventure).
+   */
+  themes?: (string | Theme)[] | null;
   /**
    * Destination vibes/moods (e.g., Outdoor, Relaxing, Glamping)
    */
@@ -3079,6 +3152,10 @@ export interface PayloadLockedDocument {
         value: string | Theme;
       } | null)
     | ({
+        relationTo: 'countries';
+        value: string | Country;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: string | Redirect;
       } | null)
@@ -3270,6 +3347,7 @@ export interface PagesSelect<T extends boolean = true> {
         imageGrid?: T | ImageGridBlockSelect<T>;
         travelPackageExplorer?: T | TravelPackageExplorerBlockSelect<T>;
         dynamicForm?: T | DynamicFormBlockSelect<T>;
+        accreditationsGrid?: T | AccreditationsGridBlockSelect<T>;
       };
   meta?:
     | T
@@ -3564,6 +3642,12 @@ export interface UpDownCardCarouselBlockSelect<T extends boolean = true> {
         href?: T;
         id?: T;
       };
+  typography?:
+    | T
+    | {
+        fontFamily?: T;
+        fontSize?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -3741,6 +3825,21 @@ export interface DynamicFormBlockSelect<T extends boolean = true> {
       };
   submitButtonText?: T;
   successMessage?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AccreditationsGridBlock_select".
+ */
+export interface AccreditationsGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -3974,6 +4073,7 @@ export interface DestinationsSelect<T extends boolean = true> {
   isPopular?: T;
   isInSeason?: T;
   categories?: T;
+  themes?: T;
   vibes?: T;
   popularityScore?: T;
   displayOrder?: T;
@@ -4032,6 +4132,7 @@ export interface InternationalPackageSelect<T extends boolean = true> {
   isPopular?: T;
   isInSeason?: T;
   categories?: T;
+  themes?: T;
   vibes?: T;
   popularityScore?: T;
   displayOrder?: T;
@@ -4127,6 +4228,9 @@ export interface PackagesSelect<T extends boolean = true> {
         id?: T;
       };
   labels?: T;
+  continent?: T;
+  country?: T;
+  region?: T;
   categories?: T;
   themes?: T;
   vibe?: T;
@@ -4448,6 +4552,20 @@ export interface ThemesSelect<T extends boolean = true> {
   icon?: T;
   featuredImage?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "countries_select".
+ */
+export interface CountriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  slugLock?: T;
+  continent?: T;
+  region?: T;
+  flag?: T;
   updatedAt?: T;
   createdAt?: T;
 }

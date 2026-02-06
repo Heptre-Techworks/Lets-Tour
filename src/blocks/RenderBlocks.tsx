@@ -22,6 +22,7 @@ import { PackageHighlights } from '@/blocks/PackageHighlights/Component'
 import { FeatureCarousel } from '@/blocks/FeatureCarousel/Component'
 import { InfoPanel } from '@/blocks/InfoPanel/Component'
 import DynamicForm from './DynamicForm/Component'
+import { AccreditationsGrid } from './AccreditationsGrid/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -44,6 +45,7 @@ const blockComponents = {
   featureCarousel: FeatureCarousel,
   dynamicForm: DynamicForm,
   infoPanel: InfoPanel,
+  accreditationsGrid: AccreditationsGrid,
 }
 
 // ✅ Helper to serialize block data safely

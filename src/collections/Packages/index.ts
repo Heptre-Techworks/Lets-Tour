@@ -432,6 +432,37 @@ export const Packages: CollectionConfig = {
               admin: { description: 'Labels like Best Seller' }
             },
             {
+              name: 'continent',
+              type: 'select',
+              options: [
+                { label: 'Asia', value: 'asia' },
+                { label: 'Europe', value: 'europe' },
+                { label: 'North America', value: 'north-america' },
+                { label: 'South America', value: 'south-america' },
+                { label: 'Africa', value: 'africa' },
+                { label: 'Oceania', value: 'oceania' },
+              ],
+              admin: {
+                description: 'Continent for filtering',
+              },
+            },
+            {
+              name: 'country',
+              type: 'relationship',
+              relationTo: 'countries',
+              admin: {
+                description: 'Country for filtering',
+              },
+            },
+            {
+              name: 'region',
+              type: 'relationship',
+              relationTo: 'regions',
+              admin: {
+                description: 'Region for filtering',
+              },
+            },
+            {
               name: 'categories',
               type: 'relationship',
               relationTo: 'package-categories',

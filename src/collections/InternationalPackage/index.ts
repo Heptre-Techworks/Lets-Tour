@@ -132,10 +132,12 @@ export const InternationalPackage: CollectionConfig = {
     },
     {
       name: 'country',
-      type: 'text',
+      type: 'relationship',
+      relationTo: 'countries',
       admin: {
-        description: 'Country name (if destination is a region within a country)',
+        description: 'Country (selected from list)',
       },
+      required: true,
     },
     {
       name: 'continent',
@@ -291,6 +293,15 @@ export const InternationalPackage: CollectionConfig = {
       hasMany: true,
       admin: {
         description: 'Apply categories like "Family Friendly", "Adventure"',
+      },
+    },
+    {
+      name: 'themes',
+      type: 'relationship',
+      relationTo: 'themes',
+      hasMany: true,
+      admin: {
+        description: 'Themes associated with this destination (e.g. Honeymoon, Adventure).',
       },
     },
 

@@ -35,6 +35,7 @@ import TravelPackageExplorer from '@/blocks/TravelPackageExplorer/config'
 import DynamicFormBlock from '@/blocks/DynamicForm/config'
 import { revalidateSite, revalidateSiteOnDelete } from '@/hooks/revalidateSite'
 import InfoPanel from '@/blocks/InfoPanel/config'
+import { AccreditationsGrid } from '@/blocks/AccreditationsGrid/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -91,7 +92,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [InfoPanel,CallToAction, Content, MediaBlock, Archive, FormBlock,DynamicScroller, PopularNow,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel, UpDownCardCarousel,ClientStories,DestinationHeroCarousel,InstagramCarouselBlock,ImageGrid,TravelPackageExplorer,DynamicFormBlock],
+              blocks: [InfoPanel,CallToAction, Content, MediaBlock, Archive, FormBlock,DynamicScroller, PopularNow,UniformCardCarousel, StaticImageBlock, NonUniformCardCarousel, UpDownCardCarousel,ClientStories,DestinationHeroCarousel,InstagramCarouselBlock,ImageGrid,TravelPackageExplorer,DynamicFormBlock,AccreditationsGrid],
               required: true,
               admin: {
                 initCollapsed: true,
