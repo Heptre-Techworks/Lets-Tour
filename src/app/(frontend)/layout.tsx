@@ -37,15 +37,57 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     console.error('Error fetching theme fonts:', e)
   }
 
+  // Extract font family names from the links or theme data if available
+  // Assuming the first font is Heading and second is Body for simplicity, or just generating vars
+  // We'll generate --font-0, --font-1, etc. based on the order.
+  // We also need to construct the font-family string.
+  // Google Fonts URL format: ...family=Font+Name:wght@...
+  // Simple extraction regex for now or just rely on the user providing the name in the CMS if we had that data handy here.
+  // The theme object has 'name' field as per ThemeSettings.ts. Let's use that.
+
+  let fontStyles = '';
+  try {
+     const theme: any = await getCachedGlobal('theme-settings' as any)()
+     if (theme?.fonts) {
+        theme.fonts.forEach((f: any, i: number) => {
+            if (f.link && f.name) {
+                fontLinks.push(f.link);
+                // Sanitize font name for CSS variable if needed, but usually the name itself is fine for usage
+                // font-family: 'Name', sans-serif;
+                fontStyles += `--font-${i}: '${f.name}', sans-serif;\n`;
+            }
+        });
+     }
+  } catch (e) {
+     console.error('Error processing fonts:', e);
+  }
+
+
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
         <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="any" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+        
+        {/* Performance Optimization: Preconnect to Google Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
         {fontLinks.map((link, i) => (
           <link key={i} href={link} rel="stylesheet" />
         ))}
+        
+        {/* Dynamic Font Variables */}
+        <style dangerouslySetInnerHTML={{
+            __html: `
+                :root {
+                    ${fontStyles}
+                    --font-heading: var(--font-0, 'Geist Sans'); /* Default to first font or Geist */
+                    --font-body: var(--font-1, var(--font-0, 'Geist Sans')); /* Default to second or first */
+                }
+            `
+        }} />
       </head>
       <body suppressHydrationWarning>
         <Providers>

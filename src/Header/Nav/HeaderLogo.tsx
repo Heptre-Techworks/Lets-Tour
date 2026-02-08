@@ -27,6 +27,7 @@ export const HeaderLogo: React.FC<{ data: Header }> = ({ data }) => {
           width={240}
           height={60}
           priority
+          sizes="(max-width: 768px) 180px, 240px"
           className="
             h-[28px] xs:h-[30px] sm:h-[34px] md:h-[38px] lg:h-[42px]
             w-auto 

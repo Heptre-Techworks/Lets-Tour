@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image' // ✅ ADDED
 
 type MediaLike = { url?: string | null; alt?: string | null }
 
@@ -100,23 +101,15 @@ export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = (
 
   return (
     <div className="font-sans p-4 sm:p-6 md:p-8">
-      {/* Font setup */}
-      <style jsx global>{`
-        .font-amiri {
-          font-family: 'Amiri', serif;
-        }
-        .font-nats {
-          font-family: 'NATS', ui-sans-serif, system-ui;
-        }
-      `}</style>
+      {/* Font setup removed - using CSS variables */}
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Left Column */}
         <div className="text-[#3C2A21]">
-          <h1 className="font-amiri italic font-bold text-[36px] sm:text-[48px] md:text-[56px] lg:text-[64px] leading-tight mb-4">
+          <h1 className="font-[family-name:var(--font-heading)] italic font-bold text-[36px] sm:text-[48px] md:text-[56px] lg:text-[64px] leading-tight mb-4">
             {heading}
           </h1>
-          <p className="font-nats text-[18px] sm:text-[20px] md:text-[24px] text-black mb-6">
+          <p className="font-[family-name:var(--font-body)] text-[18px] sm:text-[20px] md:text-[24px] text-black mb-6">
             {subheading}
           </p>
           <ul className="space-y-3">
@@ -124,7 +117,7 @@ export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = (
               highlights.map((item, index) => (
                 <li key={index} className="flex items-start">
                   <StarIcon />
-                  <span className="font-nats text-[16px] sm:text-[18px] md:text-[20px] text-black">
+                  <span className="font-[family-name:var(--font-body)] text-[16px] sm:text-[18px] md:text-[20px] text-black">
                     {item?.highlightText || ''}
                   </span>
                 </li>
@@ -141,25 +134,19 @@ export const PackageHighlightsClient: React.FC<PackageHighlightsClientProps> = (
             return (
               <div
                 key={index}
-                className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-300 hover:scale-[1.03]"
+                className="relative rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-transform duration-300 hover:scale-[1.03] h-32 sm:h-40 md:h-48 lg:h-56"
               >
-                <picture>
-
-                <img
-                  src={imageSrc}
-                  alt={
-                    imageItem?.image && typeof imageItem.image === 'object'
-                      ? imageItem.image.alt || `Gallery image ${index + 1}`
-                      : `Gallery image ${index + 1}`
-                  }
-                  className="w-full h-32 sm:h-40 md:h-48 lg:h-56 object-cover"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null
-                    e.currentTarget.src = 'https://placehold.co/400/CCCCCC/FFFFFF?text=Image+Error'
-                  }}
-                  
-                />
-                </picture>
+                  <Image
+                    src={imageSrc}
+                    alt={
+                      imageItem?.image && typeof imageItem.image === 'object'
+                        ? imageItem.image.alt || `Gallery image ${index + 1}`
+                        : `Gallery image ${index + 1}`
+                    }
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover"
+                  />
               </div>
             )
           })}

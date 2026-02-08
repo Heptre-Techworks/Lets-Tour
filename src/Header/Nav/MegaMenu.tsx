@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import Link from '@/components/Link'
+import Image from 'next/image'
 import { ChevronDown, MapPin, Globe, Layers } from 'lucide-react'
 import { JourneyLoader } from '@/components/JourneyLoader'
 
@@ -368,11 +369,12 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
                                    >
                                      {dest.featuredImage?.url && (
                                        <div className="w-16 h-16 relative overflow-hidden rounded-lg border border-gray-100 group-hover/item:border-[#FBAE3D] transition-all bg-gray-100 flex-shrink-0">
-                                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                                           <img 
+                                           <Image 
                                              src={dest.featuredImage.url} 
                                              alt={dest.featuredImage.alt || dest.name}
-                                             className="object-cover w-full h-full"
+                                             fill
+                                             className="object-cover"
+                                             sizes="64px"
                                            />
                                        </div>
                                      )}
@@ -431,11 +433,12 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
                                     >
                                       {dest.featuredImage?.url && (
                                        <div className="w-16 h-16 relative overflow-hidden rounded-lg border border-gray-100 group-hover/item:border-[#FBAE3D] transition-all bg-gray-100 flex-shrink-0">
-                                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                                           <img 
+                                           <Image 
                                              src={dest.featuredImage.url} 
                                              alt={dest.featuredImage.alt || dest.name}
-                                             className="object-cover w-full h-full"
+                                             fill
+                                             className="object-cover"
+                                             sizes="64px"
                                            />
                                        </div>
                                      )}

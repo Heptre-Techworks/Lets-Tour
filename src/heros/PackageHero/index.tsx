@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react'
 import type { Package, Review } from '@/payload-types'
 import { Media } from '@/components/Media'
 import Link from 'next/link'
+import Image from 'next/image'
 import RichText from '@/components/RichText'
 
 const StarIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -55,32 +56,10 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
-    if (packageProp) return
-    const fetchPackage = async () => {
-      const slug = pathname.split('/packages/')[1]?.split('/')[0]
-      if (!slug) {
-        setLoading(false)
-        return
-      }
-      try {
-        const response = await fetch(`/api/packages?where[slug][equals]=${slug}&depth=2`)
-        const data = await response.json()
-        if (data.docs && data.docs[0]) {
-          setPackage(data.docs[0])
-          const reviewsResponse = await fetch(
-            `/api/reviews?where[package][equals]=${data.docs[0].id}&where[published][equals]=true&limit=10&depth=2`,
-          )
-          const reviewsData = await reviewsResponse.json()
-          if (reviewsData.docs) setRecentReviews(reviewsData.docs)
-        }
-      } catch (error) {
-        console.error('Error fetching package:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchPackage()
-  }, [pathname, packageProp])
+    if (packageProp) setPackage(packageProp)
+    if (recentReviewsProp) setRecentReviews(recentReviewsProp)
+    setLoading(!packageProp && !pkg)
+  }, [packageProp, recentReviewsProp, pkg])
 
   useEffect(() => {
     setHeaderTheme('dark')
@@ -346,9 +325,15 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                       {recentBookings.map((booking) => (
                         <div
                           key={booking.id}
-                          className="w-10 h-10 rounded-full border-2 border-gray-600 overflow-hidden bg-gray-700"
+                          className="w-10 h-10 rounded-full border-2 border-gray-600 overflow-hidden bg-gray-700 relative"
                         >
-                          <img src={booking.avatar} alt="" className="w-full h-full object-cover" />
+                          <Image 
+                            src={booking.avatar} 
+                            alt="User avatar" 
+                            fill
+                            className="object-cover"
+                            sizes="40px"
+                          />
                         </div>
                       ))}
                     </div>

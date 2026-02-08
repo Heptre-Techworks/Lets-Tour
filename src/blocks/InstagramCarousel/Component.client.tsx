@@ -261,7 +261,31 @@ export const InstagramCarouselClient: React.FC<any> = ({
   }, [gridOnePosts.length])
 
 
+  const [videoSrc, setVideoSrc] = useState<string>('')
+  
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVideoSrc(videoUrl || VIDEO_URL)
+            observer.disconnect()
+          }
+        })
+      },
+      { rootMargin: '200px' },
+    )
+
+    if (videoContainerRef.current) {
+      observer.observe(videoContainerRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [videoUrl])
+
+  useEffect(() => {
+    if (!videoSrc) return
+
     const timer = setTimeout(() => {
       const videoElement = videoContainerRef.current?.querySelector('video')
       if (videoElement) {
@@ -272,7 +296,7 @@ export const InstagramCarouselClient: React.FC<any> = ({
       }
     }, 100)
     return () => clearTimeout(timer)
-  }, [])
+  }, [videoSrc])
 
   return (
     <div className={cn('container py-4', className)}>
@@ -356,22 +380,23 @@ export const InstagramCarouselClient: React.FC<any> = ({
               alignItems: 'top',
             }}
           >
-            <picture>
-              <img
+            <div className="relative w-full h-[440px] sm:h-[440px] md:h-[550px]">
+              <Image
                 src={rightContainerImage}
                 alt="Custom promotional image"
-                className="w-full h-[440px] sm:h-[440px] md:h-[550px] object-contain"
-                loading="lazy"
-                style={{ position: 'absolute', inset: 0 }}
+                fill
+                className="object-contain"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
               />
-            </picture>
+            </div>
 
             <div
               ref={videoContainerRef}
               className="z-10 pointer-events-auto relative w-[200px] sm:w-[200px] md:w-[250px] h-[430px] sm-h[450px] md:h-[530px] top-[5px] sm:top-[11px] md:top-[10px] rounded-[30px] overflow-hidden"
             >
               <video
-                src={videoUrl || VIDEO_URL}
+                src={videoSrc}
                 controls={false}
                 autoPlay={true}
                 muted={true}

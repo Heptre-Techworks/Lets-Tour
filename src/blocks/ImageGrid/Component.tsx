@@ -43,12 +43,15 @@ export const ImageGrid = async (props: ImageGridBlock) => {
         depth: 2,
       })
 
+      // Helper to safely get name from string or object
+      const safelyExtractName = (val: any) => (typeof val === 'object' ? val?.name : val)
+
       gridData = {
         leftHero: {
           title: 'Explore Destinations',
           rating: 5,
           trail: 'Top-rated destinations',
-          image: featured.docs[0]?.featuredImage, // ✅ featuredImage
+          image: featured.docs[0]?.featuredImage,
         },
         explore: {
           subtitle: 'DISCOVER',
@@ -61,9 +64,9 @@ export const ImageGrid = async (props: ImageGridBlock) => {
         },
         spots: featured.docs.slice(0, 3).map((dest: any) => ({
           name: dest.name,
-          rating: dest.popularityScore || 5, // ✅ popularityScore instead of rating
-          location: dest.country || dest.continent,
-          image: dest.featuredImage, // ✅ featuredImage
+          rating: dest.popularityScore || 5,
+          location: safelyExtractName(dest.country) || dest.continent,
+          image: dest.featuredImage,
         })),
         activities: {
           subtitle: 'ADVENTURES',
@@ -74,7 +77,7 @@ export const ImageGrid = async (props: ImageGridBlock) => {
             href: '/packages',
           },
           tag: `${featured.docs.length}+ destinations`,
-          image: featured.docs[0]?.gallery?.[0] || featured.docs[0]?.coverImage, // ✅ coverImage
+          image: featured.docs[0]?.gallery?.[0] || featured.docs[0]?.coverImage,
         },
       }
 

@@ -53,9 +53,10 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   const url = `/packages/${slug}`
 
-  const [packageData, layoutGlobal] = await Promise.all([
+  const [packageData, layoutGlobal, reviews] = await Promise.all([
     queryPackageBySlug({ slug }),
     getPackageLayout({ draft }),
+    getReviewsForPackage({ slug }),
   ])
 
   if (!packageData) {
@@ -67,7 +68,7 @@ export default async function Page({ params: paramsPromise }: Args) {
       <PageClient />
       <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
-      <RenderHero hero={(layoutGlobal as any)?.hero} packageData={packageData as any} />
+      <RenderHero hero={(layoutGlobal as any)?.hero} packageData={packageData as any} recentReviews={reviews} />
       <RenderBlocks blocks={(layoutGlobal as any)?.layout ?? []} packageContext={packageData} />
     </article>
   )
@@ -102,5 +103,38 @@ const queryPackageBySlug = cache(async ({ slug }: { slug: string }) => {
   } catch (error) {
     console.error('Error fetching package by slug:', error)
     return null
+  }
+})
+
+const getReviewsForPackage = cache(async ({ slug }: { slug: string }) => {
+  const payload = await getPayload({ config: configPromise })
+  try {
+    // First get the package ID
+    const pkgResult = await payload.find({
+      collection: 'packages',
+      where: { slug: { equals: slug } },
+      limit: 1,
+      depth: 0,
+    })
+
+    if (!pkgResult.docs[0]) return []
+
+    const pkgId = pkgResult.docs[0].id
+
+    // Fetch reviews
+    const result = await payload.find({
+      collection: 'reviews',
+      where: {
+        package: { equals: pkgId },
+        published: { equals: true },
+      },
+      limit: 10,
+      depth: 2,
+    })
+
+    return result.docs
+  } catch (error) {
+    console.error('Error fetching reviews:', error)
+    return []
   }
 })

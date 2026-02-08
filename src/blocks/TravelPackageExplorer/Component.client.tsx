@@ -1,34 +1,13 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Link from 'next/link' // ✅ ADD
+import Link from 'next/link'
+import Image from 'next/image' // ✅ ADDED
 
 type MediaLike = { url?: string | null; alt?: string | null }
 
-// Local font classes (no external imports here)
-const FontClasses = () => (
-  <style jsx global>{`
-    .font-amiri {
-      font-family: 'Amiri', serif;
-    }
-    .font-nats {
-      font-family:
-        'NATS',
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        'Segoe UI',
-        Roboto,
-        'Helvetica Neue',
-        Arial,
-        'Noto Sans',
-        'Apple Color Emoji',
-        'Segoe UI Emoji',
-        'Segoe UI Symbol',
-        'Noto Color Emoji';
-    }
-  `}</style>
-)
+// Local font classes removed - using CSS variables from layout
+const FontClasses = () => null
 
 // Helper to get image source
 const getImageSrc = (pkg: any) => {
@@ -63,7 +42,7 @@ const FilterSection: React.FC<{ title: string; children: React.ReactNode }> = ({
   children,
 }) => (
   <div className="py-3 border-b border-gray-700">
-    <h3 className="font-nats tracking-[-0.011em] leading-[0.88] text-white text-base">{title}</h3>
+    <h3 className="font-[family-name:var(--font-body)] tracking-[-0.011em] leading-[0.88] text-white text-base">{title}</h3>
     <div className="mt-2 space-y-1">{children}</div>
   </div>
 )
@@ -82,10 +61,10 @@ const Checkbox: React.FC<{
         checked={checked}
         onChange={onChange}
       />
-      <span className="ml-2 font-nats text-[16px] leading-[0.88] tracking-[-0.011em]">{label}</span>
+      <span className="ml-2 font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em]">{label}</span>
     </span>
     {count !== undefined && (
-      <span className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em]">{count}</span>
+      <span className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em]">{count}</span>
     )}
   </label>
 )
@@ -132,7 +111,7 @@ const Filters: React.FC<{
 
   return (
     <div className="w-full bg-[#1e293b] text-white p-4 rounded-lg shadow-lg h-full overflow-y-auto">
-      <h2 className="font-nats text-[20px] leading-[0.88] tracking-[-0.011em] mb-3">Filters</h2>
+      <h2 className="font-[family-name:var(--font-body)] text-[20px] leading-[0.88] tracking-[-0.011em] mb-3">Filters</h2>
 
       <FilterSection title="Budget">
         {['0-90000', '90001-120000', '120001-150000', '150001-200000'].map((range) => {
@@ -149,7 +128,7 @@ const Filters: React.FC<{
                 onChange={() => handlePriceChange(range)}
                 className="h-3 w-3 rounded bg-gray-700 border-gray-600 text-yellow-500 focus:ring-yellow-600"
               />
-              <span className="ml-2 font-nats text-[16px] leading-[0.88] tracking-[-0.011em]">
+              <span className="ml-2 font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em]">
                 ₹{Number(min).toLocaleString()} - ₹{Number(max).toLocaleString()}
               </span>
             </label>
@@ -163,7 +142,7 @@ const Filters: React.FC<{
             <button
               key={r}
               onClick={() => handleRatingChange(r)}
-              className={`px-2 py-0.5 border rounded-md text-xs font-nats tracking-[-0.011em] leading-[0.88] ${
+              className={`px-2 py-0.5 border rounded-md text-xs font-[family-name:var(--font-body)] tracking-[-0.011em] leading-[0.88] ${
                 filters.rating === r
                   ? 'bg-yellow-500 border-yellow-500 text-black'
                   : 'border-gray-500 text-gray-300'
@@ -260,10 +239,10 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
       <div className="flex items-center">
         {icon}
         <div className="ml-2">
-          <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-800">
+          <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-800">
             {label}
           </p>
-          <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-500">
+          <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-500">
             {sublabel}
           </p>
         </div>
@@ -285,15 +264,15 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
       <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col md:flex-row mb-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300 font-sans">
         {/* Image container with "card-in-card" effect */}
         <div className="md:w-64 p-3 flex-shrink-0">
-          <img
-            className="h-64 md:h-72 w-full object-cover rounded-xl shadow-md transition-transform duration-300 group-hover:scale-105" // ✅ FIXED: Consistent height
-            src={imageSrc}
-            alt={pkg.title}
-            onError={(e) => {
-              e.currentTarget.onerror = null
-              e.currentTarget.src = 'https://placehold.co/600x400/cccccc/FFFFFF/png?text=Error'
-            }}
-          />
+          <div className="h-64 md:h-72 w-full relative">
+             <Image
+                src={imageSrc}
+                alt={pkg.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 300px"
+                className="object-cover rounded-xl shadow-md transition-transform duration-300 group-hover:scale-105"
+             />
+          </div>
         </div>
 
         <div className="p-4 pt-1 md:pt-4 md:pl-0 flex flex-col flex-grow w-full">
@@ -302,19 +281,19 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
             <div className="flex-grow pr-4">
               <div className="flex items-center space-x-2">
                 {/* Title: Amiri italic 40px, 88% line-height, -0.011em */}
-                <h3 className="font-amiri italic text-[40px] leading-[0.88] tracking-[-0.011em] text-gray-800 group-hover:text-yellow-600 transition-colors">
+                <h3 className="font-[family-name:var(--font-heading)] italic text-[40px] leading-[0.88] tracking-[-0.011em] text-gray-800 group-hover:text-yellow-600 transition-colors">
                   {pkg.title}
                 </h3>
                 <StarRating rating={pkg.rating} />
               </div>
               {/* Location: NATS 16px, 88%, -0.011em */}
-              <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 mt-2">
+              <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 mt-2">
                 {pkg.location}
               </p>
               {/* Description: NATS 16px, 88%, -0.011em */}
               <p
                 className="
-    font-nats text-[14px] xs:text-[15px] sm:text-[16px] md:text-[17px]
+    font-[family-name:var(--font-body)] text-[14px] xs:text-[15px] sm:text-[16px] md:text-[17px]
     leading-relaxed sm:leading-[1.6] tracking-[-0.011em]
     text-gray-700 text-justify sm:text-left
     mt-3 sm:mt-4 mb-2 sm:mb-3
@@ -326,14 +305,14 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
 
               {pkg.inclusions && pkg.inclusions.length > 0 && (
                 <div className="mt-3">
-                  <h4 className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-800">
+                  <h4 className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-800">
                     Inclusions:
                   </h4>
                   <ul className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-1">
                     {pkg.inclusions.map((item: string, idx: number) => (
                       <li
                         key={idx}
-                        className="list-disc list-inside font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 p-2"
+                        className="list-disc list-inside font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 p-2"
                       >
                         {item}
                       </li>
@@ -347,15 +326,15 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
             <div className="w-full sm:w-48 mt-4 sm:mt-0 flex-shrink-0">
               <div className="text-right">
                 {pkg.originalPrice > pkg.price && (
-                  <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-red-500 line-through">
+                  <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-red-500 line-through">
                     ₹{pkg.originalPrice.toLocaleString()}
                   </p>
                 )}
                 {/* Price: NATS 32px, 88%, -0.011em */}
-                <p className="font-nats text-[32px] leading-[0.88] tracking-[-0.011em] font-normal text-yellow-500 bg-yellow-50 rounded-md p-1 inline-block m-2">
+                <p className="font-[family-name:var(--font-body)] text-[32px] leading-[0.88] tracking-[-0.011em] font-normal text-yellow-500 bg-yellow-50 rounded-md p-1 inline-block m-2">
                   ₹{pkg.price.toLocaleString()}
                 </p>
-                <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600">
+                <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600">
                   /person
                 </p>
               </div>
@@ -422,7 +401,7 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
                       alt="User C"
                     />
                   </div>
-                  <span className="font-nats ">
+                  <span className="font-[family-name:var(--font-body)] ">
                     {pkg.recentBookings} +
                     <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 m-2">
                       bookings in past month
@@ -441,7 +420,7 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
                   {pkg.sights.map((sight: any, idx: number) => (
                     <span
                       key={idx}
-                      className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-700 font-medium flex-shrink-0"
+                      className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-700 font-medium flex-shrink-0"
                     >
                       {typeof sight === 'string' ? sight : sight.name}
                     </span>
@@ -530,10 +509,10 @@ export const TravelPackageExplorerClient: React.FC<{ packages: any[] }> = ({ pac
               ))
             ) : (
               <div className="bg-white rounded-xl shadow-md p-6 text-center">
-                <h3 className="font-nats text-[20px] leading-[0.88] tracking-[-0.011em] text-gray-800">
+                <h3 className="font-[family-name:var(--font-body)] text-[20px] leading-[0.88] tracking-[-0.011em] text-gray-800">
                   No Packages Found
                 </h3>
-                <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 mt-2">
+                <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 mt-2">
                   Try adjusting your filters to find the perfect trip!
                 </p>
               </div>

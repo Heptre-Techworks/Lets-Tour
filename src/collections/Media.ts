@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url'
 
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
+import { processMedia } from '@/utilities/imageProcessing'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,6 +25,35 @@ export const Media: CollectionConfig = {
     delete: authenticated,
     read: anyone,
     update: authenticated,
+  },
+  hooks: {
+    beforeChange: [
+      async ({ data, req, operation }) => {
+        if (operation === 'create' && req.file) {
+          const file = req.file
+          // Only process images
+          if (file.mimetype.startsWith('image/') && !file.mimetype.includes('svg')) {
+            try {
+              const { buffer, mimeType, size } = await processMedia(file.data)
+              
+              // Update file data
+              req.file.data = buffer
+              req.file.mimetype = mimeType
+              req.file.size = size
+              req.file.name = file.name.replace(/\.[^/.]+$/, "") + ".webp"
+              
+              // Metadata updates
+              data.filename = req.file.name
+              data.mimeType = mimeType
+              data.filesize = size
+            } catch (error) {
+              req.payload.logger.error(`Error processing image: ${error}`)
+            }
+          }
+        }
+        return data
+      },
+    ],
   },
   fields: [
     {

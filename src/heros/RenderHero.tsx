@@ -10,14 +10,14 @@ type RenderHeroProps = {
   // Optional: Pass fetched data for server-side rendering (to avoid double fetch)
   destinationData?: Destination
   packageData?: Package
-  reviewsData?: Review[]
+  recentReviews?: Review[]
 }
 
 export const RenderHero: React.FC<RenderHeroProps> = ({
   hero,
   destinationData,
   packageData,
-  reviewsData = [],
+  recentReviews = [],
 }) => {
   // ✅ Return black background div if no hero or type is 'none'
   if (!hero || hero.type === 'none') {
@@ -105,7 +105,7 @@ export const RenderHero: React.FC<RenderHeroProps> = ({
             bookNowLabel: hero.packageHeroFields?.buttons?.bookNowLabel ?? 'Book now',
             enableDownload: hero.packageHeroFields?.buttons?.enableDownload ?? true,
           }}
-          recentReviews={reviewsData}
+          recentReviews={recentReviews}
         />
       )
     }

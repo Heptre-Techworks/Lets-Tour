@@ -25,6 +25,8 @@ const parseDuration = (durationStr: string): number => {
   return match ? parseInt(match[1], 10) : 0
 }
 
+const safelyExtractName = (val: any) => (typeof val === 'object' ? val?.name : val)
+
 export const TravelPackageExplorer = async (props: TravelPackageExplorerProps) => {
   const { dataSource, destination: destProp, slug } = props as any
 
@@ -141,7 +143,7 @@ export const TravelPackageExplorer = async (props: TravelPackageExplorerProps) =
         accommodationType: accommodationTypes[0] || 'Hotel',
         amenities,
         inclusions,
-        province: firstDest?.country || firstDest?.name || '',
+        province: safelyExtractName(firstDest?.country) || firstDest?.name || '',
         sights: sights.slice(0, 10), // Limit to 10 sights
         recentBookings: pkg.bookingsCount30d || 0,
         suitability: {
