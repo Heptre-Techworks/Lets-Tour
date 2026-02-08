@@ -4,6 +4,7 @@ import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 import type { Media, City as CityType, Destination } from '@/payload-types'
+import { Media as MediaComponent } from '@/components/Media'
 
 const ArrowIcon = ({ className }: { className?: string }) => (
   <svg
@@ -95,8 +96,7 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
   const [displayIndex, setDisplayIndex] = useState(initialDisplayIndex)
   const activeCityIndex = displayIndex % cities.length
 
-  const getImageUrl = (image: Media | string): string =>
-    typeof image === 'string' ? image : image?.url || ''
+
 
   const resetAutoplay = () => {
     if (timerRef.current) clearInterval(timerRef.current)
@@ -214,11 +214,24 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
         }
       `}</style>
 
-      <div
-        key={activeCityIndex}
-        style={{ backgroundImage: `url(${getImageUrl(cities[activeCityIndex].image)})` }}
-        className="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 ease-in-out"
-      />
+      <div className="absolute inset-0 w-full h-full z-0">
+        <MediaComponent
+          key={activeCityIndex}
+          resource={
+            typeof cities[activeCityIndex].image === 'object'
+              ? cities[activeCityIndex].image
+              : undefined
+          }
+          src={
+            typeof cities[activeCityIndex].image === 'string'
+              ? cities[activeCityIndex].image
+              : undefined
+          }
+          fill
+          imgClassName="object-cover transition-opacity duration-1000"
+          priority
+        />
+      </div>
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
 
       <div className="relative w-full h-full flex flex-col justify-end text-white px-4 sm:px-6 md:px-12  sm:pb-12">
