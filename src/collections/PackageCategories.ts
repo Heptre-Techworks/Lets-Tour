@@ -10,6 +10,7 @@ export const PackageCategories: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'type', 'parent'],
     group: 'Trip Configuration',
+    hidden: true,
   },
 
   access: {

@@ -1,5 +1,12 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { PageTransitionProvider } from '@/providers/PageTransitionContext'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover',
+}
 
 import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
@@ -98,9 +105,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 }}
             />
 
-            <Suspense fallback={null}>
             <GlobalPreloader />
-          </Suspense>
             <Header />
             <main>
                 {children}

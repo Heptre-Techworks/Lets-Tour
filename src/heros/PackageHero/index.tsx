@@ -118,7 +118,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   if (loading) {
     return (
       <section
-        className="relative -mt-[10.4rem] w-screen min-h-screen bg-gray-900 flex items-center justify-center text-white"
+        className="relative w-screen min-h-screen bg-gray-900 flex items-center justify-center text-white"
         data-theme="dark"
       >
         Loading package...
@@ -129,7 +129,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   if (!pkg) {
     return (
       <section
-        className="relative -mt-[10.4rem] w-screen min-h-screen bg-gray-900 flex items-center justify-center text-white"
+        className="relative w-screen min-h-screen bg-gray-900 flex items-center justify-center text-white"
         data-theme="dark"
       >
         Package not found
@@ -188,7 +188,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
 
   return (
     <section
-      className="relative -mt-[10.4rem] w-screen min-h-screen bg-gray-900 font-sans"
+      className="relative w-screen min-h-screen bg-gray-900 font-sans"
       data-theme="dark"
     >
       {/* Font classes (Amiri + NATS) */}

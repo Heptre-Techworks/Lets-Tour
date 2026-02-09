@@ -396,7 +396,7 @@ export const InstagramCarouselClient: React.FC<any> = ({
               className="z-10 pointer-events-auto absolute left-1/2 -translate-x-1/2 w-[200px] sm:w-[200px] md:w-[250px] h-[430px] sm:h-[450px] md:h-[530px] top-[5px] sm:top-[11px] md:top-[10px] rounded-[30px] overflow-hidden"
             >
               <video
-                src={videoSrc}
+                src={videoSrc || undefined}
                 controls={false}
                 autoPlay={true}
                 muted={true}

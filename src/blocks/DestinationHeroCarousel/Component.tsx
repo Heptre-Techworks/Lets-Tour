@@ -40,7 +40,7 @@ export const DestinationHeroCarousel = async ({
 
     if (populateBy === 'destination' && destinationProp) {
       const destId = typeof destinationProp === 'object' ? destinationProp.id : destinationProp
-      if (destId && /^[0-9a-fA-F]{24}$/.test(destId)) {
+      if (destId) {
         query.where.destination = { equals: destId }
       }
     }

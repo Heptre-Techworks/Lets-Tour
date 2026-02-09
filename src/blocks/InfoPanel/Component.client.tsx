@@ -154,53 +154,35 @@ async function transformPackageToPanelData(pkg: any, type: string) {
       }
 
     case 'inclusions':
-      const inclusionIds = Array.isArray(pkg.inclusions)
-        ? pkg.inclusions.map((inc: any) => (typeof inc === 'object' ? inc.id : inc)).filter(Boolean)
-        : []
-
-      const inclusions = await Promise.all(
-        inclusionIds.map(async (id: string) => {
-          try {
-            const response = await fetch(`/api/inclusions/${id}`)
-            const inc = await response.json()
+      const inclusions =
+        pkg.inclusions?.map((inc: any) => {
+          if (typeof inc === 'object' && (inc.description || inc.name)) {
             return { text: inc.description || inc.name }
-          } catch (err) {
-            console.error('Error fetching inclusion:', err)
-            return null
           }
-        }),
-      )
+          return null
+        }).filter(Boolean) || []
 
       return {
         title: 'Inclusions',
         subheading: `What's included in ${pkg.name}`,
         listType: 'disc' as const,
-        items: inclusions.filter(Boolean),
+        items: inclusions,
       }
 
     case 'exclusions':
-      const exclusionIds = Array.isArray(pkg.exclusions)
-        ? pkg.exclusions.map((exc: any) => (typeof exc === 'object' ? exc.id : exc)).filter(Boolean)
-        : []
-
-      const exclusions = await Promise.all(
-        exclusionIds.map(async (id: string) => {
-          try {
-            const response = await fetch(`/api/exclusions/${id}`)
-            const exc = await response.json()
+      const exclusions =
+        pkg.exclusions?.map((exc: any) => {
+           if (typeof exc === 'object' && (exc.description || exc.name)) {
             return { text: exc.description || exc.name }
-          } catch (err) {
-            console.error('Error fetching exclusion:', err)
-            return null
           }
-        }),
-      )
+          return null
+        }).filter(Boolean) || []
 
       return {
         title: 'Exclusions',
         subheading: `What's not included in ${pkg.name}`,
         listType: 'disc' as const,
-        items: exclusions.filter(Boolean),
+        items: exclusions,
       }
 
     default:

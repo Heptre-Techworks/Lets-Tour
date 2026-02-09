@@ -5,8 +5,8 @@ import configPromise from '@payload-config'
 import { DynamicScrollerClient } from './Component.client'
 import type { DynamicScrollerBlock } from '@/payload-types'
 
-export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock) => {
-  const { sections = [] } = props
+export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock & { destinationContext?: any }) => {
+  const { sections = [], destinationContext } = props
 
   console.log('🔍 DynamicScroller received props:', Object.keys(props))
   console.log('📋 Sections count:', sections==null?0:sections.length)
@@ -67,6 +67,10 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
           if (populateBy === 'featured') {
             query.where.isFeatured = { equals: true }
           } 
+          else if (populateBy === 'auto' && destinationContext) {
+             console.log('🎯 Fetching packages for context destination:', destinationContext.name)
+             query.where.destinations = { contains: destinationContext.id }
+          }
           else if (populateBy === 'featuredDestinations') {
             const featuredDests = await payload.find({
               collection: 'destinations',
@@ -299,6 +303,85 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock)
           console.log('✅ Processed vibes:', vibeGroups.map(v => v.vibeName))
         } catch (error) {
           console.error('❌ Error fetching vibes:', error)
+        }
+
+        return sectionData
+      }
+
+      // ==================== THEME SECTION ====================
+      if (blockType === 'themeSection' || section.themes) {
+        console.log('🎭 Processing Theme Section')
+
+        const payload = await getPayload({ config: configPromise })
+        const themes = Array.isArray(section.themes) ? section.themes : []
+        const packagesPerTheme = section.packagesPerTheme || 4
+
+        // Reusing 'vibe' type for client rendering as the UI is identical (Tabs + Cards)
+        const sectionData: any = {
+          type: 'vibe', 
+          title: section.title || 'Explore by Theme',
+          subtitle: section.subtitle,
+          theme: section.theme,
+          headerTypography: section.headerTypography,
+          cardTypography: section.cardTypography,
+          navigation: section.showNavigation ? {} : undefined,
+          vibes: [], // Functionally 'groups'
+        }
+
+        try {
+          const themeGroups = await Promise.all(
+            themes.map(async (themeRel: any) => {
+              const themeId = typeof themeRel === 'object' ? themeRel.id : themeRel
+              
+              const theme = await payload.findByID({
+                collection: 'themes',
+                id: themeId,
+                depth: 0,
+              })
+
+              const packages = await payload.find({
+                collection: 'packages',
+                where: {
+                  themes: { contains: themeId }, // ✅ Check if themes array contains this ID
+                  isPublished: { equals: true },
+                },
+                limit: packagesPerTheme,
+                depth: 2,
+              })
+
+              console.log(`🎭 Theme "${theme.name}": ${packages.docs.length} packages`)
+
+              const themeItems = packages.docs.map((pkg: any) => {
+                const currencySymbol = pkg.currency === 'USD' ? '$' : pkg.currency === 'EUR' ? '€' : '₹'
+                const tag = pkg.isInSeason ? 'In Season' : pkg.isPopular ? 'Popular' : ''
+                const tagColor = pkg.isInSeason ? 'bg-orange-400 text-white' : 'bg-red-500 text-white'
+
+                return {
+                  blockType: 'packageItem' as const,
+                  id: pkg.id,
+                  title: pkg.name,
+                  price: `${currencySymbol}${(pkg.discountedPrice || pkg.price || 0).toLocaleString()}`,
+                  image: typeof pkg.heroImage === 'object' ? pkg.heroImage : null,
+                  tag,
+                  tagColor,
+                  slug: pkg.slug,
+                  href: `/packages/${pkg.slug}`,
+                }
+              })
+
+              return {
+                vibeName: theme.name, // Mapping Theme Name to Vibe Name for UI
+                vibeSlug: theme.slug,
+                color: 'orange',
+                items: themeItems,
+              }
+            })
+          )
+
+          sectionData.vibes = themeGroups
+          console.log('✅ Processed themes:', themeGroups.map(t => t.vibeName))
+        } catch (error) {
+          console.error('❌ Error fetching themes:', error)
         }
 
         return sectionData

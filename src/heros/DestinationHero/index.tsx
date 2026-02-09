@@ -191,7 +191,7 @@ export const DestinationHero: React.FC<DestinationHeroProps> = ({
 
   return (
     <section
-      className="relative -mt-[10.4rem] w-full h-screen bg-gray-900 font-sans antialiased overflow-hidden"
+      className="relative w-full h-[100dvh] bg-gray-900 font-sans antialiased overflow-hidden"
       data-theme="dark"
     >
       {/* Fonts */}

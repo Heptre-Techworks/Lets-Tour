@@ -8,7 +8,7 @@ export const HeaderLogo: React.FC<{ data: Header }> = ({ data }) => {
   const src =
     typeof logo === 'string'
       ? logo
-      : logo?.url || logo?.src || (logo?.sizes?.thumbnail?.url ?? null)
+      : logo?.url || logo?.sizes?.thumbnail?.url || logo?.src || null
 
   return (
     <div
@@ -34,6 +34,7 @@ export const HeaderLogo: React.FC<{ data: Header }> = ({ data }) => {
             object-contain
             transition-all duration-300
           "
+          unoptimized
         />
       ) : (
         <div

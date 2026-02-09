@@ -5,6 +5,7 @@ import Link from '@/components/Link'
 import Image from 'next/image'
 import { ChevronDown, MapPin, Globe, Layers } from 'lucide-react'
 import { JourneyLoader } from '@/components/JourneyLoader'
+import { getMegaMenuData } from '@/actions/getMegaMenuData'
 
 // Types
 type Country = {
@@ -33,10 +34,12 @@ type Theme = {
 
 type Package = {
   id: string
-  title: string
+  name: string
   slug: string
-  destination?: Destination
+  destinations?: Destination[]
   themes?: Theme[]
+  Summary?: string
+  heroImage?: { url: string; alt?: string }
   overview?: string
 }
 
@@ -92,17 +95,12 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
     if (destinations.length === 0 && !loading) {
       setLoading(true)
       
-      Promise.all([
-        // Fetch Destinations (depth=2 to get country details)
-        fetch('/api/destinations?where[isPublished][equals]=true&limit=100&depth=2').then(r => r.json()),
-        // Fetch Packages
-        fetch('/api/packages?where[isPublished][equals]=true&limit=100&depth=2').then(r => r.json())
-      ])
-      .then(([destData, pkgData]) => {
-        if (destData?.docs) setDestinations(destData.docs)
-        if (pkgData?.docs) setPackages(pkgData.docs)
-      })
-      .finally(() => setLoading(false))
+      getMegaMenuData()
+        .then((data) => {
+          if (data?.destinations) setDestinations(data.destinations as Destination[])
+          if (data?.packages) setPackages(data.packages as Package[])
+        })
+        .finally(() => setLoading(false))
     }
   }, []) // Empty dependency array -> Run once on mount
 
@@ -500,12 +498,25 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
                                  href={`/packages/${pkg.slug}`}
                                  className="group/item block bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-lg transition-all"
                                >
+                                 {/* Image */}
+                                 {pkg.heroImage?.url && (
+                                   <div className="relative w-full h-40 overflow-hidden">
+                                     <Image 
+                                       src={pkg.heroImage.url} 
+                                       alt={pkg.heroImage.alt || pkg.name}
+                                       fill
+                                       className="object-cover group-hover/item:scale-105 transition-transform"
+                                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                     />
+                                   </div>
+                                 )}
+                                 {/* Content */}
                                  <div className="p-4">
                                    <div className="text-[10px] font-bold text-[#FBAE3D] uppercase tracking-wide mb-1">
-                                      {pkg.destination?.name}
+                                      {pkg.destinations?.[0]?.name}
                                    </div>
                                    <h4 className="text-sm font-bold text-gray-800 leading-tight mb-2 group-hover/item:text-[#FBAE3D] transition-colors">
-                                     {pkg.title}
+                                     {pkg.name}
                                    </h4>
                                  </div>
                                </Link>

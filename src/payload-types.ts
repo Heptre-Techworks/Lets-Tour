@@ -1825,6 +1825,7 @@ export interface DynamicScrollerBlock {
     | DynamicScroller_PackageSection
     | DynamicScroller_DestinationSection
     | DynamicScroller_VibeSection
+    | DynamicScroller_ThemeSection
     | DynamicScroller_ItinerarySection
   )[];
   id?: string | null;
@@ -1945,6 +1946,42 @@ export interface DynamicScroller_VibeSection {
   id?: string | null;
   blockName?: string | null;
   blockType: 'vibeSection';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_ThemeSection".
+ */
+export interface DynamicScroller_ThemeSection {
+  /**
+   * Section heading
+   */
+  title?: string | null;
+  /**
+   * Optional subtitle
+   */
+  subtitle?: string | null;
+  /**
+   * Select themes to display (e.g., Honeymoon, Adventure)
+   */
+  themes: (string | Theme)[];
+  /**
+   * How many packages to show per theme
+   */
+  packagesPerTheme?: number | null;
+  theme?: {
+    background?: string | null;
+  };
+  showNavigation?: boolean | null;
+  /**
+   * Global font settings for this component
+   */
+  typography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
+    fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'themeSection';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3530,6 +3567,7 @@ export interface DynamicScrollerBlockSelect<T extends boolean = true> {
         packageSection?: T | DynamicScroller_PackageSectionSelect<T>;
         destinationSection?: T | DynamicScroller_DestinationSectionSelect<T>;
         vibeSection?: T | DynamicScroller_VibeSectionSelect<T>;
+        themeSection?: T | DynamicScroller_ThemeSectionSelect<T>;
         itinerarySection?: T | DynamicScroller_ItinerarySectionSelect<T>;
       };
   id?: T;
@@ -3614,6 +3652,30 @@ export interface DynamicScroller_VibeSectionSelect<T extends boolean = true> {
   subtitle?: T;
   vibes?: T;
   packagesPerVibe?: T;
+  theme?:
+    | T
+    | {
+        background?: T;
+      };
+  showNavigation?: T;
+  typography?:
+    | T
+    | {
+        fontFamily?: T;
+        fontSize?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "DynamicScroller_ThemeSection_select".
+ */
+export interface DynamicScroller_ThemeSectionSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  themes?: T;
+  packagesPerTheme?: T;
   theme?:
     | T
     | {

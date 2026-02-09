@@ -8,7 +8,7 @@ export const Themes: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'slug'],
-    group: 'Trip Configuration',
+    group: 'Travel Management',
   },
   access: {
     read: anyone,

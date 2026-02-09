@@ -46,12 +46,11 @@ export const AdminBar: React.FC<{
     setShow(Boolean(user?.id))
   }, [])
 
+  if (!show) return null
+
   return (
     <div
-      className={cn(baseClass, 'py-2 bg-black text-white', {
-        block: show,
-        hidden: !show,
-      })}
+      className={cn(baseClass, 'py-2 bg-black text-white')}
     >
       <div className="container">
         <PayloadAdminBar

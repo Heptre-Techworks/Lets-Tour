@@ -142,7 +142,7 @@ export const GlobalPreloader: React.FC = () => {
     return () => clearInterval(interval)
   }, [isExiting, phrases.length])
 
-  if (!show) return null
+  if (!show) return <div style={{ display: 'none' }} />
 
   return <PreloaderVisual isExiting={isExiting} text={phrases[textIndex]} />
 }

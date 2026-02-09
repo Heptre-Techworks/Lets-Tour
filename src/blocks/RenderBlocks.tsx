@@ -131,10 +131,12 @@ function serializeBlockData(block: any) {
 }
 
 export const RenderBlocks: React.FC<{
-  blocks: Page['layout'][0][]
+  blocks: any[]
   packageContext?: any // Pass the full package object
+  destinationContext?: any // Pass the full destination object
+  slug?: string // Current page slug
 }> = (props) => {
-  const { blocks, packageContext } = props
+  const { blocks, packageContext, destinationContext, slug } = props
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -163,6 +165,31 @@ export const RenderBlocks: React.FC<{
                         serializedBlock.package = packageContext
                     }
                  }
+              }
+
+              // ✅ Inject Destination Context if available
+              if (destinationContext) {
+                  if (blockType === 'destinationHeroCarousel') {
+                      // Force population by destination if we are on a destination page and it's set to auto
+                      if (serializedBlock.populateBy === 'auto') {
+                          serializedBlock.populateBy = 'destination'
+                          serializedBlock.destination = destinationContext
+                      }
+                  }
+                  if (blockType === 'dynamicScroller') {
+                      serializedBlock.destinationContext = destinationContext
+                  }
+              }
+
+              // ✅ Inject Slug if available (for TravelPackageExplorer auto-mode)
+              if (slug) {
+                  if (blockType === 'travelPackageExplorer') {
+                      serializedBlock.slug = slug
+                  }
+                  // Also inject into DestinationHero if it needs slug for title interpolation
+                  if (blockType === 'destinationHeroCarousel') {
+                      serializedBlock.slug = slug 
+                  }
               }
 
               return (

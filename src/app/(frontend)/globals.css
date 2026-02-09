@@ -97,21 +97,8 @@ html[data-theme='light'] {
 }
 
 /* === Layout Elements === */
-header {
-  position: relative;
-  z-index: 50;
-  width: 100%;
-}
-
-.hero {
-  position: relative;
-  z-index: 1;
-}
-
-footer {
-  margin-top: 0 !important;
-  width: 100%;
-}
+/* === Layout Elements === */
+/* Removed global header/hero/footer styles to allow utility classes to work correctly */
 
 /* === Utility Layer === */
 @layer utilities {

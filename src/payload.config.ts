@@ -48,6 +48,7 @@ import Vibes from './collections/Vibes'
 import { Themes } from './collections/Themes'
 import { Countries } from './collections/Countries'
 import { autoRevalidatePlugin } from './plugins/autoValidate'
+import TravelDashboard from './components/Admin/TravelDashboard'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -56,7 +57,10 @@ export default buildConfig({
   admin: {
     components: {
       beforeLogin: ['@/components/BeforeLogin'],
-      beforeDashboard: ['@/components/BeforeDashboard'],
+      views: {
+        // @ts-ignore
+        Dashboard: TravelDashboard,
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),

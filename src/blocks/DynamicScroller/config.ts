@@ -419,6 +419,87 @@ const ItinerarySectionBlock: Block = {
   ],
 }
 
+// ==================== THEME SECTION ====================
+const ThemeSectionBlock: Block = {
+  slug: 'themeSection',
+  interfaceName: 'DynamicScroller_ThemeSection',
+  labels: { singular: 'Theme Section', plural: 'Theme Sections' },
+  fields: [
+    { 
+      name: 'title', 
+      type: 'text', 
+      defaultValue: 'Explore by Theme',
+      admin: { description: 'Section heading' }
+    },
+    { 
+      name: 'subtitle', 
+      type: 'text',
+      admin: { description: 'Optional subtitle' }
+    },
+    {
+      name: 'themes',
+      type: 'relationship',
+      relationTo: 'themes',
+      hasMany: true,
+      required: true,
+      admin: {
+        description: 'Select themes to display (e.g., Honeymoon, Adventure)',
+      },
+    },
+    {
+      name: 'packagesPerTheme',
+      type: 'number',
+      defaultValue: 4,
+      min: 1,
+      max: 10,
+      admin: {
+        description: 'How many packages to show per theme',
+      },
+    },
+    {
+      name: 'theme',
+      type: 'group',
+      fields: [
+        { name: 'background', type: 'text', defaultValue: 'bg-white' },
+      ],
+    },
+    { name: 'showNavigation', type: 'checkbox', defaultValue: true },
+    {
+      name: 'typography',
+      type: 'group',
+      label: 'Typography Settings',
+      admin: {
+        description: 'Global font settings for this component',
+      },
+      fields: [
+        {
+          name: 'fontFamily',
+          type: 'select',
+          defaultValue: 'inter',
+          options: [
+            { label: 'Inter (Sans)', value: 'inter' },
+            { label: 'Merriweather (Serif)', value: 'merriweather' },
+            { label: 'Roboto (Sans)', value: 'roboto' },
+            { label: 'Poppins (Sans)', value: 'poppins' },
+          ],
+        },
+        {
+          name: 'fontSize',
+          type: 'select',
+          defaultValue: 'base',
+          options: [
+            { label: 'Small', value: 'sm' },
+            { label: 'Base', value: 'base' },
+            { label: 'Large', value: 'lg' },
+            { label: 'Extra Large', value: 'xl' },
+            { label: '2XL', value: '2xl' },
+          ],
+        },
+      ],
+    },
+  ],
+}
+
 // ==================== MAIN BLOCK ====================
 export const DynamicScroller: Block = {
   slug: 'dynamicScroller',
@@ -432,6 +513,7 @@ export const DynamicScroller: Block = {
         PackageSectionBlock,
         DestinationSectionBlock,
         VibeSectionBlock,
+        ThemeSectionBlock,
         ItinerarySectionBlock,
       ],
       required: true,

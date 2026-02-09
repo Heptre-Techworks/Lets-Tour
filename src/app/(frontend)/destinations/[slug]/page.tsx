@@ -67,8 +67,12 @@ export default async function Page({ params: paramsPromise }: Args) {
       <PageClient />
       <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
-      <RenderHero hero={(layoutGlobal as any)?.hero} />
-      <RenderBlocks blocks={(layoutGlobal as any)?.layout ?? []} />
+      <RenderHero hero={(layoutGlobal as any)?.hero} destinationData={destinationData as any} />
+      <RenderBlocks 
+        blocks={(layoutGlobal as any)?.layout ?? []} 
+        destinationContext={destinationData}
+        slug={slug}
+      />
     </article>
   )
 }
@@ -94,7 +98,7 @@ const queryDestinationBySlug = cache(async ({ slug }: { slug: string }) => {
     overrideAccess: true,
     limit: 1,
     pagination: false,
-    depth: 0,
+    depth: 2,
     where: { slug: { equals: slug } },
   })
   return (result.docs?.[0] as RequiredDataFromCollectionSlug<'destinations'>) || null

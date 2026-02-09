@@ -132,8 +132,8 @@ export const TravelPackageExplorer = async (props: TravelPackageExplorerProps) =
         slug: pkg.slug, // ✅ ADD
         href: `/packages/${pkg.slug}`, // ✅ ADD
         title: pkg.name,
-        location: firstDest?.name || pkg.summary || '',
-        description: pkg.summary || '',
+        location: firstDest?.name || pkg.Summary || '',
+        description: pkg.Summary || '',
         price: pkg.discountedPrice || pkg.price || 0,
         originalPrice: pkg.price || 0,
         duration: parseDuration(pkg.duration || '0'),

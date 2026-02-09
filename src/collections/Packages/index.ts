@@ -11,8 +11,8 @@ export const Packages: CollectionConfig = {
 
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'destinations', 'price', 'duration', 'isFeatured'],
-    group: 'Trips & Packages',
+    defaultColumns: ['name', 'slug', 'isPublished'],
+    group: 'Travel Management',
   },
 
   access: {

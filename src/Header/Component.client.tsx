@@ -28,7 +28,18 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   }, [headerTheme, theme])
 
   return (
-    <header className="w-full py-4 relative bg-transparent">
+    <header 
+      className="w-full py-4 bg-transparent" 
+      style={{ 
+        position: 'absolute', 
+        top: 0, 
+        left: 0, 
+        width: '100%', 
+        zIndex: 50, 
+        background: 'transparent',
+        paddingTop: 'max(1rem, env(safe-area-inset-top))' 
+      }}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between gap-4">
           {/* --- Logo Clickable to Home --- */}

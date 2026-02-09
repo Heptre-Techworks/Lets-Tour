@@ -141,6 +141,8 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
   const displayHeading = replaceSlug(heading)
   const displaySubheading = replaceSlug(subheading)
 
+  const pathname = usePathname()
+
   const { width: windowWidth } = useWindowSize()
 
   // ✅ Enhanced responsive card calculation with better breakpoints
@@ -500,8 +502,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                   "
                   type="button"
                   style={{
-                    background: 'rgba(237, 237, 237, 0.75)',
-                    opacity: 0.5,
+                    background: 'rgba(255, 255, 255, 0.9)',
                     boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
                   }}
                 >
@@ -530,8 +531,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                   "
                   type="button"
                   style={{
-                    background: 'rgba(237, 237, 237, 0.75)',
-                    opacity: 0.5,
+                    background: 'rgba(255, 255, 255, 0.9)',
                     boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
                   }}
                 >

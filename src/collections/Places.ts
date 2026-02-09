@@ -2,6 +2,8 @@
 import type { CollectionConfig } from 'payload'
 import { anyone } from '@/access/anyone'
 import { authenticated } from '@/access/authenticated'
+import slugify from 'slugify'
+import _ from 'lodash'
 
 export const Places: CollectionConfig = {
   slug: 'places',
@@ -9,7 +11,7 @@ export const Places: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'city', 'destination', 'isPublished'],
-    group: 'Trip Configuration',
+    group: 'Travel Management',
   },
 
   access: {
@@ -24,6 +26,16 @@ export const Places: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+      hooks: {
+        beforeValidate: [
+          ({ value }) => {
+            if (value) {
+              return _.startCase(_.toLower(value))
+            }
+            return value
+          },
+        ],
+      },
       admin: {
         description: 'Place name (e.g., Sagrada Familia, Royal Palace)',
       },
@@ -37,10 +49,7 @@ export const Places: CollectionConfig = {
         beforeValidate: [
           ({ value, data }) => {
             if (!value && data?.name) {
-              return data.name
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-|-$/g, '')
+              return slugify(data.name, { lower: true, strict: true })
             }
             return value
           },
