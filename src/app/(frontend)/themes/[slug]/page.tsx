@@ -16,9 +16,11 @@ export async function generateStaticParams() {
     limit: 0, // Fetch all documents
   });
 
-  return themes.map((theme) => ({
-    slug: theme.slug,
-  }));
+  return themes
+    .filter((theme) => theme.slug)
+    .map((theme) => ({
+      slug: theme.slug,
+    }))
 }
 
 export default async function ThemeDetailPage({ params }: { params: { slug: string } }) {

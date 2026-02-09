@@ -105,7 +105,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 }}
             />
 
-            <GlobalPreloader />
+            <Suspense fallback={null}>
+              <GlobalPreloader />
+            </Suspense>
             <Header />
             <main>
                 {children}
