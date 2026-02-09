@@ -1,0 +1,30 @@
+### Create a new Custom Trip Request (Lead)
+POST http://localhost:3000/api/custom-trip-requests
+Content-Type: application/json
+
+{
+    "numPeople": 2,
+    "budgetMin": 1000,
+    "budgetMax": 5000,
+    "startDate": "2024-05-01",
+    "endDate": "2024-05-10",
+    "preferences": "We love hiking and local food.",
+    "source": "curate",
+    "status": "new"
+}
+
+### Create a new Bulk Booking Request (Alternative Lead)
+POST http://localhost:3000/api/bulk-booking-requests
+Content-Type: application/json
+
+{
+  "contactName": "John Doe",
+  "email": "john.doe@example.com",
+  "phone": "+1234567890",
+  "organization": "Test Org",
+  "numPeople": 10,
+  "desiredStartDate": "2024-06-01",
+  "desiredEndDate": "2024-06-05",
+  "message": "We need a team retreat.",
+  "status": "new"
+}

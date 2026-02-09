@@ -185,7 +185,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
         }
 
         // Auto-filter by current destination/package from URL
-        const pathname = window.location.pathname
+        // Used pathname from hook instead of window.location
         if (pathname.includes('/destinations/')) {
           const destSlug = pathname.split('/destinations/')[1]?.split('/')[0]
           if (destSlug) {

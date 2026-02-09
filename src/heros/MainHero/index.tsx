@@ -224,7 +224,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
         @keyframes fade-out-at-80 { 0%, 80% { opacity: 1; } 100% { opacity: 0; } }
       `}</style>
 
-      <section className="relative -mt-14 sm:-mt-20 md:-mt-[10.4rem] w-full h-[100dvh] overflow-hidden font-roboto text-white">
+      <section className="relative -mt-24 sm:-mt-28 md:-mt-[10.4rem] w-full h-[100dvh] overflow-hidden font-roboto text-white">
         {/* Background Image Slider */}
         <div className="absolute inset-0 z-0">
           {slides.map((slide, index) => (

@@ -61,7 +61,7 @@ export const HoverMenu: React.FC<HoverMenuProps> = ({
 
   // --- DATA FETCHING ---
   useEffect(() => {
-    if (open && items.length === 0 && !loading) {
+    if (items.length === 0 && !loading) {
       setLoading(true)
       fetch(endpoint)
         .then((r) => r.json())
@@ -71,7 +71,7 @@ export const HoverMenu: React.FC<HoverMenuProps> = ({
         })
         .finally(() => setLoading(false))
     }
-  }, [open, items.length, loading, endpoint])
+  }, [items.length, loading, endpoint])
 
   const slugifiedLabel = label.replace(/\s+/g, '-').toLowerCase()
 

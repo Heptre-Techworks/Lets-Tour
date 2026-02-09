@@ -88,7 +88,8 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
 
   // Fetch Data
   useEffect(() => {
-    if (open && destinations.length === 0 && !loading) {
+    // Fetch if data is empty (run on mount)
+    if (destinations.length === 0 && !loading) {
       setLoading(true)
       
       Promise.all([
@@ -103,7 +104,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
       })
       .finally(() => setLoading(false))
     }
-  }, [open, destinations.length, packages.length, loading])
+  }, []) // Empty dependency array -> Run once on mount
 
 
   // ==========================================
