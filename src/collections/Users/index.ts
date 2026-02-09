@@ -8,7 +8,7 @@ export const Users: CollectionConfig = {
   auth: true,
   admin: {
     useAsTitle: 'email',
-    group: 'User Data',
+    group: 'Site Management',
     defaultColumns: ['name', 'email', 'roles'],
   },
   access: {

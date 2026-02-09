@@ -5,7 +5,7 @@ export const CustomTripRequests: CollectionConfig = {
   slug: 'custom-trip-requests',
   admin: {
     useAsTitle: 'id',
-    group: 'User Data',
+    group: 'Trip Requests',
   },
   access: {
     create: () => true,

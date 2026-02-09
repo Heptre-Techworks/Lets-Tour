@@ -9,7 +9,7 @@ export const Promotions: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'discountType', 'discountValue', 'isActive'],
-    group: 'Website Content',
+    group: 'Marketing',
   },
 
   access: {

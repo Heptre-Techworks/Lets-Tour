@@ -8,7 +8,7 @@ export const Countries: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'continent', 'region'],
-    group: 'Trips & Packages', 
+    group: 'Taxonomy', 
   },
   access: {
     read: anyone,

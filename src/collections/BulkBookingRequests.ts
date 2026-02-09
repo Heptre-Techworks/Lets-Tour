@@ -5,7 +5,7 @@ export const BulkBookingRequests: CollectionConfig = {
   slug: 'bulk-booking-requests',
   admin: {
     useAsTitle: 'contactName',
-    group: 'User Data',
+    group: 'Trip Requests',
     defaultColumns: ['contactName', 'email', 'destination', 'status', 'createdAt'],
   },
   access: {

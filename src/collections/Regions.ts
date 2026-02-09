@@ -9,7 +9,7 @@ export const Regions: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'destination', 'type'],
-    group: 'Trip Configuration',
+    group: 'Taxonomy',
   },
 
   access: {

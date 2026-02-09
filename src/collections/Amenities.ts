@@ -9,7 +9,7 @@ export const Amenities: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'type'],
-    group: 'Trip Configuration',
+    group: 'Taxonomy',
   },
 
   access: {

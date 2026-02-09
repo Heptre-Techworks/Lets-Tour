@@ -9,6 +9,9 @@ const TravelDashboard = async () => {
   const packages = await payload.count({ collection: 'packages' })
   const destinations = await payload.count({ collection: 'destinations' })
   const places = await payload.count({ collection: 'places' })
+  const bookings = await payload.count({ collection: 'bookings' })
+  const customTrips = await payload.count({ collection: 'custom-trip-requests' })
+  const reviews = await payload.count({ collection: 'reviews' })
 
   return (
     <div className="travel-dashboard" style={{ padding: '4rem' }}>
@@ -31,6 +34,24 @@ const TravelDashboard = async () => {
             count={places.totalDocs} 
             href="/admin/collections/places" 
             createHref="/admin/collections/places/create" 
+        />
+        <DashboardCard 
+            title="Bookings" 
+            count={bookings.totalDocs} 
+            href="/admin/collections/bookings" 
+            createHref="/admin/collections/bookings/create" 
+        />
+        <DashboardCard 
+            title="Custom Trips" 
+            count={customTrips.totalDocs} 
+            href="/admin/collections/custom-trip-requests" 
+            createHref="/admin/collections/custom-trip-requests/create" 
+        />
+        <DashboardCard 
+            title="Reviews" 
+            count={reviews.totalDocs} 
+            href="/admin/collections/reviews" 
+            createHref="/admin/collections/reviews/create" 
         />
       </div>
     </div>

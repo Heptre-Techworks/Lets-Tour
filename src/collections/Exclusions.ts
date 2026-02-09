@@ -9,7 +9,7 @@ export const Exclusions: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['code', 'name'],
-    group: 'Trip Configuration',
+    group: 'Taxonomy',
   },
 
   access: {

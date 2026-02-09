@@ -8,7 +8,7 @@ export const AccommodationTypes: CollectionConfig = {
   slug: 'accommodation-types',
   
   admin: {
-    group: 'Trip Configuration',
+    group: 'Taxonomy',
     useAsTitle: 'name',
   },
 

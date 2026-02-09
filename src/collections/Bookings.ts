@@ -14,7 +14,7 @@ export const Bookings: CollectionConfig = {
   admin: {
     useAsTitle: 'bookingReference',
     defaultColumns: ['bookingReference', 'user', 'package', 'startDate', 'status'],
-    group: 'User Data',
+    group: 'Trip Requests',
   },
  
   access: {
