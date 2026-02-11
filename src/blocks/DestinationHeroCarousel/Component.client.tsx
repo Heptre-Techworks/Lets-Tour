@@ -117,7 +117,7 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [isPaused, setIsPaused] = useState(false)
-  const [viewportWidth, setViewportWidth] = useState(0)
+  const [viewportWidth, setViewportWidth] = useState(1200) // Default to desktop width for SSR consistency
 
   useEffect(() => {
     const updateWidth = () => setViewportWidth(window.innerWidth)
@@ -193,7 +193,10 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
     }
   }, [currentIndex, isPaused, infiniteStops.length, AUTOPLAY_DELAY])
 
-  const centerCardWidth = 450
+  // Responsive settings
+  const isMobile = viewportWidth < 768
+  const centerCardWidth = isMobile ? Math.min(viewportWidth - 40, 320) : 450
+  const sideCardWidth = isMobile ? Math.min(viewportWidth - 80, 200) : 280
   const gap = 0
 
   const transformValue = useMemo(() => {
@@ -221,15 +224,17 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
       <svg className="w-0 h-0 absolute">
         <defs>
           <clipPath id="card-shape" clipPathUnits="userSpaceOnUse">
-            <path d="M225,0 L195,30 L8,30 A8,8 0 0 0 0,38 L0,300 L450,300 L450,38 A8,8 0 0 0 442,30 L255,30 Z" />
+            {/* Adjusted clip path for responsiveness if needed, currently reusing logic */}
+             <path d={`M${centerCardWidth / 2},0 L${centerCardWidth / 2 - 30},30 L8,30 A8,8 0 0 0 0,38 L0,300 L${centerCardWidth},300 L${centerCardWidth},38 A8,8 0 0 0 ${centerCardWidth - 8},30 L${centerCardWidth / 2 + 30},30 Z`} />
           </clipPath>
         </defs>
       </svg>
-      <h1 className="text-3xl md:text-4xl font-bold text-center mt-8 mb-6 text-gray-800">
+      <h1 className="text-3xl md:text-4xl font-bold text-center mt-8 mb-6 text-gray-800 px-4">
         {displayTitle}
       </h1>
 
-      <div className="relative w-full" style={{ height: '100px' }}>
+      {/* Plane animation container - Hide on small mobile if too cluttered, or scale */}
+      <div className="relative w-full hidden md:block" style={{ height: '100px' }}>
         <svg
           className="absolute inset-x-0 -top-4 h-[340px] w-[2000px] max-w-none left-1/2 -translate-x-1/2 pointer-events-none"
           viewBox="0 0 2000 340"
@@ -326,17 +331,17 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
       <div className="relative pb-12 w-full">
         <Button
           onClick={scrollLeft}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-[50px] h-[50px] bg-gray-200/75 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-all z-50 flex items-center justify-center"
+          className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-[40px] h-[40px] md:w-[50px] md:h-[50px] bg-gray-200/75 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-all z-50 flex items-center justify-center"
           aria-label="Previous destinations"
         >
-          <ChevronLeftIcon className="w-6 h-6" />
+          <ChevronLeftIcon className="w-5 h-5 md:w-6 md:h-6" />
         </Button>
         <Button
           onClick={scrollRight}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-[50px] h-[50px] bg-gray-200/75 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-all z-50 flex items-center justify-center"
+          className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-[40px] h-[40px] md:w-[50px] md:h-[50px] bg-gray-200/75 rounded-full shadow-lg opacity-70 hover:opacity-100 transition-all z-50 flex items-center justify-center"
           aria-label="Next destinations"
         >
-          <ChevronRightIcon className="w-6 h-6" />
+          <ChevronRightIcon className="w-5 h-5 md:w-6 md:h-6" />
         </Button>
 
         <div className="overflow-hidden w-full">
@@ -347,7 +352,7 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
               transform: `translateX(-${transformValue}px)`,
               transition: transitionStyle,
             }}
-            className="flex items-end gap-0 pt-16 pb-12"
+            className="flex items-end gap-0 pt-8 md:pt-16 pb-12"
           >
             {infiniteStops.map((stop, idx) => {
               const isCenter = idx === currentIndex
@@ -359,8 +364,13 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
                   style={{ width: `${centerCardWidth}px` }}
                 >
                   <div
-                    className={`relative shrink-0 transition-all ease-out ${isCenter ? `w-[450px] h-[480px] translate-y-8` : `w-[280px] h-[340px]`}`}
-                    style={{ transitionDuration: `${TRANSITION_DURATION_MS}ms` }}
+                    className={`relative shrink-0 transition-all ease-out`}
+                    style={{
+                         transitionDuration: `${TRANSITION_DURATION_MS}ms`,
+                         width: isCenter ? `${centerCardWidth}px` : `${sideCardWidth}px`,
+                         height: isCenter ? (isMobile ? '400px' : '480px') : (isMobile ? '280px' : '340px'),
+                         transform: isCenter ? (isMobile ? 'translateY(1rem)' : 'translateY(2rem)') : 'none'
+                     }}
                   >
                     <article
                       className={`group rounded-lg overflow-hidden h-full flex flex-col shadow-lg ${isCenter ? 'bg-transparent' : 'bg-white'}`}
@@ -369,7 +379,10 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
                         <>
                           <div
                             className="w-full overflow-hidden"
-                            style={{ height: '300px', clipPath: 'url(#card-shape)' }}
+                            style={{ 
+                                height: isMobile ? '240px' : '300px', 
+                                clipPath: 'url(#card-shape)' 
+                            }}
                           >
                             <Image
                               src={getImageUrl(stop.image)}
@@ -381,9 +394,9 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
                               priority={true} // Priority for center
                             />
                           </div>
-                          <div className="bg-orange-400 text-white px-4 h-[180px] flex flex-col justify-center text-center rounded-b-lg transition-colors duration-500">
+                          <div className="bg-orange-400 text-white px-4 flex-grow flex flex-col justify-center text-center rounded-b-lg transition-colors duration-500">
                             <h3 className="font-serif italic text-xl md:text-2xl">{stop.name}</h3>
-                            <div className="text-sm mt-1">
+                            <div className="text-sm mt-1 max-h-[80px] overflow-hidden">
                                <RichText data={stop.excerpt} enableGutter={false} enableProse={false} />
                             </div>
                           </div>
@@ -399,8 +412,8 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
                             sizes="(max-width: 768px) 100vw, 300px"
                             loading="eager" // Preload adjacent images
                           />
-                          <div className="absolute bottom-0 left-0 w-full bg-orange-400/90 h-20 flex items-center justify-center text-center rounded-b-lg">
-                            <h3 className="font-serif italic text-white text-lg">{`${stop.name}, ${stop.city}`}</h3>
+                          <div className="absolute bottom-0 left-0 w-full bg-orange-400/90 h-16 md:h-20 flex items-center justify-center text-center rounded-b-lg">
+                            <h3 className="font-serif italic text-white text-base md:text-lg">{`${stop.name}`}</h3>
                           </div>
                         </div>
                       )}
@@ -415,3 +428,5 @@ export const DestinationHeroCarouselClient: React.FC<DestinationHeroCarouselClie
     </section>
   )
 }
+
+export default DestinationHeroCarouselClient

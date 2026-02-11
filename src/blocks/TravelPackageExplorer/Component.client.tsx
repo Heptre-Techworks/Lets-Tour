@@ -1,8 +1,9 @@
+// src/blocks/TravelPackageExplorer/Component.client.tsx
 'use client'
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image' // ✅ ADDED
+import Image from 'next/image'
 
 type MediaLike = { url?: string | null; alt?: string | null }
 
@@ -227,7 +228,6 @@ const Filters: React.FC<{
   )
 }
 
-// ✅ UPDATED: Wrap entire card with Link
 const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
   const SuitabilityBar: React.FC<{
     label: string
@@ -242,7 +242,7 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
           <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-800">
             {label}
           </p>
-          <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-500">
+          <p className="font-[family-name:var(--font-body)] text-[14px] sm:text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-500">
             {sublabel}
           </p>
         </div>
@@ -254,17 +254,13 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
   )
 
   const imageSrc = getImageSrc(pkg)
-  const href = pkg.href || `/packages/${pkg.slug}` || '#' // ✅ ADD
+  const href = pkg.href || `/packages/${pkg.slug}` || '#'
 
   return (
-    <Link
-      href={href}
-      className="block group" // ✅ WRAP WITH LINK
-    >
+    <Link href={href} className="block group">
       <div className="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col md:flex-row mb-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300 font-sans">
-        {/* Image container with "card-in-card" effect */}
         <div className="md:w-64 p-3 flex-shrink-0">
-          <div className="h-64 md:h-72 w-full relative">
+          <div className="h-48 sm:h-64 md:h-72 w-full relative">
              <Image
                 src={imageSrc}
                 alt={pkg.title}
@@ -277,29 +273,17 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
 
         <div className="p-4 pt-1 md:pt-4 md:pl-0 flex flex-col flex-grow w-full">
           <div className="flex flex-col sm:flex-row">
-            {/* Main Info */}
-            <div className="flex-grow pr-4">
-              <div className="flex items-center space-x-2">
-                {/* Title: Amiri italic 40px, 88% line-height, -0.011em */}
-                <h3 className="font-[family-name:var(--font-heading)] italic text-[40px] leading-[0.88] tracking-[-0.011em] text-gray-800 group-hover:text-yellow-600 transition-colors">
+            <div className="flex-grow pr-0 sm:pr-4">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                <h3 className="font-[family-name:var(--font-heading)] italic text-[32px] sm:text-[40px] leading-[0.88] tracking-[-0.011em] text-gray-800 group-hover:text-yellow-600 transition-colors">
                   {pkg.title}
                 </h3>
                 <StarRating rating={pkg.rating} />
               </div>
-              {/* Location: NATS 16px, 88%, -0.011em */}
               <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 mt-2">
                 {pkg.location}
               </p>
-              {/* Description: NATS 16px, 88%, -0.011em */}
-              <p
-                className="
-    font-[family-name:var(--font-body)] text-[14px] xs:text-[15px] sm:text-[16px] md:text-[17px]
-    leading-relaxed sm:leading-[1.6] tracking-[-0.011em]
-    text-gray-700 text-justify sm:text-left
-    mt-3 sm:mt-4 mb-2 sm:mb-3
-    px-1 sm:px-0
-  "
-              >
+              <p className="font-[family-name:var(--font-body)] text-[14px] xs:text-[15px] sm:text-[16px] md:text-[17px] leading-relaxed sm:leading-[1.6] tracking-[-0.011em] text-gray-700 text-justify sm:text-left mt-3 sm:mt-4 mb-2 sm:mb-3 px-1 sm:px-0">
                 {pkg.description}
               </p>
 
@@ -312,7 +296,7 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
                     {pkg.inclusions.map((item: string, idx: number) => (
                       <li
                         key={idx}
-                        className="list-disc list-inside font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 p-2"
+                        className="list-disc list-inside font-[family-name:var(--font-body)] text-[14px] sm:text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 p-1 sm:p-2"
                       >
                         {item}
                       </li>
@@ -322,41 +306,31 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
               )}
             </div>
 
-            {/* Side Info */}
             <div className="w-full sm:w-48 mt-4 sm:mt-0 flex-shrink-0">
-              <div className="text-right">
+              <div className="text-left sm:text-right flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start">
                 {pkg.originalPrice > pkg.price && (
-                  <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-red-500 line-through">
+                  <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-red-500 line-through mr-2 sm:mr-0">
                     ₹{pkg.originalPrice.toLocaleString()}
                   </p>
                 )}
-                {/* Price: NATS 32px, 88%, -0.011em */}
-                <p className="font-[family-name:var(--font-body)] text-[32px] leading-[0.88] tracking-[-0.011em] font-normal text-yellow-500 bg-yellow-50 rounded-md p-1 inline-block m-2">
-                  ₹{pkg.price.toLocaleString()}
-                </p>
-                <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600">
-                  /person
-                </p>
+                <div className="flex items-baseline">
+                    <p className="font-[family-name:var(--font-body)] text-[28px] sm:text-[32px] leading-[0.88] tracking-[-0.011em] font-normal text-yellow-500 bg-yellow-50 rounded-md p-1 inline-block m-0 sm:m-2">
+                    ₹{pkg.price.toLocaleString()}
+                    </p>
+                     <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 ml-1">
+                    /person
+                    </p>
+                </div>
               </div>
 
-              <div className="mt-4 space-x-2 space-y-3">
+              <div className="mt-4 space-x-0 sm:space-x-2 space-y-3">
                 <SuitabilityBar
                   label="Couples"
                   sublabel="For Newlywed Vacations"
                   percentage={pkg.suitability.couples}
                   icon={
-                    <svg
-                      className="w-6 h-6 text-pink-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                      />
+                    <svg className="w-6 h-6 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                   }
                 />
@@ -365,45 +339,23 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
                   sublabel="For Family Vacations"
                   percentage={pkg.suitability.family}
                   icon={
-                    <svg
-                      className="w-6 h-6 text-blue-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                      />
+                    <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                   }
                 />
               </div>
 
               {pkg.recentBookings > 0 && (
-                <div className="mt-3 mb-2 flex  flex-row items-center justify-end space-x-2">
+                <div className="mt-3 mb-2 flex flex-row items-center justify-start sm:justify-end space-x-2">
                   <div className="flex -space-x-1">
-                    <img
-                      className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
-                      src="https://placehold.co/32x32/FFC107/FFFFFF/png?text=A"
-                      alt="User A"
-                    />
-                    <img
-                      className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
-                      src="https://placehold.co/32x32/4CAF50/FFFFFF/png?text=B"
-                      alt="User B"
-                    />
-                    <img
-                      className="inline-block h-6 w-6 rounded-full ring-1 ring-white"
-                      src="https://placehold.co/32x32/2196F3/FFFFFF/png?text=C"
-                      alt="User C"
-                    />
+                    <img className="inline-block h-6 w-6 rounded-full ring-1 ring-white" src="https://placehold.co/32x32/FFC107/FFFFFF/png?text=A" alt="User A" />
+                    <img className="inline-block h-6 w-6 rounded-full ring-1 ring-white" src="https://placehold.co/32x32/4CAF50/FFFFFF/png?text=B" alt="User B" />
+                    <img className="inline-block h-6 w-6 rounded-full ring-1 ring-white" src="https://placehold.co/32x32/2196F3/FFFFFF/png?text=C" alt="User C" />
                   </div>
-                  <span className="font-[family-name:var(--font-body)] ">
+                  <span className="font-[family-name:var(--font-body)]">
                     {pkg.recentBookings} +
-                    <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 m-2">
+                    <p className="font-nats text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 m-2 inline sm:block">
                       bookings in past month
                     </p>
                   </span>
@@ -412,7 +364,6 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
             </div>
           </div>
 
-          {/* Sights Scroller - pushed to bottom */}
           {pkg.sights && pkg.sights.length > 0 && (
             <div className="mt-2 pt-3 border-t border-gray-200">
               <div className="relative">
@@ -420,7 +371,7 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
                   {pkg.sights.map((sight: any, idx: number) => (
                     <span
                       key={idx}
-                      className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-700 font-medium flex-shrink-0"
+                      className="font-[family-name:var(--font-body)] text-[14px] sm:text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-700 font-medium flex-shrink-0"
                     >
                       {typeof sight === 'string' ? sight : sight.name}
                     </span>
@@ -431,66 +382,53 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
           )}
         </div>
       </div>
-    </Link> // ✅ CLOSE LINK
+    </Link>
   )
 }
 
 export const TravelPackageExplorerClient: React.FC<{ packages: any[] }> = ({ packages = [] }) => {
   const [filters, setFilters] = useState<any>({})
   const [filteredPackages, setFilteredPackages] = useState(packages)
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
   useEffect(() => {
     let result = [...packages]
-
-    // Price filter
+    // ... (filtering logic is same, omitting for brevity in thought, but must retain in code)
     if (filters.priceRanges && filters.priceRanges.length > 0) {
-      result = result.filter((p: any) => {
-        return filters.priceRanges.some((range: string) => {
-          const [min, max] = range.split('-').map(Number)
-          return p.price >= min && p.price <= (max || Infinity)
+        result = result.filter((p: any) => {
+          return filters.priceRanges.some((range: string) => {
+            const [min, max] = range.split('-').map(Number)
+            return p.price >= min && p.price <= (max || Infinity)
+          })
         })
-      })
-    }
-
-    // Rating filter
-    if (filters.rating) {
-      result = result.filter((p: any) => p.rating === filters.rating)
-    }
-
-    // Duration filter
-    if (filters.duration && filters.duration.length > 0) {
-      result = result.filter((p: any) => {
-        return filters.duration.some((range: string) => {
-          const [min, max] = range.split('-').map(Number)
-          return p.duration >= min && p.duration <= max
+      }
+      if (filters.rating) {
+        result = result.filter((p: any) => p.rating === filters.rating)
+      }
+      if (filters.duration && filters.duration.length > 0) {
+        result = result.filter((p: any) => {
+          return filters.duration.some((range: string) => {
+            const [min, max] = range.split('-').map(Number)
+            return p.duration >= min && p.duration <= max
+          })
         })
-      })
-    }
-
-    // Experiences filter
-    if (filters.experiences && filters.experiences.length > 0) {
-      result = result.filter((p: any) =>
-        filters.experiences.every((exp: string) => (p.experiences || []).includes(exp)),
-      )
-    }
-
-    // Accommodation Type filter
-    if (filters.accommodationType && filters.accommodationType.length > 0) {
-      result = result.filter((p: any) => filters.accommodationType.includes(p.accommodationType))
-    }
-
-    // Amenities filter
-    if (filters.amenities && filters.amenities.length > 0) {
-      result = result.filter((p: any) =>
-        filters.amenities.every((am: string) => (p.amenities || []).includes(am)),
-      )
-    }
-
-    // Provinces filter
-    if (filters.provinces && filters.provinces.length > 0) {
-      result = result.filter((p: any) => filters.provinces.includes(p.province))
-    }
-
+      }
+      if (filters.experiences && filters.experiences.length > 0) {
+        result = result.filter((p: any) =>
+          filters.experiences.every((exp: string) => (p.experiences || []).includes(exp)),
+        )
+      }
+      if (filters.accommodationType && filters.accommodationType.length > 0) {
+        result = result.filter((p: any) => filters.accommodationType.includes(p.accommodationType))
+      }
+      if (filters.amenities && filters.amenities.length > 0) {
+        result = result.filter((p: any) =>
+          filters.amenities.every((am: string) => (p.amenities || []).includes(am)),
+        )
+      }
+      if (filters.provinces && filters.provinces.length > 0) {
+        result = result.filter((p: any) => filters.provinces.includes(p.province))
+      }
     setFilteredPackages(result)
   }, [filters, packages])
 
@@ -499,9 +437,30 @@ export const TravelPackageExplorerClient: React.FC<{ packages: any[] }> = ({ pac
       <FontClasses />
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row gap-6">
-          <aside className="w-full md:w-64 flex-shrink-0">
+          {/* Mobile Filter Toggle */}
+          <div className="md:hidden w-full mb-4">
+            <button
+              onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+              className="w-full bg-[#1e293b] text-white py-3 px-4 rounded-lg flex justify-between items-center"
+            >
+              <span className="font-semibold">Filters</span>
+              <svg
+                className={`w-5 h-5 transition-transform ${isFiltersOpen ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Sidebar */}
+          <aside className={`w-full md:w-64 flex-shrink-0 ${isFiltersOpen ? 'block' : 'hidden md:block'}`}>
             <Filters filters={filters} setFilters={setFilters} packages={packages} />
           </aside>
+
+          {/* Main Content */}
           <main className="flex-grow">
             {filteredPackages.length > 0 ? (
               filteredPackages.map((pkg: any, idx: number) => (

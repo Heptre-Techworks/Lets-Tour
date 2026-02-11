@@ -176,11 +176,11 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
           <button
             onClick={scrollLeft}
             disabled={currentScrollX === 0}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
             aria-label="Previous destinations"
           >
             <svg
-              className="w-7 h-7 text-gray-700"
+              className="w-6 h-6 md:w-7 md:h-7 text-gray-700"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -195,11 +195,11 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
           </button>
 
           {/* Cards Container */}
-          <div className="mx-20 overflow-hidden">
+          <div className="mx-0 md:mx-20 overflow-hidden">
             <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
-              className="flex gap-6 overflow-x-auto scrollbar-hide items-end pb-4"
+              className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide items-end pb-4 px-4 md:px-0"
               style={{ scrollBehavior: 'smooth' }}
             >
               {destinationsWithSizes.map((destination) => {
@@ -346,11 +346,11 @@ export const NonUniformCardCarousel: React.FC<Props> = ({
           <button
             onClick={scrollRight}
             disabled={currentScrollX >= maxScrollX}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 md:w-16 md:h-16 bg-white rounded-full shadow-lg items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
             aria-label="Next destinations"
           >
             <svg
-              className="w-7 h-7 text-gray-700"
+              className="w-6 h-6 md:w-7 md:h-7 text-gray-700"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
