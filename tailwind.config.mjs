@@ -97,6 +97,12 @@ const config = {
       fontFamily: {
         mono: ['var(--font-geist-mono)'],
         sans: ['var(--font-geist-sans)'],
+        nats: ['var(--font-nats)'],
+        amiri: ['var(--font-amiri)'],
+        kaushan: ['var(--font-kaushan)'],
+        neuton: ['var(--font-neuton)'],
+        roboto: ['var(--font-roboto)'],
+        inter: ['var(--font-inter)'],
       },
       keyframes: {
         'accordion-down': {

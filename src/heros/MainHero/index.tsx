@@ -68,13 +68,8 @@ type MainHeroProps = {
   }
 }
 
-// Font utils (Kaushan Script + Neuton)
-const fontsStyle = `
-  @import url('https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Neuton:wght@400;700&family=Roboto:wght@300;400;500&display=swap');
-  .font-kaushan { font-family: 'Kaushan Script', cursive; }
-  .font-neuton { font-family: 'Neuton', serif; }
-  .font-roboto { font-family: 'Roboto', sans-serif; }
-`
+// Font utils (Kaushan Script + Neuton) - MOVED TO GLOBAL LAYOUT
+// const fontsStyle = ... (removed)
 
 export const MainHero: React.FC<MainHeroProps> = ({
   slides = [],
@@ -212,7 +207,6 @@ export const MainHero: React.FC<MainHeroProps> = ({
     <>
       {/* Fonts + animations */}
       <style>{`
-        ${fontsStyle}
         @keyframes plane-fly { from { left: 100%; } to { left: 0; } }
         .animate-plane-fly { animation-name: plane-fly; animation-timing-function: linear; animation-iteration-count: 1; }
         @keyframes draw-dashed-line { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0 0 0 0); } }

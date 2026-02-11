@@ -4,14 +4,6 @@
 
 /* === 1. External Font Definitions (The Fix) === */
 @layer base {
-  /* This ensures the browser shows fallback text until NATS is loaded */
-  @font-face {
-    font-family: 'NATS';
-    src: url('https://fonts.cdnfonts.com/s/15858/NATS-Regular.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap; /* <--- THIS FIXES THE LIGHTHOUSE ERROR */
-  }
 
   /* Reset all headings */
   h1, h2, h3, h4, h5, h6 {
@@ -44,8 +36,12 @@
     --success: 196 52% 74%;
     --warning: 34 89% 85%;
     --error: 10 100% 86%;
-    --font-nats: 'NATS', sans-serif;
-    --font-amiri: 'Amiri', serif;
+    --font-nats: var(--font-nats), sans-serif;
+    --font-amiri: var(--font-amiri), serif;
+    --font-inter: var(--font-inter), sans-serif;
+    --font-roboto: var(--font-roboto), sans-serif;
+    --font-kaushan: var(--font-kaushan), cursive;
+    --font-neuton: var(--font-neuton), serif;
   }
 
   /* === Global Reset and Base Styles === */
@@ -63,7 +59,7 @@
 
   body {
     @apply bg-background text-foreground flex flex-col min-h-[100vh];
-    font-family: 'NATS', sans-serif;
+    font-family: var(--font-nats), sans-serif;
     line-height: 1.5;
     /* font-display is not a valid property for body, it belongs in @font-face */
     -webkit-font-smoothing: antialiased;

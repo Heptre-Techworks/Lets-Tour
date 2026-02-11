@@ -8,6 +8,7 @@ import type { Header } from '@/payload-types'
 import { CurateButton } from './CurateButton'
 import { HoverMenu } from './HoverMenu'
 import { MegaMenu } from './MegaMenu'
+import { MobileAccordion } from './MobileAccordion' // New Component
 import { Poppins } from 'next/font/google'
 
 const poppins = Poppins({
@@ -62,7 +63,7 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
                break
              case 'package-categories':
                endpoint = '/api/package-categories?limit=50&sort=name&depth=0'
-               hrefBase = '/packages' // Categories usually filter the packages page or have their own route
+               hrefBase = '/themes' // CHANGED: Points to /themes now
                break
              case 'international-package':
                endpoint = '/api/international-package?where[isPublished][equals]=true&limit=50&sort=name&depth=0'
@@ -93,7 +94,7 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
       {
         key: 'packages',
         label: 'Packages',
-        hrefBase: '/packages', 
+        hrefBase: '/themes', // CHANGED: Points to /themes now
         // CHANGED: Now fetching Categories instead of all packages
         endpoint: '/api/package-categories?limit=50&sort=name&depth=0',
         type: 'dynamic',
@@ -256,38 +257,39 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
         </div>
 
         {/* Menu Items (Scrollable content) */}
-        <div className="w-full flex flex-col items-start justify-start gap-5 sm:gap-6 ">
+        <div className="w-full flex flex-col items-start justify-start px-2 overflow-y-auto">
           {mainMenuItems.map((item) => (
              item.type === 'link' || !item.endpoint ? (
-                <Link
-                  key={`${item.key}-mobile`}
-                  href={item.hrefBase}
-                  onClick={closeMobileMenu}
-                  className="text-lg font-semibold text-black hover:text-blue-600 transition w-full p-2"
-                >
-                  {item.label}
-                </Link>
+                <div key={`${item.key}-mobile`} className="w-full border-b border-gray-100 last:border-0">
+                    <Link
+                      href={item.hrefBase}
+                      onClick={closeMobileMenu}
+                      className="block w-full py-4 text-lg font-semibold text-black hover:text-[#FBAE3D] transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                </div>
              ) : (
-                <HoverMenu
+                <MobileAccordion
                   key={`${item.key}-mobile`}
                   label={item.label}
                   hrefBase={item.hrefBase}
                   endpoint={item.endpoint}
                   onLinkClick={closeMobileMenu}
-                  className="text-lg font-semibold text-black hover:text-blue-600 transition w-full p-2"
                 />
              )
           ))}
 
           {stripLinks.map((item, index) => (
-            <Link
-              key={`mobile-strip-${item.href || '#'}-${index}`}
-              href={item.href || '#'}
-              onClick={closeMobileMenu}
-              className="text-lg font-semibold text-black hover:text-blue-600 transition w-full p-2"
-            >
-              {item.label}
-            </Link>
+            <div key={`mobile-strip-${item.href || '#'}-${index}`} className="w-full border-b border-gray-100 last:border-0">
+                <Link
+                  href={item.href || '#'}
+                  onClick={closeMobileMenu}
+                  className="block w-full py-4 text-lg font-semibold text-black hover:text-[#FBAE3D] transition-colors"
+                >
+                  {item.label}
+                </Link>
+            </div>
           ))}
         </div>
 
