@@ -5,7 +5,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     
     // Relay the request server-side to avoid CORS issues
-    const response = await fetch('https://sheets-writer-1037202171762.us-central1.run.app', {
+    const response = await fetch('https://sheets-writer-1037202171762.us-central1.run.app/append', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
