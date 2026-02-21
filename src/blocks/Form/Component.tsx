@@ -23,6 +23,7 @@ export type FormBlockType = {
 export const FormBlock: React.FC<
   {
     id?: string
+    contextPayload?: Record<string, string>
   } & FormBlockType
 > = (props) => {
   const {
@@ -82,11 +83,16 @@ export const FormBlock: React.FC<
                    // If it's rich text or complex object, stringify it
                    val = JSON.stringify(val)
                 }
-                acc[item.field] = val
+                acc[item.field] = val as any
                 return acc
               },
               {} as Record<string, unknown>,
             )
+
+            // Inject context payload if provided (e.g. package name)
+            if (props.contextPayload) {
+              Object.assign(sheetPayload, props.contextPayload)
+            }
 
             fetch('https://sheets-writer-1037202171762.us-central1.run.app', {
               method: 'POST',

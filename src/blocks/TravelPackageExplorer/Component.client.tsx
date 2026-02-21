@@ -224,6 +224,19 @@ const Filters: React.FC<{
           ))}
         </FilterSection>
       )}
+
+      <FilterSection title="Suitability">
+        <Checkbox
+          label="Couples / Honeymoon"
+          checked={(filters.suitability || []).includes('couples')}
+          onChange={() => handleCheckboxChange('suitability', 'couples')}
+        />
+        <Checkbox
+          label="Family Friendly"
+          checked={(filters.suitability || []).includes('family')}
+          onChange={() => handleCheckboxChange('suitability', 'family')}
+        />
+      </FilterSection>
     </div>
   )
 }
@@ -280,8 +293,14 @@ const PackageCard: React.FC<{ pkg: any }> = ({ pkg }) => {
                 </h3>
                 <StarRating rating={pkg.rating} />
               </div>
-              <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 mt-2">
+              <p className="font-[family-name:var(--font-body)] text-[16px] leading-[0.88] tracking-[-0.011em] text-gray-600 mt-2 flex items-center">
                 {pkg.location}
+                {pkg.durationString && (
+                  <>
+                    <span className="mx-2 text-gray-400">•</span>
+                    <span className="text-yellow-600 font-medium">{pkg.durationString}</span>
+                  </>
+                )}
               </p>
               <p className="font-[family-name:var(--font-body)] text-[14px] xs:text-[15px] sm:text-[16px] md:text-[17px] leading-relaxed sm:leading-[1.6] tracking-[-0.011em] text-gray-700 text-justify sm:text-left mt-3 sm:mt-4 mb-2 sm:mb-3 px-1 sm:px-0">
                 {pkg.description}
@@ -428,6 +447,15 @@ export const TravelPackageExplorerClient: React.FC<{ packages: any[] }> = ({ pac
       }
       if (filters.provinces && filters.provinces.length > 0) {
         result = result.filter((p: any) => filters.provinces.includes(p.province))
+      }
+      if (filters.suitability && filters.suitability.length > 0) {
+        result = result.filter((p: any) => {
+          // If 'couples' is selected, require percentage > 50 (based on parsing logic)
+          if (filters.suitability.includes('couples') && p.suitability?.couples < 51) return false
+          // If 'family' is selected, require percentage > 50
+          if (filters.suitability.includes('family') && p.suitability?.family < 51) return false
+          return true
+        })
       }
     setFilteredPackages(result)
   }, [filters, packages])

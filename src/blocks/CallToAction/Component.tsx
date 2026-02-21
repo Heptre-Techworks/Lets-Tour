@@ -6,6 +6,12 @@ import RichText from '@/components/RichText'
 import { CMSLink } from '@/components/Link'
 
 export const CallToActionBlock: React.FC<CTABlockProps> = ({ links, richText }) => {
+  const validLinks = (links || []).filter(({ link }) => link && (link.label || link.url || link.reference))
+
+  if (validLinks.length === 0) {
+    return null
+  }
+
   return (
     <div className="container">
       <div className="bg-card rounded border-border border p-4 flex flex-col gap-8 md:flex-row md:justify-between md:items-center">
@@ -13,8 +19,8 @@ export const CallToActionBlock: React.FC<CTABlockProps> = ({ links, richText }) 
           {richText && <RichText className="mb-0" data={richText} enableGutter={false} />}
         </div>
         <div className="flex flex-col gap-8">
-          {(links || []).map(({ link }, i) => {
-            return <CMSLink key={i} size="lg" {...link} />
+          {validLinks.map(({ link }, i) => {
+            return <CMSLink key={i} size="lg" {...(link as any)} />
           })}
         </div>
       </div>

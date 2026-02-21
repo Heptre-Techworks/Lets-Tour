@@ -54,6 +54,9 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   const [recentReviews, setRecentReviews] = useState<Review[]>(recentReviewsProp)
   const [loading, setLoading] = useState(!packageProp)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
 
   useEffect(() => {
     if (packageProp) setPackage(packageProp)
@@ -115,6 +118,67 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
     }
   }
 
+  const handleBookNowSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    
+    const formData = new FormData(e.currentTarget)
+    const data = Object.fromEntries(formData.entries())
+    
+    // 1. Google Sheets Payload
+    const sheetPayload = {
+      package: title,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      numPeople: data.numPeople,
+      travelDate: data.travelDate,
+      message: data.message,
+      source: 'Package Page Modal',
+    }
+
+    // 2. Custom Trip Request Payload (For CMS / Emails)
+    // Even though Custom Trip Requests schema misses explicit 'name' properties, we format preferences to capture it.
+    const customTripPayload = {
+      destination: typeof pkg?.Summary === 'string' ? null : null, // Not strongly mapping since package is known
+      budgetMin: 0,
+      budgetMax: 0,
+      numPeople: Number(data.numPeople) || 2,
+      startDate: data.travelDate || null,
+      endDate: data.travelDate || null, // Best guess
+      source: 'curate',
+      status: 'new',
+      preferences: `Package Requested: ${title}\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nMessage: ${data.message}`,
+    }
+
+    try {
+      // Send through our Next.js Custom API route proxy to avoid CORS and Payload collisions
+      const resSheets = await fetch('/api-custom/sheets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sheetPayload),
+      })
+
+      // Send to CMS to trigger Lead Emails!
+      const resPayload = await fetch('/api/custom-trip-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customTripPayload),
+      })
+
+      if (!resSheets.ok) {
+        throw new Error('Sheets Proxy failed')
+      }
+
+      setSubmitSuccess(true)
+    } catch (err) {
+      console.warn('Booking submission failed:', err)
+      alert('Failed to submit booking request. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   if (loading) {
     return (
       <section
@@ -141,7 +205,8 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   const enableDownload = buttons?.enableDownload !== false
 
   const title = pkg.name
-  const rating = pkg.starRating || pkg.rating || 5
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rating = (pkg as any).starRating || pkg.rating || 5
   const location = pkg.Summary || ''
   // description is handled by RichText now
 
@@ -256,6 +321,14 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                   <span className="font-nats text-[20px] leading-[0.88] tracking-[-0.011em] text-gray-200">
                     {location}
                   </span>
+                  {pkg.duration && (
+                    <>
+                      <span className="mx-2 text-gray-400">•</span>
+                      <span className="font-nats text-[20px] leading-[0.88] tracking-[-0.011em] text-yellow-500">
+                        {pkg.duration}
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 {/* Description: NATS 20px 100% */}
@@ -387,20 +460,101 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                     </button>
                   )}
                   {/* Button label: NATS 24px line-height 0% style */}
-                  <Link
-                    href="/curate"
+                  <button
+                    onClick={() => setIsModalOpen(true)}
                     className="bg-white text-black py-3 px-8 rounded-full hover:bg-gray-200 transition-colors inline-block text-center"
                   >
                     <span className="font-nats text-[24px] leading-[0] tracking-[-0.011em] text-[#FBAE3D]">
                       {bookNowLabel}
                     </span>
-                  </Link>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 transition-opacity duration-300">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => { setIsModalOpen(false); setSubmitSuccess(false); }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+              aria-label="Close modal"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            {submitSuccess ? (
+               <div className="text-center py-10">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                    <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Request Submitted!</h3>
+                  <p className="text-gray-600 mb-6">Thank you for your interest in {title}. One of our travel experts will reach out to you shortly to finalize your booking.</p>
+                  <button onClick={() => { setIsModalOpen(false); setSubmitSuccess(false); }} className="bg-[#FBAE3D] hover:bg-yellow-500 text-white px-6 py-2 rounded-lg font-medium transition-colors">Close</button>
+               </div>
+            ) : (
+               <>
+                  <h3 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">Book Your Trip</h3>
+                  <p className="text-gray-500 mb-6 text-sm">Please fill out the form below to initiate your booking for {title}.</p>
+                  
+                  <form onSubmit={handleBookNowSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                         <label htmlFor="name" className="text-sm font-medium text-gray-700">Name *</label>
+                         <input required type="text" id="name" name="name" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FBAE3D] focus:border-transparent text-gray-900" placeholder="John Doe" />
+                      </div>
+                      <div className="space-y-1">
+                         <label htmlFor="email" className="text-sm font-medium text-gray-700">Email *</label>
+                         <input required type="email" id="email" name="email" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FBAE3D] focus:border-transparent text-gray-900" placeholder="john@example.com" />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                         <label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone *</label>
+                         <input required type="tel" id="phone" name="phone" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FBAE3D] focus:border-transparent text-gray-900" placeholder="+91 99999 99999" />
+                      </div>
+                      <div className="space-y-1">
+                         <label htmlFor="numPeople" className="text-sm font-medium text-gray-700">No. of Travelers *</label>
+                         <input required type="number" min="1" id="numPeople" name="numPeople" defaultValue={2} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FBAE3D] focus:border-transparent text-gray-900" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                       <label htmlFor="travelDate" className="text-sm font-medium text-gray-700">Expected Travel Date</label>
+                       <input type="date" id="travelDate" name="travelDate" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FBAE3D] focus:border-transparent text-gray-900" />
+                    </div>
+                    
+                    <div className="space-y-1">
+                       <label htmlFor="message" className="text-sm font-medium text-gray-700">Any Special Requirements?</label>
+                       <textarea id="message" name="message" rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FBAE3D] focus:border-transparent text-gray-900" placeholder="Tell us if you have any specific needs or preferences..."></textarea>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full mt-2 bg-[#FBAE3D] hover:bg-yellow-500 text-white py-3 rounded-lg font-bold text-lg transition-colors flex justify-center items-center"
+                    >
+                      {isSubmitting ? (
+                        <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                      ) : (
+                        'Submit Request'
+                      )}
+                    </button>
+                  </form>
+               </>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   )
 }

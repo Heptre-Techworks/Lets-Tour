@@ -47,7 +47,7 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
     // If user has defined mainNav in CMS, use it
     const cmsNav = data?.mainNav
     if (cmsNav && cmsNav.length > 0) {
-      return cmsNav.map((item) => {
+      const items = cmsNav.map((item) => {
         let endpoint = ''
         let hrefBase = ''
 
@@ -80,6 +80,17 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
           type: item.type,
         }
       })
+      
+      // Inject "All Packages" after CMS items to guarantee it exists
+      items.push({
+        key: 'all-packages',
+        label: 'All Packages',
+        hrefBase: '/packages',
+        endpoint: '/api/packages?where[isPublished][equals]=true&limit=100&sort=name&depth=0',
+        type: 'dynamic',
+      })
+      
+      return items
     }
 
     // Default Fallback
@@ -93,10 +104,17 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
       },
       {
         key: 'packages',
-        label: 'Packages',
+        label: 'Packages By Theme',
         hrefBase: '/themes', // CHANGED: Points to /themes now
         // CHANGED: Now fetching Categories instead of all packages
         endpoint: '/api/package-categories?limit=50&sort=name&depth=0',
+        type: 'dynamic',
+      },
+      {
+        key: 'all-packages',
+        label: 'All Packages',
+        hrefBase: '/packages',
+        endpoint: '/api/packages?where[isPublished][equals]=true&limit=100&sort=name&depth=0',
         type: 'dynamic',
       },
     ]

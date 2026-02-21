@@ -137,6 +137,7 @@ export const TravelPackageExplorer = async (props: TravelPackageExplorerProps) =
         price: pkg.discountedPrice || pkg.price || 0,
         originalPrice: pkg.price || 0,
         duration: parseDuration(pkg.duration || '0'),
+        durationString: pkg.duration || '',
         rating: pkg.starRating || pkg.rating || 4,
         image: pkg.heroImage,
         experiences,

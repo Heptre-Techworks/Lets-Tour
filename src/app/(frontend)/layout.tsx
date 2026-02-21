@@ -22,6 +22,7 @@ import { WhatsAppFAB } from '@/components/WhatsAppFAB'
 import { GlobalPreloader } from '@/components/GlobalPreloader'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
+import { ScrollToTopFAB } from '@/components/ScrollToTopFAB'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
 import { Analytics } from '@vercel/analytics/next'
@@ -118,6 +119,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <main>{children}</main>
             <Footer />
             <WhatsAppFAB />
+            <ScrollToTopFAB />
           </PageTransitionProvider>
         </Providers>
         <Analytics />

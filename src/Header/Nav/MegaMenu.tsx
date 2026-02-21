@@ -105,6 +105,23 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
   }, []) // Empty dependency array -> Run once on mount
 
 
+  // Close on Scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (open) {
+        handleOpenchange(false)
+      }
+    }
+
+    if (open) {
+      window.addEventListener('scroll', handleScroll, { passive: true })
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [open, handleOpenchange])
+
   // ==========================================
   // LOGIC FOR DESTINATIONS MODE (Tabs: Intl / India)
   // ==========================================
@@ -314,8 +331,8 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
                                 {continents.map(c => (
                                   <li key={c}>
                                     <button
-                                      onClick={() => setSelectedContinent(c)}
-                                      onMouseEnter={() => setSelectedContinent(c)}
+                                      onClick={() => setSelectedContinent(c as string)}
+                                      onMouseEnter={() => setSelectedContinent(c as string)}
                                       className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all
                                         ${selectedContinent === c
                                           ? 'bg-orange-50 text-[#FBAE3D] shadow-sm'

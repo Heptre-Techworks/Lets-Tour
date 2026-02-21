@@ -299,17 +299,8 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
     )
   }
 
-  if (cards.length === 0) {
-    return (
-      <section className="relative w-full min-h-[60vh] sm:min-h-[70vh] font-sans overflow-hidden text-white bg-gray-900 flex items-center justify-center">
-        <p
-          className="text-gray-400 px-4 text-xs xs:text-sm sm:text-base"
-          style={{ fontFamily: "'NATS', sans-serif" }}
-        >
-          No client stories available yet.
-        </p>
-      </section>
-    )
+  if (!loading && cards.length === 0) {
+    return null
   }
 
   return (
