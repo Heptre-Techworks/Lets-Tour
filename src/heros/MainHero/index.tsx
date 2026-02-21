@@ -297,7 +297,7 @@ export const MainHero: React.FC<MainHeroProps> = ({
             {/* 2. Center Text Section */}
             <div className="text-center w-full px-4 mb-4 sm:mb-6 pointer-events-auto z-20 shrink-0">
                {/* Main Title */}
-               <h1 className="font-kaushan text-[36px] sm:text-[56px] md:text-[72px] lg:text-[80px] leading-[1.1] font-normal drop-shadow-2xl text-white mb-3">
+               <h1 className="kaushan-script-regular text-[36px] sm:text-[56px] md:text-[72px] lg:text-[80px] leading-[1.1] font-normal drop-shadow-2xl text-white mb-3">
                  {activeSlide.headline || 'To travel is to live!'}
                </h1>
                
@@ -322,10 +322,10 @@ export const MainHero: React.FC<MainHeroProps> = ({
                {/* Location Text */}
                <div className="overflow-hidden h-16 sm:h-20 relative flex flex-col items-center justify-center">
                  <div style={textAnimation} className="mt-[-0.5rem] sm:mt-[-1rem]">
-                    <p className="font-neuton text-[16px] sm:text-[20px] text-white/90">
+                    <p className="neuton-regular text-[16px] sm:text-[20px] text-white/90">
                        {activeSlide.subtitle}
                     </p>
-                    <h2 className="font-neuton text-[28px] sm:text-[42px] leading-tight text-white drop-shadow-md">
+                    <h2 className="neuton-regular text-[28px] sm:text-[42px] leading-tight text-white drop-shadow-md">
                        {activeSlide.location}
                     </h2>
                  </div>

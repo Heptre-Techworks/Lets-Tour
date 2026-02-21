@@ -435,12 +435,14 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
                 <h2 className="text-3xl font-bold font-amiri text-gray-800">{vibe.vibeName}</h2>
                 <div className="flex gap-3">
                   <button
+                    aria-label="Scroll left"
                     onClick={() => scroll(vibe.vibeSlug, 'left')}
                     className="w-10 h-10 rounded-full flex items-center justify-center bg-black hover:bg-gray-800 text-white transition-all"
                   >
                     <ChevronLeft />
                   </button>
                   <button
+                    aria-label="Scroll right"
                     onClick={() => scroll(vibe.vibeSlug, 'right')}
                     className="w-10 h-10 rounded-full flex items-center justify-center bg-black hover:bg-gray-800 text-white transition-all"
                   >
@@ -562,12 +564,14 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
           <div className="mt-8 flex items-center justify-between">
             <div className="flex gap-4">
               <button
+                aria-label="Scroll left"
                 onClick={() => scroll('left')}
                 className="w-14 h-14 rounded-full flex items-center justify-center bg-black hover:bg-gray-800 text-white shadow-xl transition-all active:scale-95"
               >
                 <ChevronLeft width="24" height="24" />
               </button>
               <button
+                aria-label="Scroll right"
                 onClick={() => scroll('right')}
                 className="w-14 h-14 rounded-full flex items-center justify-center bg-black hover:bg-gray-800 text-white shadow-xl transition-all active:scale-95"
               >

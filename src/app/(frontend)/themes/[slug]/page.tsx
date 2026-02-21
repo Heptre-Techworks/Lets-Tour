@@ -23,11 +23,17 @@ export async function generateStaticParams() {
     }))
 }
 
-export default async function ThemeDetailPage({ params }: { params: { slug: string } }) {
-  const { slug } = params
+type Args = {
+  params: Promise<{
+    slug?: string
+  }>
+}
+
+export default async function ThemeDetailPage({ params: paramsPromise }: Args) {
+  const { slug } = await paramsPromise
   const payload = await getPayload({ config: configPromise })
 
-  const { docs: themes } = await payload.find({
+  let themes = await payload.find({
     collection: 'themes',
     where: {
       slug: {
@@ -37,7 +43,20 @@ export default async function ThemeDetailPage({ params }: { params: { slug: stri
     limit: 1,
   })
 
-  const theme = themes[0]
+  // Fallback 1: Try lowercase
+  if (themes.docs.length === 0 && slug) {
+     themes = await payload.find({
+      collection: 'themes',
+      where: {
+        slug: {
+          equals: slug.toLowerCase(),
+        },
+      },
+      limit: 1,
+    })
+  }
+
+  const theme = themes.docs[0]
 
   if (!theme) return notFound()
 

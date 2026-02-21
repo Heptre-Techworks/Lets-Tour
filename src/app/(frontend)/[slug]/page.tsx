@@ -52,13 +52,28 @@ export default async function Page({ params: paramsPromise }: Args) {
   // avoid unused variable: only destructure what is used
   const { layout } = page
 
+  let hero = page.hero
+
+  if (slug === 'home') {
+    const payload = await getPayload({ config: configPromise })
+    // Fetch explicit Landing Page global for the home page heroism.
+    const landingPageGlobal = await payload.findGlobal({
+      slug: 'landing-page',
+      draft,
+    })
+
+    if (landingPageGlobal?.hero) {
+      hero = landingPageGlobal.hero as any
+    }
+  }
+
   return (
     <article className="pb-15">
       <PageClient />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
-      <RenderHero hero={page.hero} />
+      <RenderHero hero={hero} />
       <RenderBlocks blocks={layout} />
     </article>
   )

@@ -10,6 +10,7 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 import { ThemeSettings } from './globals/ThemeSettings'
+import { LandingPage } from './globals/LandingPage'
 
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
@@ -109,7 +110,7 @@ export default buildConfig({
     Countries,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, ThemeSettings, SearchFilters, PackageLayout, DestinationLayout],
+  globals: [Header, Footer, ThemeSettings, SearchFilters, PackageLayout, DestinationLayout, LandingPage],
   plugins: [
     ...plugins,
     autoRevalidatePlugin,

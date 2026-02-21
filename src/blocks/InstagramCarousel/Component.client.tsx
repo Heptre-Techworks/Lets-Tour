@@ -48,6 +48,13 @@ const EmbedWrapper = ({
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         if (mutation.type === 'childList') {
+          // Add title to iframe for accessibility
+          const iframeElement = embedRef.current?.querySelector('iframe')
+          if (iframeElement && !iframeElement.getAttribute('title')) {
+            iframeElement.setAttribute('title', 'Instagram Post')
+          }
+
+          // Handle video autoplay if present
           const videoElement = embedRef.current?.querySelector('video')
           if (videoElement) {
             videoElement.muted = true

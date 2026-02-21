@@ -153,6 +153,7 @@ export interface Config {
     'search-filters': SearchFilter;
     packageLayout: PackageLayout;
     destinationLayout: DestinationLayout;
+    'landing-page': LandingPage;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -161,6 +162,7 @@ export interface Config {
     'search-filters': SearchFiltersSelect<false> | SearchFiltersSelect<true>;
     packageLayout: PackageLayoutSelect<false> | PackageLayoutSelect<true>;
     destinationLayout: DestinationLayoutSelect<false> | DestinationLayoutSelect<true>;
+    'landing-page': LandingPageSelect<false> | LandingPageSelect<true>;
   };
   locale: null;
   user: User & {
@@ -5665,6 +5667,58 @@ export interface DestinationLayout {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "landing-page".
+ */
+export interface LandingPage {
+  id: string;
+  hero?: {
+    type?: string | null;
+    mainHeroFields?: {
+      slides: {
+        /**
+         * The main background image for the slide
+         */
+        backgroundImage: string | Media;
+        headline: string;
+        subtitle?: string | null;
+        location?: string | null;
+        id?: string | null;
+      }[];
+      /**
+       * Upload a PNG image of clouds with transparent background
+       */
+      cloudImage: string | Media;
+      enableAirplaneAnimation?: boolean | null;
+      /**
+       * Autoplay interval in milliseconds
+       */
+      autoplayDuration?: number | null;
+      /**
+       * Slide transition duration in milliseconds
+       */
+      transitionDuration?: number | null;
+      /**
+       * Destinations to show in search dropdown
+       */
+      destinationOptions?: (string | Destination)[] | null;
+      /**
+       * Package categories for search
+       */
+      categoryOptions?: (string | PackageCategory)[] | null;
+      buttonLabel?: string | null;
+      placeholders?: {
+        destination?: string | null;
+        date?: string | null;
+        people?: string | null;
+        category?: string | null;
+      };
+    };
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -6130,6 +6184,48 @@ export interface DestinationLayoutSelect<T extends boolean = true> {
         imageGrid?: T | ImageGridBlockSelect<T>;
       };
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "landing-page_select".
+ */
+export interface LandingPageSelect<T extends boolean = true> {
+  hero?:
+    | T
+    | {
+        type?: T;
+        mainHeroFields?:
+          | T
+          | {
+              slides?:
+                | T
+                | {
+                    backgroundImage?: T;
+                    headline?: T;
+                    subtitle?: T;
+                    location?: T;
+                    id?: T;
+                  };
+              cloudImage?: T;
+              enableAirplaneAnimation?: T;
+              autoplayDuration?: T;
+              transitionDuration?: T;
+              destinationOptions?: T;
+              categoryOptions?: T;
+              buttonLabel?: T;
+              placeholders?:
+                | T
+                | {
+                    destination?: T;
+                    date?: T;
+                    people?: T;
+                    category?: T;
+                  };
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

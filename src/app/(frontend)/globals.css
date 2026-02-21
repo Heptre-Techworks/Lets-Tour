@@ -98,6 +98,16 @@ html[data-theme='light'] {
 
 /* === Utility Layer === */
 @layer utilities {
+  .kaushan-script-regular {
+    font-family: "Kaushan Script", cursive;
+    font-weight: 400;
+    font-style: normal;
+  }
+  .neuton-regular {
+    font-family: "Neuton", serif;
+    font-weight: 400;
+    font-style: normal;
+  }
   .scrollbar-hidden::-webkit-scrollbar {
     display: none;
   }
