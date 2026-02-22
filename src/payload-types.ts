@@ -2154,14 +2154,22 @@ export interface UpDownCardCarouselBlock {
    * Style for Section Title & Subtitle
    */
   headerTypography?: {
-    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins' | 'kaushan' | 'nats') | null;
     fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
   };
   /**
-   * Style for Cards (Titles, Prices, Tags)
+   * Style for Card Titles
    */
-  cardTypography?: {
-    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins') | null;
+  cardHeadingTypography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins' | 'kaushan' | 'nats') | null;
+    fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
+  };
+  /**
+   * Style for Card Subtitles, Prices, and Tags
+   */
+  cardDetailsTypography?: {
+    fontFamily?: ('inter' | 'merriweather' | 'roboto' | 'poppins' | 'kaushan' | 'nats') | null;
+    fontSize?: ('sm' | 'base' | 'lg' | 'xl' | '2xl') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -3799,10 +3807,17 @@ export interface UpDownCardCarouselBlockSelect<T extends boolean = true> {
         fontFamily?: T;
         fontSize?: T;
       };
-  cardTypography?:
+  cardHeadingTypography?:
     | T
     | {
         fontFamily?: T;
+        fontSize?: T;
+      };
+  cardDetailsTypography?:
+    | T
+    | {
+        fontFamily?: T;
+        fontSize?: T;
       };
   id?: T;
   blockName?: T;

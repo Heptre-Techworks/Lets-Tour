@@ -62,8 +62,8 @@ function serializeBlockData(block: any) {
     // Skip functions
     if (typeof value === 'function') continue
 
-    // ✅ Special handling for blocks fields (sections, items, etc.)
-    if (key === 'sections' || key === 'items') {
+    // ✅ Special handling for blocks fields (sections, items, images, etc.)
+    if (key === 'sections' || key === 'items' || key === 'images') {
       if (Array.isArray(value)) {
         // Keep the full block object structure for nested blocks
         serialized[key] = value.map((item) => {

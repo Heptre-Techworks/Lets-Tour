@@ -120,10 +120,9 @@ const DashedRule: React.FC<{ className?: string }> = ({ className }) => (
 const CarouselCard: React.FC<{ 
     card: CardLike; 
     isEven: boolean; 
-    activeFont?: string; 
-    fontStyle?: string;
-    isCustom?: boolean;
-}> = ({ card, isEven, activeFont, fontStyle, isCustom }) => {
+    headingTypo?: { activeFont: string, fontStyle: string, isCustom: boolean, sizes: { heading: string, subheading: string } };
+    detailsTypo?: { activeFont: string, fontStyle: string, isCustom: boolean, sizes: { heading: string, subheading: string } };
+}> = ({ card, isEven, headingTypo, detailsTypo }) => {
   const [isFavorite, setIsFavorite] = React.useState(false)
 
   const priceNum =
@@ -208,7 +207,7 @@ const CarouselCard: React.FC<{
                   background: '#FBAE3D',
                   lineHeight: '88%',
                   letterSpacing: '-0.011em',
-                  fontFamily: activeFont,
+                  fontFamily: detailsTypo?.activeFont,
                   borderRadius: '8px',
                 }}
               >
@@ -229,10 +228,10 @@ const CarouselCard: React.FC<{
 
           <div className="mt-auto">
             <h3
-              className="font-bold group-hover:text-yellow-300 transition-colors flex items-center text-3xl sm:text-4xl md:text-[44px] lg:text-5xl"
+              className={`font-bold group-hover:text-yellow-300 transition-colors flex items-center ${headingTypo?.sizes?.heading || 'text-3xl sm:text-4xl md:text-[44px] lg:text-5xl'}`}
               style={{
-                fontFamily: activeFont,
-                fontStyle: isCustom ? 'normal' : 'italic',
+                fontFamily: headingTypo?.activeFont,
+                fontStyle: headingTypo?.isCustom ? 'normal' : 'italic',
                 lineHeight: '88%',
                 letterSpacing: '-0.011em',
               }}
@@ -241,9 +240,9 @@ const CarouselCard: React.FC<{
             </h3>
             {card?.details ? (
               <div
-                className="flex items-center mt-2 sm:mt-3 text-sm sm:text-base lg:text-lg"
+                className={`flex items-center mt-2 sm:mt-3 ${detailsTypo?.sizes?.subheading || 'text-sm sm:text-base lg:text-lg'}`}
                 style={{
-                  fontFamily: activeFont,
+                  fontFamily: detailsTypo?.activeFont,
                   lineHeight: '88%',
                   letterSpacing: '-0.011em',
                 }}
@@ -255,9 +254,9 @@ const CarouselCard: React.FC<{
             <div className="flex justify-between items-center mt-2.5">
               <div className="flex items-center flex-wrap">
                 <span
-                  className="font-bold text-2xl sm:text-3xl lg:text-4xl"
+                  className={`font-bold ${detailsTypo?.sizes?.subheading || 'text-2xl sm:text-3xl lg:text-4xl'}`}
                   style={{
-                    fontFamily: activeFont,
+                    fontFamily: detailsTypo?.activeFont,
                     lineHeight: '88%',
                     letterSpacing: '-0.011em',
                   }}
@@ -267,7 +266,7 @@ const CarouselCard: React.FC<{
                 <span
                   className="ml-2 text-xs sm:text-sm lg:text-base"
                   style={{
-                    fontFamily: activeFont,
+                    fontFamily: detailsTypo?.activeFont,
                     opacity: 0.8,
                   }}
                 >
@@ -311,15 +310,23 @@ export const UpDownCardCarouselClient: React.FC<{
   subheading?: string
   cards?: CardLike[]
   headerTypography?: any
-  cardTypography?: any
+  cardHeadingTypography?: any
+  cardDetailsTypography?: any
 }> = ({
   heading = 'In Season',
   subheading = "Today's enemy is tomorrow's friend.*",
   cards = [],
   headerTypography,
-  cardTypography
+  cardHeadingTypography,
+  cardDetailsTypography
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+
+  // LOG FOR DEBUGGING
+  console.log('--- UpDownCardCarousel Typography Props ---')
+  console.log('headerTypography:', headerTypography)
+  console.log('cardHeadingTypography:', cardHeadingTypography)
+  console.log('cardDetailsTypography:', cardDetailsTypography)
 
   // Typography Helper
   const getTypographyStyles = (typography: any, defaultFamily: string = "'Amiri', serif") => {
@@ -328,6 +335,8 @@ export const UpDownCardCarouselClient: React.FC<{
         merriweather: "'Merriweather', serif",
         roboto: "'Roboto', sans-serif",
         poppins: "'Poppins', sans-serif",
+        kaushan: "'Kaushan Script', cursive",
+        nats: "'NATS', sans-serif",
     }
     const activeFont = typography?.fontFamily ? fontMap[typography.fontFamily] : defaultFamily
     const fontStyle = typography?.fontFamily ? 'normal' : 'italic'
@@ -349,7 +358,8 @@ export const UpDownCardCarouselClient: React.FC<{
   // Header Styles
   const headerTypo = getTypographyStyles(headerTypography, "'Amiri', serif")
   // Card Styles
-  const cardTypo = getTypographyStyles(cardTypography, "'Inter', sans-serif")
+  const cardHeadingTypo = getTypographyStyles(cardHeadingTypography, "'Inter', sans-serif")
+  const cardDetailsTypo = getTypographyStyles(cardDetailsTypography, "'Inter', sans-serif")
 
 
   // ✅ Custom 0.2-second smooth scroll
@@ -375,7 +385,7 @@ export const UpDownCardCarouselClient: React.FC<{
   return (
     <>
       <link
-        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@400;700&family=Merriweather:wght@400;700&family=Roboto:wght@400;700&family=Poppins:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@400;700&family=Merriweather:wght@400;700&family=Roboto:wght@400;700&family=Poppins:wght@400;700&family=Kaushan+Script&display=swap"
         rel="stylesheet"
       />
 
@@ -467,9 +477,8 @@ export const UpDownCardCarouselClient: React.FC<{
                   key={`${card?.name ?? 'card'}-${index}`}
                   card={card}
                   isEven={index % 2 === 0}
-                  activeFont={cardTypo.activeFont}
-                  fontStyle={cardTypo.fontStyle}
-                  isCustom={cardTypo.isCustom}
+                  headingTypo={cardHeadingTypo}
+                  detailsTypo={cardDetailsTypo}
                 />
               ))}
           </div>

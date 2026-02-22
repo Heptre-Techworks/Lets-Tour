@@ -77,31 +77,6 @@ interface ItineraryCardProps {
 
 // --- Utils ---
 
-/** Custom smooth scroll helper for consistent cross-browser behavior */
-const smoothScroll = (element: HTMLDivElement, target: number, duration: number = 400) => {
-  const start = element.scrollLeft
-  const change = target - start
-  let currentTime = 0
-  const increment = 20
-
-  const animateScroll = () => {
-    currentTime += increment
-    const val = easeInOutQuad(currentTime, start, change, duration)
-    element.scrollLeft = val
-    if (currentTime < duration) {
-      setTimeout(animateScroll, increment)
-    }
-  }
-  animateScroll()
-}
-
-const easeInOutQuad = (t: number, b: number, c: number, d: number) => {
-  t /= d / 2
-  if (t < 1) return (c / 2) * t * t + b
-  t--
-  return (-c / 2) * (t * (t - 2) - 1) + b
-}
-
 function formatPrice(price: string | number | undefined): string {
   if (price === undefined || price === null) return '0'
   const num = typeof price === 'string' ? parseFloat(price.replace(/,/g, '')) : price
@@ -183,7 +158,7 @@ const DashedRule: React.FC<{ className?: string }> = ({ className }) => {
 
 // --- Cards ---
 
-const PackageCard: React.FC<{ item: any; activeFont?: string; fontStyle?: string; isCustom?: boolean }> = ({ item, activeFont, fontStyle, isCustom }) => {
+const PackageCard: React.FC<{ item: any; isActive?: boolean; activeFont?: string; fontStyle?: string; isCustom?: boolean }> = ({ item, isActive, activeFont, fontStyle, isCustom }) => {
   const title = item.title || ''
   const image = item.image
   const price = item.price || '0'
@@ -194,7 +169,11 @@ const PackageCard: React.FC<{ item: any; activeFont?: string; fontStyle?: string
   return (
     <Link
       href={href}
-      className="relative w-72 h-96 flex-shrink-0 snap-start rounded-2xl shadow-lg overflow-hidden group bg-black/5 block hover:shadow-2xl transition-all duration-500"
+      className={`relative w-72 h-96 flex-shrink-0 snap-start rounded-2xl shadow-lg overflow-hidden group bg-black/5 block focus:outline-none transition-all duration-500 ${
+        isActive 
+          ? 'ring-[6px] ring-yellow-400/80 shadow-[0_0_20px_rgba(251,174,61,0.5)] z-10 scale-100' 
+          : 'scale-95 hover:scale-[0.98]'
+      }`}
     >
       {src ? (
         <Image
@@ -240,7 +219,7 @@ const PackageCard: React.FC<{ item: any; activeFont?: string; fontStyle?: string
   )
 }
 
-const DestinationCard: React.FC<{ item: any; activeFont?: string; fontStyle?: string; isCustom?: boolean }> = ({ item, activeFont, fontStyle, isCustom }) => {
+const DestinationCard: React.FC<{ item: any; isActive?: boolean; activeFont?: string; fontStyle?: string; isCustom?: boolean }> = ({ item, isActive, activeFont, fontStyle, isCustom }) => {
   const title = item.title || ''
   const image = item.image
   const price = item.price || '0'
@@ -251,7 +230,11 @@ const DestinationCard: React.FC<{ item: any; activeFont?: string; fontStyle?: st
   return (
     <Link
       href={href}
-      className="relative w-72 h-96 flex-shrink-0 snap-start rounded-2xl shadow-lg overflow-hidden group bg-black/5 block transition-all duration-500"
+      className={`relative w-72 h-96 flex-shrink-0 snap-start rounded-2xl shadow-lg overflow-hidden group bg-black/5 block focus:outline-none transition-all duration-500 ${
+        isActive 
+          ? 'ring-[6px] ring-yellow-400/80 shadow-[0_0_20px_rgba(251,174,61,0.5)] z-10 scale-100' 
+          : 'scale-95 hover:scale-[0.98]'
+      }`}
     >
       {src ? (
         <Image
@@ -402,8 +385,8 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
     const el = scrollRefs.current[vibeSlug]
     if (!el) return
     const cardWidth = (el.children[0] as HTMLElement | undefined)?.clientWidth || 288
-    const scrollTarget = el.scrollLeft + (direction === 'left' ? -(cardWidth + 24) : cardWidth + 24)
-    smoothScroll(el, scrollTarget)
+    const scrollAmount = direction === 'left' ? -(cardWidth + 24) : cardWidth + 24
+    el.scrollBy({ left: scrollAmount, behavior: 'smooth' })
   }
 
   return (
@@ -457,7 +440,7 @@ const VibeSection: React.FC<{ section: Section }> = ({ section }) => {
                 className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scroll-smooth hide-scrollbar"
               >
                 {vibe.items.map((item, idx) => (
-                  <PackageCard key={idx} item={item} activeFont={cardFont} fontStyle={cardStyle} isCustom={isCustomCard} />
+                  <PackageCard key={idx} item={item} isActive={false} activeFont={cardFont} fontStyle={cardStyle} isCustom={isCustomCard} />
                 ))}
               </div>
             </div>
@@ -494,8 +477,8 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
     const el = scrollRef.current
     if (!el) return
     const cardWidth = (el.children[0] as HTMLElement | undefined)?.clientWidth || 288
-    const scrollTarget = el.scrollLeft + (direction === 'left' ? -(cardWidth + 24) : cardWidth + 24)
-    smoothScroll(el, scrollTarget)
+    const scrollAmount = direction === 'left' ? -(cardWidth + 24) : cardWidth + 24
+    el.scrollBy({ left: scrollAmount, behavior: 'smooth' })
   }
 
   const items = section.items || []
@@ -507,7 +490,14 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
     const el = scrollRef.current
     if (!el) return
     const cardWidth = (el.children[0] as HTMLElement | undefined)?.clientWidth || 288
-    setCurrentIndex(Math.round(el.scrollLeft / (cardWidth + 24)) + 1)
+    
+    // Check if we've reached the very end
+    const maxScrollLeft = el.scrollWidth - el.clientWidth
+    if (el.scrollLeft >= maxScrollLeft - 5) {
+      setCurrentIndex(el.children.length)
+    } else {
+      setCurrentIndex(Math.round(el.scrollLeft / (cardWidth + 24)) + 1)
+    }
   }
 
   return (
@@ -546,9 +536,9 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
             className="flex gap-6 overflow-x-auto pb-10 snap-x snap-mandatory scroll-smooth hide-scrollbar"
           >
             {section.type === 'package' &&
-              packageItems.map((item, idx) => <PackageCard key={idx} item={item} activeFont={cardFont} fontStyle={cardStyle} isCustom={isCustomCard} />)}
+              packageItems.map((item, idx) => <PackageCard key={idx} item={item} isActive={currentIndex === idx + 1} activeFont={cardFont} fontStyle={cardStyle} isCustom={isCustomCard} />)}
             {section.type === 'destination' &&
-              destinationItems.map((item, idx) => <DestinationCard key={idx} item={item} activeFont={cardFont} fontStyle={cardStyle} isCustom={isCustomCard} />)}
+              destinationItems.map((item, idx) => <DestinationCard key={idx} item={item} isActive={currentIndex === idx + 1} activeFont={cardFont} fontStyle={cardStyle} isCustom={isCustomCard} />)}
           </div>
         )}
 

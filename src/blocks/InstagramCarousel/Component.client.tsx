@@ -400,7 +400,7 @@ export const InstagramCarouselClient: React.FC<any> = ({
 
             <div
               ref={videoContainerRef}
-              className="z-10 pointer-events-auto absolute left-1/2 -translate-x-1/2 w-[200px] sm:w-[200px] md:w-[250px] h-[430px] sm:h-[450px] md:h-[530px] top-[5px] sm:top-[11px] md:top-[10px] rounded-[30px] overflow-hidden"
+              className="z-10 pointer-events-auto absolute left-1/2 -translate-x-1/2 w-[200px] sm:w-[200px] md:w-[250px] h-[430px] sm:h-[450px] md:h-[530px] top-[5px] sm:top-[11px] md:top-[10px] rounded-[36px] md:rounded-[42px] overflow-hidden"
             >
               <video
                 src={videoSrc || undefined}
@@ -412,7 +412,7 @@ export const InstagramCarouselClient: React.FC<any> = ({
                 style={{
                   width: '100%',
                   height: '100%',
-                  borderRadius: '20px',
+                  borderRadius: 'inherit',
                   objectFit: 'cover',
                 }}
               />

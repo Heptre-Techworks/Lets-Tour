@@ -489,7 +489,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                   className="
                     w-12 h-12 xs:w-12 xs:h-12 sm:w-10 sm:h-10 md:w-12 md:h-12
                     flex items-center justify-center rounded-full 
-                    hover:opacity-80 active:scale-95 transition-all
+                    hover:opacity-80 active:scale-95 transition-all text-black
                   "
                   type="button"
                   style={{
@@ -518,7 +518,7 @@ export const ClientStories: React.FC<ClientStoriesBlockProps> = ({
                   className="
                     w-12 h-12 xs:w-12 xs:h-12 sm:w-10 sm:h-10 md:w-12 md:h-12
                     flex items-center justify-center rounded-full 
-                    hover:opacity-80 active:scale-95 transition-all
+                    hover:opacity-80 active:scale-95 transition-all text-black
                   "
                   type="button"
                   style={{

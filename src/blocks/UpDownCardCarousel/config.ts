@@ -103,6 +103,8 @@ export const UpDownCardCarousel: Block = {
             { label: 'Merriweather (Serif)', value: 'merriweather' },
             { label: 'Roboto (Sans)', value: 'roboto' },
             { label: 'Poppins (Sans)', value: 'poppins' },
+            { label: 'Kaushan Script (Cursive)', value: 'kaushan' },
+            { label: 'NATS (Sans)', value: 'nats' },
           ],
         },
         {
@@ -120,10 +122,10 @@ export const UpDownCardCarousel: Block = {
       ],
     },
     {
-      name: 'cardTypography',
+      name: 'cardHeadingTypography',
       type: 'group',
-      label: 'Card Content Styling',
-      admin: { description: 'Style for Cards (Titles, Prices, Tags)' },
+      label: 'Card Heading Styling',
+      admin: { description: 'Style for Card Titles' },
       fields: [
         {
           name: 'fontFamily',
@@ -134,6 +136,53 @@ export const UpDownCardCarousel: Block = {
             { label: 'Merriweather (Serif)', value: 'merriweather' },
             { label: 'Roboto (Sans)', value: 'roboto' },
             { label: 'Poppins (Sans)', value: 'poppins' },
+            { label: 'Kaushan Script (Cursive)', value: 'kaushan' },
+            { label: 'NATS (Sans)', value: 'nats' },
+          ],
+        },
+        {
+          name: 'fontSize',
+          type: 'select',
+          defaultValue: 'base',
+          options: [
+            { label: 'Small', value: 'sm' },
+            { label: 'Base', value: 'base' },
+            { label: 'Large', value: 'lg' },
+            { label: 'Extra Large', value: 'xl' },
+            { label: '2XL', value: '2xl' },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'cardDetailsTypography',
+      type: 'group',
+      label: 'Card Details & Subtitle Styling',
+      admin: { description: 'Style for Card Subtitles, Prices, and Tags' },
+      fields: [
+        {
+          name: 'fontFamily',
+          type: 'select',
+          defaultValue: 'inter',
+          options: [
+            { label: 'Inter (Sans)', value: 'inter' },
+            { label: 'Merriweather (Serif)', value: 'merriweather' },
+            { label: 'Roboto (Sans)', value: 'roboto' },
+            { label: 'Poppins (Sans)', value: 'poppins' },
+            { label: 'Kaushan Script (Cursive)', value: 'kaushan' },
+            { label: 'NATS (Sans)', value: 'nats' },
+          ],
+        },
+        {
+          name: 'fontSize',
+          type: 'select',
+          defaultValue: 'base',
+          options: [
+            { label: 'Small', value: 'sm' },
+            { label: 'Base', value: 'base' },
+            { label: 'Large', value: 'lg' },
+            { label: 'Extra Large', value: 'xl' },
+            { label: '2XL', value: '2xl' },
           ],
         },
       ],
