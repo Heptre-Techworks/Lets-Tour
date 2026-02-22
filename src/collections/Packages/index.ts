@@ -470,6 +470,58 @@ export const Packages: CollectionConfig = {
               admin: { description: 'Target audience' },
             },
             {
+              name: 'categoryPills',
+              type: 'group',
+              label: 'Hero Category Pills',
+              admin: {
+                description: 'Customizable theme/category progress bars shown in the Package Hero.',
+              },
+              fields: [
+                {
+                  name: 'enablePills',
+                  type: 'checkbox',
+                  label: 'Show Category Pills in Hero',
+                  defaultValue: true,
+                },
+                {
+                  name: 'pills',
+                  type: 'array',
+                  label: 'Category Pills',
+                  admin: {
+                    condition: (_, siblingData) => siblingData.enablePills,
+                  },
+                  fields: [
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      admin: { description: 'e.g. Couples' },
+                    },
+                    {
+                      name: 'subtitle',
+                      type: 'text',
+                      required: true,
+                      admin: { description: 'e.g. For Newlywed Vacations' },
+                    },
+                    {
+                      name: 'icon',
+                      type: 'text',
+                      defaultValue: '✈',
+                      admin: { description: 'Emoji or simple text icon' },
+                    },
+                    {
+                      name: 'percentage',
+                      type: 'number',
+                      min: 0,
+                      max: 100,
+                      defaultValue: 75,
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
               name: 'themes',
               type: 'relationship',
               relationTo: 'themes',

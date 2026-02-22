@@ -29,14 +29,14 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
 
   return (
     <header 
-      className={`w-full py-4 ${pathname === '/curate' ? 'bg-black' : 'bg-transparent'}`}
+      className={`w-full py-4 ${pathname === '/curate' || theme === 'light' ? 'bg-black' : 'bg-transparent'}`}
       style={{ 
         position: 'absolute', 
         top: 0, 
         left: 0, 
         width: '100%', 
         zIndex: 50, 
-        background: pathname === '/curate' ? '#000000' : 'transparent',
+        background: pathname === '/curate' || theme === 'light' ? '#000000' : 'transparent',
         paddingTop: 'max(1rem, env(safe-area-inset-top))' 
       }}
     >

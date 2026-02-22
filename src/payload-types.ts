@@ -1274,6 +1274,30 @@ export interface Package {
    * Target audience
    */
   categories?: (string | PackageCategory)[] | null;
+  /**
+   * Customizable theme/category progress bars shown in the Package Hero.
+   */
+  categoryPills?: {
+    enablePills?: boolean | null;
+    pills?:
+      | {
+          /**
+           * e.g. Couples
+           */
+          title: string;
+          /**
+           * e.g. For Newlywed Vacations
+           */
+          subtitle: string;
+          /**
+           * Emoji or simple text icon
+           */
+          icon?: string | null;
+          percentage: number;
+          id?: string | null;
+        }[]
+      | null;
+  };
   themes?: (string | Theme)[] | null;
   vibe?: (string | null) | Vibe;
   activities?: (string | Activity)[] | null;
@@ -4403,6 +4427,20 @@ export interface PackagesSelect<T extends boolean = true> {
   country?: T;
   region?: T;
   categories?: T;
+  categoryPills?:
+    | T
+    | {
+        enablePills?: T;
+        pills?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              icon?: T;
+              percentage?: T;
+              id?: T;
+            };
+      };
   themes?: T;
   vibe?: T;
   activities?: T;

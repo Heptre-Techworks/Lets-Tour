@@ -210,17 +210,17 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   const location = pkg.Summary || ''
   // description is handled by RichText now
 
-  const vacationTypes = pkg.categories
-    ? (Array.isArray(pkg.categories) ? pkg.categories : []).map((cat) => {
-        const category = typeof cat === 'object' ? cat : null
-        return {
-          type: category?.name || '',
-          label: `For ${category?.name} Vacations`,
-          icon: '✈',
-          percentage: 75,
-        }
-      })
-    : []
+  // Extract category pills layout data
+  const hasCategoryPills = pkg.categoryPills?.enablePills !== false
+  const vacationTypes =
+    hasCategoryPills && pkg.categoryPills?.pills
+      ? pkg.categoryPills.pills.map((pill) => ({
+          type: pill.title || '',
+          label: pill.subtitle || '',
+          icon: pill.icon || '✈',
+          percentage: pill.percentage || 75,
+        }))
+      : []
 
   const pricing = {
     originalPrice: pkg.price?.toLocaleString() || '0',

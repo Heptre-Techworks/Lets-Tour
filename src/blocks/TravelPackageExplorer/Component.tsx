@@ -147,6 +147,7 @@ export const TravelPackageExplorer = async (props: TravelPackageExplorerProps) =
         province: safelyExtractName(firstDest?.country) || firstDest?.name || '',
         sights: sights.slice(0, 10), // Limit to 10 sights
         recentBookings: pkg.bookingsCount30d || 0,
+        categoryPills: pkg.categoryPills,
         suitability: {
           couples: pkg.isHoneymoon ? 90 : 50,
           family: pkg.isFamilyFriendly ? 85 : 50,

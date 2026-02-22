@@ -65,6 +65,42 @@ export const InfoPanel: Block = {
       admin: {
         condition: (_, siblingData) => siblingData.dataSource === 'manual',
       },
+      hooks: {
+        afterRead: [
+          ({ value }) => {
+            if (typeof value === 'string') {
+              return {
+                root: {
+                  type: 'root',
+                  format: '',
+                  indent: 0,
+                  version: 1,
+                  children: [
+                    {
+                      type: 'paragraph',
+                      format: '',
+                      indent: 0,
+                      version: 1,
+                      children: [
+                        {
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                          text: value,
+                          type: 'text',
+                          version: 1,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              };
+            }
+            return value;
+          },
+        ],
+      },
     },
     {
       name: 'listType',
@@ -98,6 +134,42 @@ export const InfoPanel: Block = {
           type: 'richText',
           label: 'Item Text',
           required: true,
+          hooks: {
+            afterRead: [
+              ({ value }) => {
+                if (typeof value === 'string') {
+                  return {
+                    root: {
+                      type: 'root',
+                      format: '',
+                      indent: 0,
+                      version: 1,
+                      children: [
+                        {
+                          type: 'paragraph',
+                          format: '',
+                          indent: 0,
+                          version: 1,
+                          children: [
+                            {
+                              detail: 0,
+                              format: 0,
+                              mode: 'normal',
+                              style: '',
+                              text: value,
+                              type: 'text',
+                              version: 1,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  };
+                }
+                return value;
+              },
+            ],
+          },
         },
       ],
     },
