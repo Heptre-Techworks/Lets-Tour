@@ -237,7 +237,10 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
     packages.forEach(p => {
       p.themes?.forEach(t => themeMap.set(t.id, t.name))
     })
-    return Array.from(themeMap.entries()).map(([id, name]) => ({ id, name })).sort((a,b) => a.name.localeCompare(b.name))
+    const themesList = Array.from(themeMap.entries()).map(([id, name]) => ({ id, name })).sort((a,b) => a.name.localeCompare(b.name))
+    
+    // Inject "All Packages" at the top
+    return [{ id: 'all-packages', name: 'All Packages' }, ...themesList]
   }, [packages])
 
   // Default Theme selection for Packages Mode
@@ -250,6 +253,8 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
   // 2. Filter All Packages by Selected Theme
   const filteredAllPackages = useMemo(() => {
      if (!selectedTheme) return []
+     if (selectedTheme === 'all-packages') return packages // Return all if pseudo-theme is selected
+     
      return packages.filter(p => 
         p.themes && p.themes.some(t => t.id === selectedTheme)
      )
@@ -484,7 +489,7 @@ export const MegaMenu: React.FC<MegaMenuProps> = ({
                         <div className="w-1/5 border-r border-gray-100 pr-6">
                           <h3 className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">
                             <Layers size={14} />
-                            All Themes
+                            Browse Packages
                           </h3>
                           <ul className="space-y-2">
                             {allThemes.map(theme => (

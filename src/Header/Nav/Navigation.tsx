@@ -81,15 +81,6 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
         }
       })
       
-      // Inject "All Packages" after CMS items to guarantee it exists
-      items.push({
-        key: 'all-packages',
-        label: 'All Packages',
-        hrefBase: '/packages',
-        endpoint: '/api/packages?where[isPublished][equals]=true&limit=100&sort=name&depth=0',
-        type: 'dynamic',
-      })
-      
       return items
     }
 
@@ -104,17 +95,10 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
       },
       {
         key: 'packages',
-        label: 'Packages By Theme',
+        label: 'Packages',
         hrefBase: '/themes', // CHANGED: Points to /themes now
         // CHANGED: Now fetching Categories instead of all packages
         endpoint: '/api/package-categories?limit=50&sort=name&depth=0',
-        type: 'dynamic',
-      },
-      {
-        key: 'all-packages',
-        label: 'All Packages',
-        hrefBase: '/packages',
-        endpoint: '/api/packages?where[isPublished][equals]=true&limit=100&sort=name&depth=0',
         type: 'dynamic',
       },
     ]
