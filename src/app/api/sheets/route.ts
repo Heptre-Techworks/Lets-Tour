@@ -4,6 +4,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     
+    // Append the 'Created at' timestamp per standard requirement
+    body['Created at'] = new Date().toISOString()
+    
     // Relay the request server-side to avoid CORS issues
     const response = await fetch('https://sheets-writer-1037202171762.us-central1.run.app', {
       method: 'POST',

@@ -93,6 +93,9 @@ export const FormBlock: React.FC<
             if (props.contextPayload) {
               Object.assign(sheetPayload, props.contextPayload)
             }
+            
+            // Append the 'Created at' timestamp
+            sheetPayload['Created at'] = new Date().toISOString()
 
             fetch('https://sheets-writer-1037202171762.us-central1.run.app', {
               method: 'POST',
