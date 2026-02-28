@@ -92,7 +92,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
       <head>
         <InitTheme />
-        <link href="/favicon.ico" rel="icon" sizes="any" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
 
         {/* Performance Optimization: Preconnect to Google Fonts (for Admin/Dynamic fonts) */}
@@ -133,6 +132,6 @@ export const metadata: Metadata = {
   openGraph: mergeOpenGraph(),
   twitter: {
     card: 'summary_large_image',
-    creator: '@payloadcms',
+    creator: '@letstour',
   },
 }

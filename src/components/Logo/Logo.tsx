@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import React from 'react'
-import Image from 'next/image'
+
 interface Props {
   className?: string
   loading?: 'lazy' | 'eager'
@@ -8,22 +8,11 @@ interface Props {
 }
 
 export const Logo = (props: Props) => {
-  const { loading: loadingFromProps, priority: priorityFromProps, className } = props
-
-  const loading = loadingFromProps || 'lazy'
-  const priority = priorityFromProps || 'low'
+  const { className } = props
 
   return (
-    <Image
-      fill
-      alt="Payload Logo"
-      width={193}
-      height={34}
-      loading={loading}
-      fetchPriority={priority}
-      decoding="async"
-      className={clsx('max-w-[9.375rem] w-full h-[34px]', className)}
-      src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
-    />
+    <div className={clsx('flex items-center', className)}>
+      <span className="text-2xl font-bold tracking-wide">Let&apos;s Tour</span>
+    </div>
   )
 }
