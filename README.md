@@ -3,7 +3,6 @@
 A premium travel agency platform built with **Next.js 15 (App Router)** and **Payload CMS 3.0**. This application features dynamic travel packages, destination guides, and a robust admin panel for content management, all delivered with high-performance animations and SEO optimization.
 
 ## 🚀 Tech Stack
-
 - **Framework:** [Next.js 15](https://nextjs.org/) (App Router, Server Components)
 - **CMS:** [Payload CMS 3.0](https://payloadcms.com/) (Headless, TypeScript-first)
 - **Database:** MongoDB
