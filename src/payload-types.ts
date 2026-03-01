@@ -1882,6 +1882,10 @@ export interface DynamicScroller_PackageSection {
     | {
         title: string;
         price: string;
+        /**
+         * Suffix after price
+         */
+        priceSuffix?: string | null;
         image: string | Media;
         tag?: string | null;
         tagColor?: string | null;
@@ -1916,6 +1920,10 @@ export interface DynamicScroller_DestinationSection {
     | {
         title: string;
         price: string;
+        /**
+         * Suffix after price
+         */
+        priceSuffix?: string | null;
         image: string | Media;
         tag?: string | null;
         tagColor?: string | null;
@@ -2166,6 +2174,10 @@ export interface UpDownCardCarouselBlock {
          * Price in INR.
          */
         price: number;
+        /**
+         * Suffix displayed after price (e.g. Per Person)
+         */
+        priceSuffix?: string | null;
         discount?: string | null;
         image?: (string | null) | Media;
         imageUrl?: string | null;
@@ -3623,6 +3635,7 @@ export interface DynamicScroller_PackageSectionSelect<T extends boolean = true> 
     | {
         title?: T;
         price?: T;
+        priceSuffix?: T;
         image?: T;
         tag?: T;
         tagColor?: T;
@@ -3657,6 +3670,7 @@ export interface DynamicScroller_DestinationSectionSelect<T extends boolean = tr
     | {
         title?: T;
         price?: T;
+        priceSuffix?: T;
         image?: T;
         tag?: T;
         tagColor?: T;
@@ -3818,6 +3832,7 @@ export interface UpDownCardCarouselBlockSelect<T extends boolean = true> {
         name?: T;
         details?: T;
         price?: T;
+        priceSuffix?: T;
         discount?: T;
         image?: T;
         imageUrl?: T;

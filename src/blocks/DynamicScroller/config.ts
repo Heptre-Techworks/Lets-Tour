@@ -62,6 +62,12 @@ const PackageSectionBlock: Block = {
       fields: [
         { name: 'title', type: 'text', required: true },
         { name: 'price', type: 'text', required: true },
+        {
+          name: 'priceSuffix',
+          type: 'text',
+          defaultValue: 'Per Person',
+          admin: { description: 'Suffix after price' },
+        },
         { name: 'image', type: 'upload', relationTo: 'media', required: true },
         { name: 'tag', type: 'text' },
         { name: 'tagColor', type: 'text' },
@@ -70,9 +76,7 @@ const PackageSectionBlock: Block = {
     {
       name: 'theme',
       type: 'group',
-      fields: [
-        { name: 'background', type: 'text', defaultValue: 'bg-white' },
-      ],
+      fields: [{ name: 'background', type: 'text', defaultValue: 'bg-white' }],
     },
     { name: 'showNavigation', type: 'checkbox', defaultValue: true },
     {
@@ -150,6 +154,12 @@ const DestinationSectionBlock: Block = {
       fields: [
         { name: 'title', type: 'text', required: true },
         { name: 'price', type: 'text', required: true },
+        {
+          name: 'priceSuffix',
+          type: 'text',
+          defaultValue: 'Per Person',
+          admin: { description: 'Suffix after price' },
+        },
         { name: 'image', type: 'upload', relationTo: 'media', required: true },
         { name: 'tag', type: 'text' },
         { name: 'tagColor', type: 'text' },
@@ -158,9 +168,7 @@ const DestinationSectionBlock: Block = {
     {
       name: 'theme',
       type: 'group',
-      fields: [
-        { name: 'background', type: 'text', defaultValue: 'bg-white' },
-      ],
+      fields: [{ name: 'background', type: 'text', defaultValue: 'bg-white' }],
     },
     { name: 'showNavigation', type: 'checkbox', defaultValue: true },
     {
@@ -205,17 +213,17 @@ const VibeSectionBlock: Block = {
   interfaceName: 'DynamicScroller_VibeSection',
   labels: { singular: 'Vibe Match Section', plural: 'Vibe Match Sections' },
   fields: [
-    { 
-      name: 'title', 
-      type: 'text', 
+    {
+      name: 'title',
+      type: 'text',
       defaultValue: 'Vibe Match',
-      admin: { description: 'Section heading' }
+      admin: { description: 'Section heading' },
     },
-    { 
-      name: 'subtitle', 
+    {
+      name: 'subtitle',
       type: 'text',
       defaultValue: "Today's enemy is tomorrow's friend.*",
-      admin: { description: 'Optional subtitle' }
+      admin: { description: 'Optional subtitle' },
     },
     {
       name: 'vibes',
@@ -240,9 +248,7 @@ const VibeSectionBlock: Block = {
     {
       name: 'theme',
       type: 'group',
-      fields: [
-        { name: 'background', type: 'text', defaultValue: 'bg-[#FFD89B]' },
-      ],
+      fields: [{ name: 'background', type: 'text', defaultValue: 'bg-[#FFD89B]' }],
     },
     { name: 'showNavigation', type: 'checkbox', defaultValue: true },
     {
@@ -287,15 +293,15 @@ const ItinerarySectionBlock: Block = {
   interfaceName: 'DynamicScroller_ItinerarySection',
   labels: { singular: 'Itinerary Section', plural: 'Itinerary Sections' },
   fields: [
-    { 
-      name: 'title', 
+    {
+      name: 'title',
       type: 'text',
-      admin: { description: 'Section heading (e.g., "Day by Day Itinerary")' }
+      admin: { description: 'Section heading (e.g., "Day by Day Itinerary")' },
     },
-    { 
-      name: 'subtitle', 
+    {
+      name: 'subtitle',
       type: 'text',
-      admin: { description: 'Optional subtitle' }
+      admin: { description: 'Optional subtitle' },
     },
     {
       name: 'itinerarySource',
@@ -329,42 +335,42 @@ const ItinerarySectionBlock: Block = {
         description: 'Create custom itinerary days',
       },
       fields: [
-        { 
-          name: 'day', 
-          type: 'text', 
+        {
+          name: 'day',
+          type: 'text',
           required: true,
           admin: {
             placeholder: 'Day 1: Arrival in Bali',
-          }
+          },
         },
         {
           name: 'activities',
           type: 'array',
           minRows: 1,
           fields: [
-            { 
-              name: 'icon', 
-              type: 'upload', 
+            {
+              name: 'icon',
+              type: 'upload',
               relationTo: 'media',
               admin: {
                 description: 'Activity icon (optional)',
-              }
+              },
             },
-            { 
-              name: 'description', 
-              type: 'textarea', 
+            {
+              name: 'description',
+              type: 'textarea',
               required: true,
               admin: {
                 placeholder: 'Describe the activity...',
-              }
+              },
             },
-            { 
-              name: 'detailsImage', 
-              type: 'upload', 
+            {
+              name: 'detailsImage',
+              type: 'upload',
               relationTo: 'media',
               admin: {
                 description: 'Additional image for this activity (optional)',
-              }
+              },
             },
           ],
         },
@@ -373,13 +379,11 @@ const ItinerarySectionBlock: Block = {
     {
       name: 'theme',
       type: 'group',
-      fields: [
-        { name: 'background', type: 'text', defaultValue: 'bg-white' },
-      ],
+      fields: [{ name: 'background', type: 'text', defaultValue: 'bg-white' }],
     },
-    { 
-      name: 'showNavigation', 
-      type: 'checkbox', 
+    {
+      name: 'showNavigation',
+      type: 'checkbox',
       defaultValue: true,
       label: 'Show Navigation Arrows',
     },
@@ -425,16 +429,16 @@ const ThemeSectionBlock: Block = {
   interfaceName: 'DynamicScroller_ThemeSection',
   labels: { singular: 'Theme Section', plural: 'Theme Sections' },
   fields: [
-    { 
-      name: 'title', 
-      type: 'text', 
-      defaultValue: 'Explore by Theme',
-      admin: { description: 'Section heading' }
-    },
-    { 
-      name: 'subtitle', 
+    {
+      name: 'title',
       type: 'text',
-      admin: { description: 'Optional subtitle' }
+      defaultValue: 'Explore by Theme',
+      admin: { description: 'Section heading' },
+    },
+    {
+      name: 'subtitle',
+      type: 'text',
+      admin: { description: 'Optional subtitle' },
     },
     {
       name: 'themes',
@@ -459,9 +463,7 @@ const ThemeSectionBlock: Block = {
     {
       name: 'theme',
       type: 'group',
-      fields: [
-        { name: 'background', type: 'text', defaultValue: 'bg-white' },
-      ],
+      fields: [{ name: 'background', type: 'text', defaultValue: 'bg-white' }],
     },
     { name: 'showNavigation', type: 'checkbox', defaultValue: true },
     {

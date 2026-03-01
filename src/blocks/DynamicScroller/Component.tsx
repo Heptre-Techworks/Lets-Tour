@@ -5,18 +5,20 @@ import configPromise from '@payload-config'
 import { DynamicScrollerClient } from './Component.client'
 import type { DynamicScrollerBlock } from '@/payload-types'
 
-export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock & { destinationContext?: any }) => {
+export const DynamicScrollerBlockComponent = async (
+  props: DynamicScrollerBlock & { destinationContext?: any },
+) => {
   const { sections = [], destinationContext } = props
 
   console.log('🔍 DynamicScroller received props:', Object.keys(props))
-  console.log('📋 Sections count:', sections==null?0:sections.length)
+  console.log('📋 Sections count:', sections == null ? 0 : sections.length)
 
   const sectionsArray = Array.isArray(sections) ? sections : []
 
   const processedSections = await Promise.all(
     sectionsArray.map(async (section: any, idx) => {
       const blockType = section.blockType || section.blockName
-      
+
       console.log(`📦 Section ${idx}:`, {
         blockType,
         allKeys: Object.keys(section),
@@ -25,7 +27,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
       // ==================== PACKAGE SECTION ====================
       if (blockType === 'packageSection' || section.populatePackagesBy) {
         const populateBy = section.populatePackagesBy || 'manual'
-        
+
         console.log('📦 Processing Package Section:', { populateBy })
 
         const sectionData: any = {
@@ -49,6 +51,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
             tag: item.tag,
             tagColor: item.tagColor,
             href: '#',
+            priceSuffix: item.priceSuffix || 'Per Person',
           }))
           console.log('📝 Using manual items:', sectionData.items.length)
         } else {
@@ -66,43 +69,39 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
 
           if (populateBy === 'featured') {
             query.where.isFeatured = { equals: true }
-          } 
-          else if (populateBy === 'auto' && destinationContext) {
-             console.log('🎯 Fetching packages for context destination:', destinationContext.name)
-             query.where.destinations = { contains: destinationContext.id }
-          }
-          else if (populateBy === 'featuredDestinations') {
+          } else if (populateBy === 'auto' && destinationContext) {
+            console.log('🎯 Fetching packages for context destination:', destinationContext.name)
+            query.where.destinations = { contains: destinationContext.id }
+          } else if (populateBy === 'featuredDestinations') {
             const featuredDests = await payload.find({
               collection: 'destinations',
-              where: { 
+              where: {
                 isFeatured: { equals: true },
-                isPublished: { equals: true }
+                isPublished: { equals: true },
               },
               limit: 100,
             })
-            
-            const destIds = featuredDests.docs.map(d => d.id)
+
+            const destIds = featuredDests.docs.map((d) => d.id)
             if (destIds.length > 0) {
               query.where.destinations = { in: destIds }
             }
-          } 
-          else if (populateBy === 'destinations') {
+          } else if (populateBy === 'destinations') {
             const destArray = Array.isArray(section.destinations) ? section.destinations : []
-            const destIds = destArray.map((dest: any) => 
-              typeof dest === 'object' ? dest.id : dest
-            ).filter(Boolean)
-            
+            const destIds = destArray
+              .map((dest: any) => (typeof dest === 'object' ? dest.id : dest))
+              .filter(Boolean)
+
             if (destIds.length > 0) {
               console.log('🗺️ Fetching packages from destinations:', destIds)
               query.where.destinations = { in: destIds }
             }
-          } 
-          else if (populateBy === 'vibes') {
+          } else if (populateBy === 'vibes') {
             const vibesArray = Array.isArray(section.vibes) ? section.vibes : []
-            const vibeIds = vibesArray.map((vibe: any) => 
-              typeof vibe === 'object' ? vibe.id : vibe
-            ).filter(Boolean)
-            
+            const vibeIds = vibesArray
+              .map((vibe: any) => (typeof vibe === 'object' ? vibe.id : vibe))
+              .filter(Boolean)
+
             if (vibeIds.length > 0) {
               console.log('🎭 Fetching packages from vibes:', vibeIds)
               query.where.vibe = { in: vibeIds }
@@ -131,6 +130,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
                 tagColor: labelObj?.color || 'bg-orange-400 text-white',
                 slug: pkg.slug,
                 href: `/packages/${pkg.slug}`,
+                priceSuffix: 'Per Person',
               }
             })
 
@@ -147,7 +147,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
       // ==================== DESTINATION SECTION ====================
       if (blockType === 'destinationSection' || section.populateDestinationsBy) {
         const populateBy = section.populateDestinationsBy || 'featured'
-        
+
         console.log('🗺️ Processing Destination Section:', { populateBy })
 
         const sectionData: any = {
@@ -171,6 +171,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
             tag: item.tag,
             tagColor: item.tagColor,
             href: '#',
+            priceSuffix: item.priceSuffix || 'Per Person',
           }))
           console.log('📝 Using manual destination items:', sectionData.items.length)
         } else {
@@ -203,9 +204,12 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
             console.log('✅ Fetched destinations:', result.docs.length)
 
             const destinationItems = result.docs.map((dest: any) => {
-              const currencySymbol = dest.currency === 'USD' ? '$' : dest.currency === 'EUR' ? '€' : '₹'
+              const currencySymbol =
+                dest.currency === 'USD' ? '$' : dest.currency === 'EUR' ? '€' : '₹'
               const tag = dest.isInSeason ? 'In Season' : dest.isPopular ? 'Popular' : ''
-              const tagColor = dest.isInSeason ? 'bg-orange-400 text-white' : 'bg-red-500 text-white'
+              const tagColor = dest.isInSeason
+                ? 'bg-orange-400 text-white'
+                : 'bg-red-500 text-white'
 
               return {
                 blockType: 'destinationItem' as const,
@@ -217,6 +221,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
                 tagColor,
                 slug: dest.slug,
                 href: `/destinations/${dest.slug}`,
+                priceSuffix: 'Per Person',
               }
             })
 
@@ -253,7 +258,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
           const vibeGroups = await Promise.all(
             vibes.map(async (vibeRel: any) => {
               const vibeId = typeof vibeRel === 'object' ? vibeRel.id : vibeRel
-              
+
               const vibe = await payload.findByID({
                 collection: 'vibes',
                 id: vibeId,
@@ -273,9 +278,12 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
               console.log(`🎭 Vibe "${vibe.name}": ${packages.docs.length} packages`)
 
               const vibeItems = packages.docs.map((pkg: any) => {
-                const currencySymbol = pkg.currency === 'USD' ? '$' : pkg.currency === 'EUR' ? '€' : '₹'
+                const currencySymbol =
+                  pkg.currency === 'USD' ? '$' : pkg.currency === 'EUR' ? '€' : '₹'
                 const tag = pkg.isInSeason ? 'In Season' : pkg.isPopular ? 'Popular' : ''
-                const tagColor = pkg.isInSeason ? 'bg-orange-400 text-white' : 'bg-red-500 text-white'
+                const tagColor = pkg.isInSeason
+                  ? 'bg-orange-400 text-white'
+                  : 'bg-red-500 text-white'
 
                 return {
                   blockType: 'packageItem' as const,
@@ -287,6 +295,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
                   tagColor,
                   slug: pkg.slug,
                   href: `/packages/${pkg.slug}`,
+                  priceSuffix: 'Per Person',
                 }
               })
 
@@ -296,11 +305,14 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
                 color: vibe.color || 'orange',
                 items: vibeItems,
               }
-            })
+            }),
           )
 
           sectionData.vibes = vibeGroups
-          console.log('✅ Processed vibes:', vibeGroups.map(v => v.vibeName))
+          console.log(
+            '✅ Processed vibes:',
+            vibeGroups.map((v) => v.vibeName),
+          )
         } catch (error) {
           console.error('❌ Error fetching vibes:', error)
         }
@@ -318,7 +330,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
 
         // Reusing 'vibe' type for client rendering as the UI is identical (Tabs + Cards)
         const sectionData: any = {
-          type: 'vibe', 
+          type: 'vibe',
           title: section.title || 'Explore by Theme',
           subtitle: section.subtitle,
           theme: section.theme,
@@ -332,7 +344,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
           const themeGroups = await Promise.all(
             themes.map(async (themeRel: any) => {
               const themeId = typeof themeRel === 'object' ? themeRel.id : themeRel
-              
+
               const theme = await payload.findByID({
                 collection: 'themes',
                 id: themeId,
@@ -352,9 +364,12 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
               console.log(`🎭 Theme "${theme.name}": ${packages.docs.length} packages`)
 
               const themeItems = packages.docs.map((pkg: any) => {
-                const currencySymbol = pkg.currency === 'USD' ? '$' : pkg.currency === 'EUR' ? '€' : '₹'
+                const currencySymbol =
+                  pkg.currency === 'USD' ? '$' : pkg.currency === 'EUR' ? '€' : '₹'
                 const tag = pkg.isInSeason ? 'In Season' : pkg.isPopular ? 'Popular' : ''
-                const tagColor = pkg.isInSeason ? 'bg-orange-400 text-white' : 'bg-red-500 text-white'
+                const tagColor = pkg.isInSeason
+                  ? 'bg-orange-400 text-white'
+                  : 'bg-red-500 text-white'
 
                 return {
                   blockType: 'packageItem' as const,
@@ -366,6 +381,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
                   tagColor,
                   slug: pkg.slug,
                   href: `/packages/${pkg.slug}`,
+                  priceSuffix: 'Per Person',
                 }
               })
 
@@ -375,11 +391,14 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
                 color: 'orange',
                 items: themeItems,
               }
-            })
+            }),
           )
 
           sectionData.vibes = themeGroups
-          console.log('✅ Processed themes:', themeGroups.map(t => t.vibeName))
+          console.log(
+            '✅ Processed themes:',
+            themeGroups.map((t) => t.vibeName),
+          )
         } catch (error) {
           console.error('❌ Error fetching themes:', error)
         }
@@ -416,17 +435,17 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
             activities: day.activities || [],
           }))
           console.log('📝 Using manual itinerary days:', sectionData.items.length)
-        } 
-        else if (section.itinerarySource === 'package' && section.packageRelation) {
+        } else if (section.itinerarySource === 'package' && section.packageRelation) {
           // Specific package selected - fetch on server
           try {
             const payload = await getPayload({ config: configPromise })
-            const packageId = typeof section.packageRelation === 'object' 
-              ? section.packageRelation.id 
-              : section.packageRelation
-            
+            const packageId =
+              typeof section.packageRelation === 'object'
+                ? section.packageRelation.id
+                : section.packageRelation
+
             console.log('🔍 Fetching itinerary for package ID:', packageId)
-            
+
             const packageDoc = await payload.findByID({
               collection: 'packages',
               id: packageId,
@@ -444,7 +463,7 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
                   detailsImage: activity.image || activity.detailsImage,
                 })),
               }))
-              
+
               console.log(`✅ Loaded ${sectionData.items.length} days from selected package`)
             } else {
               console.warn('⚠️ Package has no itinerary data')
@@ -467,14 +486,17 @@ export const DynamicScrollerBlockComponent = async (props: DynamicScrollerBlock 
         type: undefined,
         items: [],
       }
-    })
+    }),
   )
 
-  console.log('🎬 Final processed sections:', processedSections.map(s => ({ 
-    type: s.type, 
-    itemCount: s.items?.length || s.vibes?.length || 0,
-    itinerarySource: s.itinerarySource,
-  })))
+  console.log(
+    '🎬 Final processed sections:',
+    processedSections.map((s) => ({
+      type: s.type,
+      itemCount: s.items?.length || s.vibes?.length || 0,
+      itinerarySource: s.itinerarySource,
+    })),
+  )
 
   return <DynamicScrollerClient sections={processedSections} />
 }

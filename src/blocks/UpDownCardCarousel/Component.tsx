@@ -22,7 +22,10 @@ const getCurrencySymbol = (currency: string) => {
 export const UpDownCardCarousel = async (props: UpDownCardCarouselProps) => {
   const { dataSource, itemLimit, cards: manualCards, ...rest } = props as any
 
-  let cards = manualCards || []
+  let cards = (manualCards || []).map((card: any) => ({
+    ...card,
+    priceSuffix: card.priceSuffix || 'Per Person',
+  }))
 
   // Fetch from collections
   if (dataSource !== 'manual') {
@@ -74,6 +77,7 @@ export const UpDownCardCarousel = async (props: UpDownCardCarouselProps) => {
             image: dest.featuredImage,
             alt: dest.name,
             href: `/destinations/${dest.slug}`,
+            priceSuffix: 'Per Person',
           }
         })
       }
@@ -139,6 +143,7 @@ export const UpDownCardCarousel = async (props: UpDownCardCarouselProps) => {
             image: pkg.heroImage,
             alt: pkg.name,
             href: `/packages/${pkg.slug}`,
+            priceSuffix: 'Per Person',
           }
         })
       }

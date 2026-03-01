@@ -1,5 +1,5 @@
 // src/blocks/UpDownCarousel/config.ts
-import type { Block } from 'payload';
+import type { Block } from 'payload'
 
 export const UpDownCardCarousel: Block = {
   slug: 'upDownCardCarousel',
@@ -66,6 +66,12 @@ export const UpDownCardCarousel: Block = {
           required: true,
           min: 0,
           admin: { step: 1, description: 'Price in INR.' },
+        },
+        {
+          name: 'priceSuffix',
+          type: 'text',
+          defaultValue: 'Per Person',
+          admin: { description: 'Suffix displayed after price (e.g. Per Person)' },
         },
         { name: 'discount', type: 'text' },
         {
@@ -188,6 +194,6 @@ export const UpDownCardCarousel: Block = {
       ],
     },
   ],
-};
+}
 
-export default UpDownCardCarousel;
+export default UpDownCardCarousel

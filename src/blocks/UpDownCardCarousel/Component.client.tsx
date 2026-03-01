@@ -25,6 +25,7 @@ type CardLike = {
   imageUrl?: string | null
   alt?: string | null
   href?: string | null
+  priceSuffix?: string | null
 }
 
 const isMediaLike = (v: unknown): v is Exclude<MediaLike, string> =>
@@ -117,11 +118,21 @@ const DashedRule: React.FC<{ className?: string }> = ({ className }) => (
   />
 )
 
-const CarouselCard: React.FC<{ 
-    card: CardLike; 
-    isEven: boolean; 
-    headingTypo?: { activeFont: string, fontStyle: string, isCustom: boolean, sizes: { heading: string, subheading: string } };
-    detailsTypo?: { activeFont: string, fontStyle: string, isCustom: boolean, sizes: { heading: string, subheading: string } };
+const CarouselCard: React.FC<{
+  card: CardLike
+  isEven: boolean
+  headingTypo?: {
+    activeFont: string
+    fontStyle: string
+    isCustom: boolean
+    sizes: { heading: string; subheading: string }
+  }
+  detailsTypo?: {
+    activeFont: string
+    fontStyle: string
+    isCustom: boolean
+    sizes: { heading: string; subheading: string }
+  }
 }> = ({ card, isEven, headingTypo, detailsTypo }) => {
   const [isFavorite, setIsFavorite] = React.useState(false)
 
@@ -270,7 +281,7 @@ const CarouselCard: React.FC<{
                     opacity: 0.8,
                   }}
                 >
-                  {/* (per person) */}
+                  {card?.priceSuffix ? card.priceSuffix : null}
                 </span>
               </div>
             </div>
@@ -318,7 +329,7 @@ export const UpDownCardCarouselClient: React.FC<{
   cards = [],
   headerTypography,
   cardHeadingTypography,
-  cardDetailsTypography
+  cardDetailsTypography,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -331,24 +342,27 @@ export const UpDownCardCarouselClient: React.FC<{
   // Typography Helper
   const getTypographyStyles = (typography: any, defaultFamily: string = "'Amiri', serif") => {
     const fontMap: Record<string, string> = {
-        inter: "'Inter', sans-serif",
-        merriweather: "'Merriweather', serif",
-        roboto: "'Roboto', sans-serif",
-        poppins: "'Poppins', sans-serif",
-        kaushan: "'Kaushan Script', cursive",
-        nats: "'NATS', sans-serif",
+      inter: "'Inter', sans-serif",
+      merriweather: "'Merriweather', serif",
+      roboto: "'Roboto', sans-serif",
+      poppins: "'Poppins', sans-serif",
+      kaushan: "'Kaushan Script', cursive",
+      nats: "'NATS', sans-serif",
     }
     const activeFont = typography?.fontFamily ? fontMap[typography.fontFamily] : defaultFamily
     const fontStyle = typography?.fontFamily ? 'normal' : 'italic'
     const isCustom = !!typography?.fontFamily
 
     const size = typography?.fontSize || 'base'
-    const sizeMap: Record<string, { heading: string, subheading: string }> = {
-        sm: { heading: 'text-3xl md:text-5xl', subheading: 'text-lg md:text-xl' },
-        base: { heading: 'text-4xl sm:text-5xl md:text-6xl lg:text-[64px] xl:text-[72px]', subheading: 'text-xl sm:text-xl md:text-xl lg:text-2xl' },
-        lg: { heading: 'text-5xl sm:text-6xl md:text-[80px]', subheading: 'text-2xl md:text-[32px]' },
-        xl: { heading: 'text-6xl sm:text-7xl md:text-[96px]', subheading: 'text-3xl md:text-[40px]' },
-        '2xl': { heading: 'text-7xl sm:text-8xl md:text-[112px]', subheading: 'text-4xl md:text-[48px]' },
+    const sizeMap: Record<string, { heading: string; subheading: string }> = {
+      sm: { heading: 'text-2xl md:text-3xl', subheading: 'text-base md:text-lg' },
+      base: {
+        heading: 'text-3xl sm:text-4xl md:text-5xl lg:text-[56px]',
+        subheading: 'text-lg md:text-xl',
+      },
+      lg: { heading: 'text-4xl sm:text-5xl md:text-[64px]', subheading: 'text-xl md:text-[28px]' },
+      xl: { heading: 'text-5xl sm:text-6xl md:text-[72px]', subheading: 'text-2xl md:text-4xl' },
+      '2xl': { heading: 'text-6xl sm:text-7xl md:text-[80px]', subheading: 'text-3xl md:text-5xl' },
     }
     const sizes = sizeMap[size] || sizeMap.base
 
@@ -360,7 +374,6 @@ export const UpDownCardCarouselClient: React.FC<{
   // Card Styles
   const cardHeadingTypo = getTypographyStyles(cardHeadingTypography, "'Inter', sans-serif")
   const cardDetailsTypo = getTypographyStyles(cardDetailsTypography, "'Inter', sans-serif")
-
 
   // ✅ Custom 0.2-second smooth scroll
   const scroll = (direction: 'left' | 'right') => {
@@ -394,7 +407,7 @@ export const UpDownCardCarouselClient: React.FC<{
         style={{
           maxWidth: '100vw',
           overflow: 'hidden',
-          fontFamily: headerTypo.activeFont // Apply globally to section
+          fontFamily: headerTypo.activeFont, // Apply globally to section
         }}
       >
         <div className="px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20" style={{ marginBottom: '-20px' }}>
