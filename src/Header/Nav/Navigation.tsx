@@ -62,7 +62,7 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
                hrefBase = '/packages'
                break
              case 'package-categories':
-               endpoint = '/api/package-categories?limit=50&sort=name&depth=0'
+               endpoint = '/api/themes?limit=50&sort=name&depth=0'
                hrefBase = '/themes' // CHANGED: Points to /themes now
                break
              case 'international-package':
@@ -98,7 +98,7 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
         label: 'Packages',
         hrefBase: '/themes', // CHANGED: Points to /themes now
         // CHANGED: Now fetching Categories instead of all packages
-        endpoint: '/api/package-categories?limit=50&sort=name&depth=0',
+        endpoint: '/api/themes?limit=50&sort=name&depth=0',
         type: 'dynamic',
       },
     ]
@@ -165,7 +165,7 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle Menu"
-            className="text-black focus:outline-none transition-transform duration-300"
+            className="text-white focus:outline-none transition-transform duration-300"
           >
             {isMenuOpen ? <X size={26} /> : <Menu size={26} />}
           </button>

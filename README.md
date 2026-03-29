@@ -60,7 +60,7 @@ A premium travel agency platform built with **Next.js 15 (App Router)** and **Pa
 
 4.  **Run Development Server:**
     ```bash
-    pnpm dev
+    m s
     ```
     - Website: [http://localhost:3000](http://localhost:3000)
     - Admin Panel: [http://localhost:3000/admin](http://localhost:3000/admin)

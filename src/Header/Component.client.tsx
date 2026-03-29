@@ -31,7 +31,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
     <header 
       className={`w-full py-4 ${pathname === '/curate' || theme === 'light' ? 'bg-black' : 'bg-transparent'}`}
       style={{ 
-        position: 'absolute', 
+        position: (pathname === '/curate' || theme === 'light') ? 'relative' : 'absolute', 
         top: 0, 
         left: 0, 
         width: '100%', 
