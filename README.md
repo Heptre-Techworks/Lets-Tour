@@ -75,7 +75,7 @@ This project uses the `@payloadcms/email-nodemailer` adapter.
 
 ```
 src/
-├── app/                # Next.js App Router (Frontend)
+├── app/                # Next.js App Router (Frontend)                                                        89
 │   ├── (frontend)/     # Public facing pages
 │   ├── (payload)/      # Admin panel routes
 │   └── api/            # API routes (test-email, etc.)

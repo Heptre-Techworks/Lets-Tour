@@ -72,6 +72,13 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
            }
         }
 
+        // Mobile fallback consistency: if labeled 'Packages', force the package endpoint 
+        // regardless of CMS configuration, exactly like MegaMenu does on desktop
+        if (item.label?.toLowerCase() === 'packages') {
+          endpoint = '/api/packages?where[isPublished][equals]=true&limit=50&sort=name&depth=0'
+          hrefBase = '/packages'
+        }
+
         return {
           key: item.id || item.label,
           label: item.label,
@@ -96,9 +103,8 @@ export const Navigation: React.FC<NavigationProps> = ({ data }) => {
       {
         key: 'packages',
         label: 'Packages',
-        hrefBase: '/themes', // CHANGED: Points to /themes now
-        // CHANGED: Now fetching Categories instead of all packages
-        endpoint: '/api/themes?limit=50&sort=name&depth=0',
+        hrefBase: '/packages',
+        endpoint: '/api/packages?where[isPublished][equals]=true&limit=50&sort=name&depth=0',
         type: 'dynamic',
       },
     ]
