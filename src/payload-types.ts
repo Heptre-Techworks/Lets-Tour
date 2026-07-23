@@ -76,6 +76,7 @@ export interface Config {
     destinations: Destination;
     'international-package': InternationalPackage;
     packages: Package;
+    'package-departures': PackageDeparture;
     'accommodation-types': AccommodationType;
     activities: Activity;
     amenities: Amenity;
@@ -104,7 +105,11 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    packages: {
+      departures: 'package-departures';
+    };
+  };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -115,6 +120,7 @@ export interface Config {
     destinations: DestinationsSelect<false> | DestinationsSelect<true>;
     'international-package': InternationalPackageSelect<false> | InternationalPackageSelect<true>;
     packages: PackagesSelect<false> | PackagesSelect<true>;
+    'package-departures': PackageDeparturesSelect<false> | PackageDeparturesSelect<true>;
     'accommodation-types': AccommodationTypesSelect<false> | AccommodationTypesSelect<true>;
     activities: ActivitiesSelect<false> | ActivitiesSelect<true>;
     amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
@@ -1247,6 +1253,22 @@ export interface Package {
       }[]
     | null;
   isPublished?: boolean | null;
+  /**
+   * Fixed = scheduled departures shown on the calendar; On Request = enquiry-led.
+   */
+  scheduleType?: ('on_request' | 'fixed') | null;
+  /**
+   * Default online-payment setting inherited by new departures.
+   */
+  defaultAcceptOnlinePayment?: boolean | null;
+  /**
+   * Scheduled departures for this package.
+   */
+  departures?: {
+    docs?: (string | PackageDeparture)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   highlights?:
     | {
         icon?: ('star' | 'flight' | 'hotel' | 'meal' | 'transport' | 'ticket' | 'activity' | 'feature') | null;
@@ -1378,6 +1400,54 @@ export interface Exclusion {
     [k: string]: unknown;
   } | null;
   icon?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "package-departures".
+ */
+export interface PackageDeparture {
+  id: string;
+  /**
+   * Auto-generated from the package name and start date.
+   */
+  title?: string | null;
+  package: string | Package;
+  /**
+   * Departure date (shown on the calendar).
+   */
+  startDate: string;
+  /**
+   * Return date (optional).
+   */
+  endDate?: string | null;
+  /**
+   * Optional batch label, e.g. "Diwali Batch".
+   */
+  label?: string | null;
+  /**
+   * Total seats available for this departure.
+   */
+  capacity?: number | null;
+  /**
+   * Seats confirmed so far (maintained automatically).
+   */
+  seatsBooked?: number | null;
+  /**
+   * Overrides the package price for this departure (optional).
+   */
+  priceOverride?: number | null;
+  currency?: ('INR' | 'USD' | 'EUR' | 'GBP') | null;
+  status: 'open' | 'waitlist' | 'closed' | 'cancelled' | 'departed';
+  /**
+   * Allow customers to pay online for this departure. Defaults from the package.
+   */
+  acceptOnlinePayment?: boolean | null;
+  /**
+   * Internal notes (not shown to customers).
+   */
+  notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2684,6 +2754,10 @@ export interface Booking {
   guestPhone?: string | null;
   package: string | Package;
   /**
+   * The fixed departure this booking is for (optional).
+   */
+  packageDeparture?: (string | null) | PackageDeparture;
+  /**
    * Trip start date
    */
   startDate: string;
@@ -3212,6 +3286,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'packages';
         value: string | Package;
+      } | null)
+    | ({
+        relationTo: 'package-departures';
+        value: string | PackageDeparture;
       } | null)
     | ({
         relationTo: 'accommodation-types';
@@ -4430,6 +4508,9 @@ export interface PackagesSelect<T extends boolean = true> {
         id?: T;
       };
   isPublished?: T;
+  scheduleType?: T;
+  defaultAcceptOnlinePayment?: T;
+  departures?: T;
   highlights?:
     | T
     | {
@@ -4464,6 +4545,26 @@ export interface PackagesSelect<T extends boolean = true> {
   isFeatured?: T;
   isFamilyFriendly?: T;
   isHoneymoon?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "package-departures_select".
+ */
+export interface PackageDeparturesSelect<T extends boolean = true> {
+  title?: T;
+  package?: T;
+  startDate?: T;
+  endDate?: T;
+  label?: T;
+  capacity?: T;
+  seatsBooked?: T;
+  priceOverride?: T;
+  currency?: T;
+  status?: T;
+  acceptOnlinePayment?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4513,6 +4614,7 @@ export interface BookingsSelect<T extends boolean = true> {
   guestEmail?: T;
   guestPhone?: T;
   package?: T;
+  packageDeparture?: T;
   startDate?: T;
   endDate?: T;
   bookingDate?: T;

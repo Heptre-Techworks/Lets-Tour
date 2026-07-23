@@ -26,6 +26,7 @@ import { PackageCategories } from './collections/PackageCategories'
 import { Destinations } from './collections/Destinations'
 import { InternationalPackage } from './collections/InternationalPackage'
 import { Packages } from './collections/Packages'
+import { PackageDepartures } from './collections/PackageDepartures'
 import { SearchFilters } from './collections/SearchFilters'
 import { PackageLayout } from './PackageLayout/config'
 import { DestinationLayout } from './DestinationLayout/config'
@@ -58,9 +59,16 @@ export default buildConfig({
   admin: {
     components: {
       beforeLogin: ['@/components/BeforeLogin'],
+      afterNavLinks: [
+        '@/components/Admin/PackageManager/PackageManagerNavLink#PackageManagerNavLink',
+      ],
       views: {
         // @ts-ignore
         Dashboard: TravelDashboard,
+        packageManager: {
+          Component: '@/components/Admin/PackageManager/PackageManagerView#PackageManagerView',
+          path: '/package-manager',
+        },
       },
     },
     importMap: {
@@ -89,6 +97,7 @@ export default buildConfig({
     Destinations,
     InternationalPackage,
     Packages,
+    PackageDepartures,
     AccommodationTypes,
     Activities,
     Amenities,
@@ -178,29 +187,29 @@ export default buildConfig({
       })
 
       if (existingUsers.docs.length === 0) {
-        console.log('No users found. Creating default admin user...')
-        await payload.create({
-          collection: 'users',
-          data: {
-            name: 'Admin',
-            email: 'admin@letstour.com',
-            password: 'admin123',
-            role: 'admin',
-          },
-        })
-        await payload.create({
-          collection: 'users',
-          data: {
-            name: 'user',
-            email: 'dhanushkumark62@gmail.com',
-            password: '123456789',
-            role: 'admin',
-          },
-        })
-        console.log('✅ Default admin user created successfully!')
-        console.log('📧 Email: admin@letstour.com')
-        console.log('🔑 Password: admin123')
-        console.log('⚠️  Please change the password after first login')
+        // Seed the first admin only from env — never hard-code credentials.
+        const seedEmail = process.env.INITIAL_ADMIN_EMAIL
+        const seedPassword = process.env.INITIAL_ADMIN_PASSWORD
+
+        if (seedEmail && seedPassword) {
+          console.log('No users found. Creating initial admin user from env...')
+          await payload.create({
+            collection: 'users',
+            data: {
+              name: 'Admin',
+              email: seedEmail,
+              password: seedPassword,
+              role: 'admin',
+            },
+          })
+          console.log(`✅ Initial admin user created: ${seedEmail}`)
+          console.log('⚠️  Please change the password after first login')
+        } else {
+          console.log(
+            '⚠️  No users found and INITIAL_ADMIN_EMAIL/INITIAL_ADMIN_PASSWORD not set. ' +
+              'Skipping seed — create the first admin via /admin.',
+          )
+        }
       } else {
         console.log(`✅ Found ${existingUsers.docs.length} existing user(s)`)
       }

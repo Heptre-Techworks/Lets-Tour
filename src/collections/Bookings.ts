@@ -1,5 +1,6 @@
 import type { CollectionConfig, FieldAccess } from 'payload'
 import { sendLeadEmail } from '../hooks/sendLeadEmail'
+import { derivePaymentStatus } from '../hooks/derivePaymentStatus'
 
 const canReadBookingUser: FieldAccess = ({ req, doc }) => {
   const user = req?.user
@@ -79,6 +80,14 @@ export const Bookings: CollectionConfig = {
       type: 'relationship',
       relationTo: 'packages',
       required: true,
+    },
+    {
+      name: 'packageDeparture',
+      type: 'relationship',
+      relationTo: 'package-departures',
+      admin: {
+        description: 'The fixed departure this booking is for (optional).',
+      },
     },
     {
       type: 'row',
@@ -251,6 +260,7 @@ export const Bookings: CollectionConfig = {
         }
         return data
       },
+      derivePaymentStatus,
     ],
     afterChange: [sendLeadEmail],
   },
