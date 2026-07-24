@@ -160,6 +160,7 @@ export interface Config {
     packageLayout: PackageLayout;
     destinationLayout: DestinationLayout;
     'landing-page': LandingPage;
+    'payment-settings': PaymentSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -169,6 +170,7 @@ export interface Config {
     packageLayout: PackageLayoutSelect<false> | PackageLayoutSelect<true>;
     destinationLayout: DestinationLayoutSelect<false> | DestinationLayoutSelect<true>;
     'landing-page': LandingPageSelect<false> | LandingPageSelect<true>;
+    'payment-settings': PaymentSettingsSelect<false> | PaymentSettingsSelect<true>;
   };
   locale: null;
   user: User & {
@@ -2792,6 +2794,37 @@ export interface Booking {
    * Internal notes (not visible to customer)
    */
   internalNotes?: string | null;
+  /**
+   * Override whether this booking can be paid online.
+   */
+  onlinePaymentOverride?: ('inherit' | 'enabled' | 'disabled') | null;
+  /**
+   * Most recent Razorpay payment link.
+   */
+  paymentLinkUrl?: string | null;
+  razorpayPaymentLinkId?: string | null;
+  /**
+   * Set for on-site Checkout (Orders API).
+   */
+  razorpayOrderId?: string | null;
+  razorpayPaymentId?: string | null;
+  razorpaySignature?: string | null;
+  /**
+   * True once a payment has been verified.
+   */
+  paymentVerified?: boolean | null;
+  /**
+   * Audit log of payment webhook / verify events.
+   */
+  paymentEvents?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -4639,6 +4672,14 @@ export interface BookingsSelect<T extends boolean = true> {
       };
   specialRequests?: T;
   internalNotes?: T;
+  onlinePaymentOverride?: T;
+  paymentLinkUrl?: T;
+  razorpayPaymentLinkId?: T;
+  razorpayOrderId?: T;
+  razorpayPaymentId?: T;
+  razorpaySignature?: T;
+  paymentVerified?: T;
+  paymentEvents?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -5889,6 +5930,33 @@ export interface LandingPage {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payment-settings".
+ */
+export interface PaymentSetting {
+  id: string;
+  /**
+   * Day-to-day master switch. Also requires PAYMENTS_ENABLED=true and Razorpay keys in env.
+   */
+  enableOnlinePayments?: boolean | null;
+  provider?: 'razorpay' | null;
+  /**
+   * Informational — the active keys are set per deployment via env.
+   */
+  mode?: ('test' | 'live') | null;
+  defaultCurrency?: ('INR' | 'USD' | 'EUR' | 'GBP') | null;
+  /**
+   * Hours before a generated payment link expires.
+   */
+  paymentLinkExpiryHours?: number | null;
+  /**
+   * Shown to customers on payment links / checkout (e.g. "Lets Tour").
+   */
+  businessName?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -6396,6 +6464,21 @@ export interface LandingPageSelect<T extends boolean = true> {
                   };
             };
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payment-settings_select".
+ */
+export interface PaymentSettingsSelect<T extends boolean = true> {
+  enableOnlinePayments?: T;
+  provider?: T;
+  mode?: T;
+  defaultCurrency?: T;
+  paymentLinkExpiryHours?: T;
+  businessName?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

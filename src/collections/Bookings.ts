@@ -1,6 +1,7 @@
 import type { CollectionConfig, FieldAccess } from 'payload'
 import { sendLeadEmail } from '../hooks/sendLeadEmail'
 import { derivePaymentStatus } from '../hooks/derivePaymentStatus'
+import { syncDepartureSeats } from '../hooks/syncDepartureSeats'
 
 const canReadBookingUser: FieldAccess = ({ req, doc }) => {
   const user = req?.user
@@ -250,6 +251,77 @@ export const Bookings: CollectionConfig = {
         description: 'Internal notes (not visible to customer)',
       },
     },
+    {
+      type: 'collapsible',
+      label: 'Payment (Razorpay)',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: 'onlinePaymentOverride',
+          type: 'select',
+          defaultValue: 'inherit',
+          options: [
+            { label: 'Inherit (departure / package default)', value: 'inherit' },
+            { label: 'Force enabled', value: 'enabled' },
+            { label: 'Force disabled', value: 'disabled' },
+          ],
+          admin: {
+            description: 'Override whether this booking can be paid online.',
+          },
+        },
+        {
+          name: 'generatePaymentLink',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '@/components/Admin/Bookings/GeneratePaymentLinkButton#GeneratePaymentLinkButton',
+            },
+          },
+        },
+        {
+          name: 'paymentLinkUrl',
+          type: 'text',
+          admin: { readOnly: true, description: 'Most recent Razorpay payment link.' },
+        },
+        {
+          name: 'razorpayPaymentLinkId',
+          type: 'text',
+          index: true,
+          admin: { readOnly: true },
+        },
+        {
+          name: 'razorpayOrderId',
+          type: 'text',
+          index: true,
+          admin: { readOnly: true, description: 'Set for on-site Checkout (Orders API).' },
+        },
+        {
+          // Not `unique` on purpose: most bookings have no payment id, and a unique
+          // index would collide on multiple nulls. Idempotency is enforced in
+          // reconcilePayment via the paymentEvents log.
+          name: 'razorpayPaymentId',
+          type: 'text',
+          index: true,
+          admin: { readOnly: true },
+        },
+        {
+          name: 'razorpaySignature',
+          type: 'text',
+          admin: { readOnly: true, hidden: true },
+        },
+        {
+          name: 'paymentVerified',
+          type: 'checkbox',
+          defaultValue: false,
+          admin: { readOnly: true, description: 'True once a payment has been verified.' },
+        },
+        {
+          name: 'paymentEvents',
+          type: 'json',
+          admin: { readOnly: true, description: 'Audit log of payment webhook / verify events.' },
+        },
+      ],
+    },
   ],
 
   hooks: {
@@ -262,7 +334,7 @@ export const Bookings: CollectionConfig = {
       },
       derivePaymentStatus,
     ],
-    afterChange: [sendLeadEmail],
+    afterChange: [sendLeadEmail, syncDepartureSeats],
   },
 }
 
