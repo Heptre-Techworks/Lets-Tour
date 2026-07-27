@@ -6,14 +6,18 @@ import { RazorpayCheckoutButton } from './RazorpayCheckoutButton'
 const symbolFor = (c: string) =>
   c === 'INR' ? '₹' : c === 'USD' ? '$' : c === 'EUR' ? '€' : c === 'GBP' ? '£' : ''
 
-export type CheckoutFormProps = {
-  departureId: string
-  packageName: string
-  perPax: number
-  currency: string
+export type DepartureOption = {
+  id: string
   startDate?: string | null
   endDate?: string | null
+  perPax: number
+  currency: string
   seatsLeft?: number | null
+}
+
+export type CheckoutFormProps = {
+  packageName: string
+  departures: DepartureOption[]
 }
 
 const fmtDate = (iso?: string | null) =>
@@ -59,45 +63,77 @@ const Stepper: React.FC<{
 /**
  * On-site checkout for a fixed departure. Price is per-pax (the package price),
  * so the total updates live as travellers change. Adults + children are charged;
- * infants are free.
+ * infants are free. When the package has multiple departures, the customer picks one.
  */
-export const CheckoutForm: React.FC<CheckoutFormProps> = ({
-  departureId,
-  packageName,
-  perPax,
-  currency,
-  startDate,
-  endDate,
-  seatsLeft,
-}) => {
+export const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageName, departures }) => {
+  const [selectedId, setSelectedId] = useState(departures[0]?.id || '')
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
   const [infants, setInfants] = useState(0)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [specialRequests, setSpecialRequests] = useState('')
   const [error, setError] = useState<string | null>(null)
 
+  const selected = useMemo(
+    () => departures.find((d) => d.id === selectedId) || departures[0],
+    [departures, selectedId],
+  )
+
+  const perPax = selected?.perPax ?? 0
+  const currency = selected?.currency ?? 'INR'
+  const seatsLeft = selected?.seatsLeft
   const payingPax = adults + children
   const total = perPax * payingPax
   const sym = symbolFor(currency)
 
-  const capReached = useMemo(
-    () => typeof seatsLeft === 'number' && seatsLeft >= 0 && payingPax + infants >= seatsLeft,
-    [seatsLeft, payingPax, infants],
-  )
-
+  const capReached =
+    typeof seatsLeft === 'number' && seatsLeft >= 0 && payingPax + infants >= seatsLeft
+  const overCap = typeof seatsLeft === 'number' && seatsLeft >= 0 && payingPax + infants > seatsLeft
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const contactValid = name.trim().length > 1 && emailValid && phone.trim().length >= 7
-  const overCap = typeof seatsLeft === 'number' && seatsLeft >= 0 && payingPax + infants > seatsLeft
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
       <h1 className="text-3xl font-bold">Book: {packageName}</h1>
-      <p className="mt-1 text-muted-foreground">
-        {[fmtDate(startDate), fmtDate(endDate)].filter(Boolean).join(' → ') || 'Flexible dates'}
-        {typeof seatsLeft === 'number' && seatsLeft >= 0 ? ` · ${seatsLeft} seat${seatsLeft === 1 ? '' : 's'} left` : ''}
-      </p>
+
+      {departures.length > 1 && (
+        <div className="mt-6">
+          <div className="mb-2 text-sm font-medium">Choose a departure</div>
+          <div className="grid gap-2">
+            {departures.map((d) => {
+              const active = d.id === selected?.id
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setSelectedId(d.id)}
+                  className={`flex items-center justify-between rounded-xl border p-4 text-left transition-colors ${
+                    active ? 'border-[#FBAE3D] bg-[#FBAE3D]/5' : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <span className="font-medium">
+                    {[fmtDate(d.startDate), fmtDate(d.endDate)].filter(Boolean).join(' → ') || 'Flexible dates'}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {symbolFor(d.currency)}
+                    {d.perPax.toLocaleString('en-IN')}/pax
+                    {typeof d.seatsLeft === 'number' ? ` · ${d.seatsLeft} left` : ''}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {departures.length === 1 && (
+        <p className="mt-1 text-muted-foreground">
+          {[fmtDate(selected?.startDate), fmtDate(selected?.endDate)].filter(Boolean).join(' → ') || 'Flexible dates'}
+          {typeof seatsLeft === 'number' ? ` · ${seatsLeft} seat${seatsLeft === 1 ? '' : 's'} left` : ''}
+        </p>
+      )}
 
       <div className="mt-6 rounded-xl border p-5">
         <div className="mb-2 text-sm text-muted-foreground">
@@ -112,9 +148,17 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
       </div>
 
       <div className="mt-6 grid gap-3">
-        <input className="rounded-lg border px-4 py-3" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} />
-        <input className="rounded-lg border px-4 py-3" placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input className="rounded-lg border px-4 py-3" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <div className="text-sm font-medium">Your details</div>
+        <input className="rounded-lg border px-4 py-3" placeholder="Full name *" value={name} onChange={(e) => setName(e.target.value)} />
+        <input className="rounded-lg border px-4 py-3" placeholder="Email *" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input className="rounded-lg border px-4 py-3" placeholder="Phone *" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <textarea
+          className="rounded-lg border px-4 py-3"
+          rows={3}
+          placeholder="Special requests (optional) — dietary needs, room preferences, etc."
+          value={specialRequests}
+          onChange={(e) => setSpecialRequests(e.target.value)}
+        />
       </div>
 
       <div className="mt-6 flex items-center justify-between rounded-xl bg-black/5 p-5">
@@ -130,10 +174,11 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
           </div>
         </div>
         <RazorpayCheckoutButton
-          departureId={departureId}
+          departureId={selected?.id || ''}
           travelers={{ adults, children, infants }}
           contact={{ name, email, phone }}
-          disabled={!contactValid || total <= 0 || overCap}
+          specialRequests={specialRequests}
+          disabled={!selected || !contactValid || total <= 0 || overCap}
           onError={(m) => setError(m)}
         >
           Pay {sym}
