@@ -33,6 +33,10 @@ const DownloadIcon = () => (
   </svg>
 )
 
+const fmtDep = (iso?: string | null) =>
+  iso ? new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
+const curSym = (c?: string) => (c === 'USD' ? '$' : c === 'EUR' ? '€' : c === 'GBP' ? '£' : '₹')
+
 type PackageHeroProps = {
   buttons?: {
     bookNowLabel?: string
@@ -57,6 +61,8 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  // Bookable departures for fixed-schedule packages (loaded when the modal opens).
+  const [departures, setDepartures] = useState<any[]>([])
 
   useEffect(() => {
     if (packageProp) setPackage(packageProp)
@@ -67,6 +73,33 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
   useEffect(() => {
     setHeaderTheme('dark')
   }, [setHeaderTheme])
+
+  // Load bookable departures when the Book Now modal opens for a fixed package.
+  useEffect(() => {
+    if (!isModalOpen || !pkg || (pkg as any).scheduleType !== 'fixed') {
+      setDepartures([])
+      return
+    }
+    let active = true
+    fetch(`/api/package-departures?where[package][equals]=${pkg.id}&limit=100&depth=0&sort=startDate`, {
+      credentials: 'include',
+    })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('failed'))))
+      .then((d) => {
+        if (!active) return
+        const cutoff = Date.now() - 86400000 // include today
+        const list = (d?.docs || []).filter(
+          (dep: any) =>
+            ['open', 'waitlist'].includes(dep.status) &&
+            (!dep.startDate || new Date(dep.startDate).getTime() >= cutoff),
+        )
+        setDepartures(list)
+      })
+      .catch(() => active && setDepartures([]))
+    return () => {
+      active = false
+    }
+  }, [isModalOpen, pkg])
 
   const handleDownload = async () => {
     if (!pkg || isDownloading) return
@@ -152,22 +185,26 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
     }
 
     try {
-      // Send through our Next.js Custom API route proxy to avoid CORS and Payload collisions
-      const resSheets = await fetch('/api-custom/sheets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sheetPayload),
-      })
+      // Google Sheets logging is best-effort — it must NEVER block the booking.
+      try {
+        await fetch('/api-custom/sheets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sheetPayload),
+        })
+      } catch (sheetErr) {
+        console.warn('Sheets logging failed (non-blocking):', sheetErr)
+      }
 
-      // Send to CMS to trigger Lead Emails!
+      // The actual lead: create the CMS record (also triggers the lead email).
       const resPayload = await fetch('/api/custom-trip-requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(customTripPayload),
       })
 
-      if (!resSheets.ok) {
-        throw new Error('Sheets Proxy failed')
+      if (!resPayload.ok) {
+        throw new Error(`Enquiry submission failed (${resPayload.status})`)
       }
 
       setSubmitSuccess(true)
@@ -503,8 +540,52 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
             ) : (
                <>
                   <h3 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">Book Your Trip</h3>
-                  <p className="text-gray-500 mb-6 text-sm">Please fill out the form below to initiate your booking for {title}.</p>
-                  
+
+                  {departures.length > 0 && (
+                    <div className="mb-6">
+                      <p className="text-gray-500 mb-3 text-sm">Choose a departure to book &amp; pay online:</p>
+                      <div className="space-y-3">
+                        {departures.map((dep) => {
+                          const price = dep.priceOverride ?? pkg.price
+                          const cur = dep.currency ?? pkg.currency ?? 'INR'
+                          const left =
+                            typeof dep.capacity === 'number'
+                              ? Math.max(0, dep.capacity - (dep.seatsBooked || 0))
+                              : null
+                          return (
+                            <a
+                              key={dep.id}
+                              href={`/booking/checkout?departure=${dep.id}`}
+                              className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 p-4 hover:border-[#FBAE3D] hover:bg-[#FBAE3D]/5 transition-colors"
+                            >
+                              <div>
+                                <div className="font-semibold text-gray-900">
+                                  {fmtDep(dep.startDate)}
+                                  {dep.endDate ? ` → ${fmtDep(dep.endDate)}` : ''}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {curSym(cur)}
+                                  {Number(price || 0).toLocaleString('en-IN')} / person
+                                  {left != null ? ` · ${left} seat${left === 1 ? '' : 's'} left` : ''}
+                                </div>
+                              </div>
+                              <span className="whitespace-nowrap font-bold text-[#FBAE3D]">Book &amp; Pay →</span>
+                            </a>
+                          )
+                        })}
+                      </div>
+                      <div className="mt-6 mb-2 flex items-center gap-3 text-xs uppercase tracking-wide text-gray-400">
+                        <span className="h-px flex-1 bg-gray-200" />
+                        Or send an enquiry
+                        <span className="h-px flex-1 bg-gray-200" />
+                      </div>
+                    </div>
+                  )}
+
+                  {departures.length === 0 && (
+                    <p className="text-gray-500 mb-6 text-sm">Please fill out the form below to initiate your booking for {title}.</p>
+                  )}
+
                   <form onSubmit={handleBookNowSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
