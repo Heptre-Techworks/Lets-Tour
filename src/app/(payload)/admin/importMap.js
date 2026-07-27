@@ -19,11 +19,15 @@ import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 }
 import { SlugComponent as SlugComponent_92cc057d0a2abb4f6cf0307edf59f986 } from '@/fields/slug/SlugComponent'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { GeneratePaymentLinkButton as GeneratePaymentLinkButton_1e34ce0c28af4a142c0c20b74e22afa8 } from '@/components/Admin/Bookings/GeneratePaymentLinkButton'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { RowLabel as RowLabel_1f6ff6ff633e3695d348f4f3c58f1466 } from '@/Footer/RowLabel'
+import { PaymentStatusPanel as PaymentStatusPanel_6d7fef83766ffff7c2b6c039e4d8fcd9 } from '@/components/Admin/Payments/PaymentStatusPanel'
+import { PackageManagerNavLink as PackageManagerNavLink_332b95e01d0a7ca6c71bc530a48c9471 } from '@/components/Admin/PackageManager/PackageManagerNavLink'
 import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/components/BeforeLogin'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
+import { PackageManagerView as PackageManagerView_df202d1cb00b857a2a4df8ca07afaefa } from '@/components/Admin/PackageManager/PackageManagerView'
 
 export const importMap = {
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -47,9 +51,13 @@ export const importMap = {
   "@/fields/slug/SlugComponent#SlugComponent": SlugComponent_92cc057d0a2abb4f6cf0307edf59f986,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlocksFeatureClient": BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/Admin/Bookings/GeneratePaymentLinkButton#GeneratePaymentLinkButton": GeneratePaymentLinkButton_1e34ce0c28af4a142c0c20b74e22afa8,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
   "@/Footer/RowLabel#RowLabel": RowLabel_1f6ff6ff633e3695d348f4f3c58f1466,
+  "@/components/Admin/Payments/PaymentStatusPanel#PaymentStatusPanel": PaymentStatusPanel_6d7fef83766ffff7c2b6c039e4d8fcd9,
+  "@/components/Admin/PackageManager/PackageManagerNavLink#PackageManagerNavLink": PackageManagerNavLink_332b95e01d0a7ca6c71bc530a48c9471,
   "@/components/BeforeLogin#default": default_8a7ab0eb7ab5c511aba12e68480bfe5e,
-  "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e
+  "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
+  "@/components/Admin/PackageManager/PackageManagerView#PackageManagerView": PackageManagerView_df202d1cb00b857a2a4df8ca07afaefa
 }

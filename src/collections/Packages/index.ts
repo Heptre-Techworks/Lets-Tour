@@ -395,6 +395,45 @@ export const Packages: CollectionConfig = {
               label: 'Publish Status',
             },
             {
+              type: 'row',
+              fields: [
+                {
+                  name: 'scheduleType',
+                  type: 'select',
+                  options: [
+                    { label: 'On Request', value: 'on_request' },
+                    { label: 'Fixed Departures', value: 'fixed' },
+                  ],
+                  defaultValue: 'on_request',
+                  admin: {
+                    width: '50%',
+                    description:
+                      'Fixed = scheduled departures shown on the calendar; On Request = enquiry-led.',
+                  },
+                },
+                {
+                  name: 'defaultAcceptOnlinePayment',
+                  type: 'checkbox',
+                  label: 'Accept Online Payment (default)',
+                  defaultValue: true,
+                  admin: {
+                    width: '50%',
+                    description: 'Default online-payment setting inherited by new departures.',
+                  },
+                },
+              ],
+            },
+            {
+              name: 'departures',
+              type: 'join',
+              collection: 'package-departures',
+              on: 'package',
+              admin: {
+                description: 'Scheduled departures for this package.',
+                condition: (data) => data?.scheduleType === 'fixed',
+              },
+            },
+            {
               name: 'highlights',
               type: 'array',
               labels: { singular: 'Highlight', plural: 'Package Highlights' },
