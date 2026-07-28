@@ -28,6 +28,7 @@ import { Destinations } from './collections/Destinations'
 import { InternationalPackage } from './collections/InternationalPackage'
 import { Packages } from './collections/Packages'
 import { PackageDepartures } from './collections/PackageDepartures'
+import { DepartureSchedules } from './collections/DepartureSchedules'
 import { SearchFilters } from './collections/SearchFilters'
 import { PackageLayout } from './PackageLayout/config'
 import { DestinationLayout } from './DestinationLayout/config'
@@ -99,6 +100,7 @@ export default buildConfig({
     InternationalPackage,
     Packages,
     PackageDepartures,
+    DepartureSchedules,
     AccommodationTypes,
     Activities,
     Amenities,

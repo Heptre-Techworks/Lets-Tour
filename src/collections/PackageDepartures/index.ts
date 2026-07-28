@@ -63,6 +63,16 @@ export const PackageDepartures: CollectionConfig = {
       index: true,
     },
     {
+      name: 'schedule',
+      type: 'relationship',
+      relationTo: 'departure-schedules',
+      index: true,
+      admin: {
+        readOnly: true,
+        description: 'The recurrence rule that generated this departure (if any).',
+      },
+    },
+    {
       type: 'row',
       fields: [
         {

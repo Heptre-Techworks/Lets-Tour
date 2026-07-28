@@ -19,6 +19,8 @@ import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 }
 import { SlugComponent as SlugComponent_92cc057d0a2abb4f6cf0307edf59f986 } from '@/fields/slug/SlugComponent'
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { DaysOfWeekPicker as DaysOfWeekPicker_5dee35c61cb4831456a4698753562678 } from '@/components/Admin/DepartureSchedules/DaysOfWeekPicker'
+import { GenerateDeparturesPanel as GenerateDeparturesPanel_36f223fc5aa9dbb6952990e13a5ffce7 } from '@/components/Admin/DepartureSchedules/GenerateDeparturesPanel'
 import { GeneratePaymentLinkButton as GeneratePaymentLinkButton_1e34ce0c28af4a142c0c20b74e22afa8 } from '@/components/Admin/Bookings/GeneratePaymentLinkButton'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
@@ -51,6 +53,8 @@ export const importMap = {
   "@/fields/slug/SlugComponent#SlugComponent": SlugComponent_92cc057d0a2abb4f6cf0307edf59f986,
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BlocksFeatureClient": BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/Admin/DepartureSchedules/DaysOfWeekPicker#DaysOfWeekPicker": DaysOfWeekPicker_5dee35c61cb4831456a4698753562678,
+  "@/components/Admin/DepartureSchedules/GenerateDeparturesPanel#GenerateDeparturesPanel": GenerateDeparturesPanel_36f223fc5aa9dbb6952990e13a5ffce7,
   "@/components/Admin/Bookings/GeneratePaymentLinkButton#GeneratePaymentLinkButton": GeneratePaymentLinkButton_1e34ce0c28af4a142c0c20b74e22afa8,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
