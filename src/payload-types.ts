@@ -77,6 +77,7 @@ export interface Config {
     'international-package': InternationalPackage;
     packages: Package;
     'package-departures': PackageDeparture;
+    'departure-schedules': DepartureSchedule;
     'accommodation-types': AccommodationType;
     activities: Activity;
     amenities: Amenity;
@@ -121,6 +122,7 @@ export interface Config {
     'international-package': InternationalPackageSelect<false> | InternationalPackageSelect<true>;
     packages: PackagesSelect<false> | PackagesSelect<true>;
     'package-departures': PackageDeparturesSelect<false> | PackageDeparturesSelect<true>;
+    'departure-schedules': DepartureSchedulesSelect<false> | DepartureSchedulesSelect<true>;
     'accommodation-types': AccommodationTypesSelect<false> | AccommodationTypesSelect<true>;
     activities: ActivitiesSelect<false> | ActivitiesSelect<true>;
     amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
@@ -1417,6 +1419,10 @@ export interface PackageDeparture {
   title?: string | null;
   package: string | Package;
   /**
+   * The recurrence rule that generated this departure (if any).
+   */
+  schedule?: (string | null) | DepartureSchedule;
+  /**
    * Departure date (shown on the calendar).
    */
   startDate: string;
@@ -1450,6 +1456,88 @@ export interface PackageDeparture {
    * Internal notes (not shown to customers).
    */
   notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Weekly recurrence rules that generate fixed package departures.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "departure-schedules".
+ */
+export interface DepartureSchedule {
+  id: string;
+  /**
+   * Auto-generated from the package and end date.
+   */
+  title?: string | null;
+  /**
+   * Only fixed-schedule packages can have a recurrence.
+   */
+  package: string | Package;
+  /**
+   * First eligible date (inclusive).
+   */
+  startDate: string;
+  endsMode: 'on_date' | 'perpetual';
+  /**
+   * Generate up to and including this date.
+   */
+  untilDate?: string | null;
+  /**
+   * How many months ahead to keep generated (rolling window).
+   */
+  horizonMonths?: number | null;
+  /**
+   * Which weekdays departures start on.
+   */
+  daysOfWeek: ('0' | '1' | '2' | '3' | '4' | '5' | '6')[];
+  /**
+   * 1 = every week, 2 = every other week.
+   */
+  intervalWeeks?: number | null;
+  /**
+   * Optional time of day, e.g. "09:00" (24h).
+   */
+  departureTime?: string | null;
+  /**
+   * If set, return date = start + N nights.
+   */
+  tripNights?: number | null;
+  /**
+   * Dates within the window to skip (holidays, sold-out weeks).
+   */
+  blackoutDates?:
+    | {
+        date: string;
+        id?: string | null;
+      }[]
+    | null;
+  departureDefaults: {
+    /**
+     * Seats per departure.
+     */
+    capacity?: number | null;
+    /**
+     * Batch label, e.g. "Weekly Batch".
+     */
+    label?: string | null;
+    /**
+     * Overrides package price (optional).
+     */
+    priceOverride?: number | null;
+    currency?: ('INR' | 'USD' | 'EUR' | 'GBP') | null;
+    status: 'open' | 'waitlist' | 'closed' | 'cancelled' | 'departed';
+    /**
+     * Online payment for generated departures.
+     */
+    acceptOnlinePaymentMode?: ('inherit' | 'enabled' | 'disabled') | null;
+  };
+  lastGeneratedAt?: string | null;
+  /**
+   * Departures created by this schedule so far.
+   */
+  generatedCount?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3325,6 +3413,10 @@ export interface PayloadLockedDocument {
         value: string | PackageDeparture;
       } | null)
     | ({
+        relationTo: 'departure-schedules';
+        value: string | DepartureSchedule;
+      } | null)
+    | ({
         relationTo: 'accommodation-types';
         value: string | AccommodationType;
       } | null)
@@ -4588,6 +4680,7 @@ export interface PackagesSelect<T extends boolean = true> {
 export interface PackageDeparturesSelect<T extends boolean = true> {
   title?: T;
   package?: T;
+  schedule?: T;
   startDate?: T;
   endDate?: T;
   label?: T;
@@ -4598,6 +4691,42 @@ export interface PackageDeparturesSelect<T extends boolean = true> {
   status?: T;
   acceptOnlinePayment?: T;
   notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "departure-schedules_select".
+ */
+export interface DepartureSchedulesSelect<T extends boolean = true> {
+  title?: T;
+  package?: T;
+  startDate?: T;
+  endsMode?: T;
+  untilDate?: T;
+  horizonMonths?: T;
+  daysOfWeek?: T;
+  intervalWeeks?: T;
+  departureTime?: T;
+  tripNights?: T;
+  blackoutDates?:
+    | T
+    | {
+        date?: T;
+        id?: T;
+      };
+  departureDefaults?:
+    | T
+    | {
+        capacity?: T;
+        label?: T;
+        priceOverride?: T;
+        currency?: T;
+        status?: T;
+        acceptOnlinePaymentMode?: T;
+      };
+  lastGeneratedAt?: T;
+  generatedCount?: T;
   updatedAt?: T;
   createdAt?: T;
 }
