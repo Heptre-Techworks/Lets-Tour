@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { CheckoutForm, type DepartureOption } from '@/components/Payments/CheckoutForm'
+import { getPaymentSettings, isPaymentsEnabled } from '@/lib/razorpay/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,7 +44,11 @@ export default async function CheckoutPage({
     currency: dep.currency ?? pkg?.currency ?? 'INR',
     seatsLeft:
       typeof dep.capacity === 'number' ? Math.max(0, dep.capacity - (dep.seatsBooked || 0)) : null,
+    acceptOnlinePayment: dep.acceptOnlinePayment ?? pkg?.defaultAcceptOnlinePayment ?? true,
   })
+
+  const settings = await getPaymentSettings(payload)
+  const paymentsEnabled = isPaymentsEnabled(settings)
 
   let packageName = 'Package'
   let options: DepartureOption[] = []
@@ -86,5 +91,5 @@ export default async function CheckoutPage({
     )
   }
 
-  return <CheckoutForm packageName={packageName} departures={options} />
+  return <CheckoutForm packageName={packageName} departures={options} paymentsEnabled={paymentsEnabled} />
 }

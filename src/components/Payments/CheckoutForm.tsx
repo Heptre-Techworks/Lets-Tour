@@ -13,11 +13,15 @@ export type DepartureOption = {
   perPax: number
   currency: string
   seatsLeft?: number | null
+  acceptOnlinePayment?: boolean
 }
 
 export type CheckoutFormProps = {
   packageName: string
   departures: DepartureOption[]
+  // Whether the gateway is live (env + keys + admin toggle). Combined with the
+  // departure's own toggle to decide "Pay" vs "Request Booking".
+  paymentsEnabled?: boolean
 }
 
 const fmtDate = (iso?: string | null) =>
@@ -65,7 +69,7 @@ const Stepper: React.FC<{
  * so the total updates live as travellers change. Adults + children are charged;
  * infants are free. When the package has multiple departures, the customer picks one.
  */
-export const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageName, departures }) => {
+export const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageName, departures, paymentsEnabled }) => {
   const [selectedId, setSelectedId] = useState(departures[0]?.id || '')
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
@@ -93,6 +97,8 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageName, departu
   const overCap = typeof seatsLeft === 'number' && seatsLeft >= 0 && payingPax + infants > seatsLeft
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const contactValid = name.trim().length > 1 && emailValid && phone.trim().length >= 7
+  // Whether this specific departure can be paid online right now.
+  const payable = Boolean(paymentsEnabled) && (selected?.acceptOnlinePayment ?? true)
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
@@ -181,10 +187,21 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageName, departu
           disabled={!selected || !contactValid || total <= 0 || overCap}
           onError={(m) => setError(m)}
         >
-          Pay {sym}
-          {total.toLocaleString('en-IN')}
+          {payable ? (
+            <>
+              Pay {sym}
+              {total.toLocaleString('en-IN')}
+            </>
+          ) : (
+            'Request Booking'
+          )}
         </RazorpayCheckoutButton>
       </div>
+      {!payable && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Online payment isn&apos;t enabled for this departure — we&apos;ll take your request and contact you to confirm.
+        </p>
+      )}
 
       {!contactValid && <p className="mt-2 text-sm text-muted-foreground">Enter name, a valid email, and phone to continue.</p>}
       {overCap && <p className="mt-2 text-sm text-red-600">Only {seatsLeft} seats left for this departure.</p>}

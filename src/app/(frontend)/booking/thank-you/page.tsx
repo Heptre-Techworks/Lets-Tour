@@ -7,19 +7,23 @@ export const dynamic = 'force-dynamic'
 export default async function BookingThankYouPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ref?: string }>
+  searchParams: Promise<{ ref?: string; status?: string }>
 }) {
-  const { ref } = await searchParams
+  const { ref, status } = await searchParams
+  const isLead = status === 'received' // lead captured, payment not taken online
 
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center px-6 text-center">
       <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#FBAE3D]/15 text-3xl">
         ✓
       </div>
-      <h1 className="mb-2 text-3xl font-bold">Payment received</h1>
+      <h1 className="mb-2 text-3xl font-bold">{isLead ? 'Request received' : 'Payment received'}</h1>
       <p className="mb-6 text-muted-foreground">
-        Thank you — your booking is confirmed{ref ? <> under reference <strong>{ref}</strong></> : ''}.
-        Our team will be in touch shortly with the details.
+        {isLead ? (
+          <>Thank you — we&apos;ve received your booking request{ref ? <> (<strong>{ref}</strong>)</> : ''}. Our team will contact you shortly to confirm the details and payment.</>
+        ) : (
+          <>Thank you — your booking is confirmed{ref ? <> under reference <strong>{ref}</strong></> : ''}. Our team will be in touch shortly with the details.</>
+        )}
       </p>
       <Link
         href="/"
