@@ -2,7 +2,7 @@
 'use client'
 
 import { useHeaderTheme } from '@/providers/HeaderTheme'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import type { Package, Review } from '@/payload-types'
 import { Media } from '@/components/Media'
@@ -49,6 +49,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
 }) => {
   const { setHeaderTheme } = useHeaderTheme()
   const pathname = usePathname()
+  const router = useRouter()
 
   const [pkg, setPackage] = useState<Package | null>(packageProp || null)
   const [recentReviews, setRecentReviews] = useState<Review[]>(recentReviewsProp)
@@ -152,22 +153,26 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
     }
 
     try {
-      // Send through our Next.js Custom API route proxy to avoid CORS and Payload collisions
-      const resSheets = await fetch('/api-custom/sheets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sheetPayload),
-      })
+      // Google Sheets logging is best-effort — it must NEVER block the booking.
+      try {
+        await fetch('/api-custom/sheets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sheetPayload),
+        })
+      } catch (sheetErr) {
+        console.warn('Sheets logging failed (non-blocking):', sheetErr)
+      }
 
-      // Send to CMS to trigger Lead Emails!
+      // The actual lead: create the CMS record (also triggers the lead email).
       const resPayload = await fetch('/api/custom-trip-requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(customTripPayload),
       })
 
-      if (!resSheets.ok) {
-        throw new Error('Sheets Proxy failed')
+      if (!resPayload.ok) {
+        throw new Error(`Enquiry submission failed (${resPayload.status})`)
       }
 
       setSubmitSuccess(true)
@@ -461,7 +466,15 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                   )}
                   {/* Button label: NATS 24px line-height 0% style */}
                   <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={() => {
+                      // Fixed-departure packages go straight to the checkout page (pick
+                      // departure → travellers → pay). On-request packages open the enquiry.
+                      if ((pkg as any).scheduleType === 'fixed') {
+                        router.push(`/booking/checkout?package=${pkg.id}`)
+                      } else {
+                        setIsModalOpen(true)
+                      }
+                    }}
                     className="bg-white text-black py-3 px-8 rounded-full hover:bg-gray-200 transition-colors inline-block text-center"
                   >
                     <span className="font-nats text-[24px] leading-[0] tracking-[-0.011em] text-[#FBAE3D]">
@@ -504,7 +517,7 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                <>
                   <h3 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">Book Your Trip</h3>
                   <p className="text-gray-500 mb-6 text-sm">Please fill out the form below to initiate your booking for {title}.</p>
-                  
+
                   <form onSubmit={handleBookNowSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">

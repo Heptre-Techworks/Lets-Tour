@@ -89,6 +89,14 @@ export const RazorpayCheckoutButton: React.FC<RazorpayCheckoutButtonProps> = ({
       const order = await orderRes.json()
       if (!orderRes.ok) return fail(order?.error || 'Could not start payment')
 
+      // Lead captured but online payment isn't available for this departure —
+      // treat it as a booking request and send the customer to the confirmation.
+      if (order.payable === false) {
+        onSuccess?.(order.bookingReference)
+        window.location.href = `/booking/thank-you?ref=${encodeURIComponent(order.bookingReference)}&status=received`
+        return
+      }
+
       // 2) Open Razorpay Checkout.
       await loadCheckoutScript()
       if (!window.Razorpay) return fail('Razorpay failed to load')
