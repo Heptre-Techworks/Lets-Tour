@@ -59,32 +59,38 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
-    components: {
-      beforeLogin: ['@/components/BeforeLogin'],
-      afterNavLinks: [
-        '@/components/Admin/PackageManager/PackageManagerNavLink#PackageManagerNavLink',
-      ],
-      views: {
-        // @ts-ignore
-        Dashboard: TravelDashboard,
-        packageManager: {
-          Component: '@/components/Admin/PackageManager/PackageManagerView#PackageManagerView',
-          path: '/package-manager',
-        },
+  routes: {
+    login: '/google-login',
+  },
+  components: {
+    afterNavLinks: [
+      '@/components/Admin/PackageManager/PackageManagerNavLink#PackageManagerNavLink',
+    ],
+    views: {
+      Dashboard: TravelDashboard,
+      login: {
+        Component: '@/components/BeforeLogin',
+        path: '/google-login',
+      },
+      packageManager: {
+        Component:
+          '@/components/Admin/PackageManager/PackageManagerView#PackageManagerView',
+        path: '/package-manager',
       },
     },
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-    user: Users.slug,
-    livePreview: {
-      breakpoints: [
-        { label: 'Mobile', name: 'mobile', width: 375, height: 667 },
-        { label: 'Tablet', name: 'tablet', width: 768, height: 1024 },
-        { label: 'Desktop', name: 'desktop', width: 1440, height: 900 },
-      ],
-    },
   },
+  importMap: {
+    baseDir: path.resolve(dirname),
+  },
+  user: Users.slug,
+  livePreview: {
+    breakpoints: [
+      { label: 'Mobile', name: 'mobile', width: 375, height: 667 },
+      { label: 'Tablet', name: 'tablet', width: 768, height: 1024 },
+      { label: 'Desktop', name: 'desktop', width: 1440, height: 900 },
+    ],
+  },
+},
   editor: defaultLexical,
   db: mongooseAdapter({
     url: process.env.MONGODB_URI || '',
