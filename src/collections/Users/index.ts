@@ -1,11 +1,15 @@
 import { revalidateSite, revalidateSiteOnDelete } from '@/hooks/revalidateSite'
+import { firebaseStrategy } from '@/auth/firebaseStrategy'
 import type { CollectionConfig } from 'payload'
 
 const isAdmin = (u?: { role?: string }) => u?.role === 'admin'
 
 export const Users: CollectionConfig = {
   slug: 'users',
-  auth: true,
+  auth: {
+  disableLocalStrategy: true,
+  strategies: [firebaseStrategy],
+},
   admin: {
     useAsTitle: 'email',
     group: 'Site Management',
