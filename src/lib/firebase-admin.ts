@@ -1,13 +1,13 @@
 
 import { cert, getApp, getApps, initializeApp } from 'firebase-admin/app'
-import { getAuth } from 'firebase-admin/auth'
-
-const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON
+import { getAuth, type Auth } from 'firebase-admin/auth'
 
 function createFirebaseAdminApp() {
   if (getApps().length > 0) {
     return getApp()
   }
+
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON
 
   if (!serviceAccountJson) {
     throw new Error(
@@ -28,6 +28,13 @@ function createFirebaseAdminApp() {
   }
 }
 
-const app = createFirebaseAdminApp()
+let auth: Auth | undefined
 
-export const firebaseAdminAuth = getAuth(app)
+// Initialised on first use, not at import: payload.config imports this via the
+// auth strategy, so an import-time throw breaks every route during `next build`.
+export function getFirebaseAdminAuth(): Auth {
+  if (!auth) {
+    auth = getAuth(createFirebaseAdminApp())
+  }
+  return auth
+}

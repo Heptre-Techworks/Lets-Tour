@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { firebaseAdminAuth } from '@/lib/firebase-admin'
+import { getFirebaseAdminAuth } from '@/lib/firebase-admin'
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const decoded = await firebaseAdminAuth.verifyIdToken(idToken)
+    const decoded = await getFirebaseAdminAuth().verifyIdToken(idToken)
 
     if (!decoded.email || !decoded.email_verified) {
       return NextResponse.json(

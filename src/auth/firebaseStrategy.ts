@@ -1,5 +1,5 @@
 import type { AuthStrategy } from 'payload'
-import { firebaseAdminAuth } from '@/lib/firebase-admin'
+import { getFirebaseAdminAuth } from '@/lib/firebase-admin'
 
 export const firebaseStrategy: AuthStrategy = {
   name: 'firebase',
@@ -28,7 +28,7 @@ export const firebaseStrategy: AuthStrategy = {
     if (!idToken) return { user: null }
 
     try {
-      const decoded = await firebaseAdminAuth.verifyIdToken(idToken)
+      const decoded = await getFirebaseAdminAuth().verifyIdToken(idToken)
 
       if (!decoded.email || !decoded.email_verified) {
         return { user: null }
