@@ -23,7 +23,7 @@ A premium travel agency platform built with **Next.js 15 (App Router)** and **Pa
 - **Email Notifications:** Automated emails for new leads and bookings using Zoho Mail SMTP.
 - **SEO Ready:** Built-in SEO plugin for managing metadata, Open Graph tags, and sitemaps.
 - **Live Preview:** Real-time content preview before publishing.
-
+Check test
 ## 🛠️ Getting Started
 
 ### Prerequisites
