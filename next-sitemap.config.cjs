@@ -12,7 +12,8 @@ module.exports = {
     policies: [
       {
         userAgent: '*',
-        disallow: '/admin/*',
+        // '/admin' (prefix) also covers the bare /admin URL, which '/admin/*' missed.
+        disallow: ['/admin', '/api/auth/', '/api/users'],
       },
     ],
     additionalSitemaps: [`${SITE_URL}/pages-sitemap.xml`, `${SITE_URL}/posts-sitemap.xml`],

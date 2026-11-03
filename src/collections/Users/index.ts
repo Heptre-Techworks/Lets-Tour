@@ -7,7 +7,9 @@ const isAdmin = (u?: { role?: string }) => u?.role === 'admin'
 export const Users: CollectionConfig = {
   slug: 'users',
   auth: {
-  disableLocalStrategy: true,
+  // No password login, but keep the auth fields: the Firebase strategy and
+  // /api/auth/firebase look users up by `email`, which is dropped otherwise.
+  disableLocalStrategy: { enableFields: true },
   strategies: [firebaseStrategy],
 },
   admin: {

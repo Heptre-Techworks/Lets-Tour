@@ -38,7 +38,10 @@ const apply = (config: Mutable) => {
   components.Nav = AdminNav
   components.graphics = { ...(components.graphics ?? {}), Icon: AppIcon }
   components.views = components.views ?? {}
-  components.views.dashboard = { Component: AdminDashboard }
+  // Payload runs every views entry (dashboard included) through path-to-regexp when
+  // matching custom routes; an entry without `path` makes /admin/package-manager etc.
+  // crash with "Cannot read properties of undefined (reading 'length')".
+  components.views.dashboard = { Component: AdminDashboard, path: '/', exact: true }
   components.views.departureCalendar = {
     Component: DepartureCalendarView,
     path: '/departure-calendar',

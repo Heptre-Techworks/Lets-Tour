@@ -2,8 +2,8 @@
 'use client'
 
 import React, { useState } from 'react'
-import { signInWithPopup } from 'firebase/auth'
-import { auth, googleProvider } from '@/lib/firebase'
+import { signInWithPopup, signOut } from 'firebase/auth'
+import { getFirebaseAuth, googleProvider } from '@/lib/firebase'
 
 export default function BeforeLogin() {
   const [loading, setLoading] = useState(false)
@@ -14,7 +14,7 @@ export default function BeforeLogin() {
     setError('')
 
     try {
-      const result = await signInWithPopup(auth, googleProvider)
+      const result = await signInWithPopup(getFirebaseAuth(), googleProvider)
       const idToken = await result.user.getIdToken()
 
       const response = await fetch('/api/auth/firebase', {
@@ -24,7 +24,13 @@ export default function BeforeLogin() {
       })
 
       if (!response.ok) {
-        throw new Error('Google login could not be completed. Contact your administrator.')
+        // Don't keep a rejected Google account signed in to Firebase in this browser.
+        await signOut(getFirebaseAuth()).catch(() => {})
+        const body = await response.json().catch(() => null)
+        throw new Error(
+          (body && typeof body.error === 'string' && body.error) ||
+            'Google login could not be completed. Contact your administrator.',
+        )
       }
 
       window.location.href = '/admin'

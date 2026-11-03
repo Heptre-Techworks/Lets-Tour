@@ -16,8 +16,22 @@ type Args = {
   }>
 }
 
-export const generateMetadata = ({ params, searchParams }: Args): Promise<Metadata> =>
-  generatePageMetadata({ config, params, searchParams })
+// The admin (including the login page) must never be indexed, cached or previewed
+// by any search engine or bot. Pairs with the X-Robots-Tag header in next.config.js.
+const NO_INDEX: Metadata['robots'] = {
+  index: false,
+  follow: false,
+  nocache: true,
+  noarchive: true,
+  nosnippet: true,
+  noimageindex: true,
+  googleBot: { index: false, follow: false, noimageindex: true, nosnippet: true },
+}
+
+export const generateMetadata = async ({ params, searchParams }: Args): Promise<Metadata> => ({
+  ...(await generatePageMetadata({ config, params, searchParams })),
+  robots: NO_INDEX,
+})
 
 const Page = async ({ params, searchParams }: Args) => {
   await applyAdminStructure(config)

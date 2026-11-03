@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { cn } from '@/utilities/ui'
+import RichText from '@/components/RichText'
 import Image from 'next/image'
 
 type MaybeImage = { url?: string | null; alt?: string | null } | string | null | undefined
