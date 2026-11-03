@@ -52,26 +52,24 @@ import Vibes from './collections/Vibes'
 import { Themes } from './collections/Themes'
 import { Countries } from './collections/Countries'
 import { autoRevalidatePlugin } from './plugins/autoValidate'
-import TravelDashboard from './components/Admin/TravelDashboard'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
-  routes: {
-    login: '/google-login',
-  },
   components: {
+    // Google sign-in button on the built-in login view. Users disables the local
+    // strategy, so the email/password form is hidden.
+    beforeLogin: ['@/components/BeforeLogin'],
     afterNavLinks: [
       '@/components/Admin/PackageManager/PackageManagerNavLink#PackageManagerNavLink',
     ],
+    // The dashboard view is injected at request time by
+    // src/app/(payload)/_admin/applyAdminStructure.ts. Every entry here needs a
+    // `path`: Payload runs them all through path-to-regexp, and one without it
+    // crashes every custom admin route.
     views: {
-      Dashboard: TravelDashboard,
-      login: {
-        Component: '@/components/BeforeLogin',
-        path: '/google-login',
-      },
       packageManager: {
         Component:
           '@/components/Admin/PackageManager/PackageManagerView#PackageManagerView',

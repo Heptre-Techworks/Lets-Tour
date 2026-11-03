@@ -1,5 +1,6 @@
 import type { AuthStrategy } from 'payload'
 import { getFirebaseAdminAuth } from '@/lib/firebase-admin'
+import { isAllowedAdminEmail } from '@/auth/adminAllowlist'
 
 export const firebaseStrategy: AuthStrategy = {
   name: 'firebase',
@@ -30,17 +31,9 @@ export const firebaseStrategy: AuthStrategy = {
     try {
       const decoded = await getFirebaseAdminAuth().verifyIdToken(idToken)
 
-      if (!decoded.email || !decoded.email_verified) {
+      if (!decoded.email || !decoded.email_verified || !isAllowedAdminEmail(decoded.email)) {
         return { user: null }
       }
-      const allowedEmails = [
-  'bgragavendiran@gmail.com',
-  'a.mukesh2006@gmail.com',
-]
-
-if (!allowedEmails.includes(decoded.email.toLowerCase())) {
-  return { user: null }
-}
 
       const result = await payload.find({
         collection: 'users',

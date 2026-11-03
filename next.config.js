@@ -12,7 +12,9 @@ const nextConfig = {
     images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
-      ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
+      // Media URLs are built from process.env.NEXT_PUBLIC_SERVER_URL (e.g. www.letstour.in),
+      // which can differ from the Vercel production URL, so allow both.
+      ...[...new Set([NEXT_PUBLIC_SERVER_URL, process.env.NEXT_PUBLIC_SERVER_URL].filter(Boolean))].map((item) => {
         const url = new URL(item)
 
         return {
@@ -91,17 +93,18 @@ const nextConfig = {
   reactStrictMode: true,
   redirects,
   async headers() {
-    return [
+    // Keep the admin (incl. its login page) and the auth endpoints out of every
+    // search engine / bot index. `/admin/:path*` also matches `/admin` itself.
+    const noIndex = [
       {
-        source: '/admin/:path*',
-        headers: [
-          {
-            key: 'X-Robots-Tag',
-            value: 'noindex, nofollow',
-          },
-        ],
+        key: 'X-Robots-Tag',
+        value: 'noindex, nofollow, noarchive, nosnippet, noimageindex',
       },
     ]
+    return ['/admin/:path*', '/api/auth/:path*', '/api/users/:path*'].map((source) => ({
+      source,
+      headers: noIndex,
+    }))
   },
 }
 

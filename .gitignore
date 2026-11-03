@@ -22,3 +22,7 @@ node_modules/
 /.idea/
 /.vscode/
 /backups/
+.env*
+
+# Firebase / Google service-account keys
+*firebase-adminsdk*.json

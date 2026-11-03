@@ -1,4 +1,5 @@
 import React from 'react'
+import { redirect } from 'next/navigation'
 import type { AdminViewServerProps } from 'payload'
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import { SetStepNav } from '@payloadcms/ui'
@@ -40,7 +41,13 @@ export const DepartureCalendarView = async ({
   const { req } = initPageResult
   const payload = req.payload
   const adminRoute = payload.config.routes?.admin || '/admin'
-  const sp = (await Promise.resolve(searchParams)) as Record<string, string | string[] | undefined>
+
+  // Payload does not auth-guard custom views; send anonymous visitors to login.
+  if (!req.user) {
+    redirect(`${adminRoute}/login?redirect=${encodeURIComponent(`${adminRoute}/departure-calendar`)}`)
+  }
+
+  const sp =(await Promise.resolve(searchParams)) as Record<string, string | string[] | undefined>
   const rawId = Array.isArray(sp?.id) ? sp.id[0] : sp?.id
 
   const [schedulesRes, packagesRes, destinationsRes] = await Promise.all([

@@ -1,4 +1,5 @@
 import React from 'react'
+import { redirect } from 'next/navigation'
 import type { AdminViewServerProps } from 'payload'
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
@@ -20,6 +21,13 @@ const asId = (v: unknown): string | null => {
 export const PackageManagerView = async ({ initPageResult, params, searchParams }: AdminViewServerProps) => {
   const { req } = initPageResult
   const payload = req.payload
+
+  // Payload does not auth-guard custom views. Without this, anonymous visitors
+  // reach the overrideAccess query below and the template crashes (500).
+  if (!req.user) {
+    const adminRoute = payload.config.routes.admin
+    redirect(`${adminRoute}/login?redirect=${encodeURIComponent(`${adminRoute}/package-manager`)}`)
+  }
 
   const departuresResult = await payload.find({
     collection: 'package-departures',

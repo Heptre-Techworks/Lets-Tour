@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getFirebaseAdminAuth } from '@/lib/firebase-admin'
+import { isAllowedAdminEmail } from '@/auth/adminAllowlist'
 
 export async function POST(request: Request) {
   try {
@@ -22,6 +23,14 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Google email is not verified' },
         { status: 401 },
+      )
+    }
+
+    // Reject anyone not on the allowlist before touching the database.
+    if (!isAllowedAdminEmail(decoded.email)) {
+      return NextResponse.json(
+        { error: 'This Google account is not authorized to access the admin.' },
+        { status: 403 },
       )
     }
 
