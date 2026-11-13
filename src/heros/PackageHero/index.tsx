@@ -467,10 +467,13 @@ export const PackageHero: React.FC<PackageHeroProps> = ({
                   {/* Button label: NATS 24px line-height 0% style */}
                   <button
                     onClick={() => {
-                      // Fixed-departure packages go straight to the checkout page (pick
-                      // departure → travellers → pay). On-request packages open the enquiry.
-                      if ((pkg as any).scheduleType === 'fixed') {
-                        router.push(`/booking/checkout?package=${pkg.id}`)
+                      // Fixed-departure packages open the Departure Calendar of their
+                      // destination (dates → transport → traveller form → pay / enquiry).
+                      // On-request packages open the enquiry.
+                      const firstDest = (pkg as any).destinations?.[0]
+                      const destSlug = firstDest && typeof firstDest === 'object' ? firstDest.slug : null
+                      if ((pkg as any).scheduleType === 'fixed' && destSlug) {
+                        router.push(`/departure-calendar/${destSlug}?package=${pkg.id}`)
                       } else {
                         setIsModalOpen(true)
                       }

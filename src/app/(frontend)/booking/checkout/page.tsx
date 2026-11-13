@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { CheckoutForm, type DepartureOption } from '@/components/Payments/CheckoutForm'
@@ -11,7 +12,7 @@ const BOOKABLE = ['open', 'waitlist']
 
 // On-site checkout. Accepts either:
 //   /booking/checkout?departure=<id>   → a specific departure
-//   /booking/checkout?package=<id>     → pick from the package's bookable departures
+//   /booking/checkout?package=<id>     → redirects to the destination's Departure Calendar
 // Everything references existing records in the DB; price is per-pax.
 export default async function CheckoutPage({
   searchParams,
@@ -64,24 +65,17 @@ export default async function CheckoutPage({
     packageName = pkg.name || packageName
     options = [toOption(dep, pkg)]
   } else if (packageId) {
+    // The old "Choose a departure" step is gone: package links now land on the
+    // Departure Calendar of the package's first destination.
     const pkg = (await payload
-      .findByID({ collection: 'packages', id: packageId, depth: 0, overrideAccess: true })
+      .findByID({ collection: 'packages', id: packageId, depth: 1, overrideAccess: true })
       .catch(() => null)) as any
     if (!pkg) return shell('Package not found', 'This package is unavailable.')
-    packageName = pkg.name || packageName
-
-    const res = await payload.find({
-      collection: 'package-departures',
-      where: { and: [{ package: { equals: packageId } }, { status: { in: BOOKABLE } }] },
-      sort: 'startDate',
-      depth: 0,
-      limit: 100,
-      overrideAccess: true,
-    })
-    const cutoff = Date.now() - 86400000
-    options = res.docs
-      .filter((d: any) => !d.startDate || new Date(d.startDate).getTime() >= cutoff)
-      .map((d: any) => toOption(d, pkg))
+    const dest = Array.isArray(pkg.destinations) ? pkg.destinations[0] : null
+    if (dest && typeof dest === 'object' && dest.slug) {
+      redirect(`/departure-calendar/${dest.slug}?package=${pkg.id}`)
+    }
+    return shell('No departure calendar', <>{pkg.name || 'This package'} has no destination linked yet.</>)
   }
 
   if (options.length === 0) {

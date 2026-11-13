@@ -74,7 +74,11 @@ export async function POST(req: Request) {
       guestName: contact.name,
       guestEmail: contact.email,
       guestPhone: contact.phone,
-      contactDetails: { phone: contact.phone || '', email: contact.email || '' },
+      contactDetails: {
+        phone: contact.phone || '',
+        email: contact.email || '',
+        ...(body.address ? { address: String(body.address) } : {}),
+      },
       specialRequests: body.specialRequests,
     } as any,
   })

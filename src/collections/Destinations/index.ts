@@ -183,6 +183,81 @@ export const Destinations: CollectionConfig = {
       },
     },
 
+    // ==================== DEPARTURE CALENDAR: SUGGESTED TRANSPORT ====================
+    {
+      name: 'suggestedTransport',
+      type: 'array',
+      label: 'Suggested Flights & Trains',
+      labels: { singular: 'Option', plural: 'Flights & Trains' },
+      admin: {
+        description:
+          'Shown on this destination\'s Departure Calendar page as recommended ways to reach the batch.',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'mode',
+              type: 'select',
+              required: true,
+              defaultValue: 'flight',
+              options: [
+                { label: '✈ Flight', value: 'flight' },
+                { label: '🚆 Train', value: 'train' },
+              ],
+              admin: { width: '33%' },
+            },
+            {
+              name: 'operator',
+              type: 'text',
+              required: true,
+              admin: { width: '33%', description: 'e.g. Air India, IndiGo, Vande Bharat' },
+            },
+            {
+              name: 'number',
+              type: 'text',
+              admin: { width: '34%', description: 'Flight / train number, e.g. AI 571' },
+            },
+          ],
+        },
+        {
+          name: 'vehicle',
+          type: 'text',
+          admin: { description: 'Aircraft / coach type, e.g. Airbus A320neo' },
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'departTime', type: 'text', required: true, admin: { width: '25%', description: 'e.g. 06:20 AM' } },
+            { name: 'departCode', type: 'text', admin: { width: '25%', description: 'e.g. MAA' } },
+            { name: 'departCity', type: 'text', required: true, admin: { width: '50%', description: 'e.g. Chennai' } },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'arriveTime', type: 'text', required: true, admin: { width: '25%', description: 'e.g. 09:10 AM' } },
+            { name: 'arriveCode', type: 'text', admin: { width: '25%', description: 'e.g. IXZ' } },
+            { name: 'arriveCity', type: 'text', required: true, admin: { width: '50%', description: 'e.g. Port Blair' } },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'duration', type: 'text', admin: { width: '50%', description: 'e.g. 2h 50m' } },
+            { name: 'stops', type: 'text', admin: { width: '50%', description: 'e.g. Direct / 1 stop' } },
+          ],
+        },
+        {
+          name: 'recommended',
+          type: 'checkbox',
+          defaultValue: false,
+          admin: { description: 'Highlight with a "Recommended" badge.' },
+        },
+      ],
+    },
+
     // ==================== PRICING ====================
     {
       type: 'row',
