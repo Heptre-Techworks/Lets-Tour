@@ -10,6 +10,7 @@ import { PayloadRedirects } from '@/components/PayloadRedirects'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
+import { generateDestinationMeta } from '@/utilities/generateSeoMeta'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import PageClient from './page.client'
 
@@ -86,7 +87,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     queryDestinationBySlug({ slug }),
     getDestinationLayout({ draft }),
   ])
-  return generateMeta({ doc: (destinationData as any) ?? (layoutGlobal as any) })
+  return destinationData ? generateDestinationMeta(destinationData as any) : generateMeta({ doc: layoutGlobal as any })
 }
 
 const queryDestinationBySlug = cache(async ({ slug }: { slug: string }) => {

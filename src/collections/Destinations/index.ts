@@ -479,6 +479,42 @@ export const Destinations: CollectionConfig = {
       ],
     },
 
+    // ==================== SEO (GOOGLE) ====================
+    {
+      name: 'meta',
+      type: 'group',
+      label: 'Google Search Appearance',
+      admin: {
+        description:
+          'Leave blank to use the automatic text (name, nights/days and starting price). Fill in to override what Google shows.',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          label: 'Google Title',
+          admin: {
+            description: 'About 50–60 characters. e.g. "Vietnam Tour Package – 8 Nights / 9 Days from ₹63,999"',
+          },
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          label: 'Google Description',
+          admin: {
+            description: 'About 120–155 characters: a short line about the trip, shown under the title.',
+          },
+        },
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Share Image (optional)',
+          admin: { description: 'Image used when the link is shared (WhatsApp, Facebook…). Defaults to the main image.' },
+        },
+      ],
+    },
+
     // ==================== PUBLISH STATUS ====================
     {
       name: 'isPublished',

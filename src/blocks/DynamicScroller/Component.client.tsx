@@ -515,7 +515,11 @@ const DynamicSection: React.FC<{ section: Section }> = ({ section }) => {
   }, [pathname])
 
   const displayTitle = section.title?.replace(/{slug}/gi, formattedSlug) || ''
-  const displaySubtitle = "Today's enemy is tomorrow's friend."
+  // Use the subtitle entered in the admin ({slug} is supported like the title);
+  // only fall back to the old tagline when none was entered.
+  const displaySubtitle = section.subtitle?.trim()
+    ? section.subtitle.replace(/{slug}/gi, formattedSlug)
+    : "Today's enemy is tomorrow's friend."
 
   const scroll = (direction: 'left' | 'right') => {
     const el = scrollRef.current

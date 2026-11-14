@@ -740,6 +740,23 @@ export interface Destination {
   timezone?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  /**
+   * Leave blank to use the automatic text (name, nights/days and starting price). Fill in to override what Google shows.
+   */
+  meta?: {
+    /**
+     * About 50–60 characters. e.g. "Vietnam Tour Package – 8 Nights / 9 Days from ₹63,999"
+     */
+    title?: string | null;
+    /**
+     * About 120–155 characters: a short line about the trip, shown under the title.
+     */
+    description?: string | null;
+    /**
+     * Image used when the link is shared (WhatsApp, Facebook…). Defaults to the main image.
+     */
+    image?: (string | null) | Media;
+  };
   isPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -1389,6 +1406,23 @@ export interface Package {
   isFeatured?: boolean | null;
   isFamilyFriendly?: boolean | null;
   isHoneymoon?: boolean | null;
+  /**
+   * Leave blank to use the automatic text (name, nights/days and starting price). Fill in to override what Google shows.
+   */
+  meta?: {
+    /**
+     * About 50–60 characters. e.g. "Vietnam Tour Package – 8 Nights / 9 Days from ₹63,999"
+     */
+    title?: string | null;
+    /**
+     * About 120–155 characters: a short line about the trip, shown under the title.
+     */
+    description?: string | null;
+    /**
+     * Image used when the link is shared (WhatsApp, Facebook…). Defaults to the main image.
+     */
+    image?: (string | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -4576,6 +4610,13 @@ export interface DestinationsSelect<T extends boolean = true> {
   timezone?: T;
   latitude?: T;
   longitude?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   isPublished?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -4745,6 +4786,13 @@ export interface PackagesSelect<T extends boolean = true> {
   isFeatured?: T;
   isFamilyFriendly?: T;
   isHoneymoon?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
