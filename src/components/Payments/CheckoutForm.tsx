@@ -70,7 +70,7 @@ const Stepper: React.FC<{
  * infants are free. When the package has multiple departures, the customer picks one.
  */
 export const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageName, departures, paymentsEnabled }) => {
-  const [selectedId, setSelectedId] = useState(departures[0]?.id || '')
+  const [selectedId] = useState(departures[0]?.id || '')
   const [adults, setAdults] = useState(1)
   const [children, setChildren] = useState(0)
   const [infants, setInfants] = useState(0)
@@ -104,37 +104,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({ packageName, departu
     <div className="mx-auto max-w-2xl px-6 py-10">
       <h1 className="text-3xl font-bold">Book: {packageName}</h1>
 
-      {departures.length > 1 && (
-        <div className="mt-6">
-          <div className="mb-2 text-sm font-medium">Choose a departure</div>
-          <div className="grid gap-2">
-            {departures.map((d) => {
-              const active = d.id === selected?.id
-              return (
-                <button
-                  key={d.id}
-                  type="button"
-                  onClick={() => setSelectedId(d.id)}
-                  className={`flex items-center justify-between rounded-xl border p-4 text-left transition-colors ${
-                    active ? 'border-[#FBAE3D] bg-[#FBAE3D]/5' : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <span className="font-medium">
-                    {[fmtDate(d.startDate), fmtDate(d.endDate)].filter(Boolean).join(' → ') || 'Flexible dates'}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {symbolFor(d.currency)}
-                    {d.perPax.toLocaleString('en-IN')}/pax
-                    {typeof d.seatsLeft === 'number' ? ` · ${d.seatsLeft} left` : ''}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {departures.length === 1 && (
+      {(
         <p className="mt-1 text-muted-foreground">
           {[fmtDate(selected?.startDate), fmtDate(selected?.endDate)].filter(Boolean).join(' → ') || 'Flexible dates'}
           {typeof seatsLeft === 'number' ? ` · ${seatsLeft} seat${seatsLeft === 1 ? '' : 's'} left` : ''}

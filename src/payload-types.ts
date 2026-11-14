@@ -605,6 +605,63 @@ export interface Destination {
    */
   places?: (string | Place)[] | null;
   /**
+   * Shown on this destination's Departure Calendar page as recommended ways to reach the batch.
+   */
+  suggestedTransport?:
+    | {
+        mode: 'flight' | 'train';
+        /**
+         * e.g. Air India, IndiGo, Vande Bharat
+         */
+        operator: string;
+        /**
+         * Flight / train number, e.g. AI 571
+         */
+        number?: string | null;
+        /**
+         * Aircraft / coach type, e.g. Airbus A320neo
+         */
+        vehicle?: string | null;
+        /**
+         * e.g. 06:20 AM
+         */
+        departTime: string;
+        /**
+         * e.g. MAA
+         */
+        departCode?: string | null;
+        /**
+         * e.g. Chennai
+         */
+        departCity: string;
+        /**
+         * e.g. 09:10 AM
+         */
+        arriveTime: string;
+        /**
+         * e.g. IXZ
+         */
+        arriveCode?: string | null;
+        /**
+         * e.g. Port Blair
+         */
+        arriveCity: string;
+        /**
+         * e.g. 2h 50m
+         */
+        duration?: string | null;
+        /**
+         * e.g. Direct / 1 stop
+         */
+        stops?: string | null;
+        /**
+         * Highlight with a "Recommended" badge.
+         */
+        recommended?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Lowest package price
    */
   startingPrice?: number | null;
@@ -4471,6 +4528,24 @@ export interface DestinationsSelect<T extends boolean = true> {
   continent?: T;
   cities?: T;
   places?: T;
+  suggestedTransport?:
+    | T
+    | {
+        mode?: T;
+        operator?: T;
+        number?: T;
+        vehicle?: T;
+        departTime?: T;
+        departCode?: T;
+        departCity?: T;
+        arriveTime?: T;
+        arriveCode?: T;
+        arriveCity?: T;
+        duration?: T;
+        stops?: T;
+        recommended?: T;
+        id?: T;
+      };
   startingPrice?: T;
   currency?: T;
   discount?:

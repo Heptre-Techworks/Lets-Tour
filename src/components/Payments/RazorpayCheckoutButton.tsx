@@ -17,6 +17,8 @@ export type RazorpayCheckoutButtonProps = {
   travelers: { adults: number; children?: number; infants?: number }
   contact: Contact
   specialRequests?: string
+  /** Customer's full address (stored on the booking's contact details). */
+  address?: string
   className?: string
   children?: React.ReactNode
   disabled?: boolean
@@ -53,6 +55,7 @@ export const RazorpayCheckoutButton: React.FC<RazorpayCheckoutButtonProps> = ({
   travelers,
   contact,
   specialRequests,
+  address,
   className,
   children,
   disabled,
@@ -84,6 +87,7 @@ export const RazorpayCheckoutButton: React.FC<RazorpayCheckoutButtonProps> = ({
           infants: travelers.infants || 0,
           contact,
           specialRequests,
+          address,
         }),
       })
       const order = await orderRes.json()
@@ -140,7 +144,7 @@ export const RazorpayCheckoutButton: React.FC<RazorpayCheckoutButtonProps> = ({
     } catch (e) {
       fail(e instanceof Error ? e.message : 'Something went wrong')
     }
-  }, [departureId, travelers, contact, specialRequests, branding, fail, onSuccess])
+  }, [departureId, travelers, contact, specialRequests, address, branding, fail, onSuccess])
 
   return (
     <button
