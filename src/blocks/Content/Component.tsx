@@ -31,7 +31,16 @@ export const ContentBlock: React.FC<ContentBlockProps> = (props) => {
                 })}
                 key={index}
               >
-                {richText && <RichText data={richText} enableGutter={false} />}
+                {richText && (
+                  // Default text colour is black — also when the visitor's browser is in dark mode,
+                  // which would otherwise switch the text to light grey / white (prose-invert).
+                  // A colour picked in the admin is an inline style on the text, so it overrides this.
+                  <RichText
+                    data={richText}
+                    enableGutter={false}
+                    className="text-black dark:text-black [--tw-prose-body:#000] [--tw-prose-headings:#000] [--tw-prose-lead:#000] [--tw-prose-bold:#000] [--tw-prose-links:#000] [--tw-prose-bullets:#000] [--tw-prose-counters:#000] [--tw-prose-quotes:#000] [--tw-prose-captions:#000] dark:[--tw-prose-body:#000] dark:[--tw-prose-headings:#000] dark:[--tw-prose-lead:#000] dark:[--tw-prose-bold:#000] dark:[--tw-prose-links:#000] dark:[--tw-prose-bullets:#000] dark:[--tw-prose-counters:#000] dark:[--tw-prose-quotes:#000] dark:[--tw-prose-captions:#000]"
+                  />
+                )}
 
                 {enableLink && <CMSLink {...link} />}
               </div>

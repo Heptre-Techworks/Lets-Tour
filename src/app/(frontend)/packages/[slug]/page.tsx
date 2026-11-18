@@ -10,6 +10,7 @@ import { PayloadRedirects } from '@/components/PayloadRedirects'
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
+import { generatePackageMeta } from '@/utilities/generateSeoMeta'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import PageClient from './page.client'
 
@@ -83,7 +84,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     queryPackageBySlug({ slug }),
     getPackageLayout({ draft }),
   ])
-  return generateMeta({ doc: (packageData as any) ?? (layoutGlobal as any) })
+  return packageData ? generatePackageMeta(packageData as any) : generateMeta({ doc: layoutGlobal as any })
 }
 
 const queryPackageBySlug = cache(async ({ slug }: { slug: string }) => {
